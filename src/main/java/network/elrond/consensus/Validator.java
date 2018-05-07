@@ -1,16 +1,14 @@
 package network.elrond.consensus;
 
 public class Validator {
+
     private String pubKey;
     private String ip;
     /*......*/
 
-    public Validator()
+    public Validator(String pubKey, String ip)
     {
-        pubKey = "";
-        ip = "127.0.0.1";
+        this.pubKey = pubKey;
+        this.ip = ip;
     }
-
-
-
 }

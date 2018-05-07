@@ -4,31 +4,28 @@ import java.util.List;
 
 public class PBFTBlock implements PBFT
 {
-    public void SetValidators(List<Validator> listValidators)
+    public void setValidators(List<Validator> listValidators)
     {
 
     }
 
-    public void GetAnswerFromValidator(Validator val, ConsensusAnswerType answer)
+    public void getAnswerFromValidator(Validator val, ConsensusAnswerType answer)
     {
 
     }
 
-    public String RunConsensus()
+    public String runConsensus()
     {
         return(null);
     }
 
-    public ConsensusAnswerType GetAnswer()
+    public ConsensusAnswerType getAnswer()
     {
         return(ConsensusAnswerType.NOT_ANSWERED);
     }
 
-    public ConsensusAnswerType GetStatusPBFT()
+    public ConsensusAnswerType getStatusPBFT()
     {
         return (ConsensusAnswerType.NOT_ANSWERED);
     }
-
-
-
 }
