@@ -5,3 +5,5 @@ The first Elrond prototype
 
 
 Sebi a modificat si el ceva!
+
+Sebi a modificat inca ceva!
