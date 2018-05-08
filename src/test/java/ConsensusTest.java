@@ -1,9 +1,14 @@
 
 import junit.framework.TestCase;
+import network.elrond.chronology.Epoch;
+import network.elrond.chronology.Round;
 import org.junit.Test;
 import network.elrond.consensus.*;
+import network.elrond.chronology.*;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ConsensusTest {
     @Test
@@ -59,7 +64,58 @@ public class ConsensusTest {
     @Test
     public void testRoundSPoS()
     {
-        System.out.println("aaaaa");
+        Epoch e = new Epoch();
+
+        //test round r
+        e.createRound();
+        e.createRound();
+        Round r = e.createRound();
+        TestCase.assertEquals(BigInteger.valueOf(2), r.roundHeight());
+
+        //test for eligible list size = 3 => plain copy
+        for (int i = 0; i < 3; i++)
+        {
+            e.getEligibleList().add(new Validator("0xA" + Integer.toString(i)));
+        }
+
+        r.rebuildValidatorsList("RANDOM_SOURCE_1");
+
+        System.out.printf("1. Original epoch list [%d]:", e.getEligibleList().size());
+        System.out.println();
+        System.out.println("==========================================================");
+        displayListValidators(e.getEligibleList());
+
+        System.out.printf("1. Validators [%d]:", r.getListValidators().size());
+        System.out.println();
+        System.out.println("==========================================================");
+        displayListValidators(r.getListValidators());
+
+        //test for eligible list size = 100 => random chosen
+        for (int i = 0; i < 100; i++)
+        {
+            e.getEligibleList().add(new Validator("0xA" + Integer.toString(i)));
+        }
+
+        r.rebuildValidatorsList("RANDOM_SOURCE_2");
+
+        System.out.printf("2. Original epoch list [%d]:", e.getEligibleList().size());
+        System.out.println();
+        System.out.println("==========================================================");
+        displayListValidators(e.getEligibleList());
+
+        System.out.printf("2. Validators [%d]:", r.getListValidators().size());
+        System.out.println();
+        System.out.println("==========================================================");
+        displayListValidators(r.getListValidators());
+
+    }
+
+    private void displayListValidators(List<Validator> list) {
+        for (int i = 0; i < list.size(); i++)
+        {
+            System.out.println(list.get(i).getPubKey());
+        }
+        System.out.println();
     }
 
 }
