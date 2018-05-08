@@ -6,8 +6,12 @@ public class ECKeyPair implements IKeyPair {
 
     }
 
+    public ECKeyPair(){
+
+    }
+
     @Override
-    public String toString(){
+    public String toSting(){
         return "";
     }
 

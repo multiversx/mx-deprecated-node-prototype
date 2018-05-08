@@ -6,8 +6,7 @@ public interface PBFT
 {
     void setValidators(List<Validator> listValidators);
     void getAnswerFromValidator(Validator val, ConsensusAnswerType answer);
-    void validate();
-    ConsensusAnswerType getAnswer(String strPubKey);
+    String runConsensus();
+    ConsensusAnswerType getAnswer();
     ConsensusAnswerType getStatusPBFT();
-
 }
