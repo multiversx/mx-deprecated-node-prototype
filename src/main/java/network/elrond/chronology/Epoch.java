@@ -17,7 +17,7 @@ public class Epoch {
         listRounds = new ArrayList<Round>();
     }
 
-    public Round CreateRound(){
+    public Round createRound(){
         Round r = new Round(this);
         listRounds.add(r);
 
