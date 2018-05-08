@@ -4,7 +4,6 @@ import network.elrond.chronology.Epoch;
 import network.elrond.chronology.Round;
 import org.junit.Test;
 import network.elrond.consensus.*;
-import network.elrond.chronology.*;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -26,13 +25,13 @@ public class ConsensusTest {
 
         //testing if list has been loaded 2 times
         pbftb1.setValidators(arlValidators);
-        TestCase.assertEquals(21, pbftb1.getListValidators().size());
+        TestCase.assertEquals(20, pbftb1.getListValidators().size());
         pbftb1.setValidators(arlValidators);
         TestCase.assertEquals(21, pbftb1.getListValidators().size());
 
         //test if I can modify an answer
         int cntValidator = 4;
-        pbftb1.getAnswerFromValidator(new Validator("0xA" + Integer.toString(cntValidator)),
+        pbftb1.setAnswerFromValidator(new Validator("0xA" + Integer.toString(cntValidator)),
                 ConsensusAnswerType.AGREE);
         TestCase.assertEquals(ConsensusAnswerType.AGREE, pbftb1.getListValidators().get(cntValidator).getAnswer());
 
@@ -47,14 +46,14 @@ public class ConsensusTest {
         //testing the pbft status if only the first 14 validators agreed
         for (int i = 0; i < 14; i++)
         {
-            pbftb1.getAnswerFromValidator(new Validator("0xA" + Integer.toString(i)),
+            pbftb1.setAnswerFromValidator(new Validator("0xA" + Integer.toString(i)),
                     ConsensusAnswerType.AGREE);
             TestCase.assertEquals(ConsensusAnswerType.DISAGREE, pbftb1.getStatusPBFT());
         }
         //testing if more than 15 validators aggred, the result should be agree
         for (int i = 15; i < 21; i++)
         {
-            pbftb1.getAnswerFromValidator(new Validator("0xA" + Integer.toString(i)),
+            pbftb1.setAnswerFromValidator(new Validator("0xA" + Integer.toString(i)),
                     ConsensusAnswerType.AGREE);
             TestCase.assertEquals(ConsensusAnswerType.AGREE, pbftb1.getStatusPBFT());
         }

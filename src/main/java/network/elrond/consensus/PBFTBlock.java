@@ -18,7 +18,7 @@ public class PBFTBlock implements PBFT {
         }
     }
 
-    public void getAnswerFromValidator(Validator val, ConsensusAnswerType answer) {
+    public void setAnswerFromValidator(Validator val, ConsensusAnswerType answer) {
         if (listValidators.contains(val)) {
             listValidators.get(listValidators.indexOf(val)).setAnswer(answer);
         }
@@ -30,7 +30,7 @@ public class PBFTBlock implements PBFT {
 
     public void validate() {
         //...bla bla bla, re-run tx's, suppose to agree
-        getAnswerFromValidator(new Validator(ConsensusUtil.CRT_PUB_KEY), ConsensusAnswerType.AGREE);
+        setAnswerFromValidator(new Validator(ConsensusUtil.CRT_PUB_KEY), ConsensusAnswerType.AGREE);
 
     }
 
