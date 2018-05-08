@@ -2,16 +2,13 @@ package network.elrond.crypto;
 
 public class ECKeyPair implements IKeyPair {
 
-    private ECKeyPair(){
 
-    }
-
-    public ECKeyPair(){
+    private ECKeyPair() {
 
     }
 
     @Override
-    public String toSting(){
+    public String toString(){
         return "";
     }
 
