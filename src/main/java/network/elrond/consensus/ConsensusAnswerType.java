@@ -4,5 +4,6 @@ public enum ConsensusAnswerType
 {
     AGREE,
     DISAGREE,
-    NOT_ANSWERED
+    NOT_ANSWERED,
+    NOT_AVAILABLE
 }
