@@ -56,6 +56,10 @@ public class ConsensusTest {
 
     }
 
-
+    @Test
+    public void testRoundSPoS()
+    {
+        System.out.println("aaaaa");
+    }
 
 }

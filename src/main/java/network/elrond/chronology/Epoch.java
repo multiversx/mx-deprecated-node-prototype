@@ -6,11 +6,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Epoch {
-    private static List<Validator> listWaiting;
-    private static List<Validator> listEligible;
+    private List<Validator> listWaiting;
+    private List<Validator> listEligible;
+    private List<Round> listRounds;
 
-    static{
+    public Epoch()
+    {
         listWaiting = new ArrayList<Validator>();
         listEligible = new ArrayList<Validator>();
+        listRounds = new ArrayList<Round>();
+    }
+
+    public Round CreateRound(){
+        Round r = new Round(this);
+        listRounds.add(r);
+
+        return(r);
+    }
+
+    public Round getLastRound()
+    {
+        if (listRounds.size() == 0) {
+            return (null);
+        }
+
+        return (listRounds.get(listRounds.size() - 1));
+    }
+
+    public List<Validator> getEligibleList()
+    {
+        return (listEligible);
     }
 }
