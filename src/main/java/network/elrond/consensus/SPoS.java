@@ -1,6 +1,5 @@
 package network.elrond.consensus;
 
-public interface SPoS
-{
+public interface SPoS {
     float getValidatorStake(Validator val);
 }
