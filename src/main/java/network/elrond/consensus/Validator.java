@@ -11,6 +11,14 @@ public class Validator {
     private int rating;
     /*......*/
 
+    public Validator(String pubKey, String ip, ConsensusAnswerType answer, BigInteger stake, int rating) {
+        this.pubKey = pubKey;
+        this.ip = ip;
+        this.answer = answer;
+        this.stake = stake;
+        this.rating = rating;
+    }
+
     public Validator(String pubKey, String ip, ConsensusAnswerType answer) {
         this.pubKey = pubKey;
         this.ip = ip;
@@ -32,6 +40,7 @@ public class Validator {
         this.answer = src.getAnswer();
         this.ip = src.getIP();
         this.stake = src.getStake();
+        this.rating = src.getRating();
     }
 
     public String getPubKey() {

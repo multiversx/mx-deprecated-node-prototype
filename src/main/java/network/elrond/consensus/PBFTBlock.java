@@ -2,6 +2,7 @@ package network.elrond.consensus;
 
 import java.util.List;
 import java.util.ArrayList;
+import network.elrond.core.Util;
 
 public class PBFTBlock implements PBFT {
     private List<Validator> listValidators;
@@ -30,7 +31,7 @@ public class PBFTBlock implements PBFT {
 
     public void validate() {
         //...bla bla bla, re-run tx's, suppose to agree
-        setAnswerFromValidator(new Validator(ConsensusUtil.CRT_PUB_KEY), ConsensusAnswerType.AGREE);
+        setAnswerFromValidator(new Validator(Util.CRT_PUB_KEY), ConsensusAnswerType.AGREE);
 
     }
 
