@@ -1,7 +1,6 @@
 package network.elrond.crypto;
 
-public class ECKeyPair implements IKeyPair {
-
+public class ECKeyPair implements KeyPair {
 
     private ECKeyPair() {
 
@@ -20,7 +19,7 @@ public class ECKeyPair implements IKeyPair {
         return new byte[0];
     }
 
-    public IKeyPair clone() throws CloneNotSupportedException {
+    public KeyPair clone() throws CloneNotSupportedException {
         return null;
     }
 }

@@ -1,3 +1,4 @@
+package network.elrond.consensus;
 
 import junit.framework.TestCase;
 import network.elrond.chronology.Epoch;

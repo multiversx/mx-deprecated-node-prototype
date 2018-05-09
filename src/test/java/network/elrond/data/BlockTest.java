@@ -1,3 +1,5 @@
+package network.elrond.data;
+
 import junit.framework.TestCase;
 import network.elrond.data.Block;
 import org.junit.Test;
