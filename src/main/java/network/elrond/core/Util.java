@@ -17,6 +17,8 @@ public class Util {
     public static final BigInteger MIN_STAKE = BigInteger.valueOf(10).pow(8);
     public static final float WEIGHT_STAKE_SPOS = 0.4f;
     public static final float WEIGHT_RATING_SPOS = 0.6f;
+    public static final int MAX_LEN_ADDR = 42; //20 bytes x 2 chars + 0x
+    public static final int MAX_LEN_PUB_KEY = 66; //33 bytes x 2 chars
 
     //JLS: oare nu e mai bine sa lucram cu hashuri pe array de bytes? Vom face economie la ceea ce transmitem pe fir
     public static String applySha256(String input){
@@ -38,5 +40,15 @@ public class Util {
         catch(Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static byte[] hexStringToByteArray(String s) {
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                    + Character.digit(s.charAt(i+1), 16));
+        }
+        return data;
     }
 }

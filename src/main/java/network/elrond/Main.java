@@ -1,6 +1,6 @@
 package network.elrond;
 
-import network.elrond.consensus.CalcEligibleListValidators;
+import network.elrond.consensus.EligibleListValidators;
 import network.elrond.consensus.ConsensusAnswerType;
 import network.elrond.consensus.SPoS;
 import network.elrond.consensus.Validator;
