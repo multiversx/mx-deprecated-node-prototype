@@ -15,10 +15,10 @@ public class SPoS {
         SHA3 = new DigestSHA3(256);
     }
 
-    public static CalcEligibleListValidators generateCleanupList(List<Validator> eligibleList) {
+    public static EligibleListValidators generateCleanupList(List<Validator> eligibleList) {
         //fetching parameters from validators (ie. min/max stake, min/max reputation, etc)
 
-        CalcEligibleListValidators result = new CalcEligibleListValidators();
+        EligibleListValidators result = new EligibleListValidators();
 
         if (eligibleList == null) {
             return (result);
@@ -65,7 +65,7 @@ public class SPoS {
         return(result);
     }
 
-    public static List<Validator> generateWeightedEligibleList(CalcEligibleListValidators cleanedUpListObject) {
+    public static List<Validator> generateWeightedEligibleList(EligibleListValidators cleanedUpListObject) {
 
         if (cleanedUpListObject == null) {
             return (new ArrayList<Validator>());
@@ -115,7 +115,7 @@ public class SPoS {
             return (tempList);
         }
 
-        CalcEligibleListValidators cleanedUpList = generateCleanupList(eligibleList);
+        EligibleListValidators cleanedUpList = generateCleanupList(eligibleList);
 
         if (cleanedUpList.list.size() <= Util.VERIFIER_GROUP_SIZE) {
             //not enouch validators, copy them all

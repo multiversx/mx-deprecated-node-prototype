@@ -6,14 +6,14 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CalcEligibleListValidators {
+public class EligibleListValidators {
 
     public List<Validator> list;
     public int minRating;
     public int maxRating;
     public BigInteger maxStake;
 
-    public CalcEligibleListValidators()
+    public EligibleListValidators()
     {
         list = new ArrayList<Validator>();
         maxStake = BigInteger.ZERO;

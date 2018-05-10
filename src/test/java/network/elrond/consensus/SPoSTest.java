@@ -29,7 +29,7 @@ public class SPoSTest {
         vList.add(new Validator("0xA11", "", ConsensusAnswerType.NOT_ANSWERED, Util.MIN_STAKE.multiply(BigInteger.valueOf(10)), -1));
         vList.add(new Validator("0xA12", "", ConsensusAnswerType.NOT_ANSWERED, Util.MIN_STAKE.subtract(BigInteger.valueOf(1)), 0));
 
-        CalcEligibleListValidators cleanedUpList = SPoS.generateCleanupList(vList);
+        EligibleListValidators cleanedUpList = SPoS.generateCleanupList(vList);
 
         System.out.printf("Original list [%d]:",vList.size());
         System.out.println();
@@ -67,7 +67,7 @@ public class SPoSTest {
         vList.add(new Validator("0xA11", "", ConsensusAnswerType.NOT_ANSWERED, Util.MIN_STAKE.multiply(BigInteger.valueOf(10)), -1));
         vList.add(new Validator("0xA12", "", ConsensusAnswerType.NOT_ANSWERED, Util.MIN_STAKE.subtract(BigInteger.valueOf(1)), 0));
 
-        CalcEligibleListValidators cleanedUpList = SPoS.generateCleanupList(vList);
+        EligibleListValidators cleanedUpList = SPoS.generateCleanupList(vList);
         List<Validator> lResult = SPoS.generateWeightedEligibleList(cleanedUpList);
 
         System.out.printf("[small] Original list [%d]:", vList.size());
@@ -109,7 +109,7 @@ public class SPoSTest {
             vList.add(new Validator("0xA" + Integer.toString(i), "", ConsensusAnswerType.NOT_ANSWERED, Util.MIN_STAKE, 0));
         }
 
-        CalcEligibleListValidators cleanedUpList = SPoS.generateCleanupList(vList);
+        EligibleListValidators cleanedUpList = SPoS.generateCleanupList(vList);
         List<Validator> lResult = SPoS.generateWeightedEligibleList(cleanedUpList);
 
         System.out.printf("[small] Original list [%d]:", vList.size());
