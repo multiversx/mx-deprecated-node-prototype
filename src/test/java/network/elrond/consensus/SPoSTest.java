@@ -151,7 +151,7 @@ public class SPoSTest {
 
 
 
-        SPoS.SHA3.digest();
+        Util.SHA3.digest();
 
         dInterim = new Date();
 
