@@ -7,12 +7,15 @@ import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
+import org.bouncycastle.jcajce.provider.digest.SHA3;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
 public class PrivateKey {
     private BigInteger privateKey;
+    private final byte MIN_HASHING_ITERATIONS = 5;
+    private static final SHA3.DigestSHA3 SHA3_INSTANCE = new SHA3.Digest256();
 
     /**
      * Default constructor
@@ -58,7 +61,22 @@ public class PrivateKey {
      * @param seed String seed to generate the private key
      */
     public PrivateKey(String seed){
+        X9ECParameters ecParameters = SECNamedCurves.getByName("secp256k1");
+        BigInteger primeOrder = ecParameters.getN();
+        byte[] seedArray = seed.getBytes();
 
+        for(int i=0; i< MIN_HASHING_ITERATIONS; i++){
+            seedArray = SHA3_INSTANCE.digest(seedArray);
+        }
+
+        privateKey = new BigInteger(seedArray);
+
+        // to be a valid private key it needs to verify:
+        // 0 < pk < n, where n is the order of the largest prime order subgroup
+        while((-1 != privateKey.compareTo(primeOrder)) && (1 != privateKey.compareTo(BigInteger.valueOf(0)))) {
+            seedArray = SHA3_INSTANCE.digest(seedArray);
+            privateKey = new BigInteger(seedArray);
+        }
     }
 
     /**

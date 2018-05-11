@@ -1,6 +1,5 @@
 package network.elrond.crypto;
 
-import network.elrond.core.Util;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.params.ECDomainParameters;
@@ -16,8 +15,6 @@ import java.security.NoSuchProviderException;
 import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
 
-import static network.elrond.core.Util.byteArrayToHexString;
-
 public class PublicKey implements ECPublicKey {
     private ECPoint q;
     private boolean isInitialized;
@@ -31,7 +28,7 @@ public class PublicKey implements ECPublicKey {
     /**
      * Default constructor
      */
-    private PublicKey() {
+    public PublicKey() {
         isInitialized = false;
     }
 
@@ -67,7 +64,7 @@ public class PublicKey implements ECPublicKey {
     /**
      * Sets the public key from a byte stream
      *
-     * @param key
+     * @param key the encoded byte stream representation of the public key (obtained through getEncoded call)
      * @throws NoSuchAlgorithmException
      * @throws NoSuchProviderException
      * @throws InvalidKeySpecException
@@ -93,7 +90,7 @@ public class PublicKey implements ECPublicKey {
 
     @Override
     public String getAlgorithm() {
-        return "ECDH";
+        return "EC";
     }
 
     @Override
@@ -109,27 +106,5 @@ public class PublicKey implements ECPublicKey {
     @Override
     public ECParameterSpec getParameters() {
         return null;
-    }
-
-    public static void main(String[] args) {
-        PrivateKey privk = new PrivateKey();
-        PublicKey pubk = new PublicKey(privk);
-
-        int length = pubk.getEncoded().length;
-        System.out.println("Calculated public key encoded: " + byteArrayToHexString(pubk.getEncoded()) + "\n length: " + length);
-
-        System.out.println("Generated private key: " + byteArrayToHexString(privk.getPrivateKey().toByteArray()));
-
-        PublicKey pubk2 = new PublicKey();
-        try {
-            pubk2.setPublicKey(pubk.getEncoded());
-            System.out.println("Generated public key encoded: " + byteArrayToHexString(pubk2.getEncoded()));
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (NoSuchProviderException e) {
-            e.printStackTrace();
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
     }
 }
