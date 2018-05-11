@@ -9,11 +9,7 @@ import java.util.List;
 import org.bouncycastle.jcajce.provider.digest.SHA3.DigestSHA3;
 
 public class SPoS {
-    public static DigestSHA3 SHA3;
 
-    static{
-        SHA3 = new DigestSHA3(256);
-    }
 
     public static EligibleListValidators generateCleanupList(List<Validator> eligibleList) {
         //fetching parameters from validators (ie. min/max stake, min/max reputation, etc)
@@ -139,7 +135,7 @@ public class SPoS {
         int size = weightedList.size();
         int startIdx = 0;
         while (tempList.size() < Util.VERIFIER_GROUP_SIZE) {
-            BigInteger bi = new BigInteger(SHA3.digest((strRandomSource + Integer.toString(nonce)).getBytes()));
+            BigInteger bi = new BigInteger(Util.SHA3.digest((strRandomSource + Integer.toString(nonce)).getBytes()));
 
             startIdx = bi.mod(BigInteger.valueOf(size)).intValue();
 

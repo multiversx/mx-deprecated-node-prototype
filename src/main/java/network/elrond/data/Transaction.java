@@ -25,6 +25,8 @@ public class Transaction {
     private byte[] sig;
     //plain public key in hexa form
     private String pubKey;
+    //plain message hash
+    private byte[] hash;
 
     public Transaction()
     {
@@ -37,6 +39,7 @@ public class Transaction {
         data = null;
         sig = null;
         pubKey = "";
+        hash = new byte[0];
     }
 
     public Transaction(BigInteger nonce, BigInteger value, String recvAddress, String sendAddress)
@@ -51,6 +54,7 @@ public class Transaction {
         data = null;
         sig = null;
         pubKey = "";
+        hash = new byte[0];
     }
 
     public BigInteger getNonce() { return (nonce); }
@@ -89,7 +93,7 @@ public class Transaction {
 
     public void setPubKey(String pubKey) {this.pubKey = pubKey;}
 
-    public String getJSONDataRAW() {
+    public String encodeJSONnoSig() {
         JSONObject jtx = new JSONObject();
 
         JSONObject jobj = new JSONObject();
@@ -107,12 +111,12 @@ public class Transaction {
         jobj.put("sig", "");
         jobj.put("key", pubKey);
 
-        jtx.append("TX", jobj);
+        jtx.put("TX", jobj);
 
         return(jtx.toString());
     }
 
-    public String getJSONData() {
+    public String encodeJSON() {
         JSONObject jtx = new JSONObject();
 
         JSONObject jobj = new JSONObject();
@@ -135,7 +139,7 @@ public class Transaction {
         }
         jobj.put("key", pubKey);
 
-        jtx.append("TX", jobj);
+        jtx.put("TX", jobj);
 
         return(jtx.toString());
     }
@@ -200,8 +204,6 @@ public class Transaction {
                 tempData = null;
             }
 
-
-
             this.nonce = tempNonce;
             this.value = tempValue;
             this.recvAddress = tempRecv;
@@ -217,6 +219,17 @@ public class Transaction {
         }
 
         return(null);
+    }
+
+    public byte[] getHash()
+    {
+        if (hash.length == 0)
+        {
+            //compute hash
+            hash = Util.SHA3.digest(this.encodeJSONnoSig().getBytes());
+        }
+
+        return (hash);
     }
 
     public static Transaction createTransaction(String strJSONData) {
@@ -238,6 +251,9 @@ public class Transaction {
                 ){
             return (null);
         }
+
+        byte[] message = tx.getHash();
+
 
 
 

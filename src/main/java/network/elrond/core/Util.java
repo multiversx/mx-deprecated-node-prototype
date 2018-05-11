@@ -2,6 +2,7 @@ package network.elrond.core;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import org.bouncycastle.jcajce.provider.digest.SHA3.DigestSHA3;
 
 public class Util {
     public static final int VERIFIER_GROUP_SIZE = 21;
@@ -19,6 +20,12 @@ public class Util {
     public static final float WEIGHT_RATING_SPOS = 0.6f;
     public static final int MAX_LEN_ADDR = 42; //20 bytes x 2 chars + 0x
     public static final int MAX_LEN_PUB_KEY = 66; //33 bytes x 2 chars
+
+    public static DigestSHA3 SHA3;
+
+    static{
+        SHA3 = new DigestSHA3(256);
+    }
 
     //JLS: oare nu e mai bine sa lucram cu hashuri pe array de bytes? Vom face economie la ceea ce transmitem pe fir
     public static String applySha256(String input){
