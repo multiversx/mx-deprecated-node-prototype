@@ -58,4 +58,12 @@ public class Util {
         }
         return data;
     }
+
+    public static String byteArrayToHexString(byte[] data) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : data) {
+            sb.append(String.format("%02x", b & 0xff));
+        }
+        return sb.toString();
+    }
 }

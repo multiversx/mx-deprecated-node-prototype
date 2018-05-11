@@ -1,5 +1,6 @@
 package network.elrond.crypto;
 
+import network.elrond.core.Util;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.params.ECDomainParameters;
@@ -15,6 +16,8 @@ import java.security.NoSuchProviderException;
 import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
 
+import static network.elrond.core.Util.byteArrayToHexString;
+
 public class PublicKey implements ECPublicKey {
     private ECPoint q;
     private boolean isInitialized;
@@ -23,14 +26,6 @@ public class PublicKey implements ECPublicKey {
         if (Security.getProvider("BC") == null) {
             Security.addProvider(new BouncyCastleProvider());
         }
-    }
-
-    public static String toHex(byte[] data) {
-        StringBuilder sb = new StringBuilder();
-        for (byte b : data) {
-            sb.append(String.format("%02x", b & 0xff));
-        }
-        return sb.toString();
     }
 
     /**
@@ -121,14 +116,14 @@ public class PublicKey implements ECPublicKey {
         PublicKey pubk = new PublicKey(privk);
 
         int length = pubk.getEncoded().length;
-        System.out.println("Calculated public key encoded: " + toHex(pubk.getEncoded()) + "\n length: " + length);
+        System.out.println("Calculated public key encoded: " + byteArrayToHexString(pubk.getEncoded()) + "\n length: " + length);
 
-        System.out.println("Generated private key: " + toHex(privk.getPrivateKey().toByteArray()));
+        System.out.println("Generated private key: " + byteArrayToHexString(privk.getPrivateKey().toByteArray()));
 
         PublicKey pubk2 = new PublicKey();
         try {
             pubk2.setPublicKey(pubk.getEncoded());
-            System.out.println("Generated public key encoded: " + toHex(pubk2.getEncoded()));
+            System.out.println("Generated public key encoded: " + byteArrayToHexString(pubk2.getEncoded()));
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (NoSuchProviderException e) {
