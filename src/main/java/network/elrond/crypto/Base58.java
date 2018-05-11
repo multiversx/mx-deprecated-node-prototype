@@ -109,9 +109,9 @@ public class Base58 {
      * Converts a number received as a byte array, with each element a "digit" in the
      * original base (fromBase), into a different base (toBase) number.
      *
-     * @param number   byte array containing number to be converted
-     * @param base Base of number before conversion
-     * @param divisor   The number to divide by
+     * @param number  byte array containing number to be converted
+     * @param base    Base of number before conversion
+     * @param divisor The number to divide by
      * @return The remainder
      */
     public static byte divMode(byte[] number, int startIndex, int base, int divisor) {
@@ -128,11 +128,23 @@ public class Base58 {
 
     /* For test */
     public static void main(String[] args) {
-        byte[] nb = {120, 59, 57, 30, 22, 11, 98, 8};
-        String result = Base58.encode(nb);
+        // encoded base58 for "Hello world" = StV1DL6CwTryKyV
+        char[] nb = "Hello world".toCharArray();
+        byte[] nb_b = new byte[nb.length];
+
+        for (int i = 0; i < nb.length; i++) {
+            nb_b[i] = (byte) (nb[i] & 0xFF);
+        }
+
+        String result = Base58.encode(nb_b);
 
         System.out.println("Nb: " + nb + " in base 58: " + result);
         byte[] decoded = Base58.decode(result);
-        System.out.println("decoded:" + result + " in base 256: " + decoded);
+        char[] decoded_c = new char[decoded.length];
+        for (int i = 0; i < decoded.length; i++) {
+            decoded_c[i] = (char) decoded[i];
+        }
+
+        System.out.println("decoded:" + result + " in base 256: " + decoded_c);
     }
 }
