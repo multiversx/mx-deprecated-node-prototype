@@ -5,6 +5,7 @@ import network.elrond.consensus.ConsensusAnswerType;
 import network.elrond.consensus.SPoS;
 import network.elrond.consensus.Validator;
 import network.elrond.core.Util;
+import network.elrond.data.DataBlock;
 
 import java.util.ArrayList;
 import java.util.Date;
