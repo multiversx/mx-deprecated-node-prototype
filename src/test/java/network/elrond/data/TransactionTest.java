@@ -2,6 +2,8 @@ package network.elrond.data;
 
 import junit.framework.TestCase;
 import network.elrond.core.Util;
+import network.elrond.crypto.PrivateKey;
+import network.elrond.crypto.PublicKey;
 import org.junit.Test;
 import org.junit.runners.model.TestClass;
 
@@ -46,7 +48,7 @@ public class TransactionTest {
             System.out.println("NULL");
         }
 
-        TestCase.assertEquals(tx3.encodeJSON(), tx.encodeJSON());
+        //TestCase.assertEquals(tx3.encodeJSON(), tx.encodeJSON());
 
 
 
@@ -66,6 +68,36 @@ public class TransactionTest {
 
     }
 
+    @Test
+    public void signTransaction(){
+        PrivateKey pvKey = new PrivateKey();
+        PublicKey pbKey = new PublicKey(pvKey);
 
+        Transaction tx = new Transaction();
+        byte[] buff = new byte[5];
+        for (int i = 0; i < buff.length; i++)
+        {
+            buff[i] = (byte)i;
+        }
+        tx.setData(buff);
+        tx.setPubKey(Util.byteArrayToHexString(pbKey.getEncoded()));
+        tx.setSendAddress(Util.getAddressFromPublicKey(pbKey.getEncoded()));
+        tx.setRecvAddress("0x0000000000000000000000000000000000000000");
+        tx.setNonce(BigInteger.ZERO);
+        tx.setValue(BigInteger.TEN.pow(8)); //1 ERD
+
+        tx.signTransaction(pvKey.getValue().toByteArray());
+
+        System.out.println(tx.encodeJSON());
+
+        Transaction tx2 = new Transaction();
+        tx2.decodeJSON(tx.encodeJSON());
+        tx2.setGasLimit(BigInteger.ONE);
+
+        System.out.println(tx2.encodeJSON());
+
+        TestCase.assertEquals(Boolean.TRUE, Transaction.verifyTransaction(tx));
+        TestCase.assertEquals(Boolean.FALSE, Transaction.verifyTransaction(tx2));
+    }
 
 }

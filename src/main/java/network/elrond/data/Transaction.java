@@ -1,6 +1,11 @@
 package network.elrond.data;
 
 import java.math.BigInteger;
+
+import network.elrond.crypto.PrivateKey;
+import network.elrond.crypto.PublicKey;
+import network.elrond.crypto.SchnorrSignature;
+import org.bouncycastle.math.ec.ECPoint;
 import org.json.*;
 import org.bouncycastle.util.encoders.Base64;
 import network.elrond.core.Util;
@@ -27,8 +32,10 @@ public class Transaction {
     private BigInteger gasLimit;
     //blob of data to executed in Elrond Virtual Machine
     private byte[] data;
-    //blob of data containing sig
-    private byte[] sig;
+    //blob of data containing first part of sig
+    private byte[] sig1;
+    //blob of data containing second part of sig
+    private byte[] sig2;
     //plain public key in hexa form
     private String pubKey;
     //plain message hash
@@ -48,7 +55,8 @@ public class Transaction {
         gasPrice = BigInteger.ZERO;
         gasLimit = BigInteger.ZERO;
         data = null;
-        sig = null;
+        sig1 = null;
+        sig2 = null;
         pubKey = "";
         hashNoSig = new byte[0];
         hash = new byte[0];
@@ -71,7 +79,8 @@ public class Transaction {
         gasPrice = BigInteger.ZERO;
         gasLimit = BigInteger.ZERO;
         data = null;
-        sig = null;
+        sig1 = null;
+        sig2 = null;
         pubKey = "";
         hashNoSig = new byte[0];
         hash = new byte[0];
@@ -162,16 +171,28 @@ public class Transaction {
     public void setData(byte[] data){this.data = data;}
 
     /**
-     * Gets the signature of the tx
+     * Gets the first part of signature of the tx
      * @return sig as byte array
      */
-    public byte[] getSig(){return(sig);}
+    public byte[] getSig1(){return(sig1);}
 
     /**
-     * Sets the signature of the tx
-     * @param sig as byte array
+     * Sets the first part of signature of the tx
+     * @param sig1 as byte array
      */
-    public void setSig(byte[] sig){this.sig = sig;}
+    public void setSig(byte[] sig1){this.sig1 = sig1;}
+
+    /**
+     * Gets the second part of signature of the tx
+     * @return sig as byte array
+     */
+    public byte[] getSig2(){return(sig2);}
+
+    /**
+     * Sets the second part of signature of the tx
+     * @param sig2 as byte array
+     */
+    public void setSig2(byte[] sig2){this.sig2 = sig2;}
 
     /**
      * Gets the public key used for verifying the tx
@@ -199,13 +220,14 @@ public class Transaction {
         jobj.put("rcv", recvAddress);
         jobj.put("snd", sendAddress);
         jobj.put("gprice", gasPrice.toString(10));
-        jobj.put("glimit", gasPrice.toString(10));
+        jobj.put("glimit", gasLimit.toString(10));
         if (data == null) {
             jobj.put("data", "");
         } else {
             jobj.put("data", new String(Base64.encode(data)));
         }
-        jobj.put("sig", "");
+        jobj.put("sig1", "");
+        jobj.put("sig2", "");
         //hexa form -> byte array -> base64 (reduce the size)
         jobj.put("key", new String(Base64.encode(Util.hexStringToByteArray(pubKey))));
 
@@ -228,17 +250,23 @@ public class Transaction {
         jobj.put("rcv", recvAddress);
         jobj.put("snd", sendAddress);
         jobj.put("gprice", gasPrice.toString(10));
-        jobj.put("glimit", gasPrice.toString(10));
+        jobj.put("glimit", gasLimit.toString(10));
         if (data == null) {
             jobj.put("data", "");
         } else {
             jobj.put("data", new String(Base64.encode(data)));
         }
-        if (sig == null)
+        if (sig1 == null)
         {
-            jobj.put("sig", "");
+            jobj.put("sig1", "");
         } else {
-            jobj.put("sig", new String(Base64.encode(sig)));
+            jobj.put("sig1", new String(Base64.encode(sig1)));
+        }
+        if (sig2 == null)
+        {
+            jobj.put("sig2", "");
+        } else {
+            jobj.put("sig2", new String(Base64.encode(sig2)));
         }
         //hexa form -> byte array -> base64 (reduce the size)
         jobj.put("key", new String(Base64.encode(Util.hexStringToByteArray(pubKey))));
@@ -290,8 +318,11 @@ public class Transaction {
         if (!jobj.has("data")) {
             return ("Error fetching data from JSON! [data is missing]");
         }
-        if (!jobj.has("sig")) {
-            return ("Error fetching data from JSON! [sig is missing]");
+        if (!jobj.has("sig1")) {
+            return ("Error fetching data from JSON! [sig1 is missing]");
+        }
+        if (!jobj.has("sig2")) {
+            return ("Error fetching data from JSON! [sig2 is missing]");
         }
         if (!jobj.has("key")) {
             return ("Error fetching data from JSON! [(public) key is missing]");
@@ -305,7 +336,8 @@ public class Transaction {
             BigInteger tempGPrice = new BigInteger(jobj.getString("gprice"));
             BigInteger tempGLimit = new BigInteger(jobj.getString("glimit"));
             String tempData = jobj.getString("data");
-            String tempSig = jobj.getString("sig");
+            String tempSig1 = jobj.getString("sig1");
+            String tempSig2 = jobj.getString("sig2");
             String tempKey = jobj.getString("key");
 
             if (tempData.equals("")){
@@ -319,7 +351,12 @@ public class Transaction {
             this.gasLimit = tempGLimit;
             this.gasPrice = tempGPrice;
             this.data = Base64.decode(tempData.getBytes());
-            this.sig = Base64.decode(tempSig.getBytes());
+            if ((tempSig1 != null) && (tempSig1.length() > 0)) {
+                this.sig1 = Base64.decode(tempSig1.getBytes());
+            }
+            if ((tempSig2 != null) && (tempSig2.length() > 0)) {
+                this.sig2 = Base64.decode(tempSig2.getBytes());
+            }
             this.pubKey = Util.byteArrayToHexString(Base64.decode(tempKey));
 
         } catch (Exception ex) {
@@ -364,7 +401,18 @@ public class Transaction {
      * @param privateKeysBytes
      */
     public void signTransaction(byte[] privateKeysBytes) {
-        //TO DO
+        this.sig1 = new byte[0];
+        this.sig2 = new byte[0];
+
+        PrivateKey pvkey = new PrivateKey(privateKeysBytes);
+        byte[] hashNoSigLocal = getHashNoSig();
+        PublicKey pbkey = new PublicKey(pvkey);
+
+        SchnorrSignature schnorr = new SchnorrSignature();
+        schnorr.signMessage(hashNoSigLocal, pvkey, pbkey);
+
+        this.sig1 = schnorr.getSignatureValue().toByteArray();
+        this.sig2 = schnorr.getChallenge().toByteArray();
     }
 
     /**
@@ -376,10 +424,12 @@ public class Transaction {
         //test 1. consistency checks
         if ((tx.getNonce().compareTo(BigInteger.ZERO) < 0) ||
                 (tx.getValue().compareTo(BigInteger.ZERO) < 0) ||
-                (tx.getSig().length == 0) ||
+                (tx.getSig1() == null) ||
+                (tx.getSig2() == null) ||
+                (tx.getSig1().length == 0) ||
+                (tx.getSig2().length == 0) ||
                 (tx.sendAddress.length() != Util.MAX_LEN_ADDR) ||
                 (tx.recvAddress.length() != Util.MAX_LEN_ADDR) ||
-                (tx.getSig().length == 0) || //TO DO modify with actual value
                 (tx.pubKey.length() != Util.MAX_LEN_PUB_KEY * 2)
                 ){
             return (false);
@@ -392,7 +442,23 @@ public class Transaction {
 
         //test 3. verify the signature
         byte[] message = tx.getHashNoSig();
-        //TO DO
+        SchnorrSignature schnorr = new SchnorrSignature();
+        if ((tx.getSig1() != null) && (tx.getSig1().length > 0) &&
+                (tx.getSig2() != null) && (tx.getSig2().length > 0)) {
+            schnorr.setSignature(new BigInteger(tx.getSig1()), new BigInteger(tx.getSig2()));
+        }
+
+        PublicKey pbKey = new PublicKey();
+        try {
+            pbKey.setPublicKey(Util.hexStringToByteArray(tx.pubKey));
+        } catch(Exception ex) {
+            return (false);
+        }
+
+        if (!schnorr.verifySignature(message, pbKey))
+        {
+            return (false);
+        }
 
         return (true);
     }
