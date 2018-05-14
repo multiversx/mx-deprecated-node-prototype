@@ -6,11 +6,22 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.bouncycastle.jcajce.provider.digest.SHA3.DigestSHA3;
 
+/**
+ * The SpoS class implements the Secure Proof of Stake algorithm
+ *
+ * @author  Elrond Team - JLS
+ * @version 1.0
+ * @since   2018-05-14
+ */
 public class SPoS {
-
-
+    /**
+     * The method creates a node result of type EligibleListValidators that contains a clean-up version of the
+     * whole eligible list validators (no negative ratings, stake equal or higher of minim stake, etc) and
+     * computes minimum/maximum ratings, maximum stake.
+     * @param eligibleList that contain validators to be included in cleaned up list
+     * @return the node that holds the data
+     */
     public static EligibleListValidators generateCleanupList(List<Validator> eligibleList) {
         //fetching parameters from validators (ie. min/max stake, min/max reputation, etc)
 
@@ -47,10 +58,6 @@ public class SPoS {
                 result.maxRating = v.getRating();
             }
 
-//            if (v.getStake().compareTo(minStake) < 0) {
-//                minStake = v.getStake();
-//            }
-
             if (v.getStake().compareTo(result.maxStake) > 0) {
                 result.maxStake = v.getStake();
             }
@@ -61,6 +68,13 @@ public class SPoS {
         return(result);
     }
 
+    /**
+     * The method computes the score for each validator and multiply its entrance in the output list
+     * The score is an integer from 0 to Util.MAX_RATING and 0 means it appears once in the list, 1 twice and so on
+     * @param cleanedUpListObject the objcet that holds the input data of the cleaned up list
+     *                            (call method generateCleanupList first)
+     * @return the weighted validators list
+     */
     public static List<Validator> generateWeightedEligibleList(EligibleListValidators cleanedUpListObject) {
 
         if (cleanedUpListObject == null) {
@@ -102,6 +116,14 @@ public class SPoS {
         return (tempList);
     }
 
+    /**
+     * The method returns a list of maximum Util.VERIFIER_GROUP_SIZE validators that will start the consensus process
+     * The first validator in the list is the leader!!!
+     * @param strRandomSource a String that will be used to select Util.VERIFIER_GROUP_SIZE from a weighted list
+     * @param eligibleList the input weighted list (call first method generateWeightedEligibleList)
+     * @param roundHeight the round height (ID)
+     * @return the list of selected validator, first item being the leader
+     */
     public static List<Validator> generateValidatorsList(String strRandomSource, List<Validator> eligibleList, BigInteger roundHeight) {
         //pick max Util.VERIFIER_GROUP_SIZE from eligible list
         //based on their stake, rating. Round r will rotate the lead
@@ -168,6 +190,11 @@ public class SPoS {
         return(tempList);
     }
 
+    /**
+     * Method used vor copying Lists of Validators. Method creates a new Validator for each item in the source list
+     * @param src list to be copied
+     * @return new list of Validators
+     */
     public static List<Validator> copyList(List<Validator> src) {
         List<Validator> tempList = new ArrayList<Validator>();
 

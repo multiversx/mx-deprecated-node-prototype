@@ -2,6 +2,9 @@ package network.elrond.core;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.util.Arrays;
+
+import network.elrond.chronology.Epoch;
 import org.bouncycastle.jcajce.provider.digest.SHA3.DigestSHA3;
 
 public class Util {
@@ -19,7 +22,10 @@ public class Util {
     public static final float WEIGHT_STAKE_SPOS = 0.4f;
     public static final float WEIGHT_RATING_SPOS = 0.6f;
     public static final int MAX_LEN_ADDR = 42; //20 bytes x 2 chars + 0x
-    public static final int MAX_LEN_PUB_KEY = 66; //33 bytes x 2 chars
+    public static final int MAX_LEN_PUB_KEY = 33;
+
+    public static Epoch MAIN_EPOCH = new Epoch();
+
 
     public static DigestSHA3 SHA3;
 
@@ -65,5 +71,32 @@ public class Util {
             sb.append(String.format("%02x", b & 0xff));
         }
         return sb.toString();
+    }
+
+    public static String getAddressFromPublicKey(byte[] pubKeyBytes)
+    {
+        if (pubKeyBytes == null) {
+            return ("");
+        }
+
+        //step 1. get the data in the hexa form
+        String strHexa = byteArrayToHexString(pubKeyBytes);
+
+        if (strHexa.length() != Util.MAX_LEN_PUB_KEY * 2) {
+            return("");
+        }
+
+        //step 2. compute hash based on hexa form
+        byte[] hash = SHA3.digest(strHexa.getBytes());
+
+        if (hash.length != 32) {
+            return("");
+        }
+
+        //step 3. trim to last 20 bytes
+        byte[] addr = Arrays.copyOfRange(hash, 12, 32);
+
+        //step 4. convert to hexa form and add 0x
+        return ("0x" + byteArrayToHexString(addr));
     }
 }
