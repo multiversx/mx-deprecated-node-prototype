@@ -17,7 +17,7 @@ public class PublicKeyTest {
         PublicKey pubk = new PublicKey(privk);
         // verify the pair is valid
         TestCase.assertEquals(
-                "039da58f889fcc021d9fba09d8e87d2127ebdaffbff9da0ac0c289ec8a7c36bf38",
+                "021a50a33eb266ace1597f4399086b15b989d5c303dfc4ada06454dd7325062286",
                 Util.byteArrayToHexString(pubk.getEncoded()));
     }
 

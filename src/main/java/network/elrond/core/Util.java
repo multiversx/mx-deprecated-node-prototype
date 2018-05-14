@@ -1,10 +1,16 @@
 package network.elrond.core;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
+<<<<<<< 119410126b61118b8315e0fc7cf74353cd385c71
 import java.util.Arrays;
 
 import network.elrond.chronology.Epoch;
+=======
+
+>>>>>>> Implement Schnorr single signature
 import org.bouncycastle.jcajce.provider.digest.SHA3.DigestSHA3;
 
 public class Util {
@@ -22,6 +28,7 @@ public class Util {
     public static final float WEIGHT_STAKE_SPOS = 0.4f;
     public static final float WEIGHT_RATING_SPOS = 0.6f;
     public static final int MAX_LEN_ADDR = 42; //20 bytes x 2 chars + 0x
+<<<<<<< 119410126b61118b8315e0fc7cf74353cd385c71
     public static final int MAX_LEN_PUB_KEY = 33;
 
     public static Epoch MAIN_EPOCH = new Epoch();
@@ -32,9 +39,13 @@ public class Util {
     static{
         SHA3 = new DigestSHA3(256);
     }
+=======
+    public static final int MAX_LEN_PUB_KEY = 66; //33 bytes x 2 chars
+    public static DigestSHA3 SHA3 = new DigestSHA3(256);
+>>>>>>> Implement Schnorr single signature
 
     //JLS: oare nu e mai bine sa lucram cu hashuri pe array de bytes? Vom face economie la ceea ce transmitem pe fir
-    public static String applySha256(String input){
+    public static String applySha256(String input) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
@@ -44,13 +55,12 @@ public class Util {
 
             for (int i = 0; i < hash.length; i++) {
                 String hex = Integer.toHexString(0xff & hash[i]);
-                if(hex.length() == 1) hexString.append('0');
+                if (hex.length() == 1) hexString.append('0');
                 hexString.append(hex);
             }
 
             return hexString.toString();
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -60,7 +70,7 @@ public class Util {
         byte[] data = new byte[len / 2];
         for (int i = 0; i < len; i += 2) {
             data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i+1), 16));
+                    + Character.digit(s.charAt(i + 1), 16));
         }
         return data;
     }
@@ -72,6 +82,7 @@ public class Util {
         }
         return sb.toString();
     }
+
 
     public static String getAddressFromPublicKey(byte[] pubKeyBytes)
     {
@@ -98,5 +109,25 @@ public class Util {
 
         //step 4. convert to hexa form and add 0x
         return ("0x" + byteArrayToHexString(addr));
+    }
+
+    /**
+     * Concatenates two byte arrays returning the resulting byte array
+     * @param first the byte array that will be concatenated first
+     * @param second the byte array that will be concatenated second
+     * @return the concatenated byte array
+     */
+    public static byte[] concatenateArrays(byte[] first, byte[] second) {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        byte[] result;
+        try {
+            output.write(first);
+            output.write(second);
+            result = output.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+            result = null;
+        }
+        return result;
     }
 }

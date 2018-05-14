@@ -1,6 +1,5 @@
 package network.elrond.crypto;
 
-import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
@@ -39,7 +38,7 @@ public class PublicKey implements ECPublicKey {
      * @param privateKey the corresponding private key
      */
     public PublicKey(PrivateKey privateKey) {
-        X9ECParameters ecParameters = SECNamedCurves.getByName("secp256r1");
+        X9ECParameters ecParameters = PrivateKey.getEcParameters();
         ECDomainParameters domainParameters = new ECDomainParameters(
                 ecParameters.getCurve(),
                 ecParameters.getG(),
@@ -48,7 +47,7 @@ public class PublicKey implements ECPublicKey {
                 ecParameters.getSeed());
 
         // compute the public key based on the private key
-        q = domainParameters.getG().multiply(privateKey.getPrivateKey());
+        q = domainParameters.getG().multiply(privateKey.getValue());
         isInitialized = true;
     }
 
@@ -70,7 +69,7 @@ public class PublicKey implements ECPublicKey {
      * @throws InvalidKeySpecException
      */
     public void setPublicKey(byte[] key) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
-        X9ECParameters ecParameters = SECNamedCurves.getByName("secp256k1");
+        X9ECParameters ecParameters = PrivateKey.getEcParameters();
         ECParameterSpec ecParameterSpec = new ECParameterSpec(
                 ecParameters.getCurve(),
                 ecParameters.getG(),
