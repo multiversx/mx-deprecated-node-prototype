@@ -4,13 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
-<<<<<<< 119410126b61118b8315e0fc7cf74353cd385c71
 import java.util.Arrays;
-
-import network.elrond.chronology.Epoch;
-=======
-
->>>>>>> Implement Schnorr single signature
 import org.bouncycastle.jcajce.provider.digest.SHA3.DigestSHA3;
 
 public class Util {
@@ -28,21 +22,8 @@ public class Util {
     public static final float WEIGHT_STAKE_SPOS = 0.4f;
     public static final float WEIGHT_RATING_SPOS = 0.6f;
     public static final int MAX_LEN_ADDR = 42; //20 bytes x 2 chars + 0x
-<<<<<<< 119410126b61118b8315e0fc7cf74353cd385c71
     public static final int MAX_LEN_PUB_KEY = 33;
-
-    public static Epoch MAIN_EPOCH = new Epoch();
-
-
-    public static DigestSHA3 SHA3;
-
-    static{
-        SHA3 = new DigestSHA3(256);
-    }
-=======
-    public static final int MAX_LEN_PUB_KEY = 66; //33 bytes x 2 chars
     public static DigestSHA3 SHA3 = new DigestSHA3(256);
->>>>>>> Implement Schnorr single signature
 
     //JLS: oare nu e mai bine sa lucram cu hashuri pe array de bytes? Vom face economie la ceea ce transmitem pe fir
     public static String applySha256(String input) {
