@@ -1,6 +1,7 @@
 package network.elrond.p2p;
 
 import net.tomp2p.dht.FutureGet;
+import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.futures.FutureBootstrap;
@@ -11,10 +12,12 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.storage.Data;
 import network.elrond.application.AppContext;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 public class P2PBroadcastServiceImpl implements P2PBroadcastService {
@@ -134,6 +137,34 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         }
         return false;
     }
+
+    public Object get(P2PBroadcastChanel chanel, String key) throws ClassNotFoundException, IOException {
+        PeerDHT peer = chanel.getConnection().getDht();
+        FutureGet futureGet = peer.get(Number160.createHash(key)).start();
+        futureGet.awaitUninterruptibly(500);
+        if (futureGet.isSuccess()) {
+            Iterator<Data> iterator = futureGet.dataMap().values().iterator();
+            if (!iterator.hasNext()) {
+                return null;
+            }
+            Data data = iterator.next();
+            return data.object();
+        } else {
+            LoggerFactory.getLogger(P2PBroadcastServiceImpl.class).warn("Timout getting! hash: " + key);
+        }
+        return null;
+    }
+
+    public FuturePut put(P2PBroadcastChanel chanel, String key, Object value) throws IOException {
+        PeerDHT peer = chanel.getConnection().getDht();
+
+        FuturePut fp = peer.put(Number160.createHash(key)).data(new Data(value)).start();
+
+        fp.awaitUninterruptibly();
+
+        return(fp);
+    }
+
 
     @SuppressWarnings("unchecked")
     public boolean unsubscribeFromChannel(P2PBroadcastChanel chanel) {

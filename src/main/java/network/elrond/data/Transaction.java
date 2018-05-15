@@ -86,6 +86,24 @@ public class Transaction {
         hash = new byte[0];
     }
 
+    public Transaction(String strDataJSON)
+    {
+        nonce = BigInteger.ZERO;
+        value = BigInteger.ZERO;
+        recvAddress = "";
+        sendAddress = "";
+        gasPrice = BigInteger.ZERO;
+        gasLimit = BigInteger.ZERO;
+        data = null;
+        sig1 = null;
+        sig2 = null;
+        pubKey = "";
+        hashNoSig = new byte[0];
+        hash = new byte[0];
+
+        this.decodeJSON(strDataJSON);
+    }
+
     /**
      * Gets the nonce
      * @return nonce as BigInteger

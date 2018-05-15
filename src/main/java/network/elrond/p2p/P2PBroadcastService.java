@@ -1,6 +1,7 @@
 package network.elrond.p2p;
 
 
+import net.tomp2p.dht.FuturePut;
 import network.elrond.application.AppContext;
 
 import java.io.IOException;
@@ -20,4 +21,7 @@ public interface P2PBroadcastService {
 
     boolean leaveNetwork(List<P2PBroadcastChanel> chanel);
 
+    Object get(P2PBroadcastChanel chanel, String key) throws ClassNotFoundException, IOException;
+
+    FuturePut put(P2PBroadcastChanel chanel, String key, Object value) throws IOException;
 }
