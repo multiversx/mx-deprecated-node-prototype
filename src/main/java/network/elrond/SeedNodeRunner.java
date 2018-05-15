@@ -12,7 +12,7 @@ public class SeedNodeRunner {
         AppContext context = new AppContext();
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(4000);
-        context.setPort(4001);
+        context.setPort(4000);
         context.setPeerId(1);
 
 
