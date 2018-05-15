@@ -8,18 +8,25 @@ import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
+import org.bouncycastle.util.Arrays;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
 public class PrivateKey {
-    private BigInteger privateKey;
+    private byte[] privateKey;
+    //private BigInteger privateKey;
     private static final X9ECParameters EC_PARAMETERS = SECNamedCurves.getByName("secp256k1");
 
     public static BigInteger getCurveOrder() {
         return EC_PARAMETERS.getN();
     }
 
+    /**
+     * Getter for the used Elliptic Curve parameters
+     *
+     * @return the EC parameters
+     */
     public static final X9ECParameters getEcParameters() {
         return EC_PARAMETERS;
     }
@@ -48,21 +55,7 @@ public class PrivateKey {
         keyPairGenerator.init(keyParameters);
         keyPair = keyPairGenerator.generateKeyPair();
         ECPrivateKeyParameters privateKey = (ECPrivateKeyParameters) keyPair.getPrivate();
-        this.privateKey = privateKey.getD();
-    }
-
-    /**
-     * Checks if the private key is valid
-     *
-     * @return true if private key is valid, false otherwise
-     */
-    public boolean isValid() {
-        BigInteger unsignedPrivateKey = new BigInteger(1, privateKey.toByteArray());
-        if ((-1 != unsignedPrivateKey.compareTo(EC_PARAMETERS.getN())) &&
-                (1 != unsignedPrivateKey.compareTo(BigInteger.ZERO))) {
-            return false;
-        }
-        return true;
+        this.privateKey = privateKey.getD().toByteArray();
     }
 
     /**
@@ -71,7 +64,7 @@ public class PrivateKey {
      * @param src The byte array
      */
     public PrivateKey(byte[] src) {
-        privateKey = new BigInteger(src);
+        privateKey = src.clone();
     }
 
     /**
@@ -81,24 +74,36 @@ public class PrivateKey {
      * @param seed String seed to generate the private key
      */
     public PrivateKey(String seed) {
-        BigInteger primeOrder = EC_PARAMETERS.getN();
         byte[] seedArray = seed.getBytes();
-        boolean validPrivateKey = false;
+        final byte[] ZERO = new byte[32];
+        Arrays.fill(ZERO, (byte) 0);
 
         seedArray = Util.SHA3.digest(seedArray);
-        privateKey = new BigInteger(1, seedArray);
 
         // to be a valid private key it needs to verify:
         // 0 < pk < n, where n is the order of the largest prime order subgroup
         // consider BigInteger will be interpreted as negative when first bit is 1
         // so do the check on unsigned but don't store the extra 00 byte
-        while ((-1 != privateKey.compareTo(primeOrder)) && (1 != privateKey.compareTo(BigInteger.ZERO))) {
+        while (1 > Arrays.compareUnsigned(seedArray, ZERO)) {
             seedArray = Util.SHA3.digest(seedArray);
-            privateKey = new BigInteger(1, seedArray);
         }
 
         // store without the extra byte in case of unsigned
-        privateKey = new BigInteger(seedArray);
+        privateKey = seedArray;
+    }
+
+    /**
+     * Checks if the private key is valid
+     *
+     * @return true if private key is valid, false otherwise
+     */
+    public boolean isValid() {
+        BigInteger unsignedPrivateKey = new BigInteger(1, privateKey);
+
+        if (1 != unsignedPrivateKey.compareTo(BigInteger.ZERO)) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -106,8 +111,8 @@ public class PrivateKey {
      *
      * @return the private key
      */
-    public BigInteger getValue() {
-        return privateKey;
+    public byte[] getValue() {
+        return privateKey.clone();
     }
 
     /**
@@ -115,7 +120,7 @@ public class PrivateKey {
      *
      * @param privateKey
      */
-    public void setPrivateKey(BigInteger privateKey) {
-        this.privateKey = privateKey;
+    public void setPrivateKey(byte[] privateKey) {
+        this.privateKey = privateKey.clone();
     }
 }

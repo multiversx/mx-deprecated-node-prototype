@@ -4,7 +4,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.util.Arrays;
+
+import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.bouncycastle.jcajce.provider.digest.SHA3.DigestSHA3;
 
 public class Util {
@@ -24,27 +27,7 @@ public class Util {
     public static final int MAX_LEN_ADDR = 42; //20 bytes x 2 chars + 0x
     public static final int MAX_LEN_PUB_KEY = 33;
     public static DigestSHA3 SHA3 = new DigestSHA3(256);
-
-    //JLS: oare nu e mai bine sa lucram cu hashuri pe array de bytes? Vom face economie la ceea ce transmitem pe fir
-    public static String applySha256(String input) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-
-            byte[] hash = digest.digest(input.getBytes("UTF-8"));
-
-            StringBuilder hexString = new StringBuilder(); // This will contain hash as hexidecimal
-
-            for (int i = 0; i < hash.length; i++) {
-                String hex = Integer.toHexString(0xff & hash[i]);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-
-            return hexString.toString();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+    public static SHA256.Digest SHA256 = new SHA256.Digest();
 
     public static byte[] hexStringToByteArray(String s) {
         int len = s.length();
@@ -65,8 +48,7 @@ public class Util {
     }
 
 
-    public static String getAddressFromPublicKey(byte[] pubKeyBytes)
-    {
+    public static String getAddressFromPublicKey(byte[] pubKeyBytes) {
         if (pubKeyBytes == null) {
             return ("");
         }
@@ -75,14 +57,14 @@ public class Util {
         String strHexa = byteArrayToHexString(pubKeyBytes);
 
         if (strHexa.length() != Util.MAX_LEN_PUB_KEY * 2) {
-            return("");
+            return ("");
         }
 
         //step 2. compute hash based on hexa form
         byte[] hash = SHA3.digest(strHexa.getBytes());
 
         if (hash.length != 32) {
-            return("");
+            return ("");
         }
 
         //step 3. trim to last 20 bytes
@@ -94,7 +76,8 @@ public class Util {
 
     /**
      * Concatenates two byte arrays returning the resulting byte array
-     * @param first the byte array that will be concatenated first
+     *
+     * @param first  the byte array that will be concatenated first
      * @param second the byte array that will be concatenated second
      * @return the concatenated byte array
      */

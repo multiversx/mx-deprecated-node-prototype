@@ -5,14 +5,26 @@ import org.bouncycastle.math.ec.ECPoint;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.Arrays;
 
 public class SchnorrSignature {
-    private BigInteger signature;
-    private BigInteger challenge;
-    private boolean isCalculated;
+    private byte[] signature;
+    private byte[] challenge;
+    private boolean calculated;
+    private static SecureRandom secureRandom;
 
+    static {
+        byte[] seed;
+        secureRandom = new SecureRandom();
+        seed = secureRandom.generateSeed(32);
+        secureRandom.setSeed(seed);
+    }
+
+    /**
+     * Default Constructor
+     */
     public SchnorrSignature() {
-        isCalculated = false;
+        calculated = false;
     }
 
     /**
@@ -20,8 +32,8 @@ public class SchnorrSignature {
      *
      * @return the signature value
      */
-    public BigInteger getSignatureValue() {
-        return (isCalculated) ? signature : null;
+    public byte[] getSignatureValue() {
+        return (calculated) ? signature.clone() : null;
     }
 
     /**
@@ -29,29 +41,29 @@ public class SchnorrSignature {
      *
      * @return the challenge value
      */
-    public BigInteger getChallenge() {
-        return (isCalculated) ? challenge : null;
+    public byte[] getChallenge() {
+        return (calculated) ? challenge.clone() : null;
     }
 
     /**
      * Setter for signature
      *
-     * @param signature BigInteger representing signature
-     * @param challenge BigInteger representing the associated challenge
+     * @param signature signature as a byte array
+     * @param challenge challenge as a byte array
      * @return true if all set was done, false otherwise
      */
-    public boolean setSignature(BigInteger signature, BigInteger challenge) {
-        if (signature == null || signature.equals(BigInteger.ZERO)) {
+    public boolean setSignature(byte[] signature, byte[] challenge) {
+        if (signature == null || (new BigInteger(signature)).equals(BigInteger.ZERO)) {
             return false;
         }
 
-        if (challenge == null || challenge.equals(BigInteger.ZERO)) {
+        if (challenge == null || (new BigInteger(challenge)).equals(BigInteger.ZERO)) {
             return false;
         }
 
-        this.signature = signature;
-        this.challenge = challenge;
-        isCalculated = true;
+        this.signature = signature.clone();
+        this.challenge = challenge.clone();
+        calculated = true;
 
         return true;
     }
@@ -66,15 +78,14 @@ public class SchnorrSignature {
      * 6. if s = 0 start from 1
      * 7. else return signature (r, s)
      *
-     * @param message    the message to sign
+     * @param message    the message to sign as a byte array
      * @param privateKey the private key used to sign
      * @param publicKey  the public key used for challenge calculation
      * @return true if signed successfully, false otherwise
      */
     public boolean signMessage(byte[] message, PrivateKey privateKey, PublicKey publicKey) {
         // Choose random private part k
-        SecureRandom secureRandom;
-        byte[] k;
+        byte[] k = new byte[32];
         BigInteger kInteger;
         byte[] s = null;
         ECPoint basePointG;
@@ -92,26 +103,27 @@ public class SchnorrSignature {
             return false;
         }
 
-        isCalculated = false;
-        while (!rValid || !isCalculated) {
-            rValid = false;
-            isCalculated = false;
-            secureRandom = new SecureRandom();
-            k = secureRandom.generateSeed(32);
+        calculated = false;
+        while (!rValid || !calculated) {
+            calculated = false;
+            secureRandom.nextBytes(k);
             kInteger = new BigInteger(1, k);
 
-            //make sure k is in allowed range
-            while (0 <= kInteger.compareTo(PrivateKey.getCurveOrder())) {
-                k = Util.SHA3.digest(k);
-                kInteger = new BigInteger(k);
+            //make sure k is not zero
+            while (kInteger.equals(BigInteger.ZERO)) {
+                secureRandom.nextBytes(k);
+                kInteger = new BigInteger(1, k);
             }
+
+            //without possible extra byte for unsigned
+            kInteger = new BigInteger(k);
 
             // Calculate public part (commit point) Q = k*G
             basePointG = PrivateKey.getEcParameters().getG();
             commitPointQ = basePointG.multiply(kInteger);
 
             // Calculate the challenge
-            // First concatenate Q public key and message
+            // First concatenate Q, public key and message
             challengeR = Util.concatenateArrays(commitPointQ.getEncoded(true), publicKey.getEncoded());
             challengeR = Util.concatenateArrays(challengeR, message);
             // Calculate the digest of the byte array to get the challenge
@@ -119,23 +131,25 @@ public class SchnorrSignature {
             BigInteger challengeRInteger = new BigInteger(challengeR);
             if (challengeRInteger.equals(BigInteger.ZERO)) {
                 rValid = false;
+                System.out.println("challenge zero: " + Util.byteArrayToHexString(challengeRInteger.toByteArray()));
             } else {
                 rValid = true;
 
                 // Compute signature as s = k - r * privateKey
-                BigInteger sInteger = kInteger.subtract(challengeRInteger.multiply(privateKey.getValue()));
+                BigInteger sInteger = kInteger.subtract(challengeRInteger.multiply(new BigInteger(privateKey.getValue())));
 
                 if (sInteger.equals(BigInteger.ZERO)) {
-                    isCalculated = false;
+                    calculated = false;
+                    System.out.println("signature zero: " + Util.byteArrayToHexString(sInteger.toByteArray()));
                 } else {
-                    signature = sInteger;
-                    challenge = challengeRInteger;
-                    isCalculated = true;
+                    signature = sInteger.toByteArray();
+                    challenge = challengeR;
+                    calculated = true;
                 }
             }
         }
 
-        return isCalculated;
+        return calculated;
     }
 
     /**
@@ -158,7 +172,7 @@ public class SchnorrSignature {
      * 4. else calculate r2 = H(Q, publicKey, message)
      * 5. return r2 == r
      *
-     * @param message   the message as byte stream, on which the signature was computed
+     * @param message   the message as byte array, on which the signature was computed
      * @param publicKey the public key to verify signature against
      * @return true if the public key verifies the signature and message, false otherwise
      */
@@ -166,10 +180,10 @@ public class SchnorrSignature {
         ECPoint basePointG;
         ECPoint commitPointQ;
         byte[] r2;
-        BigInteger r2Integer;
+        BigInteger challengeInt;
 
         // check signature
-        if (null == signature || false == this.isCalculated) {
+        if (null == signature || !this.calculated) {
             return false;
         }
 
@@ -190,7 +204,9 @@ public class SchnorrSignature {
 
         // Compute Q = s*g + r*publicKey
         basePointG = PrivateKey.getEcParameters().getG();
-        commitPointQ = basePointG.multiply(signature).add(publicKey.getQ().multiply(challenge));
+        challengeInt = new BigInteger(challenge);
+        commitPointQ = basePointG.multiply(new BigInteger(signature))
+                .add(publicKey.getQ().multiply(challengeInt));
 
         if (commitPointQ.isInfinity()) {
             return false;
@@ -200,9 +216,8 @@ public class SchnorrSignature {
         r2 = Util.concatenateArrays(commitPointQ.getEncoded(true), publicKey.getEncoded());
         r2 = Util.concatenateArrays(r2, message);
         r2 = Util.SHA3.digest(r2);
-        r2Integer = new BigInteger(r2);
 
-        return challenge.equals(r2Integer);
+        return Arrays.equals(challenge, r2);
     }
 
     /**

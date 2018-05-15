@@ -1,31 +1,24 @@
 package network.elrond.crypto;
 
-import java.math.BigInteger;
+import java.util.ArrayList;
 
-//TODO: parameters & return types need to be decided/confirmed.
 public interface MultiSignature {
+    public byte[] computeCommitment();
 
-    public BigInteger getRandom();
+    public byte[] computeCommitmentHash(byte[] commitment);
 
-    public BigInteger computeCommitment(BigInteger pubKey);
-
-    public BigInteger computeCommitmentHash(BigInteger commitment);
-
-    public boolean validateCommitment(BigInteger commitment, BigInteger commitmentHash);
+    public boolean validateCommitment(byte[] commitment, byte[] commitmentHash);
 
     // compute or get the challenge from leader
-    public BigInteger computeChallenge();
+    public byte[] computeChallenge(ArrayList<PublicKey> signers,
+                                   ArrayList<byte[]> commitment,
+                                   PublicKey publicKey,
+                                   byte[] message,
+                                   byte bitmapCommitments);
 
-    public BigInteger computeSignatureShare();
+    public byte[] computeSignatureShare(byte[] challenge, PrivateKey privateKey);
 
-    public boolean VerifySignatureShare();
+    public byte[] AggregateSignatures(ArrayList<byte[]> signatureShares, byte bitmapSigners);
 
-    public BigInteger AggregateSignatures();
-
-    public boolean VerifyAggregatedSignature();
-
-    public byte[] serialize(BigInteger value);
-
-    public BigInteger deserialize(byte[] array);
-
+    public boolean VerifyAggregatedSignature(ArrayList<PublicKey> signers, byte[] aggregatedCommitment, byte[] aggregatedSignature, byte bitmapSigners, byte[] message);
 }

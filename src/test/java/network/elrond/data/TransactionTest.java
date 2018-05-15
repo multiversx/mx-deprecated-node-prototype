@@ -79,8 +79,7 @@ public class TransactionTest {
         tx.setNonce(BigInteger.ZERO);
         tx.setValue(BigInteger.TEN.pow(8)); //1 ERD
 
-
-        ts.signTransaction(tx, pvKey.getValue().toByteArray());
+        ts.signTransaction(tx, pvKey.getValue());
 
         System.out.println(ts.encodeJSON(tx, true));
 

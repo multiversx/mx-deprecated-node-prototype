@@ -200,5 +200,4 @@ public class Transaction {
      */
     public void setPubKey(String pubKey) {this.pubKey = pubKey;}
 
-
 }

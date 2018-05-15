@@ -8,6 +8,7 @@ import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.ECPoint;
 
+import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -16,7 +17,7 @@ import java.security.spec.InvalidKeySpecException;
 
 public class PublicKey implements ECPublicKey {
     private ECPoint q;
-    private boolean isInitialized;
+    private boolean initialized;
 
     static {
         if (Security.getProvider("BC") == null) {
@@ -28,7 +29,32 @@ public class PublicKey implements ECPublicKey {
      * Default constructor
      */
     public PublicKey() {
-        isInitialized = false;
+        initialized = false;
+    }
+
+    /**
+     * Constructor
+     * Generates the corresponding public key for the given public point encoding
+     *
+     * @param key the public point Q encoding, as a byte array
+     */
+    public PublicKey(byte[] key) {
+        X9ECParameters ecParameters = PrivateKey.getEcParameters();
+        ECParameterSpec ecParameterSpec = new ECParameterSpec(
+                ecParameters.getCurve(),
+                ecParameters.getG(),
+                ecParameters.getN(),
+                ecParameters.getH(),
+                ecParameters.getSeed());
+        ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(ecParameters.getCurve().decodePoint(key), ecParameterSpec);
+        KeyFactory keyFactory = null;
+        try {
+            keyFactory = KeyFactory.getInstance("EC", "BC");
+            q = ((ECPublicKey) keyFactory.generatePublic(publicKeySpec)).getQ();
+            initialized = true;
+        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -47,8 +73,8 @@ public class PublicKey implements ECPublicKey {
                 ecParameters.getSeed());
 
         // compute the public key based on the private key
-        q = domainParameters.getG().multiply(privateKey.getValue());
-        isInitialized = true;
+        q = domainParameters.getG().multiply(new BigInteger(privateKey.getValue()));
+        initialized = true;
     }
 
     /**
@@ -79,12 +105,34 @@ public class PublicKey implements ECPublicKey {
         ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(ecParameters.getCurve().decodePoint(key), ecParameterSpec);
         KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC");
         q = ((ECPublicKey) keyFactory.generatePublic(publicKeySpec)).getQ();
-        isInitialized = true;
+        initialized = true;
+    }
+
+    /**
+     * Checks if public key is valid
+     *
+     * @return true if public key is valid, false otherwise
+     */
+    public boolean isValid() {
+        if (!initialized || q.isInfinity() || new BigInteger(q.getEncoded(true)).equals(BigInteger.ZERO)) {
+            return false;
+        }
+
+        // check if it satisfies curve equation
+        if (!q.isValid()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean isInitialized() {
+        return initialized;
     }
 
     @Override
     public ECPoint getQ() {
-        return q;
+        return (initialized) ? q : null;
     }
 
     @Override
@@ -99,11 +147,18 @@ public class PublicKey implements ECPublicKey {
 
     @Override
     public byte[] getEncoded() {
-        return q.getEncoded(true);
+        return (initialized) ? q.getEncoded(true) : null;
     }
 
     @Override
     public ECParameterSpec getParameters() {
-        return null;
+        X9ECParameters ecParameters = PrivateKey.getEcParameters();
+        ECParameterSpec ecParameterSpec = new ECParameterSpec(
+                ecParameters.getCurve(),
+                ecParameters.getG(),
+                ecParameters.getN(),
+                ecParameters.getH());
+
+        return ecParameterSpec;
     }
 }

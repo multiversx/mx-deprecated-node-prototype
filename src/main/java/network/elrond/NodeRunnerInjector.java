@@ -83,8 +83,7 @@ public class NodeRunnerInjector {
         tx.setRecvAddress("0x0000000000000000000000000000000000000000");
         tx.setNonce(BigInteger.ZERO);
         tx.setValue(BigInteger.TEN.pow(8)); //1 ERD
-
-        ts.signTransaction(tx, pvKey.getValue().toByteArray());
+        ts.signTransaction(tx, pvKey.getValue());
 
         String strHash = new String(Base64.encode(ts.getHash(tx, true)));
 
