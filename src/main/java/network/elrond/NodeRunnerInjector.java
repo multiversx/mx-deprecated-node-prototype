@@ -10,7 +10,7 @@ import network.elrond.data.Block;
 import network.elrond.data.DataBlock;
 import network.elrond.data.Transaction;
 import network.elrond.p2p.P2PBroadcastChanel;
-import network.elrond.p2p.P2PBroadcastServiceImpl;
+import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.LoggerFactory;
 
@@ -88,10 +88,10 @@ public class NodeRunnerInjector {
         String strHash = new String(Base64.encode(tx.getHash()));
 
         try {
-            FuturePut fp = P2PBroadcastServiceImpl.instance().put(channel, strHash, tx.encodeJSON());
+            FuturePut fp = AppServiceProvider.getP2PObjectService().put(channel.getConnection(), strHash, tx.encodeJSON());
             if (fp.isSuccess()) {
                 LoggerFactory.getLogger(NodeRunnerInjector.class).info("Put tx hash: " + strHash);
-                P2PBroadcastServiceImpl.instance().publishToChannel(channel, "H:" + strHash);
+                AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, "H:" + strHash);
                 //System.out.println(NodeProducerTX.class + " INFO Put tx hash: " + strHash);
                 //
             } else {
@@ -99,12 +99,12 @@ public class NodeRunnerInjector {
                 LoggerFactory.getLogger(NodeRunnerInjector.class).error("Error placing tx! hash: " + strHash + "");
             }
 
-        } catch (Exception ex){
+        } catch (Exception ex) {
 
         }
     }
 
-    private static void InjectBlk(AppState state, Random rdm){
+    private static void InjectBlk(AppState state, Random rdm) {
         P2PBroadcastChanel channel = state.getChanel("BLOCKS");
 
         Block b = new DataBlock();
@@ -120,10 +120,10 @@ public class NodeRunnerInjector {
         String strHash = new String(Base64.encode(b.getHash()));
 
         try {
-            FuturePut fp = P2PBroadcastServiceImpl.instance().put(channel, strHash, b.encodeJSON());
+            FuturePut fp = AppServiceProvider.getP2PObjectService().put(channel.getConnection(), strHash, b.encodeJSON());
             if (fp.isSuccess()) {
                 LoggerFactory.getLogger(NodeRunnerInjector.class).info("Put blk hash: " + strHash);
-                P2PBroadcastServiceImpl.instance().publishToChannel(channel, "H:" + strHash);
+                AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, "H:" + strHash);
                 //System.out.println(NodeProducerTX.class + " INFO Put tx hash: " + strHash);
                 //
             } else {
@@ -131,7 +131,7 @@ public class NodeRunnerInjector {
                 LoggerFactory.getLogger(NodeRunnerInjector.class).error("Error placing blk! hash: " + strHash + "");
             }
 
-        } catch (Exception ex){
+        } catch (Exception ex) {
 
         }
 

@@ -1,7 +1,10 @@
 package network.elrond.application;
 
 import network.elrond.Application;
-import network.elrond.p2p.*;
+import network.elrond.p2p.P2PBroadcastChanel;
+import network.elrond.p2p.P2PChannelListener;
+import network.elrond.p2p.P2PConnection;
+import network.elrond.service.AppServiceProvider;
 
 public class AppManager {
 
@@ -16,14 +19,15 @@ public class AppManager {
 
 
         AppState state = application.getState();
-        P2PBroadcastConnection connection = state.getConnection();
+        P2PConnection connection = state.getConnection();
 
         P2PBroadcastChanel channel = state.getChanel(channelName);
         if (channel == null) {
-            channel = P2PBroadcastServiceImpl.instance().createChannel(connection, channelName);
+            channel = AppServiceProvider.getP2PBroadcastService().createChannel(connection, channelName);
         }
-        P2PBroadcastServiceImpl.instance().subscribeToChannel(channel);
+        AppServiceProvider.getP2PBroadcastService().subscribeToChannel(channel);
         state.addChanel(channelName, channel);
+
         channel.getListeners().add(listener);
 
         return channel;

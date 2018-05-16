@@ -6,10 +6,10 @@ import java.util.List;
 public class P2PBroadcastChanel {
 
     private String name;
-    private P2PBroadcastConnection connection;
+    private P2PConnection connection;
     private List<P2PChannelListener> listeners = new ArrayList<>();
 
-    public P2PBroadcastChanel(String chanelName, P2PBroadcastConnection connection) {
+    public P2PBroadcastChanel(String chanelName, P2PConnection connection) {
         this.name = chanelName;
         this.connection = connection;
     }
@@ -22,11 +22,11 @@ public class P2PBroadcastChanel {
         this.name = name;
     }
 
-    public P2PBroadcastConnection getConnection() {
+    public P2PConnection getConnection() {
         return connection;
     }
 
-    public void setConnection(P2PBroadcastConnection connection) {
+    public void setConnection(P2PConnection connection) {
         this.connection = connection;
     }
 

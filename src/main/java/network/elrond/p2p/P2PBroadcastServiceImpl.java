@@ -12,24 +12,17 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.storage.Data;
 import network.elrond.application.AppContext;
-import org.slf4j.LoggerFactory;
+import network.elrond.service.AppServiceProvider;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 public class P2PBroadcastServiceImpl implements P2PBroadcastService {
 
-    private static P2PBroadcastService instance = new P2PBroadcastServiceImpl();
 
-    public static P2PBroadcastService instance() {
-        return instance;
-    }
-
-
-    public P2PBroadcastConnection createConnection(AppContext context) throws IOException {
+    public P2PConnection createConnection(AppContext context) throws IOException {
 
         Integer peerId = context.getPeerId();
         int peerPort = context.getPort();
@@ -49,11 +42,11 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
             peer.discover().peerAddress(fb.bootstrapTo().iterator().next()).start().awaitUninterruptibly();
         }
 
-        return new P2PBroadcastConnection(peerId, peer, dht);
+        return new P2PConnection(peerId, peer, dht);
 
     }
 
-    public P2PBroadcastChanel createChannel(P2PBroadcastConnection connection, String channelName) {
+    public P2PBroadcastChanel createChannel(P2PConnection connection, String channelName) {
 
         try {
 
@@ -69,12 +62,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
             P2PBroadcastChanel channel = new P2PBroadcastChanel(channelName, connection);
 
             Peer peer = connection.getPeer();
-            peer.objectDataReply((sender, request) -> {
-                for (P2PChannelListener listener : channel.getListeners()) {
-                    listener.onReciveMessage(sender, request);
-                }
-                return null;
-            });
+            peer.objectDataReply(connection.registerChannel(channel));
 
             return channel;
 
@@ -90,7 +78,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         try {
 
 
-            P2PBroadcastConnection connection = chanel.getConnection();
+            P2PConnection connection = chanel.getConnection();
             String channelName = chanel.getName();
             PeerDHT dht = connection.getDht();
 
@@ -115,7 +103,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
     public boolean publishToChannel(P2PBroadcastChanel chanel, Object object) {
         try {
 
-            P2PBroadcastConnection connection = chanel.getConnection();
+            P2PConnection connection = chanel.getConnection();
             String channelName = chanel.getName();
 
             PeerDHT dht = connection.getDht();
@@ -126,7 +114,10 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
                 HashSet<PeerAddress> peersOnChannel;
                 peersOnChannel = (HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object();
                 for (PeerAddress peer : peersOnChannel) {
-                    FutureDirect futureDirect = dht.peer().sendDirect(peer).object(object).start();
+                    FutureDirect futureDirect = dht.peer()
+                            .sendDirect(peer)
+                            .object(new P2PBroadcastMessage(channelName, object))
+                            .start();
                     futureDirect.awaitUninterruptibly();
                 }
 
@@ -139,30 +130,11 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
     }
 
     public Object get(P2PBroadcastChanel chanel, String key) throws ClassNotFoundException, IOException {
-        PeerDHT peer = chanel.getConnection().getDht();
-        FutureGet futureGet = peer.get(Number160.createHash(key)).start();
-        futureGet.awaitUninterruptibly(500);
-        if (futureGet.isSuccess()) {
-            Iterator<Data> iterator = futureGet.dataMap().values().iterator();
-            if (!iterator.hasNext()) {
-                return null;
-            }
-            Data data = iterator.next();
-            return data.object();
-        } else {
-            LoggerFactory.getLogger(P2PBroadcastServiceImpl.class).warn("Timout getting! hash: " + key);
-        }
-        return null;
+        return AppServiceProvider.getP2PObjectService().get(chanel.getConnection(), key);
     }
 
     public FuturePut put(P2PBroadcastChanel chanel, String key, Object value) throws IOException {
-        PeerDHT peer = chanel.getConnection().getDht();
-
-        FuturePut fp = peer.put(Number160.createHash(key)).data(new Data(value)).start();
-
-        fp.awaitUninterruptibly();
-
-        return(fp);
+        return AppServiceProvider.getP2PObjectService().put(chanel.getConnection(), key, value);
     }
 
 
@@ -170,7 +142,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
     public boolean unsubscribeFromChannel(P2PBroadcastChanel chanel) {
         try {
 
-            P2PBroadcastConnection connection = chanel.getConnection();
+            P2PConnection connection = chanel.getConnection();
             String channelName = chanel.getName();
 
             PeerDHT dht = connection.getDht();
@@ -194,7 +166,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
 
     public boolean leaveNetwork(List<P2PBroadcastChanel> channels) {
 
-        P2PBroadcastConnection connection = channels.get(0).getConnection();
+        P2PConnection connection = channels.get(0).getConnection();
 
         for (P2PBroadcastChanel chanel : channels) {
             unsubscribeFromChannel(chanel);

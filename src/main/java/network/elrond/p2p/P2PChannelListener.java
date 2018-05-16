@@ -4,5 +4,5 @@ import net.tomp2p.peers.PeerAddress;
 
 public interface P2PChannelListener {
 
-    void onReciveMessage(PeerAddress sender, Object request);
+    void onReciveMessage(PeerAddress sender, P2PBroadcastMessage request);
 }
