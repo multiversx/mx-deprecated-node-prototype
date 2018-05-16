@@ -4,7 +4,9 @@ import network.elrond.Application;
 import network.elrond.p2p.AppP2PManager;
 import network.elrond.application.AppState;
 import network.elrond.data.Block;
+import network.elrond.data.BlockService;
 import network.elrond.data.SynchronizedPool;
+import network.elrond.data.TransactionService;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.processor.AppProcessor;
 import network.elrond.processor.AppProcessors;
@@ -17,8 +19,8 @@ import java.io.IOException;
 public class P2PBlocksInterceptorProcessor implements AppProcessor {
 
     private Logger logger = LoggerFactory.getLogger(AppProcessors.class);
-
     private static String CHANNEL_NAME = "BLOCKS";
+    BlockService blks = AppServiceProvider.getBlockService();
 
     @Override
     public void process(Application application) throws IOException {
@@ -45,7 +47,7 @@ public class P2PBlocksInterceptorProcessor implements AppProcessor {
 
 
                     if (objData != null) {
-                        pool.addObjectInPool(strHash, Block.createInstance(objData.toString()));
+                        pool.addObjectInPool(strHash, blks.decodeJSON(objData.toString()));
                         logger.info("Got blk hash: " + strHash);
                     }
 

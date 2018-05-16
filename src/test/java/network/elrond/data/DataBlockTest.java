@@ -2,11 +2,14 @@ package network.elrond.data;
 
 import junit.framework.TestCase;
 import network.elrond.data.Block;
+import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
 import java.math.BigInteger;
 
 public class DataBlockTest {
+    BlockService blks = AppServiceProvider.getBlockService();
+
     @Test
     public void testBlock() {
         DataBlock db = new DataBlock();
@@ -23,13 +26,12 @@ public class DataBlockTest {
         db.listPubKeys.add("025f37d20e5b18909361e0ead7ed17c69b417bee70746c9e9c2bcb1394d921d4ae");
         db.listPubKeys.add("025f37d20e5b18909361e0ead7ed17c69b417bee70746c9e9c2bcb1394d921d4af");
 
-        System.out.println(db.encodeJSON());
+        System.out.println(blks.encodeJSON(db, true));
 
-        DataBlock db2 = new DataBlock();
-        db2.decodeJSON(db.encodeJSON());
-        System.out.println(db2.encodeJSON());
+        Block db2 = blks.decodeJSON(blks.encodeJSON(db, true));
+        System.out.println(blks.encodeJSON(db2, true));
 
-        TestCase.assertEquals(db.encodeJSON(), db2.encodeJSON());
+        TestCase.assertEquals(blks.encodeJSON(db, true), blks.encodeJSON(db2, true));
 
 
 

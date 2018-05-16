@@ -6,9 +6,7 @@ import network.elrond.application.AppState;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
-import network.elrond.data.Block;
-import network.elrond.data.DataBlock;
-import network.elrond.data.Transaction;
+import network.elrond.data.*;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
@@ -19,6 +17,9 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class NodeRunnerInjector {
+
+    private static TransactionService ts = AppServiceProvider.getTransactionService();
+    private static BlockService blks = AppServiceProvider.getBlockService();
 
     public static void main(String[] args) throws Exception {
 
@@ -83,12 +84,12 @@ public class NodeRunnerInjector {
         tx.setNonce(BigInteger.ZERO);
         tx.setValue(BigInteger.TEN.pow(8)); //1 ERD
 
-        tx.signTransaction(pvKey.getValue().toByteArray());
+        ts.signTransaction(tx, pvKey.getValue().toByteArray());
 
-        String strHash = new String(Base64.encode(tx.getHash()));
+        String strHash = new String(Base64.encode(ts.getHash(tx, true)));
 
         try {
-            FuturePut fp = AppServiceProvider.getP2PObjectService().put(channel.getConnection(), strHash, tx.encodeJSON());
+            FuturePut fp = AppServiceProvider.getP2PObjectService().put(channel.getConnection(), strHash, ts.encodeJSON(tx, true));
             if (fp.isSuccess()) {
                 LoggerFactory.getLogger(NodeRunnerInjector.class).info("Put tx hash: " + strHash);
                 AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, "H:" + strHash);
@@ -117,10 +118,11 @@ public class NodeRunnerInjector {
             b.getListTXHashes().add(buff);
         }
 
-        String strHash = new String(Base64.encode(b.getHash()));
+        String strHash = new String(Base64.encode(blks.getHash(b, true)));
 
         try {
-            FuturePut fp = AppServiceProvider.getP2PObjectService().put(channel.getConnection(), strHash, b.encodeJSON());
+            FuturePut fp = AppServiceProvider.getP2PObjectService().put(channel.getConnection(), strHash,
+                    blks.encodeJSON(b, true));
             if (fp.isSuccess()) {
                 LoggerFactory.getLogger(NodeRunnerInjector.class).info("Put blk hash: " + strHash);
                 AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, "H:" + strHash);

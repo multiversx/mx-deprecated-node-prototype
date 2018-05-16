@@ -5,6 +5,7 @@ import network.elrond.p2p.AppP2PManager;
 import network.elrond.application.AppState;
 import network.elrond.data.SynchronizedPool;
 import network.elrond.data.Transaction;
+import network.elrond.data.TransactionService;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.processor.AppProcessor;
 import network.elrond.processor.AppProcessors;
@@ -18,6 +19,7 @@ public class P2PTransactionsInterceptorProcessor implements AppProcessor {
 
     private Logger logger = LoggerFactory.getLogger(AppProcessors.class);
     private static final String CHANNEL_NAME = "TRANSACTIONS";
+    TransactionService ts = AppServiceProvider.getTransactionService();
 
     @Override
     public void process(Application application) throws IOException {
@@ -44,7 +46,7 @@ public class P2PTransactionsInterceptorProcessor implements AppProcessor {
 
                     Object objData = AppServiceProvider.getP2PObjectService().get(connection, strHash);
                     if (objData != null) {
-                        pool.addObjectInPool(strHash, new Transaction(objData.toString()));
+                        pool.addObjectInPool(strHash, ts.decodeJSON(objData.toString()));
                         logger.info("Got tx hash: " + strHash);
                     }
 

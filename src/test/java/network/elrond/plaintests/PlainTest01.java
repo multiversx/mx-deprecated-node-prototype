@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Arrays;
 
 public class PlainTest01 {
 
@@ -27,6 +28,8 @@ public class PlainTest01 {
             LoggerFactory.getLogger("PlainTest01").error(ex.getMessage() + " billing");
             LoggerFactory.getLogger("PlainTest01").warn(ex.getMessage());
         }
+
+        System.out.println(Arrays.equals(("aaa").getBytes(), new byte[]{97, 97, 97}));
     }
 
 

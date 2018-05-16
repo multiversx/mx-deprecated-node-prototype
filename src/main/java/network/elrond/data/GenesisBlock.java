@@ -11,6 +11,8 @@ import java.util.ArrayList;
  * @since   2018-05-14
  */
 public class GenesisBlock extends Block{
+    public static String STR_GENESIS_BLOCK = "GENESIS";
+
     /**
      * Implicit constructor
      */
@@ -19,12 +21,12 @@ public class GenesisBlock extends Block{
         hashNoSig = new byte[0];
         hash = new byte[0];
         listPubKeys = new ArrayList<String>();
-        prevBlockHash = ("GENESIS").getBytes();
+        prevBlockHash = STR_GENESIS_BLOCK.getBytes();
         listTXHashes = new ArrayList<byte[]>();
         //TO DO
         //add here a minting address
         shard = 0;
-        appStateHash = ("GENESIS").getBytes();
+        appStateHash = STR_GENESIS_BLOCK.getBytes();
         //TO DO
         //compute an initial state hash
     }

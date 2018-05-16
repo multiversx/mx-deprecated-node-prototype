@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.crypto.SchnorrSignature;
+import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.math.ec.ECPoint;
 import org.json.*;
 import org.bouncycastle.util.encoders.Base64;
@@ -38,10 +39,7 @@ public class Transaction {
     private byte[] sig2;
     //plain public key in hexa form
     private String pubKey;
-    //plain message hash
-    private byte[] hashNoSig;
-    //complete tx hash
-    private byte[] hash;
+
 
     /**
      * Default constructor
@@ -58,8 +56,6 @@ public class Transaction {
         sig1 = null;
         sig2 = null;
         pubKey = "";
-        hashNoSig = new byte[0];
-        hash = new byte[0];
     }
 
     /**
@@ -82,26 +78,6 @@ public class Transaction {
         sig1 = null;
         sig2 = null;
         pubKey = "";
-        hashNoSig = new byte[0];
-        hash = new byte[0];
-    }
-
-    public Transaction(String strDataJSON)
-    {
-        nonce = BigInteger.ZERO;
-        value = BigInteger.ZERO;
-        recvAddress = "";
-        sendAddress = "";
-        gasPrice = BigInteger.ZERO;
-        gasLimit = BigInteger.ZERO;
-        data = null;
-        sig1 = null;
-        sig2 = null;
-        pubKey = "";
-        hashNoSig = new byte[0];
-        hash = new byte[0];
-
-        this.decodeJSON(strDataJSON);
     }
 
     /**
@@ -198,7 +174,7 @@ public class Transaction {
      * Sets the first part of signature of the tx
      * @param sig1 as byte array
      */
-    public void setSig(byte[] sig1){this.sig1 = sig1;}
+    public void setSig1(byte[] sig1){this.sig1 = sig1;}
 
     /**
      * Gets the second part of signature of the tx
@@ -224,286 +200,5 @@ public class Transaction {
      */
     public void setPubKey(String pubKey) {this.pubKey = pubKey;}
 
-    /**
-     * Encodes in JSON format the tx information using sig field as empty string ""
-     * This is usually used to generate the hash without signature for signing/verifying the tx
-     * @return JSON format of the tx as String
-     */
-    public String encodeJSONnoSig() {
-        JSONObject jtx = new JSONObject();
 
-        JSONObject jobj = new JSONObject();
-        jobj.put("nonce", nonce.toString(10));
-        jobj.put("value", value.toString(10));
-        jobj.put("rcv", recvAddress);
-        jobj.put("snd", sendAddress);
-        jobj.put("gprice", gasPrice.toString(10));
-        jobj.put("glimit", gasLimit.toString(10));
-        if (data == null) {
-            jobj.put("data", "");
-        } else {
-            jobj.put("data", new String(Base64.encode(data)));
-        }
-        jobj.put("sig1", "");
-        jobj.put("sig2", "");
-        //hexa form -> byte array -> base64 (reduce the size)
-        jobj.put("key", new String(Base64.encode(Util.hexStringToByteArray(pubKey))));
-
-        jtx.put("TX", jobj);
-
-        return(jtx.toString());
-    }
-
-    /**
-     * Encodes in JSON format the tx information using the data from all its fields
-     * This is usually used when broadcasting the complete tx to peers
-     * @return JSON format of the tx as String
-     */
-    public String encodeJSON() {
-        JSONObject jtx = new JSONObject();
-
-        JSONObject jobj = new JSONObject();
-        jobj.put("nonce", nonce.toString(10));
-        jobj.put("value", value.toString(10));
-        jobj.put("rcv", recvAddress);
-        jobj.put("snd", sendAddress);
-        jobj.put("gprice", gasPrice.toString(10));
-        jobj.put("glimit", gasLimit.toString(10));
-        if (data == null) {
-            jobj.put("data", "");
-        } else {
-            jobj.put("data", new String(Base64.encode(data)));
-        }
-        if (sig1 == null)
-        {
-            jobj.put("sig1", "");
-        } else {
-            jobj.put("sig1", new String(Base64.encode(sig1)));
-        }
-        if (sig2 == null)
-        {
-            jobj.put("sig2", "");
-        } else {
-            jobj.put("sig2", new String(Base64.encode(sig2)));
-        }
-        //hexa form -> byte array -> base64 (reduce the size)
-        jobj.put("key", new String(Base64.encode(Util.hexStringToByteArray(pubKey))));
-
-        jtx.put("TX", jobj);
-
-        return(jtx.toString());
-    }
-
-    /**
-     * Decodes the data from JSON format and overwrites current members data
-     * This is usually as the first step when retrieving a tx from a peer
-     * @param strJSONData data to be parsed
-     * @return Encountered error (for diagnostics) or null if parsing was completed without errors
-     */
-    public String decodeJSON(String strJSONData){
-        JSONObject jtx = null;
-
-        try{
-            jtx = new JSONObject(strJSONData);
-        } catch (Exception ex) {
-            return ("Error parsing JSON data! [" + ex.getMessage() + "]");
-        }
-
-        if (!jtx.has("TX")) {
-            return ("Error fetching data from JSON! [TX is missing]");
-        }
-
-        JSONObject jobj = jtx.getJSONObject("TX");
-
-        if (!jobj.has("nonce")) {
-            return ("Error fetching data from JSON! [nonce is missing]");
-        }
-        if (!jobj.has("value")) {
-            return ("Error fetching data from JSON! [value is missing]");
-        }
-        if (!jobj.has("rcv")) {
-            return ("Error fetching data from JSON! [rcv is missing]");
-        }
-        if (!jobj.has("snd")) {
-            return ("Error fetching data from JSON! [snd is missing]");
-        }
-        if (!jobj.has("gprice")) {
-            return ("Error fetching data from JSON! [gprice is missing]");
-        }
-        if (!jobj.has("glimit")) {
-            return ("Error fetching data from JSON! [glimit is missing]");
-        }
-        if (!jobj.has("data")) {
-            return ("Error fetching data from JSON! [data is missing]");
-        }
-        if (!jobj.has("sig1")) {
-            return ("Error fetching data from JSON! [sig1 is missing]");
-        }
-        if (!jobj.has("sig2")) {
-            return ("Error fetching data from JSON! [sig2 is missing]");
-        }
-        if (!jobj.has("key")) {
-            return ("Error fetching data from JSON! [(public) key is missing]");
-        }
-
-        try {
-            BigInteger tempNonce = new BigInteger(jobj.getString("nonce"));
-            BigInteger tempValue = new BigInteger(jobj.getString("value"));
-            String tempRecv = jobj.getString("rcv");
-            String tempSend = jobj.getString("snd");
-            BigInteger tempGPrice = new BigInteger(jobj.getString("gprice"));
-            BigInteger tempGLimit = new BigInteger(jobj.getString("glimit"));
-            String tempData = jobj.getString("data");
-            String tempSig1 = jobj.getString("sig1");
-            String tempSig2 = jobj.getString("sig2");
-            String tempKey = jobj.getString("key");
-
-            if (tempData.equals("")){
-                tempData = null;
-            }
-
-            this.nonce = tempNonce;
-            this.value = tempValue;
-            this.recvAddress = tempRecv;
-            this.sendAddress = tempSend;
-            this.gasLimit = tempGLimit;
-            this.gasPrice = tempGPrice;
-            this.data = Base64.decode(tempData.getBytes());
-            if ((tempSig1 != null) && (tempSig1.length() > 0)) {
-                this.sig1 = Base64.decode(tempSig1.getBytes());
-            }
-            if ((tempSig2 != null) && (tempSig2.length() > 0)) {
-                this.sig2 = Base64.decode(tempSig2.getBytes());
-            }
-            this.pubKey = Util.byteArrayToHexString(Base64.decode(tempKey));
-
-        } catch (Exception ex) {
-            return ("Error fetching data from JSON! [something went horribly wrong converting data]");
-        }
-
-        return(null);
-    }
-
-    /**
-     * Computes the hash of the tx with an empty sig field
-     * Used in signing/verifying process
-     * @return hash as byte array
-     */
-    public byte[] getHashNoSig() {
-        if (hashNoSig.length == 0) {
-            //compute hash
-            hashNoSig = Util.SHA3.digest(this.encodeJSONnoSig().getBytes());
-        }
-
-        return (hashNoSig);
-    }
-
-    /**
-     * Computes the hash of the complete tx info
-     * Used as a mean of tx identification
-     * @return hash as byte array
-     */
-    public byte[] getHash()
-    {
-        if (hash.length == 0)
-        {
-            //compute hash
-            hash = Util.SHA3.digest(this.encodeJSON().getBytes());
-        }
-
-        return (hash);
-    }
-
-    /**
-     * TO DO
-     * @param privateKeysBytes
-     */
-    public void signTransaction(byte[] privateKeysBytes) {
-        this.sig1 = new byte[0];
-        this.sig2 = new byte[0];
-
-        PrivateKey pvkey = new PrivateKey(privateKeysBytes);
-        byte[] hashNoSigLocal = getHashNoSig();
-        PublicKey pbkey = new PublicKey(pvkey);
-
-        SchnorrSignature schnorr = new SchnorrSignature();
-        schnorr.signMessage(hashNoSigLocal, pvkey, pbkey);
-
-        this.sig1 = schnorr.getSignatureValue().toByteArray();
-        this.sig2 = schnorr.getChallenge().toByteArray();
-    }
-
-    /**
-     * Verify the data stored in tx
-     * @param tx to be verified
-     * @return true if tx passes all consistency tests
-     */
-    public static Boolean verifyTransaction(Transaction tx) {
-        //test 1. consistency checks
-        if ((tx.getNonce().compareTo(BigInteger.ZERO) < 0) ||
-                (tx.getValue().compareTo(BigInteger.ZERO) < 0) ||
-                (tx.getSig1() == null) ||
-                (tx.getSig2() == null) ||
-                (tx.getSig1().length == 0) ||
-                (tx.getSig2().length == 0) ||
-                (tx.sendAddress.length() != Util.MAX_LEN_ADDR) ||
-                (tx.recvAddress.length() != Util.MAX_LEN_ADDR) ||
-                (tx.pubKey.length() != Util.MAX_LEN_PUB_KEY * 2)
-                ){
-            return (false);
-        }
-
-        //test 2. verify if sender address is generated from public key used to sign tx
-        if (!tx.getSendAddress().equals(Util.getAddressFromPublicKey(Util.hexStringToByteArray(tx.pubKey)))) {
-            return (false);
-        }
-
-        //test 3. verify the signature
-        byte[] message = tx.getHashNoSig();
-        SchnorrSignature schnorr = new SchnorrSignature();
-        if ((tx.getSig1() != null) && (tx.getSig1().length > 0) &&
-                (tx.getSig2() != null) && (tx.getSig2().length > 0)) {
-            schnorr.setSignature(new BigInteger(tx.getSig1()), new BigInteger(tx.getSig2()));
-        }
-
-        PublicKey pbKey = new PublicKey();
-        try {
-            pbKey.setPublicKey(Util.hexStringToByteArray(tx.pubKey));
-        } catch(Exception ex) {
-            return (false);
-        }
-
-        if (!schnorr.verifySignature(message, pbKey))
-        {
-            return (false);
-        }
-
-        return (true);
-    }
-
-    /**
-     * Recreates a tx from JSON format string and checks the consistency
-     * @param strJSONData to be decoded
-     * @return the new tx or null if something went wrong in decoding/parsing/checking processes
-     */
-    public static Transaction createTransaction(String strJSONData) {
-        Transaction tx = new Transaction();
-        String result = tx.decodeJSON(strJSONData);
-
-        //consistency test
-        if (result != null) {
-            return (null);
-        }
-
-        if (!verifyTransaction(tx)) {
-            return(null);
-        }
-
-
-        //test if the sender address is derived from the public that signed the sig block
-
-
-
-        return (tx);
-    }
 }

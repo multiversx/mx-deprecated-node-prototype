@@ -2,6 +2,7 @@ package network.elrond.data;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import network.elrond.crypto.PublicKey;
 import org.bouncycastle.util.encoders.Base64;
@@ -23,8 +24,10 @@ public abstract class Block {
     protected byte[] hashNoSig;
     //complete tx hash
     protected byte[] hash;
-    //blob of data containing sig
-    protected byte[] sig;
+    //blob of data containing first part of sig
+    private byte[] sig1;
+    //blob of data containing second part of sig
+    private byte[] sig2;
     //list of public keys used in signing. First is the leader that proposed the block
     protected List<String> listPubKeys;
     //previus block hash
@@ -45,6 +48,8 @@ public abstract class Block {
         listTXHashes = new ArrayList<byte[]>();
         shard = 0;
         appStateHash = new byte[0];
+        sig1 = new byte[0];
+        sig2 = new byte[0];
     }
 
     /**
@@ -66,210 +71,90 @@ public abstract class Block {
     }
 
     /**
-     * Encodes in JSON format the block information using the data from all its fields
-     * This is usually used when broadcasting the complete blk to peers
-     *
-     * @return JSON format of the blk as String
+     * Gets the list of transaction hashes
+     * @return list of tx hashes
      */
-    public String encodeJSON() {
-        JSONObject jblk = new JSONObject();
-
-        JSONObject jobj = new JSONObject();
-        jobj.put("nonce", nonce.toString(10));
-
-        if (sig == null) {
-            jobj.put("sig", "");
-        } else {
-            jobj.put("sig", new String(Base64.encode(sig)));
-        }
-        //appends the public keys
-        for (int i = 0; i < listPubKeys.size(); i++) {
-            jobj.append("keys", listPubKeys.get(i));
-        }
-
-        //appends the tx hashes
-        for (int i = 0; i < listTXHashes.size(); i++) {
-            jobj.append("txs", new String(Base64.encode(listTXHashes.get(i))));
-        }
-
-        jobj.put("shard", shard);
-
-        //prev block hash
-        jobj.put("pbh", new String(Base64.encode(prevBlockHash)));
-
-        //app state hash
-        jobj.put("ash", new String(Base64.encode(appStateHash)));
-
-        jblk.put("BLK", jobj);
-
-        return (jblk.toString());
-    }
-
     public List<byte[]> getListTXHashes(){
         return(listTXHashes);
     }
 
     /**
-     * Encodes in JSON format the block information using sig field as empty string ""
-     * This is usually used to generate the hash without signature for signing/verifying the blk
-     *
-     * @return JSON format of the blk as String
+     * Gets te public keys used in signing process of the block
+     * @return the list of public keys
      */
-    public String encodeJSONnoSig() {
-        JSONObject jblk = new JSONObject();
-
-        JSONObject jobj = new JSONObject();
-        jobj.put("nonce", nonce.toString(10));
-        jobj.put("sig", "");
-
-        //appends the public keys
-        for (int i = 0; i < listPubKeys.size(); i++) {
-            jobj.append("keys", listPubKeys.get(i));
-        }
-
-        //appends the tx hashes
-        for (int i = 0; i < listTXHashes.size(); i++) {
-            jobj.append("txs", new String(Base64.encode(listTXHashes.get(i))));
-        }
-
-        jobj.put("shard", shard);
-
-        //prev block hash
-        jobj.put("pbh", new String(Base64.encode(prevBlockHash)));
-
-        //app state hash
-        jobj.put("ash", new String(Base64.encode(appStateHash)));
-
-        jblk.put("BLK", jobj);
-
-        return (jblk.toString());
-    }
+    public List<String> getListPublicKeys() { return(listPubKeys);}
 
     /**
-     * Computes the hash of the block with an empty sig field
-     * Used in signing/verifying process
-     *
-     * @return hash as byte array
+     * Gets the first part of signature of the tx
+     * @return sig as byte array
      */
-    public byte[] getHashNoSig() {
-        if (hashNoSig.length == 0) {
-            //compute hash
-            hashNoSig = Util.SHA3.digest(this.encodeJSONnoSig().getBytes());
-        }
-
-        return (hashNoSig);
-    }
+    public byte[] getSig1(){return(sig1);}
 
     /**
-     * Computes the hash of the complete tx info
-     * Used as a mean of blk identification
-     *
-     * @return hash as byte array
+     * Sets the first part of signature of the tx
+     * @param sig1 as byte array
      */
-    public byte[] getHash() {
-        if (hash.length == 0) {
-            //compute hash
-            hash = Util.SHA3.digest(this.encodeJSON().getBytes());
-        }
-
-        return (hash);
-    }
+    public void setSig1(byte[] sig1){this.sig1 = sig1;}
 
     /**
-     * Decodes the data from JSON format and overwrites current members data
-     * This is usually as the first step when retrieving a blk from a peer
-     *
-     * @param strJSONData data to be parsed
-     * @return Encountered error (for diagnostics) or null if parsing was completed without errors
+     * Gets the second part of signature of the tx
+     * @return sig as byte array
      */
-    public String decodeJSON(String strJSONData) {
-        JSONObject jblk = null;
+    public byte[] getSig2(){return(sig2);}
 
-        try {
-            jblk = new JSONObject(strJSONData);
-        } catch (Exception ex) {
-            return ("Error parsing JSON data! [" + ex.getMessage() + "]");
-        }
+    /**
+     * Sets the second part of signature of the tx
+     * @param sig2 as byte array
+     */
+    public void setSig2(byte[] sig2){this.sig2 = sig2;}
 
-        if (!jblk.has("BLK")) {
-            return ("Error fetching data from JSON! [BLK is missing]");
-        }
+    /**
+     * Gets the shard's number
+     * @return shard as int
+     */
+    public int getShard(){return (shard);}
 
-        JSONObject jobj = jblk.getJSONObject("BLK");
+    /**
+     * Sets the shard's number
+     * @param shard to be set
+     */
+    public void setShard(int shard) { this.shard = shard;}
 
-        if (!jobj.has("nonce")) {
-            return ("Error fetching data from JSON! [nonce is missing]");
-        }
-        if (!jobj.has("sig")) {
-            return ("Error fetching data from JSON! [sig is missing]");
-        }
-        if (!jobj.has("keys")) {
-            return ("Error fetching data from JSON! [keys is missing]");
-        }
-        if (!jobj.has("txs")) {
-            return ("Error fetching data from JSON! [txs is missing]");
-        }
-        if (!jobj.has("shard")) {
-            return ("Error fetching data from JSON! [shard is missing]");
-        }
-        if (!jobj.has("ash")) {
-            return ("Error fetching data from JSON! [ash is missing]");
-        }
-        if (!jobj.has("pbh")) {
-            return ("Error fetching data from JSON! [ash is missing]");
-        }
+    /**
+     * Gets the previous block hash
+     * @return the previous block hash as byte array
+     */
+    public byte[] getPrevBlockHash() { return prevBlockHash;}
 
-        try {
-            BigInteger tempNonce = new BigInteger(jobj.getString("nonce"));
-            String tempSig = jobj.getString("sig");
-            JSONArray jsonArr = jobj.getJSONArray("keys");
-            List<String> tempListPubKeys = new ArrayList<String>();
-            for (int i = 0; i < jsonArr.length(); i++) {
-                tempListPubKeys.add(jsonArr.getString(i));
-            }
+    /**
+     * Sets the previous block hash
+     * @param prevBlockHash to be set
+     */
+    public void setPrevBlockHash(byte[] prevBlockHash) {this.prevBlockHash = prevBlockHash;}
 
-            jsonArr = jobj.getJSONArray("txs");
-            List<byte[]> tempTxs = new ArrayList<byte[]>();
-            for (int i = 0; i < jsonArr.length(); i++) {
-                tempTxs.add(Base64.decode(jsonArr.getString(i)));
-            }
+    /**
+     * Gets the app state hash
+     * @return the app state hash as byte array
+     */
+    public byte[] getAppStateHash() { return appStateHash;}
 
-            int tempShard = jobj.getInt("shard");
-            byte[] tempAsh = Base64.decode(jobj.getString("ash"));
-
-            byte[] tempPbh = Base64.decode(jobj.getString("pbh"));
+    /**
+     * Sets the app state hash
+     * @param appStateHash to be set
+     */
+    public void setAppStateHash(byte[] appStateHash) {this.appStateHash = appStateHash;}
 
 
-            this.nonce = tempNonce;
-            if (tempSig.length() == 0) {
-                this.sig = null;
-            } else {
-                this.sig = Base64.decode(tempSig);
-            }
-
-            this.listPubKeys = tempListPubKeys;
-            this.listTXHashes = tempTxs;
-            this.shard = tempShard;
-            this.appStateHash = tempAsh;
-            this.prevBlockHash = tempPbh;
-
-        } catch (Exception ex) {
-            return ("Error fetching data from JSON! [something went horribly wrong converting data]");
-        }
-
-        return (null);
-    }
-
-    public static Block createInstance(String strDataJSON)
-    {
-        Block b = new DataBlock();
-        b.decodeJSON(strDataJSON);
-        if (b.prevBlockHash == ("GENESIS").getBytes()){
-            return (new GenesisBlock());
-        }
-
-        return (b);
-    }
+//    public static Block createInstance(String strDataJSON)
+//    {
+//        Block b = new DataBlock();
+//        b.decodeJSON(strDataJSON);
+//        if (Arrays.equals(b.prevBlockHash,("GENESIS").getBytes())){
+//            return (new GenesisBlock());
+//        }
+//
+//        return (b);
+//    }
 
 
 }
