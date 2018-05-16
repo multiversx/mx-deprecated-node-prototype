@@ -14,9 +14,9 @@ import java.math.BigInteger;
 /**
  * The TransactionServiceImpl class implements TransactionService and is used to maintain Transaction objects
  *
- * @author  Elrond Team - JLS
+ * @author Elrond Team - JLS
  * @version 1.0
- * @since   2018-05-16
+ * @since 2018-05-16
  */
 public class TransactionServiceImpl implements TransactionService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -24,7 +24,8 @@ public class TransactionServiceImpl implements TransactionService {
     /**
      * Encodes in JSON format the tx information using the data from all its fields
      * This is usually used when broadcasting the complete tx to peers
-     * @param tx transaction
+     *
+     * @param tx      transaction
      * @param withSig whether or not to include the signature parts in output String
      * @return JSON format of the tx as String
      */
@@ -43,14 +44,12 @@ public class TransactionServiceImpl implements TransactionService {
         } else {
             jobj.put("data", new String(Base64.encode(tx.getData())));
         }
-        if ((tx.getSig1() == null) || (!withSig))
-        {
+        if ((tx.getSig1() == null) || (!withSig)) {
             jobj.put("sig1", "");
         } else {
             jobj.put("sig1", new String(Base64.encode(tx.getSig1())));
         }
-        if ((tx.getSig2() == null) || (!withSig))
-        {
+        if ((tx.getSig2() == null) || (!withSig)) {
             jobj.put("sig2", "");
         } else {
             jobj.put("sig2", new String(Base64.encode(tx.getSig2())));
@@ -60,73 +59,74 @@ public class TransactionServiceImpl implements TransactionService {
 
         jtx.put("TX", jobj);
 
-        return(jtx.toString());
+        return (jtx.toString());
     }
 
     /**
      * Decodes the data from JSON format
      * This is usually as the first step when retrieving a tx from a peer
+     *
      * @param strJSONData data to be parsed
      * @return transaction from decoded JSON data, null if method encounters errors
      */
-    public Transaction decodeJSON(String strJSONData){
+    public Transaction decodeJSON(String strJSONData) {
         JSONObject jtx = null;
 
         Transaction tx = new Transaction();
 
-        try{
+        try {
             jtx = new JSONObject(strJSONData);
         } catch (Exception ex) {
             logger.error("Error parsing JSON data! [" + ex.getMessage() + "]");
-            return(null);
+            return (null);
         }
 
         if (!jtx.has("TX")) {
             logger.error("Error fetching data from JSON! [TX is missing]");
-            return(null);
+            return (null);
         }
 
         JSONObject jobj = jtx.getJSONObject("TX");
 
         if (!jobj.has("nonce")) {
             logger.error("Error fetching data from JSON! [nonce is missing]");
-            return(null);
+            return (null);
         }
         if (!jobj.has("value")) {
             logger.error("Error fetching data from JSON! [value is missing]");
-            return(null);
+            return (null);
         }
         if (!jobj.has("rcv")) {
             logger.error("Error fetching data from JSON! [rcv is missing]");
-            return(null);
+            return (null);
         }
         if (!jobj.has("snd")) {
             logger.error("Error fetching data from JSON! [snd is missing]");
-            return(null);
+            return (null);
         }
         if (!jobj.has("gprice")) {
             logger.error("Error fetching data from JSON! [gprice is missing]");
-            return(null);
+            return (null);
         }
         if (!jobj.has("glimit")) {
             logger.error("Error fetching data from JSON! [glimit is missing]");
-            return(null);
+            return (null);
         }
         if (!jobj.has("data")) {
             logger.error("Error fetching data from JSON! [data is missing]");
-            return(null);
+            return (null);
         }
         if (!jobj.has("sig1")) {
             logger.error("Error fetching data from JSON! [sig1 is missing]");
-            return(null);
+            return (null);
         }
         if (!jobj.has("sig2")) {
             logger.error("Error fetching data from JSON! [sig2 is missing]");
-            return(null);
+            return (null);
         }
         if (!jobj.has("key")) {
             logger.error("Error fetching data from JSON! [(public) key is missing]");
-            return(null);
+            return (null);
         }
 
         try {
@@ -141,7 +141,7 @@ public class TransactionServiceImpl implements TransactionService {
             String tempSig2 = jobj.getString("sig2");
             String tempKey = jobj.getString("key");
 
-            if (tempData.equals("")){
+            if (tempData.equals("")) {
                 tempData = null;
             }
 
@@ -162,27 +162,28 @@ public class TransactionServiceImpl implements TransactionService {
 
         } catch (Exception ex) {
             logger.error("Error fetching data from JSON! [something went horribly wrong converting data]");
-            return(null);
+            return (null);
         }
 
-        return(tx);
+        return (tx);
     }
 
     /**
      * Computes the hash of the complete tx info
      * Used as a mean of tx identification
-     * @param tx transaction
+     *
+     * @param tx      transaction
      * @param withSig whether or not to include the signature parts in hash
      * @return hash as byte array
      */
-    public byte[] getHash(Transaction tx, boolean withSig)
-    {
+    public byte[] getHash(Transaction tx, boolean withSig) {
         return (Util.SHA3.digest(encodeJSON(tx, withSig).getBytes()));
     }
 
     /**
      * Signs the transaction using private keys
-     * @param tx transaction
+     *
+     * @param tx               transaction
      * @param privateKeysBytes private key as byte array
      */
     public void signTransaction(Transaction tx, byte[] privateKeysBytes) {
@@ -193,12 +194,13 @@ public class TransactionServiceImpl implements TransactionService {
         SchnorrSignature schnorr = new SchnorrSignature();
         schnorr.signMessage(hashNoSigLocal, pvkey, pbkey);
 
-        tx.setSig1(schnorr.getSignatureValue().toByteArray());
-        tx.setSig2(schnorr.getChallenge().toByteArray());
+        tx.setSig1(schnorr.getSignatureValue());
+        tx.setSig2(schnorr.getChallenge());
     }
 
     /**
      * Verify the data stored in tx
+     *
      * @param tx to be verified
      * @return true if tx passes all consistency tests
      */
@@ -213,7 +215,7 @@ public class TransactionServiceImpl implements TransactionService {
                 (tx.getSendAddress().length() != Util.MAX_LEN_ADDR) ||
                 (tx.getRecvAddress().length() != Util.MAX_LEN_ADDR) ||
                 (tx.getPublicKey().length() != Util.MAX_LEN_PUB_KEY * 2)
-                ){
+                ) {
             return (false);
         }
 
@@ -227,18 +229,17 @@ public class TransactionServiceImpl implements TransactionService {
         SchnorrSignature schnorr = new SchnorrSignature();
         if ((tx.getSig1() != null) && (tx.getSig1().length > 0) &&
                 (tx.getSig2() != null) && (tx.getSig2().length > 0)) {
-            schnorr.setSignature(new BigInteger(tx.getSig1()), new BigInteger(tx.getSig2()));
+            schnorr.setSignature(tx.getSig1(), tx.getSig2());
         }
 
         PublicKey pbKey = new PublicKey();
         try {
             pbKey.setPublicKey(Util.hexStringToByteArray(tx.getPublicKey()));
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             return (false);
         }
 
-        if (!schnorr.verifySignature(message, pbKey))
-        {
+        if (!schnorr.verifySignature(message, pbKey)) {
             return (false);
         }
 
