@@ -41,6 +41,9 @@ public class Application implements Serializable {
 
         // Intercept P2P transactions
         AppProcessors.P2P_TRANSACTIONS_INTERCEPTOR.process(this);
+
+        // Intercept P2P blocks
+        AppProcessors.P2P_BLOCKS_INTERCEPTOR.process(this);
     }
 
     public void stop() {
