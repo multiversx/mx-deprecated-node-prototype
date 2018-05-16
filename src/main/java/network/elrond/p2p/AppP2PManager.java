@@ -1,16 +1,14 @@
-package network.elrond.application;
+package network.elrond.p2p;
 
 import network.elrond.Application;
-import network.elrond.p2p.P2PBroadcastChanel;
-import network.elrond.p2p.P2PChannelListener;
-import network.elrond.p2p.P2PConnection;
+import network.elrond.application.AppState;
 import network.elrond.service.AppServiceProvider;
 
-public class AppManager {
+public class AppP2PManager {
 
-    private static AppManager instance = new AppManager();
+    private static AppP2PManager instance = new AppP2PManager();
 
-    public static AppManager instance() {
+    public static AppP2PManager instance() {
         return instance;
     }
 

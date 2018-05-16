@@ -8,11 +8,13 @@ import network.elrond.p2p.P2PObjectServiceImpl;
 public class AppServiceProvider {
 
 
+
     private static P2PBroadcastService p2PBroadcastService = new P2PBroadcastServiceImpl();
 
     public static P2PBroadcastService getP2PBroadcastService() {
         return p2PBroadcastService;
     }
+
 
 
     private static P2PObjectService p2PObjectService = new P2PObjectServiceImpl();

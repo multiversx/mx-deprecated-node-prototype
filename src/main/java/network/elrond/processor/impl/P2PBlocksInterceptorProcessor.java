@@ -1,7 +1,7 @@
 package network.elrond.processor.impl;
 
 import network.elrond.Application;
-import network.elrond.application.AppManager;
+import network.elrond.p2p.AppP2PManager;
 import network.elrond.application.AppState;
 import network.elrond.data.Block;
 import network.elrond.data.SynchronizedPool;
@@ -60,7 +60,7 @@ public class P2PBlocksInterceptorProcessor implements AppProcessor {
         threadProcessBlockHashes.start();
 
 
-        AppManager.instance().subscribeToChannel(application, CHANNEL_NAME, (sender, request) -> {
+        AppP2PManager.instance().subscribeToChannel(application, CHANNEL_NAME, (sender, request) -> {
             if (request == null) {
                 return;
             }
