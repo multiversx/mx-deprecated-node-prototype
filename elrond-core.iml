@@ -15,6 +15,7 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.hamcrest:hamcrest-core:1.3" level="project" />
     <orderEntry type="library" name="Maven: org.bouncycastle:bcprov-jdk15on:1.59" level="project" />
     <orderEntry type="library" name="Maven: net.tomp2p:tomp2p-all:5.0-Beta8" level="project" />
+    <orderEntry type="library" name="Maven: net.tomp2p:tomp2p-nat:5.0-Beta8" level="project" />
     <orderEntry type="library" name="Maven: org.bitlet:weupnp:0.1.2" level="project" />
     <orderEntry type="library" name="Maven: com.ganyo:gcm-server:1.0.2" level="project" />
     <orderEntry type="library" name="Maven: com.googlecode.json-simple:json-simple:1.1" level="project" />
@@ -34,7 +35,8 @@
     <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.8.4" level="project" />
     <orderEntry type="library" name="Maven: org.json:json:20180130" level="project" />
     <orderEntry type="library" name="Maven: org.codehaus.janino:janino:2.5.16" level="project" />
+    <orderEntry type="library" name="Maven: org.iq80.leveldb:leveldb:0.10" level="project" />
+    <orderEntry type="library" name="Maven: org.iq80.leveldb:leveldb-api:0.10" level="project" />
+    <orderEntry type="library" name="Maven: com.google.guava:guava:21.0" level="project" />
   </component>
 </module>
-
-
