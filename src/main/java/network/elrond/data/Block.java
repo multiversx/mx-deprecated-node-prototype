@@ -18,7 +18,7 @@ import network.elrond.core.Util;
  */
 public abstract class Block {
     //block counter
-    protected  BigInteger nonce;
+    protected BigInteger nonce;
     //plain message hash
     protected byte[] hashNoSig;
     //complete tx hash
@@ -36,7 +36,7 @@ public abstract class Block {
     //app state hash
     protected byte[] appStateHash;
 
-    public Block(){
+    public Block() {
         nonce = BigInteger.ZERO;
         hashNoSig = new byte[0];
         hash = new byte[0];
@@ -49,21 +49,26 @@ public abstract class Block {
 
     /**
      * Gets the nonce
+     *
      * @return nonce as BigInteger
      */
-    public BigInteger getNonce() { return (nonce); }
+    public BigInteger getNonce() {
+        return (nonce);
+    }
 
     /**
      * Sets the nonce
+     *
      * @param nonce to be set
      */
-    public void setNonce(BigInteger nonce){
+    public void setNonce(BigInteger nonce) {
         this.nonce = nonce;
     }
 
     /**
      * Encodes in JSON format the block information using the data from all its fields
      * This is usually used when broadcasting the complete blk to peers
+     *
      * @return JSON format of the blk as String
      */
     public String encodeJSON() {
@@ -72,8 +77,7 @@ public abstract class Block {
         JSONObject jobj = new JSONObject();
         jobj.put("nonce", nonce.toString(10));
 
-        if (sig == null)
-        {
+        if (sig == null) {
             jobj.put("sig", "");
         } else {
             jobj.put("sig", new String(Base64.encode(sig)));
@@ -98,12 +102,17 @@ public abstract class Block {
 
         jblk.put("BLK", jobj);
 
-        return(jblk.toString());
+        return (jblk.toString());
+    }
+
+    public List<byte[]> getListTXHashes(){
+        return(listTXHashes);
     }
 
     /**
-     *  Encodes in JSON format the block information using sig field as empty string ""
-     *  This is usually used to generate the hash without signature for signing/verifying the blk
+     * Encodes in JSON format the block information using sig field as empty string ""
+     * This is usually used to generate the hash without signature for signing/verifying the blk
+     *
      * @return JSON format of the blk as String
      */
     public String encodeJSONnoSig() {
@@ -133,13 +142,13 @@ public abstract class Block {
 
         jblk.put("BLK", jobj);
 
-        return(jblk.toString());
+        return (jblk.toString());
     }
-
 
     /**
      * Computes the hash of the block with an empty sig field
      * Used in signing/verifying process
+     *
      * @return hash as byte array
      */
     public byte[] getHashNoSig() {
@@ -154,6 +163,7 @@ public abstract class Block {
     /**
      * Computes the hash of the complete tx info
      * Used as a mean of blk identification
+     *
      * @return hash as byte array
      */
     public byte[] getHash() {
@@ -168,13 +178,14 @@ public abstract class Block {
     /**
      * Decodes the data from JSON format and overwrites current members data
      * This is usually as the first step when retrieving a blk from a peer
+     *
      * @param strJSONData data to be parsed
      * @return Encountered error (for diagnostics) or null if parsing was completed without errors
      */
-    public String decodeJSON(String strJSONData){
+    public String decodeJSON(String strJSONData) {
         JSONObject jblk = null;
 
-        try{
+        try {
             jblk = new JSONObject(strJSONData);
         } catch (Exception ex) {
             return ("Error parsing JSON data! [" + ex.getMessage() + "]");
@@ -213,15 +224,13 @@ public abstract class Block {
             String tempSig = jobj.getString("sig");
             JSONArray jsonArr = jobj.getJSONArray("keys");
             List<String> tempListPubKeys = new ArrayList<String>();
-            for (int i = 0; i < jsonArr.length(); i++)
-            {
+            for (int i = 0; i < jsonArr.length(); i++) {
                 tempListPubKeys.add(jsonArr.getString(i));
             }
 
             jsonArr = jobj.getJSONArray("txs");
             List<byte[]> tempTxs = new ArrayList<byte[]>();
-            for (int i = 0; i < jsonArr.length(); i++)
-            {
+            for (int i = 0; i < jsonArr.length(); i++) {
                 tempTxs.add(Base64.decode(jsonArr.getString(i)));
             }
 
@@ -231,12 +240,11 @@ public abstract class Block {
             byte[] tempPbh = Base64.decode(jobj.getString("pbh"));
 
 
-
             this.nonce = tempNonce;
             if (tempSig.length() == 0) {
                 this.sig = null;
             } else {
-              this.sig = Base64.decode(tempSig);
+                this.sig = Base64.decode(tempSig);
             }
 
             this.listPubKeys = tempListPubKeys;
@@ -249,7 +257,19 @@ public abstract class Block {
             return ("Error fetching data from JSON! [something went horribly wrong converting data]");
         }
 
-        return(null);
+        return (null);
     }
+
+    public static Block createInstance(String strDataJSON)
+    {
+        Block b = new DataBlock();
+        b.decodeJSON(strDataJSON);
+        if (b.prevBlockHash == ("GENESIS").getBytes()){
+            return (new GenesisBlock());
+        }
+
+        return (b);
+    }
+
 
 }
