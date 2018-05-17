@@ -1,6 +1,7 @@
 package network.elrond.consensus;
 
 import network.elrond.core.Util;
+import network.elrond.service.AppServiceProvider;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import java.util.List;
  * @version 1.0
  * @since   2018-05-14
  */
-public class SPoS {
+public class SPoSServiceImpl implements SPoSService {
     /**
      * The method creates a node result of type EligibleListValidators that contains a clean-up version of the
      * whole eligible list validators (no negative ratings, stake equal or higher of minim stake, etc) and
@@ -22,7 +23,7 @@ public class SPoS {
      * @param eligibleList that contain validators to be included in cleaned up list
      * @return the node that holds the data
      */
-    public static EligibleListValidators generateCleanupList(List<Validator> eligibleList) {
+    public EligibleListValidators generateCleanupList(List<Validator> eligibleList) {
         //fetching parameters from validators (ie. min/max stake, min/max reputation, etc)
 
         EligibleListValidators result = new EligibleListValidators();
@@ -75,11 +76,13 @@ public class SPoS {
      *                            (call method generateCleanupList first)
      * @return the weighted validators list
      */
-    public static List<Validator> generateWeightedEligibleList(EligibleListValidators cleanedUpListObject) {
+    public List<Validator> generateWeightedEligibleList(EligibleListValidators cleanedUpListObject) {
 
         if (cleanedUpListObject == null) {
             return (new ArrayList<Validator>());
         }
+
+        ValidatorService vs = AppServiceProvider.getValidatorService();
 
         List<Validator> tempList = copyList(cleanedUpListObject.list);
 
@@ -107,7 +110,7 @@ public class SPoS {
                 v.setScoreRating(sRating);
             }
 
-            int score = v.getScore();
+            int score = vs.computeValidatorScore(v);
             for (int j = 0; j < score; j++) {
                 tempList.add(new Validator(v));
             }
@@ -124,7 +127,7 @@ public class SPoS {
      * @param roundHeight the round height (ID)
      * @return the list of selected validator, first item being the leader
      */
-    public static List<Validator> generateValidatorsList(String strRandomSource, List<Validator> eligibleList, BigInteger roundHeight) {
+    public List<Validator> generateValidatorsList(String strRandomSource, List<Validator> eligibleList, BigInteger roundHeight) {
         //pick max Util.VERIFIER_GROUP_SIZE from eligible list
         //based on their stake, rating. Round r will rotate the lead
 
@@ -195,7 +198,7 @@ public class SPoS {
      * @param src list to be copied
      * @return new list of Validators
      */
-    public static List<Validator> copyList(List<Validator> src) {
+    public List<Validator> copyList(List<Validator> src) {
         List<Validator> tempList = new ArrayList<Validator>();
 
         for (int i = 0; i < src.size(); i++) {

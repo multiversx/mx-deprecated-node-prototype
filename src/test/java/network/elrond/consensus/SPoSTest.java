@@ -3,6 +3,7 @@ package network.elrond.consensus;
 import junit.framework.TestCase;
 import network.elrond.UtilTest;
 import network.elrond.core.Util;
+import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -11,6 +12,8 @@ import java.util.List;
 import java.util.Date;
 
 public class SPoSTest {
+    SPoSService sss = AppServiceProvider.getSPoSService();
+
     @Test
     public void testSPoSCleanedUpList() {
         List<Validator> vList = new ArrayList<Validator>();
@@ -29,7 +32,7 @@ public class SPoSTest {
         vList.add(new Validator("0xA11", "", ConsensusAnswerType.NOT_ANSWERED, Util.MIN_STAKE.multiply(BigInteger.valueOf(10)), -1));
         vList.add(new Validator("0xA12", "", ConsensusAnswerType.NOT_ANSWERED, Util.MIN_STAKE.subtract(BigInteger.valueOf(1)), 0));
 
-        EligibleListValidators cleanedUpList = SPoS.generateCleanupList(vList);
+        EligibleListValidators cleanedUpList = sss.generateCleanupList(vList);
 
         System.out.printf("Original list [%d]:",vList.size());
         System.out.println();
@@ -67,8 +70,8 @@ public class SPoSTest {
         vList.add(new Validator("0xA11", "", ConsensusAnswerType.NOT_ANSWERED, Util.MIN_STAKE.multiply(BigInteger.valueOf(10)), -1));
         vList.add(new Validator("0xA12", "", ConsensusAnswerType.NOT_ANSWERED, Util.MIN_STAKE.subtract(BigInteger.valueOf(1)), 0));
 
-        EligibleListValidators cleanedUpList = SPoS.generateCleanupList(vList);
-        List<Validator> lResult = SPoS.generateWeightedEligibleList(cleanedUpList);
+        EligibleListValidators cleanedUpList = sss.generateCleanupList(vList);
+        List<Validator> lResult = sss.generateWeightedEligibleList(cleanedUpList);
 
         System.out.printf("[small] Original list [%d]:", vList.size());
         System.out.println();
@@ -109,8 +112,8 @@ public class SPoSTest {
             vList.add(new Validator("0xA" + Integer.toString(i), "", ConsensusAnswerType.NOT_ANSWERED, Util.MIN_STAKE, 0));
         }
 
-        EligibleListValidators cleanedUpList = SPoS.generateCleanupList(vList);
-        List<Validator> lResult = SPoS.generateWeightedEligibleList(cleanedUpList);
+        EligibleListValidators cleanedUpList = sss.generateCleanupList(vList);
+        List<Validator> lResult = sss.generateWeightedEligibleList(cleanedUpList);
 
         System.out.printf("[small] Original list [%d]:", vList.size());
         System.out.println();
@@ -156,7 +159,7 @@ public class SPoSTest {
         dInterim = new Date();
 
         //CalcEligibleListValidators cleanedUpList = SPoS.generateCleanupList(vList);
-        List<Validator> lResult = SPoS.generateValidatorsList("TEST", vList, BigInteger.ONE);
+        List<Validator> lResult = sss.generateValidatorsList("TEST", vList, BigInteger.ONE);
 
         Date dEnd = new Date();
 
