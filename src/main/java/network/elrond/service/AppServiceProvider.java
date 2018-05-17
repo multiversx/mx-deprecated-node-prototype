@@ -1,5 +1,9 @@
 package network.elrond.service;
 
+import network.elrond.consensus.SPoSService;
+import network.elrond.consensus.SPoSServiceImpl;
+import network.elrond.consensus.ValidatorService;
+import network.elrond.consensus.ValidatorServiceImpl;
 import network.elrond.data.BlockService;
 import network.elrond.data.BlockServiceImpl;
 import network.elrond.data.TransactionService;
@@ -28,4 +32,10 @@ public class AppServiceProvider {
 
     private static BlockService blockService = new BlockServiceImpl();
     public static BlockService getBlockService() {return (blockService);}
+
+    private static ValidatorService validatorService = new ValidatorServiceImpl();
+    public static ValidatorService getValidatorService() {return validatorService;}
+
+    private static SPoSService sPoSService = new SPoSServiceImpl();
+    public static SPoSService getSPoSService() {return sPoSService;}
 }

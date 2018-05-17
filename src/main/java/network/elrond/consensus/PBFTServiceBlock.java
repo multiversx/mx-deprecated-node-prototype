@@ -11,14 +11,14 @@ import network.elrond.core.Util;
  * @version 1.0
  * @since   2018-05-14
  */
-public class PBFTBlock implements PBFT {
+public class PBFTServiceBlock implements PBFTService {
     //list of validators used in the consensus
     private List<Validator> listValidators;
 
     /**
      * Implicit constructor
      */
-    public PBFTBlock() {
+    public PBFTServiceBlock() {
         listValidators = new ArrayList<Validator>();
     }
 
