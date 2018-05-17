@@ -1,6 +1,7 @@
 package network.elrond.data;
 
 import java.util.ArrayDeque;
+import java.util.Collection;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -46,6 +47,33 @@ public class SynchronizedPool<K, T> {
      */
     public void addObjectInPool(K key, T obj) {
         objectPool.put(key, obj);
+    }
+
+    /**
+     * Gets the object from its hash
+     * @param key to search and retrieve the object
+     * @return the object
+     */
+    public T getObjectFromPool(K key){return(objectPool.get(key));}
+
+    public T removeObjectFromPool(K key){
+        if (!objectPool.contains(key)){
+            return (null);
+        }
+
+        T obj = getObjectFromPool(key);
+
+        objectPool.remove(key);
+
+        return (obj);
+    }
+
+    /**
+     * Get all values from object pool (snapshot)
+     * @return the values as a Collection
+     */
+    public Collection<T> getValues(){
+        return objectPool.values();
     }
 
     /**

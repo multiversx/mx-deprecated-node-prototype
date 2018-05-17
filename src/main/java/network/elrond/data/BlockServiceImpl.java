@@ -1,6 +1,8 @@
 package network.elrond.data;
 
+import network.elrond.application.AppState;
 import network.elrond.core.Util;
+import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -11,6 +13,7 @@ import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -74,11 +77,23 @@ public class BlockServiceImpl implements BlockService {
      /**
      * Computes the hash of the block with an empty sig field
      * Used in signing/verifying process
-     *
+     * @param blk block to be computed
+     * @param withHash true, to include in hash the sig block (complete tx hash)
      * @return hash as byte array
      */
     public byte[] getHash(Block blk, boolean withHash) {
         return (Util.SHA3.digest(encodeJSON(blk, withHash).getBytes()));
+    }
+
+    /**
+     * Computes the hash of the block with an empty sig field
+     * Used in signing/verifying process
+     * @param blk block to be computed
+     * @param withHash true, to include in hash the sig block (complete tx hash)
+     * @return hash as String
+     */
+    public String getHashAsString(Block blk, boolean withHash) {
+        return (new String(Base64.encode(getHash(blk, true))));
     }
 
     /**
@@ -183,4 +198,33 @@ public class BlockServiceImpl implements BlockService {
         return (blk);
     }
 
+    /**
+     * Fetch transaction from memory pool (if they exists, otherwise get them from dht)
+     * @param
+     */
+    public void solveBlocks(AppState appState) {
+        Block[] blocksToBeChecked = (Block[])appState.syncDataBlk.getValues().toArray();
+
+        Block blk;
+
+        for (int i = 0; i < blocksToBeChecked.length; i++) {
+            blk = blocksToBeChecked[i];
+
+            if (blk.getIsSolved()) {
+                continue;
+            }
+
+            //solving
+            for (int j = 0; j < blk.getListTXHashes().size(); j++){
+                //if tx has been solved, skip it
+                if (blk.getListTransactions().get(j) != null){
+                    continue;
+                }
+
+                byte[] hash = blk.getListTXHashes().get(j);
+
+                blk.setTransaction(AppServiceProvider.getTransactionService().fetchTransaction(new String(Base64.encode(hash)), appState.syncDataTx), j);
+            }
+        }
+    }
 }

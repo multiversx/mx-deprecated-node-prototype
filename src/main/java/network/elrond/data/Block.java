@@ -34,10 +34,14 @@ public abstract class Block {
     protected byte[] prevBlockHash;
     //list of transaction hashes included in block
     protected List<byte[]> listTXHashes;
+    //list of transactions included in block
+    protected List<Transaction> listTransactions;
     //int shard ID
     protected int shard;
     //app state hash
     protected byte[] appStateHash;
+    //true if the block is correctly signed
+    boolean isChecked;
 
     public Block() {
         nonce = BigInteger.ZERO;
@@ -46,10 +50,12 @@ public abstract class Block {
         listPubKeys = new ArrayList<String>();
         prevBlockHash = new byte[0];
         listTXHashes = new ArrayList<byte[]>();
+        listTransactions = new ArrayList<>();
         shard = 0;
         appStateHash = new byte[0];
         sig1 = new byte[0];
         sig2 = new byte[0];
+        isChecked = false;
     }
 
     /**
@@ -76,6 +82,26 @@ public abstract class Block {
      */
     public List<byte[]> getListTXHashes(){
         return(listTXHashes);
+    }
+
+    public void addTXHash(byte[] hash){
+        listTXHashes.add(hash);
+        listTransactions.add(null);
+    }
+
+    /**
+     * Gets the list of transactions
+     * @return list of txs
+     */
+    public List<Transaction> getListTransactions() {return listTransactions;}
+
+    /**
+     * Set transaction at index
+     * @param tx to be written
+     * @param idx, position
+     */
+    public void setTransaction(Transaction tx, int idx){
+        listTransactions.set(idx, tx);
     }
 
     /**
@@ -144,6 +170,17 @@ public abstract class Block {
      */
     public void setAppStateHash(byte[] appStateHash) {this.appStateHash = appStateHash;}
 
+    /**
+     * Gets the flag if all transactions have been fetched
+     * @return true, if all tx hashes have been resolved in transaction list
+     */
+    public boolean getIsSolved() {
+
+        return ((listTransactions.size() == getListTXHashes().size()) &&
+                (listTransactions.size() > 0) &&
+                (!listTransactions.contains(null)));
+
+    }
 
 //    public static Block createInstance(String strDataJSON)
 //    {

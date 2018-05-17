@@ -1,5 +1,7 @@
 package network.elrond.data;
 
+import network.elrond.Application;
+import network.elrond.application.AppState;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
@@ -20,6 +22,8 @@ import java.math.BigInteger;
  */
 public class TransactionServiceImpl implements TransactionService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    //private AppState appState =
 
     /**
      * Encodes in JSON format the tx information using the data from all its fields
@@ -244,5 +248,21 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         return (true);
+    }
+
+    public Transaction fetchTransaction(String strHash, SynchronizedPool<String, Transaction> syncDataTx){
+        //search in tx pool
+        if (syncDataTx.isObjectInPool(strHash))
+        {
+            return (syncDataTx.getObjectFromPool(strHash));
+        }
+
+        //TO DO
+        //search elsewhere
+
+        //Not found, put the hash in tx pool so it will be fetched by tx interceptor thread
+        syncDataTx.pushKey(strHash);
+
+        return(null);
     }
 }
