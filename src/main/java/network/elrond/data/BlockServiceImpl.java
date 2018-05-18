@@ -54,11 +54,17 @@ public class BlockServiceImpl implements BlockService {
         for (int i = 0; i < listPubKeys.size(); i++) {
             jobj.append("keys", listPubKeys.get(i));
         }
+        if (listPubKeys.size() == 0){
+            jobj.put("keys", (Collection)null);
+        }
 
         //appends the tx hashes
         List<byte[]> txHashes = blk.getListTXHashes();
         for (int i = 0; i < txHashes.size(); i++) {
             jobj.append("txs", new String(Base64.encode(txHashes.get(i))));
+        }
+        if (txHashes.size() == 0){
+            jobj.put("txs", (Collection)null);
         }
 
         jobj.put("shard", blk.getShard());
@@ -78,21 +84,21 @@ public class BlockServiceImpl implements BlockService {
      * Computes the hash of the block with an empty sig field
      * Used in signing/verifying process
      * @param blk block to be computed
-     * @param withHash true, to include in hash the sig block (complete tx hash)
+     * @param withSig true, to include in hash the sig block (complete tx hash)
      * @return hash as byte array
      */
-    public byte[] getHash(Block blk, boolean withHash) {
-        return (Util.SHA3.digest(encodeJSON(blk, withHash).getBytes()));
+    public byte[] getHash(Block blk, boolean withSig) {
+        return (Util.SHA3.digest(encodeJSON(blk, withSig).getBytes()));
     }
 
     /**
      * Computes the hash of the block with an empty sig field
      * Used in signing/verifying process
      * @param blk block to be computed
-     * @param withHash true, to include in hash the sig block (complete tx hash)
+     * @param withSig true, to include in hash the sig block (complete tx hash)
      * @return hash as String
      */
-    public String getHashAsString(Block blk, boolean withHash) {
+    public String getHashAsString(Block blk, boolean withSig) {
         return (new String(Base64.encode(getHash(blk, true))));
     }
 
@@ -151,7 +157,7 @@ public class BlockServiceImpl implements BlockService {
             return(null);
         }
         if (!jobj.has("pbh")) {
-            logger.error("Error fetching data from JSON! [ash is missing]");
+            logger.error("Error fetching data from JSON! [pbh is missing]");
             return(null);
         }
 
@@ -160,6 +166,9 @@ public class BlockServiceImpl implements BlockService {
             String tempSig1 = jobj.getString("sig1");
             String tempSig2 = jobj.getString("sig2");
             JSONArray jsonArr = jobj.getJSONArray("keys");
+            String strAsh = jobj.getString("ash");
+            String strPbh = jobj.getString("pbh");
+
 
             for (int i = 0; i < jsonArr.length(); i++) {
                 blk.getListPublicKeys().add(jsonArr.getString(i));
@@ -167,13 +176,20 @@ public class BlockServiceImpl implements BlockService {
 
             jsonArr = jobj.getJSONArray("txs");
             for (int i = 0; i < jsonArr.length(); i++) {
-                blk.getListTXHashes().add(Base64.decode(jsonArr.getString(i)));
+                blk.addTXHash(Base64.decode(jsonArr.getString(i)));
             }
 
             int tempShard = jobj.getInt("shard");
-            byte[] tempAsh = Base64.decode(jobj.getString("ash"));
 
-            byte[] tempPbh = Base64.decode(jobj.getString("pbh"));
+            byte[] tempAsh = new byte[0];
+            if (strAsh.length() > 0){
+                tempAsh = Base64.decode(strAsh);
+            }
+
+            byte[] tempPbh = new byte[0];
+            if (strPbh.length() > 0) {
+                tempPbh = Base64.decode(strPbh);
+            }
 
             if (Arrays.equals(tempPbh, GenesisBlock.STR_GENESIS_BLOCK.getBytes())){
                 return(new GenesisBlock());
@@ -203,19 +219,31 @@ public class BlockServiceImpl implements BlockService {
      * @param
      */
     public void solveBlocks(AppState appState) {
-        Block[] blocksToBeChecked = (Block[])appState.syncDataBlk.getValues().toArray();
+        Object[] blocksToBeChecked = appState.syncDataBlk.getValues().toArray();
 
         Block blk;
 
         for (int i = 0; i < blocksToBeChecked.length; i++) {
-            blk = blocksToBeChecked[i];
+            blk = (Block) blocksToBeChecked[i];
+
+            if (!appState.isStillRunning()){
+                return;
+            }
 
             if (blk.getIsSolved()) {
                 continue;
             }
 
+            if (blk.getListTransactions().size() != blk.getListTXHashes().size()){
+                int l = 0;
+            }
+
             //solving
             for (int j = 0; j < blk.getListTXHashes().size(); j++){
+                if (!appState.isStillRunning()){
+                    return;
+                }
+
                 //if tx has been solved, skip it
                 if (blk.getListTransactions().get(j) != null){
                     continue;
@@ -223,7 +251,7 @@ public class BlockServiceImpl implements BlockService {
 
                 byte[] hash = blk.getListTXHashes().get(j);
 
-                blk.setTransaction(AppServiceProvider.getTransactionService().fetchTransaction(new String(Base64.encode(hash)), appState.syncDataTx), j);
+                blk.setTransaction(AppServiceProvider.getTransactionService().fetchTransaction(new String(Base64.encode(hash)), appState), j);
             }
         }
     }

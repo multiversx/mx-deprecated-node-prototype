@@ -6,6 +6,7 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.crypto.SchnorrSignature;
+import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -145,8 +146,8 @@ public class TransactionServiceImpl implements TransactionService {
             String tempSig2 = jobj.getString("sig2");
             String tempKey = jobj.getString("key");
 
-            if (tempData.equals("")) {
-                tempData = null;
+            if (!tempData.equals("")) {
+                tx.setData(Base64.decode(tempData.getBytes()));
             }
 
             tx.setNonce(tempNonce);
@@ -155,7 +156,7 @@ public class TransactionServiceImpl implements TransactionService {
             tx.setSendAddress(tempSend);
             tx.setGasLimit(tempGLimit);
             tx.setGasPrice(tempGPrice);
-            tx.setData(Base64.decode(tempData.getBytes()));
+
             if ((tempSig1 != null) && (tempSig1.length() > 0)) {
                 tx.setSig1(Base64.decode(tempSig1.getBytes()));
             }
@@ -182,6 +183,17 @@ public class TransactionServiceImpl implements TransactionService {
      */
     public byte[] getHash(Transaction tx, boolean withSig) {
         return (Util.SHA3.digest(encodeJSON(tx, withSig).getBytes()));
+    }
+
+    /**
+     * Computes the hash of the block with an empty sig field
+     * Used in signing/verifying process
+     * @param tx transaction to be computed
+     * @param withSig true, to include in hash the sig block (complete tx hash)
+     * @return hash as String
+     */
+    public String getHashAsString(Transaction tx, boolean withSig) {
+        return (new String(Base64.encode(getHash(tx, withSig))));
     }
 
     /**
@@ -250,18 +262,32 @@ public class TransactionServiceImpl implements TransactionService {
         return (true);
     }
 
-    public Transaction fetchTransaction(String strHash, SynchronizedPool<String, Transaction> syncDataTx){
+    public Transaction fetchTransaction(String strHash, AppState appState){
         //search in tx pool
-        if (syncDataTx.isObjectInPool(strHash))
+        if (appState.syncDataTx.isObjectInPool(strHash))
         {
-            return (syncDataTx.getObjectFromPool(strHash));
+            return (appState.syncDataTx.getObjectFromPool(strHash));
         }
 
         //TO DO
         //search elsewhere
 
-        //Not found, put the hash in tx pool so it will be fetched by tx interceptor thread
-        syncDataTx.pushKey(strHash);
+        //Not found, get from DHT
+        try {
+
+            Object objData = AppServiceProvider.getP2PObjectService().get(appState.getConnection(), strHash);
+            if (objData != null) {
+                Transaction tx = decodeJSON(objData.toString());
+                if (tx != null) {
+                    appState.syncDataTx.addObjectInPool(strHash, tx);
+                    logger.info("Got tx hash: " + strHash);
+                    return (tx);
+                }
+            }
+        }
+        catch (Exception ex){
+            System.out.println(ex.getStackTrace());
+        }
 
         return(null);
     }

@@ -19,7 +19,7 @@ public class P2PTransactionsInterceptorProcessor implements AppProcessor {
 
     private Logger logger = LoggerFactory.getLogger(AppProcessors.class);
     private static final String CHANNEL_NAME = "TRANSACTIONS";
-    TransactionService ts = AppServiceProvider.getTransactionService();
+    TransactionService txServ = AppServiceProvider.getTransactionService();
 
     @Override
     public void process(Application application) throws IOException {
@@ -46,8 +46,11 @@ public class P2PTransactionsInterceptorProcessor implements AppProcessor {
 
                     Object objData = AppServiceProvider.getP2PObjectService().get(connection, strHash);
                     if (objData != null) {
-                        pool.addObjectInPool(strHash, ts.decodeJSON(objData.toString()));
-                        logger.info("Got tx hash: " + strHash);
+                        Transaction tx = txServ.decodeJSON(objData.toString());
+                        if (tx != null) {
+                            pool.addObjectInPool(strHash, tx);
+                            logger.info("Got tx hash: " + strHash);
+                        }
                     }
 
                     logger.info("Tx pool size: " + pool.size());

@@ -32,22 +32,22 @@ public class DataBlockTest {
         System.out.println(blks.encodeJSON(db2, true));
 
         TestCase.assertEquals(blks.encodeJSON(db, true), blks.encodeJSON(db2, true));
+    }
 
+    @Test
+    public void testBlock2() {
+        DataBlock db = new DataBlock();
+        db.nonce = BigInteger.ONE;
+        db.shard = 0;
+        db.appStateHash = new byte[]{0, 45, 22, -10, 23, -123};
 
+        db.prevBlockHash = new byte[]{-128, -127, -126, -125, -124};
 
+        System.out.println(blks.encodeJSON(db, true));
 
-//        Block b1 = new Block("Hello world from Elrond", "0");
-////
-////        String data = b1.getData();
-////        TestCase.assertEquals("Hello world from Elrond", b1.getData());
-////
-////        String hash = b1.getHash();
-////        TestCase.assertEquals("?", b1.getHash());
+        Block db2 = blks.decodeJSON(blks.encodeJSON(db, true));
+        System.out.println(blks.encodeJSON(db2, true));
 
-
-
-
-
-
+        TestCase.assertEquals(blks.encodeJSON(db, true), blks.encodeJSON(db2, true));
     }
 }

@@ -114,7 +114,7 @@ public class NodeRunnerInjector {
             byte[] buff = new byte[32];
             rdm.nextBytes(buff);
 
-            b.getListTXHashes().add(buff);
+            b.addTXHash(buff);
         }
 
         String strHash = new String(Base64.encode(blks.getHash(b, true)));

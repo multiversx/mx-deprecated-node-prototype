@@ -1,5 +1,6 @@
 package network.elrond.processor;
 
+import network.elrond.processor.impl.BlocksProcessor;
 import network.elrond.processor.impl.P2PBlocksInterceptorProcessor;
 import network.elrond.processor.impl.P2PConnectionStarterProcessor;
 import network.elrond.processor.impl.P2PTransactionsInterceptorProcessor;
@@ -30,6 +31,10 @@ public class AppProcessors {
 
         new P2PBlocksInterceptorProcessor().process(application);
 
+    };
+
+    public static  AppProcessor BLOCKS_PROCESSOR = (application) -> {
+        new BlocksProcessor().process(application);
     };
 
 

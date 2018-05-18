@@ -47,8 +47,12 @@ public class P2PBlocksInterceptorProcessor implements AppProcessor {
 
 
                     if (objData != null) {
-                        pool.addObjectInPool(strHash, blks.decodeJSON(objData.toString()));
-                        logger.info("Got blk hash: " + strHash);
+                        Block blk = blks.decodeJSON(objData.toString());
+
+                        if (blk != null) {
+                            pool.addObjectInPool(strHash, blk);
+                            logger.info("Got blk hash: " + strHash);
+                        }
                     }
 
                     logger.info("Blk pool size: " + pool.size());

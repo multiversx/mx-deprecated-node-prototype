@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import network.elrond.crypto.PublicKey;
+import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -102,6 +103,15 @@ public abstract class Block {
      */
     public void setTransaction(Transaction tx, int idx){
         listTransactions.set(idx, tx);
+    }
+
+    /**
+     * Add transaction (tx + hash)
+     * @param tx the Transaction to be added
+     */
+    public void addTransaction(Transaction tx){
+        listTransactions.add(tx);
+        listTXHashes.add(AppServiceProvider.getTransactionService().getHash(tx, true));
     }
 
     /**
