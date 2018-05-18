@@ -4,10 +4,7 @@ import network.elrond.consensus.SPoSService;
 import network.elrond.consensus.SPoSServiceImpl;
 import network.elrond.consensus.ValidatorService;
 import network.elrond.consensus.ValidatorServiceImpl;
-import network.elrond.data.BlockService;
-import network.elrond.data.BlockServiceImpl;
-import network.elrond.data.TransactionService;
-import network.elrond.data.TransactionServiceImpl;
+import network.elrond.data.*;
 import network.elrond.p2p.P2PBroadcastService;
 import network.elrond.p2p.P2PBroadcastServiceImpl;
 import network.elrond.p2p.P2PObjectService;
@@ -38,4 +35,7 @@ public class AppServiceProvider {
 
     private static SPoSService sPoSService = new SPoSServiceImpl();
     public static SPoSService getSPoSService() {return sPoSService;}
+
+    private static AccountStateService accountStateService = new AccountStateServiceImpl();
+    public static AccountStateService getAccountStateService() {return accountStateService;}
 }
