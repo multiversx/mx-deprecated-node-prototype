@@ -8,9 +8,13 @@ import static network.elrond.core.CompactEncoder.unpackToNibbles;
 import static org.bouncycastle.util.Arrays.concatenate;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import network.elrond.crypto.HashUtil;
+import network.elrond.db.ByteArrayWrapper;
 import network.elrond.core.ByteUtil;
 import network.elrond.core.Value;
 import org.iq80.leveldb.DB;
@@ -39,12 +43,20 @@ public class TrieImpl implements Trie {
         this.prevRoot = root;
     }
 
+    public TrieIterator getIterator() {
+        return new TrieIterator(this);
+    }
+
     public void setCache(Cache cache) {
         this.cache = cache;
     }
 
     public Cache getCache() {
         return this.cache;
+    }
+
+    public Object getPrevRoot() {
+        return prevRoot;
     }
 
     public Object getRoot() {
@@ -357,6 +369,15 @@ public class TrieImpl implements Trie {
         return itemList;
     }
 
+    // Simple compare function which compares two tries based on their stateRoot
+    @Override
+    public boolean equals(Object trie) {
+        if (this == trie) return true;
+        if (trie instanceof Trie)
+            return Arrays.equals(this.getRootHash(), ((Trie) trie).getRootHash());
+        return false;
+    }
+
     @Override
     public void sync() {
         this.cache.commit();
@@ -367,6 +388,16 @@ public class TrieImpl implements Trie {
     public void undo() {
         this.cache.undo();
         this.root = this.prevRoot;
+    }
+
+    // Returns a copy of this trie
+    public TrieImpl copy() {
+        TrieImpl trie = new TrieImpl(this.cache.getDb(), this.root);
+        for (ByteArrayWrapper key : this.cache.getNodes().keySet()) {
+            Node node = this.cache.getNodes().get(key);
+            trie.cache.getNodes().put(key, node.copy());
+        }
+        return trie;
     }
 
     /********************************
@@ -380,6 +411,42 @@ public class TrieImpl implements Trie {
             slice[i] = "";
         }
         return slice;
+    }
+
+    /**
+     * Insert/delete operations on a Trie structure
+     * leaves the old nodes in cache, this method scans the
+     * cache and removes them. The method is not thread
+     * safe, the tree should not be modified during the
+     * cleaning process.
+     */
+    public void cleanCache() {
+
+        CollectFullSetOfNodes collectAction = new CollectFullSetOfNodes();
+        long startTime = System.currentTimeMillis();
+
+        this.scanTree(this.getRootHash(), collectAction);
+
+        Set<byte[]> hashSet = collectAction.getCollectedHashes();
+        Map<ByteArrayWrapper, Node> nodes =  this.getCache().getNodes();
+        Set<ByteArrayWrapper> toRemoveSet = new HashSet<>();
+
+        for (ByteArrayWrapper key : nodes.keySet()) {
+            if (!hashSet.contains(key.getData())) {
+                toRemoveSet.add(key);
+            }
+        }
+
+        for (ByteArrayWrapper key : toRemoveSet) {
+
+            this.getCache().delete(key.getData());
+
+            if (logger.isTraceEnabled())
+                logger.trace("Garbage collected node: [{}]",
+                        Hex.toHexString(key.getData()));
+        }
+        logger.info("Garbage collected node list, size: [{}]", toRemoveSet.size());
+        logger.info("Garbage collection time: [{}ms]", System.currentTimeMillis() - startTime);
     }
 
     private void scanTree(byte[] hash, ScanAction scanAction) {
