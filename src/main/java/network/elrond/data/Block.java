@@ -2,13 +2,7 @@ package network.elrond.data;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import network.elrond.crypto.PublicKey;
-import org.bouncycastle.util.encoders.Base64;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import network.elrond.core.Util;
 
 /**
  * The Block abstract class implements a block of data that contains hashes of transaction

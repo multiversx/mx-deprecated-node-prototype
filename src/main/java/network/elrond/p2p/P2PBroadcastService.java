@@ -10,6 +10,14 @@ public interface P2PBroadcastService {
 
     P2PConnection createConnection(AppContext context) throws IOException;
 
+    P2PConnection createConnection(
+            Integer peerId,
+            int peerPort,
+            String masterPeerIpAddress,
+            int masterPeerPort
+    ) throws IOException;
+
+
     P2PBroadcastChanel createChannel(P2PConnection connection, String chanelName);
 
     boolean subscribeToChannel(P2PBroadcastChanel chanel);

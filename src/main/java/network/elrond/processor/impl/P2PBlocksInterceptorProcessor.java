@@ -1,13 +1,12 @@
 package network.elrond.processor.impl;
 
 import network.elrond.Application;
-import network.elrond.p2p.AppP2PManager;
 import network.elrond.application.AppState;
+import network.elrond.blockchain.Blockchain;
+import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.data.Block;
 import network.elrond.data.BlockService;
-import network.elrond.data.SynchronizedPool;
-import network.elrond.data.TransactionService;
-import network.elrond.p2p.P2PConnection;
+import network.elrond.p2p.AppP2PManager;
 import network.elrond.processor.AppProcessor;
 import network.elrond.processor.AppProcessors;
 import network.elrond.service.AppServiceProvider;
@@ -15,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.concurrent.ArrayBlockingQueue;
 
 public class P2PBlocksInterceptorProcessor implements AppProcessor {
 
@@ -26,32 +26,30 @@ public class P2PBlocksInterceptorProcessor implements AppProcessor {
     public void process(Application application) throws IOException {
 
 
+        ArrayBlockingQueue<String> queue = new ArrayBlockingQueue<>(10000);
+
         AppState state = application.getState();
-        SynchronizedPool<String, Block> pool = state.syncDataBlk;
+        Blockchain blockchain = state.getBlockchain();
+
         Thread threadProcessBlockHashes = new Thread(() -> {
 
             while (state.isStillRunning()) {
-                String strHash = pool.popKey();
 
-                if (strHash == null) {
+                String hash = queue.poll();
+                if (hash == null) {
                     continue;
                 }
 
-                if (pool.isObjectInPool(strHash)) {
-                    continue;
-                }
                 try {
 
-                    P2PConnection connection = state.getConnection();
-                    Object objData = AppServiceProvider.getP2PObjectService().get(connection, strHash);
-
-
-                    if (objData != null) {
-                        pool.addObjectInPool(strHash, blks.decodeJSON(objData.toString()));
-                        logger.info("Got blk hash: " + strHash);
+                    // This will retrieve block form network if required
+                    Block block = AppServiceProvider.getBlockchainService().get(hash, blockchain, BlockchainUnitType.BLOCK);
+                    if (block != null) {
+                        logger.info("Got new block " + hash);
+                    } else {
+                        logger.info("Block not found !!!: " + hash);
                     }
 
-                    logger.info("Blk pool size: " + pool.size());
 
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -67,11 +65,17 @@ public class P2PBlocksInterceptorProcessor implements AppProcessor {
                 return;
             }
             String strPayload = request.getPayload().toString();
-            //test if it's a blk hash
+
             if (strPayload.startsWith("H:")) {
                 strPayload = strPayload.substring(2);
-                pool.pushKey(strPayload);
+                //pool.pushKey(strPayload);
+                try {
+                    queue.put(strPayload);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
+
 
             //System.err.println(sender + " - " + request);
         });

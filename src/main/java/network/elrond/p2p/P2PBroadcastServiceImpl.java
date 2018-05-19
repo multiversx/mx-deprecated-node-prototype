@@ -29,6 +29,16 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         String masterPeerIpAddress = context.getMasterPeerIpAddress();
         int masterPeerPort = context.getMasterPeerPort();
 
+        return createConnection(peerId, peerPort, masterPeerIpAddress, masterPeerPort);
+
+    }
+
+    public P2PConnection createConnection(
+            Integer peerId,
+            int peerPort,
+            String masterPeerIpAddress,
+            int masterPeerPort
+    ) throws IOException {
         Peer peer = new PeerBuilder(Number160.createHash(peerId)).ports(peerPort).start();
         PeerDHT dht = new PeerBuilderDHT(peer).start();
 
@@ -43,7 +53,6 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         }
 
         return new P2PConnection(peerId, peer, dht);
-
     }
 
     public P2PBroadcastChanel createChannel(P2PConnection connection, String channelName) {

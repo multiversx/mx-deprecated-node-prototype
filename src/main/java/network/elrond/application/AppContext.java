@@ -9,7 +9,7 @@ public class AppContext implements Serializable {
     private String masterPeerIpAddress;
     private Integer masterPeerPort;
 
-    private boolean emitter = false;
+
 
 
     public Integer getPeerId() {
@@ -42,14 +42,6 @@ public class AppContext implements Serializable {
 
     public void setMasterPeerPort(Integer masterPeerPort) {
         this.masterPeerPort = masterPeerPort;
-    }
-
-    public boolean isEmitter() {
-        return emitter;
-    }
-
-    public void setEmitter(boolean emitter) {
-        this.emitter = emitter;
     }
 
 
