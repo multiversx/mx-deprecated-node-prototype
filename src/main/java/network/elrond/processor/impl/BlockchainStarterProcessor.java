@@ -1,6 +1,7 @@
 package network.elrond.processor.impl;
 
 import network.elrond.Application;
+import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainContext;
@@ -8,24 +9,32 @@ import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.processor.AppProcessor;
 
+
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class BlockchainStarterProcessor implements AppProcessor {
 
     @Override
     public void process(Application application) throws IOException {
 
+        AppContext context = application.getContext();
+
         AppState state = application.getState();
 
+        final String startupDir = System.getProperty("user.dir");
+        Path pathBlk = Paths.get(startupDir, context.getBlockchainBasePath(), "blockchain.block.data");
+        Path pathTx = Paths.get(startupDir, context.getBlockchainBasePath(), "blockchain.transaction.data");
 
-        BlockchainContext context = new BlockchainContext();
+        BlockchainContext blkcContext = new BlockchainContext();
         P2PConnection connection = state.getConnection();
-        context.setConnection(connection);
+        blkcContext.setConnection(connection);
 
-        context.setDatabasePath(BlockchainUnitType.BLOCK, "blockchain.block.data");
-        context.setDatabasePath(BlockchainUnitType.TRANSACTION, "blockchain.transaction.data");
+        blkcContext.setDatabasePath(BlockchainUnitType.BLOCK, pathBlk.toString());
+        blkcContext.setDatabasePath(BlockchainUnitType.TRANSACTION, pathTx.toString());
 
-        Blockchain blockchain = new Blockchain(context);
+        Blockchain blockchain = new Blockchain(blkcContext);
 
         state.setBlockchain(blockchain);
     }

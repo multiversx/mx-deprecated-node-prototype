@@ -192,7 +192,7 @@ public class Transaction {
      * Gets the public key used for verifying the tx
      * @return public key as String : e.g. 046f8a4352...
      */
-    public String getPublicKey(){return (pubKey);}
+    public String getPubKey(){return (pubKey);}
 
     /**
      * Sets the public key used for verifying the tx
