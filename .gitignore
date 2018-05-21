@@ -2,4 +2,8 @@
 /target
 /bin
 .project
+/blockchain.block.data
+/blockchain.transaction.data
+/consumer
+/producer
 
