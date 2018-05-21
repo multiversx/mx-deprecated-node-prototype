@@ -1,5 +1,7 @@
 /.idea
 /target
 /bin
+/blockchain.block.data-test
+/blockchain.transaction.data-test
 .project
 
