@@ -16,6 +16,9 @@ import java.nio.file.Paths;
 
 public class BlockchainStarterProcessor implements AppProcessor {
 
+    public static final String BLOCKCHAIN_BLOCK_DATA = "blockchain.block.data";
+    public static final String BLOCKCHAIN_TRANSACTION_DATA = "blockchain.transaction.data";
+
     @Override
     public void process(Application application) throws IOException {
 
@@ -23,18 +26,19 @@ public class BlockchainStarterProcessor implements AppProcessor {
 
         AppState state = application.getState();
 
-        final String startupDir = System.getProperty("user.dir");
-        Path pathBlk = Paths.get(startupDir, context.getBlockchainBasePath(), "blockchain.block.data");
-        Path pathTx = Paths.get(startupDir, context.getBlockchainBasePath(), "blockchain.transaction.data");
+        String workingDirectory = System.getProperty("user.dir");
+        String blockchainBasePath = context.getBlockchainBasePath();
+        Path pathBlk = Paths.get(workingDirectory, blockchainBasePath, BLOCKCHAIN_BLOCK_DATA);
+        Path pathTx = Paths.get(workingDirectory, blockchainBasePath, BLOCKCHAIN_TRANSACTION_DATA);
 
-        BlockchainContext blkcContext = new BlockchainContext();
+        BlockchainContext blockContext = new BlockchainContext();
         P2PConnection connection = state.getConnection();
-        blkcContext.setConnection(connection);
+        blockContext.setConnection(connection);
 
-        blkcContext.setDatabasePath(BlockchainUnitType.BLOCK, pathBlk.toString());
-        blkcContext.setDatabasePath(BlockchainUnitType.TRANSACTION, pathTx.toString());
+        blockContext.setDatabasePath(BlockchainUnitType.BLOCK, pathBlk.toString());
+        blockContext.setDatabasePath(BlockchainUnitType.TRANSACTION, pathTx.toString());
 
-        Blockchain blockchain = new Blockchain(blkcContext);
+        Blockchain blockchain = new Blockchain(blockContext);
 
         state.setBlockchain(blockchain);
     }

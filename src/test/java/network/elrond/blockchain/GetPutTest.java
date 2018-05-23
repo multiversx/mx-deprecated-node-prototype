@@ -21,7 +21,7 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class GetPutTest {
-    private TransactionService trxServ = AppServiceProvider.getTransactionService();
+    private TransactionService transactionService = AppServiceProvider.getTransactionService();
     private BlockService blkServ = AppServiceProvider.getBlockService();
 
     private PrivateKey pvKeySender = new PrivateKey("a");
@@ -62,7 +62,7 @@ public class GetPutTest {
                         FuturePut fp = AppServiceProvider.getP2PObjectService().put(channel.getConnection(),
                                 getTxHash(tx), serServ.encodeJSON(tx));
                         System.out.println("Pet tx hash: " + getTxHash(tx) + " on wire...");
-                    } catch (Exception ex){
+                    } catch (Exception ex) {
                         ex.printStackTrace();
                     }
 
@@ -117,14 +117,14 @@ public class GetPutTest {
 
             BlockchainService blkcServ = AppServiceProvider.getBlockchainService();
 
-            BlockchainContext blkcContext = new BlockchainContext();
-            blkcContext.setConnection(state.getConnection());
-            blkcContext.setDatabasePath(BlockchainUnitType.BLOCK, "c:\\test\\blk");
-            blkcContext.setDatabasePath(BlockchainUnitType.TRANSACTION, "c:\\test\\tx");
+            BlockchainContext blockchainContext = new BlockchainContext();
+            blockchainContext.setConnection(state.getConnection());
+            blockchainContext.setDatabasePath(BlockchainUnitType.BLOCK, "blockchain.block.data-test");
+            blockchainContext.setDatabasePath(BlockchainUnitType.TRANSACTION, "blockchain.transaction.data-test");
             Blockchain blockchain = null;
 
             try {
-                blockchain = new Blockchain(blkcContext);
+                blockchain = new Blockchain(blockchainContext);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 return;
@@ -195,21 +195,21 @@ public class GetPutTest {
 
     }
 
-    private Transaction generateTransaction(int value){
-        Transaction tx = new Transaction();
-        tx.setNonce(BigInteger.ZERO);
+    private Transaction generateTransaction(int value) {
+        Transaction transaction = new Transaction();
+        transaction.setNonce(BigInteger.ZERO);
         //2 ERDs
-        tx.setValue(BigInteger.valueOf(10).pow(8).multiply(BigInteger.valueOf(value)));
-        tx.setSendAddress(Util.getAddressFromPublicKey(pbKeySender.getEncoded()));
-        tx.setRecvAddress(Util.getAddressFromPublicKey(pbKeyRecv.getEncoded()));
-        tx.setPubKey(Util.byteArrayToHexString(pbKeySender.getEncoded()));
+        transaction.setValue(BigInteger.valueOf(10).pow(8).multiply(BigInteger.valueOf(value)));
+        transaction.setSendAddress(Util.getAddressFromPublicKey(pbKeySender.getEncoded()));
+        transaction.setRecvAddress(Util.getAddressFromPublicKey(pbKeyRecv.getEncoded()));
+        transaction.setPubKey(Util.byteArrayToHexString(pbKeySender.getEncoded()));
 
-        //trxServ.signTransaction(tx, pvKeySender.getValue());
+        //transactionService.signTransaction(transaction, pvKeySender.getValue());
 
-        return(tx);
+        return (transaction);
     }
 
-    private String getTxHash(Transaction tx){
-        return(new String(Base64.encode(trxServ.getHash(tx, true))));
+    private String getTxHash(Transaction tx) {
+        return (new String(Base64.encode(transactionService.getHash(tx, true))));
     }
 }

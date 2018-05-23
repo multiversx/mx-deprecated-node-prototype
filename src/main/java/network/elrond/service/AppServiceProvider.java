@@ -26,7 +26,6 @@ public class AppServiceProvider {
         return serializationService;
     }
 
-
     private static P2PObjectService p2PObjectService = new P2PObjectServiceImpl();
 
     public static P2PObjectService getP2PObjectService() {

@@ -15,8 +15,8 @@ public class BlockchainServiceTest {
 
     @Test
     public void testBlockchainService() {
-        BlockchainService blkcServ = AppServiceProvider.getBlockchainService();
-        BlockService blkServ = AppServiceProvider.getBlockService();
+        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
+        BlockService blockService = AppServiceProvider.getBlockService();
 
         BlockchainContext context = new BlockchainContext();
         context.setDatabasePath(BlockchainUnitType.BLOCK, "blockchain.block.data-test");
@@ -32,7 +32,7 @@ public class BlockchainServiceTest {
                 }
 
 
-                blkcServ.put(new String(Base64.encode(blkServ.getHash(blk, true))), blk, blkc, BlockchainUnitType.BLOCK);
+                blockchainService.put(new String(Base64.encode(blockService.getHash(blk, true))), blk, blkc, BlockchainUnitType.BLOCK);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -40,7 +40,7 @@ public class BlockchainServiceTest {
 
     }
 
-    private Block GenerateRandomBlock(){
+    private Block GenerateRandomBlock() {
         byte[] buff = new byte[32];
 
         DataBlock db = new DataBlock();
@@ -49,7 +49,7 @@ public class BlockchainServiceTest {
 
         rdm.nextBytes(buff);
         db.setAppStateHash(buff);
-        for (int i = 0; i< 1000; i++){
+        for (int i = 0; i < 1000; i++) {
             rdm.nextBytes(buff);
             db.getListTXHashes().add(buff);
         }
@@ -57,7 +57,7 @@ public class BlockchainServiceTest {
         db.getListPublicKeys().add("025f37d20e5b18909361e0ead7ed17c69b417bee70746c9e9c2bcb1394d921d4ae");
         db.getListPublicKeys().add("025f37d20e5b18909361e0ead7ed17c69b417bee70746c9e9c2bcb1394d921d4af");
 
-        return(db);
+        return (db);
 
     }
 }
