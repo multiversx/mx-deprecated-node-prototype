@@ -1,6 +1,7 @@
 package network.elrond;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
@@ -23,20 +24,33 @@ public class P2PAppForm {
     private JTextField textFieldPrivateKey;
     private JTextField textFieldPublicKey;
     private JTextArea textAreaOutput;
+    private JToolBar logger;
+    private JScrollPane loggerScrollPane;
+    private final static String newline = "\n";
 
     public P2PAppForm() {
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                textAreaOutput.setText("Start Elrond protocol");
+                String yourIp = textFieldIp.getText();
+                String yourPort = textFieldYourPort.getText();
+                String ipToConnect = textFieldIpConnect.getText();
+                String portToConnect = textFieldPortToConnect.getText();
+                String instanceName = textFieldInstanceName.getText();
+                String privateKey = textFieldPrivateKey.getText();
+
+                textAreaOutput.append(yourIp + newline);
+                textAreaOutput.append(yourPort + newline);
+                textAreaOutput.append(ipToConnect + newline);
+                textAreaOutput.append(portToConnect + newline);
+                textAreaOutput.append(instanceName + newline);
+                textAreaOutput.append(privateKey + newline);
             }
         });
     }
 
     public static void main(String[] args) throws InterruptedException {
         JFrame frame = new JFrame("P2PAppForm");
-
-        JTabbedPane tabbedPane = new JTabbedPane();
         frame.setContentPane(new P2PAppForm().configurationPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1000, 800);
