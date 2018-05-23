@@ -115,12 +115,15 @@ public class GetPutTest {
 
             AppState state = app.getState();
 
-            BlockchainService blkcServ = AppServiceProvider.getBlockchainService();
+            BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
+
 
             BlockchainContext blockchainContext = new BlockchainContext();
             blockchainContext.setConnection(state.getConnection());
             blockchainContext.setDatabasePath(BlockchainUnitType.BLOCK, "blockchain.block.data-test");
             blockchainContext.setDatabasePath(BlockchainUnitType.TRANSACTION, "blockchain.transaction.data-test");
+            blockchainContext.setDatabasePath(BlockchainUnitType.SETTINGS, "blockchain.settings.data-test");
+
             Blockchain blockchain = null;
 
             try {
@@ -148,7 +151,7 @@ public class GetPutTest {
                     Transaction tx = null;
 
                     try {
-                        tx = blkcServ.get(hash, blockchain, BlockchainUnitType.TRANSACTION);
+                        tx = blockchainService.get(hash, blockchain, BlockchainUnitType.TRANSACTION);
 
 
                         if (tx != null) {

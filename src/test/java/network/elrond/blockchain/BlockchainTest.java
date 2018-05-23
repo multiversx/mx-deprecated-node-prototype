@@ -30,6 +30,7 @@ public class BlockchainTest {
         BlockchainContext context = new BlockchainContext();
         context.setDatabasePath(BlockchainUnitType.BLOCK, "blockchain.block.data-test");
         context.setDatabasePath(BlockchainUnitType.TRANSACTION, "blockchain.transaction.data-test");
+        context.setDatabasePath(BlockchainUnitType.SETTINGS, "blockchain.settings.data-test");
 
         blockchain = new Blockchain(context);
     }

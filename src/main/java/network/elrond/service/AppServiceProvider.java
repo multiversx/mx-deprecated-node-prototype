@@ -2,19 +2,23 @@ package network.elrond.service;
 
 import network.elrond.account.AccountStateService;
 import network.elrond.account.AccountStateServiceImpl;
+import network.elrond.blockchain.AppPersistanceServiceImpl;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainServiceImpl;
 import network.elrond.consensus.SPoSService;
 import network.elrond.consensus.SPoSServiceImpl;
 import network.elrond.consensus.ValidatorService;
 import network.elrond.consensus.ValidatorServiceImpl;
-
-import network.elrond.crypto.*;
+import network.elrond.crypto.BNMultiSignatureServiceImpl;
+import network.elrond.crypto.MultiSignatureService;
+import network.elrond.crypto.SchnorrSignatureServiceImpl;
+import network.elrond.crypto.SignatureService;
 import network.elrond.data.*;
 import network.elrond.p2p.P2PBroadcastService;
 import network.elrond.p2p.P2PBroadcastServiceImpl;
 import network.elrond.p2p.P2PObjectService;
 import network.elrond.p2p.P2PObjectServiceImpl;
+
 
 public class AppServiceProvider {
 
@@ -66,6 +70,7 @@ public class AppServiceProvider {
         return blockchainService;
     }
 
+
     private static SignatureService signatureService = new SchnorrSignatureServiceImpl();
 
     public static SignatureService getSignatureService() {
@@ -88,6 +93,18 @@ public class AppServiceProvider {
 
     public static TransactionExecutionService getTransactionExecutionService() {
         return transactionExecutionService;
+    }
+
+    private static BlockchainService appPersistanceService = new AppPersistanceServiceImpl();
+
+    public static BlockchainService getAppPersistanceService() {
+        return appPersistanceService;
+    }
+
+    private static BootstrapService bootstrapService = new BootstrapServiceImpl();
+
+    public static BootstrapService getBootstrapService() {
+        return bootstrapService;
     }
 
 }

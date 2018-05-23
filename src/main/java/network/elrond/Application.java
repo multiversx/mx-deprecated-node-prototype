@@ -45,13 +45,14 @@ public class Application implements Serializable {
         //  Start accounts
         AppProcessors.BOOTSTRAP_ACCOUNTS.process(this);
 
-
         // Intercept P2P transactions
         AppProcessors.P2P_TRANSACTIONS_INTERCEPTOR.process(this);
 
         // Intercept P2P blocks
         AppProcessors.P2P_BLOCKS_INTERCEPTOR.process(this);
 
+        // Start bootstrapping process
+        AppProcessors.BOOTSTRAP_SYSTEM.process(this);
 
     }
 

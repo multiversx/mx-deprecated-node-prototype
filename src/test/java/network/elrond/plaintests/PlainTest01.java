@@ -1,11 +1,18 @@
 package network.elrond.plaintests;
 
+import network.elrond.blockchain.SettingsType;
+import network.elrond.core.Util;
+import network.elrond.crypto.PrivateKey;
+import network.elrond.crypto.PublicKey;
+import network.elrond.service.AppServiceProvider;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.math.BigInteger;
 import java.net.Socket;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,6 +44,18 @@ public class PlainTest01 {
         Path pathBlk = Paths.get(startupDir, "producer", "blockchain.block.data");
 
         System.out.println(pathBlk.toString());
+        System.out.println(SettingsType.MAX_BLOCK_HEIGHT.toString());
+
+        System.out.println(AppServiceProvider.getSerializationService().encodeJSON("aaaaaBBBB"));
+        System.out.println(AppServiceProvider.getSerializationService().encodeJSON(BigInteger.ZERO));
+    }
+
+    @Test
+    public void getPrivPubKeyTest(){
+        PrivateKey privKey = new PrivateKey("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent ultrices velit elit, non bibendum leo suscipit ac.");
+        PublicKey pubKey = new PublicKey(privKey);
+
+        System.out.println("Public key: " + Util.getHashEncoded64(pubKey.getEncoded()) + " address: " + Util.getAddressFromPublicKey(pubKey.getEncoded()));
     }
 
 
