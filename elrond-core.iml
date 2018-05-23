@@ -38,5 +38,8 @@
     <orderEntry type="library" name="Maven: org.iq80.leveldb:leveldb:0.10" level="project" />
     <orderEntry type="library" name="Maven: org.iq80.leveldb:leveldb-api:0.10" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:21.0" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.6.3" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.6.0" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.6.3" level="project" />
   </component>
 </module>
