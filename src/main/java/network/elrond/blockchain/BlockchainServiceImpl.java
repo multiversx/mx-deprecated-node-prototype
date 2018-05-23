@@ -121,7 +121,7 @@ public class BlockchainServiceImpl implements BlockchainService {
         return AppServiceProvider.getSerializationService().decodeJSON(strJSONData, clazz);
     }
 
-    private boolean isOffline(P2PConnection connection) {
+    protected boolean isOffline(P2PConnection connection) {
         return connection == null;
     }
 
