@@ -27,7 +27,7 @@ public class BlockchainStarterProcessor implements AppProcessor {
         AppState state = application.getState();
 
         String workingDirectory = System.getProperty("user.dir");
-        String blockchainBasePath = context.getBlockchainBasePath();
+        String blockchainBasePath = context.getStorageBasePath();
         Path pathBlk = Paths.get(workingDirectory, blockchainBasePath, BLOCKCHAIN_BLOCK_DATA);
         Path pathTx = Paths.get(workingDirectory, blockchainBasePath, BLOCKCHAIN_TRANSACTION_DATA);
 

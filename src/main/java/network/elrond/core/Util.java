@@ -29,6 +29,14 @@ public class Util {
     public static DigestSHA3 SHA3 = new DigestSHA3(256);
     public static SHA256.Digest SHA256 = new SHA256.Digest();
 
+    public static byte[] EMPTY_BYTE_ARRAY;
+    public static byte[] EMPTY_DATA_HASH;
+
+    static{
+        EMPTY_BYTE_ARRAY = new byte[0];
+        EMPTY_DATA_HASH = SHA3.digest(EMPTY_BYTE_ARRAY);
+    }
+
     public static byte[] hexStringToByteArray(String s) {
         int len = s.length();
         byte[] data = new byte[len / 2];
@@ -53,7 +61,7 @@ public class Util {
             return ("");
         }
 
-        //step 1. get the data in the hexa form
+        //step 1. getAccountState the data in the hexa form
         String strHexa = byteArrayToHexString(pubKeyBytes);
 
         if (strHexa.length() != Util.MAX_LEN_PUB_KEY * 2) {

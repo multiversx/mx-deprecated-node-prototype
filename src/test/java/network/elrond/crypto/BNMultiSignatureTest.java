@@ -55,7 +55,7 @@ public class BNMultiSignatureTest {
 
             // generate a bitmap for (2/3) + 1 signers out of all consensus members
             for (int chIdx = 0; chIdx < CONSENSUS_MALICIOUS; chIdx++) {
-                // get random 15 out of 21
+                // getAccountState random 15 out of 21
                 random = rand.nextInt(CONSENSUS_GROUP_SIZE);
                 chosen = (1 << random) ^ MASK_BITMAP;
                 while ((bitmap & chosen) == bitmap) {

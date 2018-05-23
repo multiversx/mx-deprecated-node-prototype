@@ -15,7 +15,7 @@ public class Transaction {
     //value used in transaction in sERDs see core.Util
     private BigInteger value;
     //receiving address as 0x0024f2849a...
-    private String recvAddress;
+    private String receiverAddress;
     //sender address as 0x0024f22323...
     private String sendAddress;
     //amount of sERDs per each unit of gas
@@ -39,7 +39,7 @@ public class Transaction {
     {
         nonce = BigInteger.ZERO;
         value = BigInteger.ZERO;
-        recvAddress = "";
+        receiverAddress = "";
         sendAddress = "";
         gasPrice = BigInteger.ZERO;
         gasLimit = BigInteger.ZERO;
@@ -60,7 +60,7 @@ public class Transaction {
     {
         this.nonce = nonce;
         this.value = value;
-        this.recvAddress = recvAddress;
+        this.receiverAddress = recvAddress;
         this.sendAddress = sendAddress;
         //free 4 all
         gasPrice = BigInteger.ZERO;
@@ -99,13 +99,13 @@ public class Transaction {
      * Gets the receiving address as String : e.g. 0x37f345a....
      * @return address as String
      */
-    public String getRecvAddress(){ return (recvAddress); }
+    public String getReceiverAddress(){ return (receiverAddress); }
 
     /**
      * Sets the receiving address
-     * @param recvAddress to be set
+     * @param receiverAddress to be set
      */
-    public void setRecvAddress(String recvAddress) {this.recvAddress = recvAddress;}
+    public void setReceiverAddress(String receiverAddress) {this.receiverAddress = receiverAddress;}
 
     /**
      * Gets the sender address as String : e.g. 0x37f345a....

@@ -1,8 +1,5 @@
 package network.elrond.blockchain;
 
-import network.elrond.blockchain.Blockchain;
-import network.elrond.blockchain.BlockchainContext;
-import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.data.Block;
 import network.elrond.data.DataBlock;
 import network.elrond.service.AppServiceProvider;
@@ -83,8 +80,8 @@ public class BlockchainTest {
             Block _block = blocks.get(hash);
             Block block = AppServiceProvider.getBlockchainService().get(hash, blockchain, BlockchainUnitType.BLOCK);
             Assert.assertEquals(block.getNonce(), _block.getNonce());
-            String b1Js = AppServiceProvider.getBlockService().encodeJSON(_block, true);
-            String b2Js = AppServiceProvider.getBlockService().encodeJSON(block, true);
+            String b1Js = AppServiceProvider.getSerializationService().encodeJSON(_block);
+            String b2Js = AppServiceProvider.getSerializationService().encodeJSON(block);
             Assert.assertEquals(b1Js, b2Js);
 
             System.out.println(b1Js);

@@ -249,7 +249,7 @@ public class BNMultiSignatureServiceImpl implements MultiSignatureService {
 
         // calculate challenge
         challenge = computeChallenge(publicKeys, publicKey, aggCommitment, message, bitmap);
-        // get BigInteger challenge
+        // getAccountState BigInteger challenge
         challengeInt = (new BigInteger(1, challenge));
         // Compute R2 = s*G - c*publicKey
         commitmentR2 = basePointG.multiply(new BigInteger(signature)).subtract(publicKey.getQ().multiply(challengeInt));

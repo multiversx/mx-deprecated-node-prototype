@@ -46,7 +46,8 @@ public class P2PTransactionsInterceptorProcessor implements AppProcessor {
 
                     Object objData = AppServiceProvider.getP2PObjectService().get(connection, strHash);
                     if (objData != null) {
-                        pool.addObjectInPool(strHash, ts.decodeJSON(objData.toString()));
+                        Transaction tx = AppServiceProvider.getSerializationService().decodeJSON(objData.toString(), Transaction.class);
+                        pool.addObjectInPool(strHash, tx);
                         logger.info("Got tx hash: " + strHash);
                     }
 

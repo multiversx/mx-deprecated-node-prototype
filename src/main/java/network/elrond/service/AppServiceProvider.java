@@ -1,11 +1,14 @@
 package network.elrond.service;
 
+import network.elrond.account.AccountStateService;
+import network.elrond.account.AccountStateServiceImpl;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainServiceImpl;
 import network.elrond.consensus.SPoSService;
 import network.elrond.consensus.SPoSServiceImpl;
 import network.elrond.consensus.ValidatorService;
 import network.elrond.consensus.ValidatorServiceImpl;
+
 import network.elrond.crypto.*;
 import network.elrond.data.*;
 import network.elrond.p2p.P2PBroadcastService;
@@ -74,4 +77,17 @@ public class AppServiceProvider {
     public static MultiSignatureService getMultiSignatureService() {
         return multiSignatureService;
     }
+
+    private static AccountStateService accountStateService = new AccountStateServiceImpl();
+
+    public static AccountStateService getAccountStateService() {
+        return accountStateService;
+    }
+
+    private static TransactionExecutionService transactionExecutionService = new TransactionExecutionServiceImpl();
+
+    public static TransactionExecutionService getTransactionExecutionService() {
+        return transactionExecutionService;
+    }
+
 }

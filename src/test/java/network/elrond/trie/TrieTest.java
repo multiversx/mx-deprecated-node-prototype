@@ -806,11 +806,11 @@ public class TrieTest {
 
         for (int i = 0; i < dbDumpJSONArray.size(); ++i){
 
-            JSONObject obj = (JSONObject)dbDumpJSONArray.get(i);
-            byte[] key = Hex.decode(obj.get("key").toString());
-            byte[] val = Hex.decode(obj.get("val").toString());
+            JSONObject obj = (JSONObject)dbDumpJSONArray.getAccountState(i);
+            byte[] key = Hex.decode(obj.getAccountState("key").toString());
+            byte[] val = Hex.decode(obj.getAccountState("val").toString());
 
-            db.put(key, val);
+            db.setAccountState(key, val);
         }
 
         // TEST: load trie out of this run up to block#33
@@ -818,7 +818,7 @@ public class TrieTest {
         TrieImpl trie = new TrieImpl(db.getDb(), rootNode);
 
         // first key added in genesis
-        byte[] val1 = trie.get(Hex.decode("51ba59315b3a95761d0863b05ccc7a7f54703d99"));
+        byte[] val1 = trie.getAccountState(Hex.decode("51ba59315b3a95761d0863b05ccc7a7f54703d99"));
         AccountState accountState1 = new AccountState(val1);
 
         assertEquals(BigInteger.valueOf(2).pow(200), accountState1.getBalance());
@@ -827,7 +827,7 @@ public class TrieTest {
         assertEquals(null, accountState1.getStateRoot());
 
         // last key added up to block#33
-        byte[] val2 = trie.get(Hex.decode("a39c2067eb45bc878818946d0f05a836b3da44fa"));
+        byte[] val2 = trie.getAccountState(Hex.decode("a39c2067eb45bc878818946d0f05a836b3da44fa"));
         AccountState accountState2 = new AccountState(val2);
 
         assertEquals(new BigInteger("1500000000000000000"), accountState2.getBalance());

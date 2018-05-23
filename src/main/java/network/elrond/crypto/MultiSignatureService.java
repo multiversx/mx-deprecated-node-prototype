@@ -15,7 +15,7 @@ public interface MultiSignatureService {
     public byte[] aggregateCommitments(ArrayList<byte[]> commitments,
                                        long bitmapCommitments);
 
-    // compute or get the challenge from leader
+    // compute or getAccountState the challenge from leader
     public byte[] computeChallenge(ArrayList<PublicKey> signers,
                                    PublicKey publicKey,
                                    byte[] aggregatedCommitment,

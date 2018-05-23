@@ -75,7 +75,7 @@ public class SchnorrSignatureServiceImpl implements SignatureService {
             // First concatenate R, public key and message
             challengeC = Util.concatenateArrays(commitPointR.getEncoded(true), publicKey.getEncoded());
             challengeC = Util.concatenateArrays(challengeC, message);
-            // Calculate the digest of the byte array to get the challenge
+            // Calculate the digest of the byte array to getAccountState the challenge
             challengeC = Util.SHA3.digest(challengeC);
             BigInteger challengeCInteger = new BigInteger(challengeC);
             if (challengeCInteger.equals(BigInteger.ZERO)) {

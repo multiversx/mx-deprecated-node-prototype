@@ -81,7 +81,7 @@ public class RLP {
      * 	- if we went with 60 then we would have only had 4 slots for long strings
      * so RLP would not have been able to store objects above 4gb
      * 	- if we went with 48 then RLP would be fine for 2^128 space, but that's way too much
-     * 	- so 56 and 2^64 space seems like the right place to put the cutoff
+     * 	- so 56 and 2^64 space seems like the right place to setAccountState the cutoff
      * 	- also, that's where Bitcoin's varint does the cutof
      **/
     private static int SIZE_THRESHOLD = 56;

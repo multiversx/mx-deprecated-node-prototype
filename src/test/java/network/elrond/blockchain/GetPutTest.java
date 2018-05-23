@@ -34,7 +34,7 @@ public class GetPutTest {
     public void mainProducer() throws Exception {
 
         AppContext context = new AppContext();
-        context.setBlockchainBasePath("producer");
+        context.setStorageBasePath("producer");
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(4000);
         context.setPort(4000);
@@ -96,7 +96,7 @@ public class GetPutTest {
     public void mainConsumer() throws Exception {
 
         AppContext context = new AppContext();
-        context.setBlockchainBasePath("consumer");
+        context.setStorageBasePath("consumer");
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(4000);
         context.setPort(4001);
@@ -143,7 +143,7 @@ public class GetPutTest {
                     Transaction txExpected = generateTransaction(value);
                     String hash = getTxHash(txExpected);
 
-                    System.out.println("Trying to get tx hash: " + hash + "...");
+                    System.out.println("Trying to getAccountState tx hash: " + hash + "...");
 
                     Transaction tx = null;
 
@@ -201,7 +201,7 @@ public class GetPutTest {
         //2 ERDs
         transaction.setValue(BigInteger.valueOf(10).pow(8).multiply(BigInteger.valueOf(value)));
         transaction.setSendAddress(Util.getAddressFromPublicKey(pbKeySender.getEncoded()));
-        transaction.setRecvAddress(Util.getAddressFromPublicKey(pbKeyRecv.getEncoded()));
+        transaction.setReceiverAddress(Util.getAddressFromPublicKey(pbKeyRecv.getEncoded()));
         transaction.setPubKey(Util.byteArrayToHexString(pbKeySender.getEncoded()));
 
         //transactionService.signTransaction(transaction, pvKeySender.getValue());

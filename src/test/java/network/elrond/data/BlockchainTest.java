@@ -81,8 +81,8 @@ public class BlockchainTest {
             Block _block = blocks.get(hash);
             Block block = AppServiceProvider.getBlockchainService().get(hash, blockchain, BlockchainUnitType.BLOCK);
             Assert.assertEquals(block.nonce, _block.nonce);
-            String b1Js = AppServiceProvider.getBlockService().encodeJSON(_block, true);
-            String b2Js = AppServiceProvider.getBlockService().encodeJSON(block, true);
+            String b1Js = AppServiceProvider.getSerializationService().encodeJSON(_block);
+            String b2Js = AppServiceProvider.getSerializationService().encodeJSON(block);
             Assert.assertEquals(b1Js, b2Js);
 
             System.out.println(b1Js);
