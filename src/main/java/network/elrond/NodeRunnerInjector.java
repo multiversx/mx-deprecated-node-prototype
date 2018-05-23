@@ -79,7 +79,7 @@ public class NodeRunnerInjector {
         tx.setData(buff);
         tx.setPubKey(Util.byteArrayToHexString(pbKey.getEncoded()));
         tx.setSendAddress(Util.getAddressFromPublicKey(pbKey.getEncoded()));
-        tx.setRecvAddress("0x0000000000000000000000000000000000000000");
+        tx.setReceiverAddress("0x0000000000000000000000000000000000000000");
         tx.setNonce(BigInteger.ZERO);
         tx.setValue(BigInteger.TEN.pow(8)); //1 ERD
         ts.signTransaction(tx, pvKey.getValue());
@@ -87,7 +87,9 @@ public class NodeRunnerInjector {
         String strHash = new String(Base64.encode(ts.getHash(tx, true)));
 
         try {
-            FuturePut fp = AppServiceProvider.getP2PObjectService().put(channel.getConnection(), strHash, ts.encodeJSON(tx, true));
+
+            String json = AppServiceProvider.getSerializationService().encodeJSON(tx);
+            FuturePut fp = AppServiceProvider.getP2PObjectService().put(channel.getConnection(), strHash, json);
             if (fp.isSuccess()) {
                 LoggerFactory.getLogger(NodeRunnerInjector.class).info("Put tx hash: " + strHash);
                 AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, "H:" + strHash);
@@ -120,7 +122,7 @@ public class NodeRunnerInjector {
 
         try {
             FuturePut fp = AppServiceProvider.getP2PObjectService().put(channel.getConnection(), strHash,
-                    blks.encodeJSON(b, true));
+                    AppServiceProvider.getSerializationService().encodeJSON(b));
             if (fp.isSuccess()) {
                 LoggerFactory.getLogger(NodeRunnerInjector.class).info("Put blk hash: " + strHash);
                 AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, "H:" + strHash);

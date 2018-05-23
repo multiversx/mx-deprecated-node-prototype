@@ -33,12 +33,12 @@ public class ConsensusTest {
 //        int cntValidator = 4;
 //        pbftb1.setAnswerFromValidator(new Validator("0xA" + Integer.toString(cntValidator)),
 //                ConsensusAnswerType.AGREE);
-//        TestCase.assertEquals(ConsensusAnswerType.AGREE, pbftb1.getListValidators().get(cntValidator).getAnswer());
+//        TestCase.assertEquals(ConsensusAnswerType.AGREE, pbftb1.getListValidators().getAccountState(cntValidator).getAnswer());
 //
 //        //test if the consensus changed crt validator answer
 //        cntValidator = 8;
 //        pbftb1.validate();
-//        TestCase.assertEquals(ConsensusAnswerType.AGREE, pbftb1.getListValidators().get(cntValidator).getAnswer());
+//        TestCase.assertEquals(ConsensusAnswerType.AGREE, pbftb1.getListValidators().getAccountState(cntValidator).getAnswer());
 //
 //        //test consensus
 //        //only 2 agreed
@@ -153,7 +153,7 @@ public class ConsensusTest {
 //
 //    private void displayListValidators(List<Validator> list) {
 //        for (int i = 0; i < list.size(); i++) {
-//            Validator v = list.get(i);
+//            Validator v = list.getAccountState(i);
 //
 //            System.out.println(v.getPubKey() + ", S: " + v.getStake().toString(10) + ", R: " + v.getRating());
 //        }

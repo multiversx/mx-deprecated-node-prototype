@@ -11,7 +11,7 @@ import java.util.List;
  * @version 1.0
  * @since   2018-05-14
  */
-public abstract class Block {
+public class Block {
     //block counter
     protected BigInteger nonce;
     //plain message hash
@@ -72,11 +72,15 @@ public abstract class Block {
         return(listTXHashes);
     }
 
+    public void setListTXHashes(List<byte[]> listTXHashes) {this.listTXHashes = listTXHashes;}
+
     /**
      * Gets te public keys used in signing process of the block
      * @return the list of public keys
      */
     public List<String> getListPublicKeys() { return(listPubKeys);}
+
+    public void setListPubKeys(List<String> listPubKeys){this.listPubKeys = listPubKeys;}
 
     /**
      * Gets the first part of signature of the tx

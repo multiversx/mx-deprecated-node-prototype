@@ -8,7 +8,6 @@ import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
-import org.bouncycastle.util.Arrays;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -75,21 +74,21 @@ public class PrivateKey {
      */
     public PrivateKey(String seed) {
         byte[] seedArray = seed.getBytes();
-        final byte[] ZERO = new byte[32];
-        Arrays.fill(ZERO, (byte) 0);
+        BigInteger seedInt;
 
         seedArray = Util.SHA3.digest(seedArray);
+        seedInt = new BigInteger(1, seedArray);
 
         // to be a valid private key it needs to verify:
         // 0 < pk < n, where n is the order of the largest prime order subgroup
-        // consider BigInteger will be interpreted as negative when first bit is 1
-        // so do the check on unsigned but don't store the extra 00 byte
-        while (1 > Arrays.compareUnsigned(seedArray, ZERO)) {
+        while (1 != seedInt.compareTo(BigInteger.ZERO) ||
+                0 <= seedInt.compareTo(getCurveOrder())) {
             seedArray = Util.SHA3.digest(seedArray);
+            seedInt = new BigInteger(1, seedArray);
         }
 
         // store without the extra byte in case of unsigned
-        privateKey = seedArray;
+        privateKey = seedInt.toByteArray();
     }
 
     /**
@@ -98,9 +97,10 @@ public class PrivateKey {
      * @return true if private key is valid, false otherwise
      */
     public boolean isValid() {
-        BigInteger unsignedPrivateKey = new BigInteger(1, privateKey);
+        BigInteger privateKeyInt = new BigInteger(privateKey);
 
-        if (1 != unsignedPrivateKey.compareTo(BigInteger.ZERO)) {
+        if (1 != privateKeyInt.compareTo(BigInteger.ZERO) ||
+                0 <= privateKeyInt.compareTo(getCurveOrder())) {
             return false;
         }
         return true;

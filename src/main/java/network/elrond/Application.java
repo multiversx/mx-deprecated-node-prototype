@@ -42,6 +42,9 @@ public class Application implements Serializable {
         //  Start blockchain
         AppProcessors.BOOTSTRAP_BLOCKCHAIN.process(this);
 
+        //  Start accounts
+        AppProcessors.BOOTSTRAP_ACCOUNTS.process(this);
+
 
         // Intercept P2P transactions
         AppProcessors.P2P_TRANSACTIONS_INTERCEPTOR.process(this);

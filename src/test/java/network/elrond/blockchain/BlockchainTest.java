@@ -1,8 +1,7 @@
-package network.elrond.data;
+package network.elrond.blockchain;
 
-import network.elrond.blockchain.Blockchain;
-import network.elrond.blockchain.BlockchainContext;
-import network.elrond.blockchain.BlockchainUnitType;
+import network.elrond.data.Block;
+import network.elrond.data.DataBlock;
 import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.junit.Assert;
@@ -80,7 +79,7 @@ public class BlockchainTest {
 
             Block _block = blocks.get(hash);
             Block block = AppServiceProvider.getBlockchainService().get(hash, blockchain, BlockchainUnitType.BLOCK);
-            Assert.assertEquals(block.nonce, _block.nonce);
+            Assert.assertEquals(block.getNonce(), _block.getNonce());
             String b1Js = AppServiceProvider.getSerializationService().encodeJSON(_block);
             String b2Js = AppServiceProvider.getSerializationService().encodeJSON(block);
             Assert.assertEquals(b1Js, b2Js);

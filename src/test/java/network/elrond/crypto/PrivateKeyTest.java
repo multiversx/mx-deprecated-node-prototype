@@ -17,7 +17,7 @@ public class PrivateKeyTest {
 
         // validate against checked pair
         TestCase.assertEquals(
-                "948c6246ebb299414ccd3cc8b17674d3f6fe0d14b984b6c2c84e0d5866a38da2",
+                "00948c6246ebb299414ccd3cc8b17674d3f6fe0d14b984b6c2c84e0d5866a38da2",
                 Util.byteArrayToHexString(privKey.getValue()));
 
         // check the random number is within expected range 0 < privateKey < n

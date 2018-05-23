@@ -326,7 +326,7 @@ public class TrieImpl implements Trie {
     /**
      * Helper method to retrieve the actual node
      * If the node is not a list and length is > 32
-     * bytes get the actual node from the db
+     * bytes getAccountState the actual node from the db
      *
      * @param node -
      * @return
