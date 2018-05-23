@@ -19,7 +19,7 @@ public class BlockchainServiceImpl implements BlockchainService {
      * @return
      */
     @Override
-    public synchronized <H extends String, B> boolean contains(H hash, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
+    public synchronized <H extends Object, B> boolean contains(H hash, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
 
         BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
         P2PConnection connection = blockchain.getConnection();
@@ -41,7 +41,7 @@ public class BlockchainServiceImpl implements BlockchainService {
      * @throws IOException
      */
     @Override
-    public synchronized <H extends String, B> void put(H hash, B object, Blockchain blockchain, BlockchainUnitType type) throws IOException {
+    public synchronized <H extends Object, B> void put(H hash, B object, Blockchain blockchain, BlockchainUnitType type) throws IOException {
 
 
         if (object == null || hash == null) {
@@ -53,10 +53,10 @@ public class BlockchainServiceImpl implements BlockchainService {
 
         unit.cache.put(hash, object);
         String strJSONData = AppServiceProvider.getSerializationService().encodeJSON(object);
-        unit.database.put(bytes(hash), bytes(strJSONData));
+        unit.database.put(bytes(hash.toString()), bytes(strJSONData));
 
         if (!isOffline(connection)) {
-            AppServiceProvider.getP2PObjectService().put(connection, hash, strJSONData);
+            AppServiceProvider.getP2PObjectService().put(connection, hash.toString(), strJSONData);
         }
 
     }
@@ -70,7 +70,7 @@ public class BlockchainServiceImpl implements BlockchainService {
      * @throws ClassNotFoundException
      */
     @Override
-    public synchronized <H extends String, B> B get(H hash, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
+    public synchronized <H extends Object, B> B get(H hash, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
 
 
         BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
@@ -94,18 +94,18 @@ public class BlockchainServiceImpl implements BlockchainService {
 
     }
 
-    private <H extends String, B> B getDataFromNetwork(H hash, BlockchainPersistenceUnit<H, B> unit, P2PConnection connection)
+    private <H extends Object, B> B getDataFromNetwork(H hash, BlockchainPersistenceUnit<H, B> unit, P2PConnection connection)
             throws ClassNotFoundException, IOException {
 
         if (isOffline(connection)) {
             return null;
         }
-        String strJSONData = (String) AppServiceProvider.getP2PObjectService().get(connection, hash);
+        String strJSONData = (String) AppServiceProvider.getP2PObjectService().get(connection, hash.toString());
         return decodeObject(unit.clazz, strJSONData);
     }
 
-    private <B, H extends String> B getDataFromDatabase(H hash, BlockchainPersistenceUnit<H, B> unit) {
-        byte[] data = unit.database.get(bytes(hash));
+    private <B, H extends Object> B getDataFromDatabase(H hash, BlockchainPersistenceUnit<H, B> unit) {
+        byte[] data = unit.database.get(bytes(hash.toString()));
         if (data == null) {
             return null;
         }
@@ -121,7 +121,7 @@ public class BlockchainServiceImpl implements BlockchainService {
         return AppServiceProvider.getSerializationService().decodeJSON(strJSONData, clazz);
     }
 
-    private boolean isOffline(P2PConnection connection) {
+    protected boolean isOffline(P2PConnection connection) {
         return connection == null;
     }
 

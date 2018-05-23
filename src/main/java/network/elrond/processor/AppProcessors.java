@@ -45,4 +45,8 @@ public class AppProcessors {
     };
 
 
+    public static AppProcessor BOOTSTRAP_SYSTEM = (application) -> {
+        new BootstrappingProcessor().process(application);
+    };
+
 }

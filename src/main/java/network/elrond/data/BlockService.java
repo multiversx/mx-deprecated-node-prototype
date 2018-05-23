@@ -1,11 +1,11 @@
 package network.elrond.data;
 
+import network.elrond.blockchain.Blockchain;
+
 public interface BlockService {
-
-
 
     byte[] getHash(Block blk, boolean withHash);
 
-//    String encodeJSON(Block blk, boolean withSig);
-//    Block decodeJSON(String strJSONData);
+    void executeBlock(Blockchain blkc, Block blk) throws Exception;
+
 }

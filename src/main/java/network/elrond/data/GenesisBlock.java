@@ -1,5 +1,7 @@
 package network.elrond.data;
 
+import network.elrond.service.AppServiceProvider;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 
@@ -23,11 +25,25 @@ public class GenesisBlock extends Block{
         listPubKeys = new ArrayList<String>();
         prevBlockHash = STR_GENESIS_BLOCK.getBytes();
         listTXHashes = new ArrayList<byte[]>();
-        //TO DO
+//        //TO DO
+//
+//        txMint = new Transaction();
+//        txMint.setNonce(BigInteger.ZERO);
+//        txMint.setPubKey(STR_GENESIS_BLOCK);
+//        txMint.setRecvAddress("0xbde7dc0e2128f49b1b1b1808cbd1ee42605d07fe");
+//        txMint.setSendAddress("0x0000000000000000000000000000000000000000");
+//        //50 mil ERDs
+//        txMint.setValue(BigInteger.TEN.pow(14).multiply(BigInteger.valueOf(50)));
+//
+//        this.listTXHashes.add(AppServiceProvider.getTransactionService().getHash(txMint, true));
+
+
+
         //add here a minting address
         shard = 0;
         appStateHash = STR_GENESIS_BLOCK.getBytes();
         //TO DO
         //compute an initial state hash
     }
+
 }

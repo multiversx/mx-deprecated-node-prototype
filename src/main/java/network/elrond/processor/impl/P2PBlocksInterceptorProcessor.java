@@ -40,9 +40,11 @@ public class P2PBlocksInterceptorProcessor implements AppProcessor {
 
                 try {
 
-                    // This will retrieve block form network if required
+                    // This will retrieve block from network if required
                     Block block = AppServiceProvider.getBlockchainService().get(hash, blockchain, BlockchainUnitType.BLOCK);
+
                     if (block != null) {
+                        AppServiceProvider.getBlockchainService().put(block.getNonce(), hash, blockchain, BlockchainUnitType.BLOCK_INDEX);
                         logger.info("Got new block " + hash);
                     } else {
                         logger.info("Block not found !!!: " + hash);
@@ -73,8 +75,6 @@ public class P2PBlocksInterceptorProcessor implements AppProcessor {
                     e.printStackTrace();
                 }
             }
-
-
             //System.err.println(sender + " - " + request);
         });
     }
