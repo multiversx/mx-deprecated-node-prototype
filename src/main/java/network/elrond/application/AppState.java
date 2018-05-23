@@ -2,9 +2,6 @@ package network.elrond.application;
 
 
 import network.elrond.blockchain.Blockchain;
-import network.elrond.data.Block;
-import network.elrond.data.SynchronizedPool;
-import network.elrond.data.Transaction;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PConnection;
 
@@ -21,9 +18,10 @@ public class AppState implements Serializable {
     private P2PConnection connection;
     private Map<String, P2PBroadcastChanel> channels = new HashMap<>();
 
+    private boolean bootstrapping = false;
 
-    public SynchronizedPool<String, Transaction> syncDataTx = new SynchronizedPool<>();
-    public SynchronizedPool<String, Block> syncDataBlk = new SynchronizedPool<>();
+//    public SynchronizedPool<String, Transaction> syncDataTx = new SynchronizedPool<>();
+//    public SynchronizedPool<String, Block> syncDataBlk = new SynchronizedPool<>();
 
 
     public P2PBroadcastChanel getChanel(String name) {
@@ -57,4 +55,8 @@ public class AppState implements Serializable {
     public Blockchain getBlockchain() {
         return blockchain;
     }
+
+    public boolean isBootstrapping() { return bootstrapping; }
+
+    public void setBootstrapping(boolean bootstrapping) {this.bootstrapping = bootstrapping;}
 }

@@ -19,8 +19,9 @@ public class BlockchainServiceTest {
         BlockService blkServ = AppServiceProvider.getBlockService();
 
         BlockchainContext context = new BlockchainContext();
-        context.setDatabasePath(BlockchainUnitType.BLOCK, "c:\\test\\blk");
-        context.setDatabasePath(BlockchainUnitType.TRANSACTION, "c:\\test\\tx");
+        context.setDatabasePath(BlockchainUnitType.BLOCK, "blockchain.block.data-test");
+        context.setDatabasePath(BlockchainUnitType.TRANSACTION, "blockchain.transaction.data-test");
+        context.setDatabasePath(BlockchainUnitType.SETTINGS, "blockchain.settings.data-test");
         try {
             Blockchain blkc = new Blockchain(context);
 

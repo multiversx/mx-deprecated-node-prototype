@@ -27,7 +27,7 @@ public class P2PObjectServiceImpl implements P2PObjectService {
             Data data = iterator.next();
             return data.object();
         } else {
-            LoggerFactory.getLogger(P2PBroadcastServiceImpl.class).warn("Timout getting! hash: " + key);
+            LoggerFactory.getLogger(P2PBroadcastServiceImpl.class).warn("Timeout getting! hash: " + key);
         }
         return null;
     }

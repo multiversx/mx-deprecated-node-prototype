@@ -49,6 +49,8 @@ public class Application implements Serializable {
         // Intercept P2P blocks
         AppProcessors.P2P_BLOCKS_INTERCEPTOR.process(this);
 
+        // Start bootstrapping process
+        AppProcessors.BOOTSTRAP_SYSTEM.process(this);
 
     }
 

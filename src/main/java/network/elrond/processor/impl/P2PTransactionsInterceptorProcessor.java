@@ -1,9 +1,10 @@
 package network.elrond.processor.impl;
 
 import network.elrond.Application;
+import network.elrond.blockchain.Blockchain;
+import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.p2p.AppP2PManager;
 import network.elrond.application.AppState;
-import network.elrond.data.SynchronizedPool;
 import network.elrond.data.Transaction;
 import network.elrond.data.TransactionService;
 import network.elrond.p2p.P2PConnection;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.concurrent.ArrayBlockingQueue;
 
 public class P2PTransactionsInterceptorProcessor implements AppProcessor {
 
@@ -24,33 +26,29 @@ public class P2PTransactionsInterceptorProcessor implements AppProcessor {
     @Override
     public void process(Application application) throws IOException {
 
+        ArrayBlockingQueue<String> queue = new ArrayBlockingQueue<>(10000);
 
         AppState state = application.getState();
-        SynchronizedPool<String, Transaction> pool = state.syncDataTx;
         P2PConnection connection = state.getConnection();
+        Blockchain blockchain = state.getBlockchain();
 
         Thread threadProcessTxHashes = new Thread(() -> {
 
             while (state.isStillRunning()) {
-                String strHash = pool.popKey();
-
-                if (strHash == null) {
-                    continue;
-                }
-
-                if (pool.isObjectInPool(strHash)) {
+                String hash = queue.poll();
+                if (hash == null) {
                     continue;
                 }
 
                 try {
+                    // This will retrieve tx from network if required
+                    Transaction tx = AppServiceProvider.getBlockchainService().get(hash, blockchain, BlockchainUnitType.TRANSACTION);
 
-                    Object objData = AppServiceProvider.getP2PObjectService().get(connection, strHash);
-                    if (objData != null) {
-                        pool.addObjectInPool(strHash, ts.decodeJSON(objData.toString()));
-                        logger.info("Got tx hash: " + strHash);
+                    if (tx != null) {
+                        logger.info("Got new tx " + hash);
+                    } else {
+                        logger.info("Tx not found !!!: " + hash);
                     }
-
-                    logger.info("Tx pool size: " + pool.size());
 
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -69,7 +67,11 @@ public class P2PTransactionsInterceptorProcessor implements AppProcessor {
             //test if it's a tx hash
             if (strPayload.startsWith("H:")) {
                 strPayload = strPayload.substring(2);
-                pool.pushKey(strPayload);
+                try {
+                    queue.put(strPayload);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
 
             //System.err.println(sender + " - " + request);

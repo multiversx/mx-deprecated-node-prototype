@@ -1,6 +1,10 @@
 package network.elrond.data;
 
+import network.elrond.blockchain.AppPersistanceServiceImpl;
+import network.elrond.blockchain.Blockchain;
+import network.elrond.blockchain.BlockchainService;
 import network.elrond.core.Util;
+import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -181,6 +185,22 @@ public class BlockServiceImpl implements BlockService {
         }
 
         return (blk);
+    }
+
+    public void executeBlock(Blockchain blkc, Block blk) throws Exception{
+        BootstrapService bootServ = AppServiceProvider.getBootstrapService();
+
+        if ((blk.getClass() == GenesisBlock.class) && (bootServ.getMaxBlockSizeLocal(blkc).compareTo(BigInteger.ONE) == 0)){
+            //DO MINT
+
+            return;
+        }
+
+        //fetch transactions
+        //TO DO
+
+        //process block
+        //TO DO
     }
 
 }

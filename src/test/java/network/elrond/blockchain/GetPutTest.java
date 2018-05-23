@@ -118,9 +118,9 @@ public class GetPutTest {
             BlockchainService blkcServ = AppServiceProvider.getBlockchainService();
 
             BlockchainContext blkcContext = new BlockchainContext();
-            blkcContext.setConnection(state.getConnection());
-            blkcContext.setDatabasePath(BlockchainUnitType.BLOCK, "c:\\test\\blk");
-            blkcContext.setDatabasePath(BlockchainUnitType.TRANSACTION, "c:\\test\\tx");
+            blkcContext.setDatabasePath(BlockchainUnitType.BLOCK, "blockchain.block.data-test");
+            blkcContext.setDatabasePath(BlockchainUnitType.TRANSACTION, "blockchain.transaction.data-test");
+            blkcContext.setDatabasePath(BlockchainUnitType.SETTINGS, "blockchain.settings.data-test");
             Blockchain blockchain = null;
 
             try {

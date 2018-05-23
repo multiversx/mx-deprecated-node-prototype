@@ -26,6 +26,8 @@ public class BlockchainStarterProcessor implements AppProcessor {
         final String startupDir = System.getProperty("user.dir");
         Path pathBlk = Paths.get(startupDir, context.getBlockchainBasePath(), "blockchain.block.data");
         Path pathTx = Paths.get(startupDir, context.getBlockchainBasePath(), "blockchain.transaction.data");
+        Path pathSettings = Paths.get(startupDir, context.getBlockchainBasePath(), "blockchain.settings.data");
+        Path pathBlkIdx = Paths.get(startupDir, context.getBlockchainBasePath(), "blockchain.blockidx.data");
 
         BlockchainContext blkcContext = new BlockchainContext();
         P2PConnection connection = state.getConnection();
@@ -33,6 +35,8 @@ public class BlockchainStarterProcessor implements AppProcessor {
 
         blkcContext.setDatabasePath(BlockchainUnitType.BLOCK, pathBlk.toString());
         blkcContext.setDatabasePath(BlockchainUnitType.TRANSACTION, pathTx.toString());
+        blkcContext.setDatabasePath(BlockchainUnitType.SETTINGS, pathSettings.toString());
+        blkcContext.setDatabasePath(BlockchainUnitType.BLOCK_INDEX, pathBlkIdx.toString());
 
         Blockchain blockchain = new Blockchain(blkcContext);
 

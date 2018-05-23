@@ -1,9 +1,6 @@
 package network.elrond.processor;
 
-import network.elrond.processor.impl.BlockchainStarterProcessor;
-import network.elrond.processor.impl.P2PBlocksInterceptorProcessor;
-import network.elrond.processor.impl.P2PConnectionStarterProcessor;
-import network.elrond.processor.impl.P2PTransactionsInterceptorProcessor;
+import network.elrond.processor.impl.*;
 
 
 public class AppProcessors {
@@ -40,5 +37,9 @@ public class AppProcessors {
         new BlockchainStarterProcessor().process(application);
     };
 
+
+    public static AppProcessor BOOTSTRAP_SYSTEM = (application) -> {
+        new BootstrappingProcessor().process(application);
+    };
 
 }

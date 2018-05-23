@@ -9,6 +9,7 @@ import java.util.Arrays;
 
 import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.bouncycastle.jcajce.provider.digest.SHA3.DigestSHA3;
+import org.bouncycastle.util.encoders.Base64;
 
 public class Util {
     public static final int VERIFIER_GROUP_SIZE = 21;
@@ -28,6 +29,7 @@ public class Util {
     public static final int MAX_LEN_PUB_KEY = 33;
     public static DigestSHA3 SHA3 = new DigestSHA3(256);
     public static SHA256.Digest SHA256 = new SHA256.Digest();
+    public static BigInteger BIG_INT_MIN_ONE = BigInteger.valueOf(-1);
 
     public static byte[] hexStringToByteArray(String s) {
         int len = s.length();
@@ -93,5 +95,15 @@ public class Util {
             result = null;
         }
         return result;
+    }
+
+    public static String getHashEncoded64(String data){
+        byte[] buff = SHA3.digest(data.getBytes());
+
+        return(new String(Base64.encode(buff)));
+    }
+
+    public static String getHashEncoded64(byte[] data){
+        return(new String(Base64.encode(data)));
     }
 }
