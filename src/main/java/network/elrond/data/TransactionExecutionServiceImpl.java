@@ -12,6 +12,7 @@ import java.math.BigInteger;
 public class TransactionExecutionServiceImpl implements TransactionExecutionService {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private SerializationService serializationService = AppServiceProvider.getSerializationService();
 
     @Override
     public <A extends String> boolean processTransaction(Accounts<A> accounts, Transaction transaction) throws Exception {
@@ -21,7 +22,7 @@ public class TransactionExecutionServiceImpl implements TransactionExecutionServ
         }
 
 
-        String strHash = new String(Base64.encode(AppServiceProvider.getTransactionService().getHash(transaction, true)));
+        String strHash = new String(Base64.encode(serializationService.getHash(transaction, true)));
 
         if (!AppServiceProvider.getTransactionService().verifyTransaction(transaction)) {
             logger.info("Invalid transaction! tx hash: " + strHash);
@@ -30,10 +31,10 @@ public class TransactionExecutionServiceImpl implements TransactionExecutionServ
 
         //We have to copy-construct the objects for sandbox mode
         A receiverAddress = (A) transaction.getReceiverAddress();
-        AccountState receiverAccountState = AppServiceProvider.getAccountStateService().getAccountState(receiverAddress, accounts);
+        AccountState receiverAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(receiverAddress, accounts);
 
         A sendAddress = (A) transaction.getSendAddress();
-        AccountState senderAccountState = AppServiceProvider.getAccountStateService().getAccountState(sendAddress, accounts);
+        AccountState senderAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(sendAddress, accounts);
 
         if (senderAccountState.getBalance().compareTo(transaction.getValue()) < 0) {
             logger.info("Invalid transaction! Will result in negative balance! tx hash: " + strHash);

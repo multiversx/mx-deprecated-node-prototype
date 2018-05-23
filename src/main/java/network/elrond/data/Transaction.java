@@ -1,5 +1,7 @@
 package network.elrond.data;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+
 import java.math.BigInteger;
 
 /**
@@ -9,6 +11,7 @@ import java.math.BigInteger;
  * @version 1.0
  * @since   2018-05-11
  */
+@JsonFilter("filterSigs")
 public class Transaction {
     //tx counter
     private BigInteger nonce;

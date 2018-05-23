@@ -46,12 +46,6 @@ public class AppServiceProvider {
         return (transactionService);
     }
 
-    private static BlockService blockService = new BlockServiceImpl();
-
-    public static BlockService getBlockService() {
-        return (blockService);
-    }
-
     private static ValidatorService validatorService = new ValidatorServiceImpl();
 
     public static ValidatorService getValidatorService() {
