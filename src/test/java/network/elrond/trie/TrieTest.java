@@ -58,6 +58,32 @@ public class TrieTest {
     }
 
     @Test
+    public void testExample() {
+        TrieImpl trie = new TrieImpl(mockDb);
+
+        byte[] b1 = {10, 7, 1, 1, 3, 5, 5};
+        trie.update(b1, "45.0 ETH".getBytes());
+
+        byte[] b2 = {10, 7, 7, 13, 3, 3, 7};
+        trie.update(b2, "1.00 WEI".getBytes());
+
+        byte[] b3 = {10, 7, 15, 9, 3, 6, 5};
+        trie.update(b3, "1.1 ETH".getBytes());
+
+        byte[] b4 = {10, 7, 7, 13, 3, 9, 7};
+        trie.update(b4, "0.12 ETH".getBytes());
+
+//        trie.update("a711355", "45.0 ETH");
+//        trie.update("a77d337", "1.00 WEI");
+//        trie.update("a7f9365", "1.1 ETH");
+//        trie.update("a77d397", "0.12 ETH");
+
+        String dmp = trie.getTrieDump();
+        System.out.println(dmp);
+    }
+
+
+    @Test
     public void testEmptyKey() {
         TrieImpl trie = new TrieImpl(mockDb);
 
