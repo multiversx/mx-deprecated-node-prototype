@@ -5,9 +5,11 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.service.AppServiceProvider;
+import org.bouncycastle.util.encoders.Base64;
 import org.junit.Test;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 
 public class TransactionTest {
 
@@ -55,6 +57,34 @@ public class TransactionTest {
         //System.out.println(Base64.encode(buff).toString());
         //System.out.println(new String(Base64.decode(Base64.encode(buff))));
 
+
+    }
+
+    @Test
+    public void testHash(){
+        PrivateKey pvKey = new PrivateKey();
+        PublicKey pbKey = new PublicKey(pvKey);
+
+        Transaction tx = new Transaction();
+        byte[] buff = new byte[5];
+        for (int i = 0; i < buff.length; i++) {
+            buff[i] = (byte) i;
+        }
+        tx.setData(buff);
+        tx.setPubKey(Util.byteArrayToHexString(pbKey.getEncoded()));
+        tx.setSendAddress(Util.getAddressFromPublicKey(pbKey.getEncoded()));
+        tx.setReceiverAddress("0x0000000000000000000000000000000000000000");
+        tx.setNonce(BigInteger.ZERO);
+        tx.setValue(BigInteger.TEN.pow(8)); //1 ERD
+
+
+        tx.setSig1(new byte[]{1, 2, 3});
+        tx.setSig2(new byte[]{4, 5, 6});
+
+        System.out.println(new String(Base64.encode(serializationService.getHash(tx, true))));
+        System.out.println(new String(Base64.encode(serializationService.getHash(tx, false))));
+
+        TestCase.assertEquals(false, Arrays.equals(serializationService.getHash(tx, true), serializationService.getHash(tx, false)));
 
     }
 

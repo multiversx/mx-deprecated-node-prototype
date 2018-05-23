@@ -113,10 +113,10 @@ public class AccountStateTest {
             logger.info(AppServiceProvider.getSerializationService().encodeJSON(reciverAccount));
 
             //sender
-            TestCase.assertEquals(BigInteger.TEN.pow(8).multiply(BigInteger.valueOf(98)), reciverAccount.getBalance());
-            TestCase.assertEquals(BigInteger.ONE, reciverAccount.getNonce());
+            TestCase.assertEquals(BigInteger.TEN.pow(8).multiply(BigInteger.valueOf(98)), senderAccount.getBalance());
+            TestCase.assertEquals(BigInteger.ONE, senderAccount.getNonce());
             //receiver
-            TestCase.assertEquals(BigInteger.TEN.pow(8).multiply(BigInteger.valueOf(2)), senderAccount.getBalance());
+            TestCase.assertEquals(BigInteger.TEN.pow(8).multiply(BigInteger.valueOf(2)), reciverAccount.getBalance());
 
         } catch (Exception ex) {
             TestCase.assertEquals("NOK", ex.getMessage());

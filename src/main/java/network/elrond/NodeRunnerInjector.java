@@ -19,7 +19,7 @@ import java.util.Scanner;
 public class NodeRunnerInjector {
 
     private static TransactionService ts = AppServiceProvider.getTransactionService();
-    private static BlockService blks = AppServiceProvider.getBlockService();
+    private static  SerializationService serializationService = AppServiceProvider.getSerializationService();
 
     public static void main(String[] args) throws Exception {
 
@@ -84,7 +84,7 @@ public class NodeRunnerInjector {
         tx.setValue(BigInteger.TEN.pow(8)); //1 ERD
         ts.signTransaction(tx, pvKey.getValue());
 
-        String strHash = new String(Base64.encode(ts.getHash(tx, true)));
+        String strHash = new String(Base64.encode(serializationService.getHash(tx, true)));
 
         try {
 
@@ -118,7 +118,7 @@ public class NodeRunnerInjector {
             b.getListTXHashes().add(buff);
         }
 
-        String strHash = new String(Base64.encode(blks.getHash(b, true)));
+        String strHash = new String(Base64.encode(serializationService.getHash(b, true)));
 
         try {
             FuturePut fp = AppServiceProvider.getP2PObjectService().put(channel.getConnection(), strHash,
