@@ -4,4 +4,8 @@
 /blockchain.block.data-test
 /blockchain.transaction.data-test
 .project
+/blockchain.block.data
+/blockchain.transaction.data
+/consumer
+/producer
 

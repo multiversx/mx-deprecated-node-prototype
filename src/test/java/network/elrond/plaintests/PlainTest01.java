@@ -7,6 +7,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 public class PlainTest01 {
@@ -30,6 +32,11 @@ public class PlainTest01 {
         }
 
         System.out.println(Arrays.equals(("aaa").getBytes(), new byte[]{97, 97, 97}));
+
+        final String startupDir = System.getProperty("user.dir");
+        Path pathBlk = Paths.get(startupDir, "producer", "blockchain.block.data");
+
+        System.out.println(pathBlk.toString());
     }
 
 

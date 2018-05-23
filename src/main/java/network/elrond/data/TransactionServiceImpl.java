@@ -57,7 +57,7 @@ public class TransactionServiceImpl implements TransactionService {
             jobj.put("sig2", new String(Base64.encode(tx.getSig2())));
         }
         //hexa form -> byte array -> base64 (reduce the size)
-        jobj.put("key", new String(Base64.encode(Util.hexStringToByteArray(tx.getPublicKey()))));
+        jobj.put("key", new String(Base64.encode(Util.hexStringToByteArray(tx.getPubKey()))));
 
         jtx.put("TX", jobj);
 
@@ -217,13 +217,13 @@ public class TransactionServiceImpl implements TransactionService {
                 (tx.getSig2().length == 0) ||
                 (tx.getSendAddress().length() != Util.MAX_LEN_ADDR) ||
                 (tx.getRecvAddress().length() != Util.MAX_LEN_ADDR) ||
-                (tx.getPublicKey().length() != Util.MAX_LEN_PUB_KEY * 2)
+                (tx.getPubKey().length() != Util.MAX_LEN_PUB_KEY * 2)
                 ) {
             return (false);
         }
 
         //test 2. verify if sender address is generated from public key used to sign tx
-        if (!tx.getSendAddress().equals(Util.getAddressFromPublicKey(Util.hexStringToByteArray(tx.getPublicKey())))) {
+        if (!tx.getSendAddress().equals(Util.getAddressFromPublicKey(Util.hexStringToByteArray(tx.getPubKey())))) {
             return (false);
         }
 
@@ -239,7 +239,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         PublicKey pbKey = new PublicKey();
         try {
-            pbKey.setPublicKey(Util.hexStringToByteArray(tx.getPublicKey()));
+            pbKey.setPublicKey(Util.hexStringToByteArray(tx.getPubKey()));
         } catch (Exception ex) {
             return (false);
         }
