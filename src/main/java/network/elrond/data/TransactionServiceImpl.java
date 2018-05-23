@@ -3,7 +3,9 @@ package network.elrond.data;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
-import network.elrond.crypto.SchnorrSignature;
+import network.elrond.crypto.Signature;
+import network.elrond.crypto.SignatureService;
+import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -55,7 +57,7 @@ public class TransactionServiceImpl implements TransactionService {
             jobj.put("sig2", new String(Base64.encode(tx.getSig2())));
         }
         //hexa form -> byte array -> base64 (reduce the size)
-        jobj.put("key", new String(Base64.encode(Util.hexStringToByteArray(tx.getPublicKey()))));
+        jobj.put("key", new String(Base64.encode(Util.hexStringToByteArray(tx.getPubKey()))));
 
         jtx.put("TX", jobj);
 
@@ -190,12 +192,13 @@ public class TransactionServiceImpl implements TransactionService {
         PrivateKey pvkey = new PrivateKey(privateKeysBytes);
         byte[] hashNoSigLocal = getHash(tx, false);
         PublicKey pbkey = new PublicKey(pvkey);
+        Signature sig;
 
-        SchnorrSignature schnorr = new SchnorrSignature();
-        schnorr.signMessage(hashNoSigLocal, pvkey, pbkey);
+        SignatureService schnorr = AppServiceProvider.getSignatureService();
+        sig = schnorr.signMessage(hashNoSigLocal, pvkey, pbkey);
 
-        tx.setSig1(schnorr.getSignatureValue());
-        tx.setSig2(schnorr.getChallenge());
+        tx.setSig1(sig.getSignature());
+        tx.setSig2(sig.getChallenge());
     }
 
     /**
@@ -214,32 +217,34 @@ public class TransactionServiceImpl implements TransactionService {
                 (tx.getSig2().length == 0) ||
                 (tx.getSendAddress().length() != Util.MAX_LEN_ADDR) ||
                 (tx.getRecvAddress().length() != Util.MAX_LEN_ADDR) ||
-                (tx.getPublicKey().length() != Util.MAX_LEN_PUB_KEY * 2)
+                (tx.getPubKey().length() != Util.MAX_LEN_PUB_KEY * 2)
                 ) {
             return (false);
         }
 
         //test 2. verify if sender address is generated from public key used to sign tx
-        if (!tx.getSendAddress().equals(Util.getAddressFromPublicKey(Util.hexStringToByteArray(tx.getPublicKey())))) {
+        if (!tx.getSendAddress().equals(Util.getAddressFromPublicKey(Util.hexStringToByteArray(tx.getPubKey())))) {
             return (false);
         }
 
         //test 3. verify the signature
         byte[] message = getHash(tx, false);
-        SchnorrSignature schnorr = new SchnorrSignature();
+        SignatureService schnorr = AppServiceProvider.getSignatureService();
+        Signature sig = new Signature();
         if ((tx.getSig1() != null) && (tx.getSig1().length > 0) &&
                 (tx.getSig2() != null) && (tx.getSig2().length > 0)) {
-            schnorr.setSignature(tx.getSig1(), tx.getSig2());
+            sig.setSignature(tx.getSig1());
+            sig.setChallenge(tx.getSig2());
         }
 
         PublicKey pbKey = new PublicKey();
         try {
-            pbKey.setPublicKey(Util.hexStringToByteArray(tx.getPublicKey()));
+            pbKey.setPublicKey(Util.hexStringToByteArray(tx.getPubKey()));
         } catch (Exception ex) {
             return (false);
         }
 
-        if (!schnorr.verifySignature(message, pbKey)) {
+        if (!schnorr.verifySignature(sig.getSignature(), sig.getChallenge(), message, pbKey)) {
             return (false);
         }
 

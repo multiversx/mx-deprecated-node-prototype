@@ -30,7 +30,6 @@ public class NodeRunnerInjector {
         context.setPeerId(0);
 
 
-        context.setEmitter(true);
         Application app = new Application(context);
         app.start();
 

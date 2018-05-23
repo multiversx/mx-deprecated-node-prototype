@@ -2,6 +2,7 @@ package network.elrond.crypto;
 
 import junit.framework.TestCase;
 import network.elrond.core.Util;
+import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
 public class SchnorrSignatureTest {
@@ -17,15 +18,11 @@ public class SchnorrSignatureTest {
             // variate the message
             String message = "hello Elrond network " + i;
             byte[] msgHash = Util.SHA3.digest(message.getBytes());
-            SchnorrSignature schnorrSignature = new SchnorrSignature();
+            SignatureService signatureService = AppServiceProvider.getSignatureService();
+            Signature sig;
             // sign the hash
-            schnorrSignature.signMessage(msgHash, keyPair.getPrivateKey(), keyPair.getPublicKey());
-            TestCase.assertTrue(schnorrSignature.verifySignature(msgHash, keyPair.getPublicKey()));
-
-            System.out.println("\nsignature: " + Util.byteArrayToHexString(schnorrSignature.getSignatureValue()) +
-                    "\nlength: " + schnorrSignature.getSignatureValue().length +
-                    "\nchallenge: " + Util.byteArrayToHexString(schnorrSignature.getChallenge()) +
-                    "\nlength:" + schnorrSignature.getChallenge().length);
+            sig = signatureService.signMessage(msgHash, keyPair.getPrivateKey(), keyPair.getPublicKey());
+            TestCase.assertTrue(signatureService.verifySignature(sig.getSignature(), sig.getChallenge(), msgHash, keyPair.getPublicKey()));
         }
     }
 }

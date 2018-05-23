@@ -2,15 +2,6 @@ package network.elrond.data;
 
 import java.math.BigInteger;
 
-import network.elrond.crypto.PrivateKey;
-import network.elrond.crypto.PublicKey;
-import network.elrond.crypto.SchnorrSignature;
-import network.elrond.service.AppServiceProvider;
-import org.bouncycastle.math.ec.ECPoint;
-import org.json.*;
-import org.bouncycastle.util.encoders.Base64;
-import network.elrond.core.Util;
-
 /**
  * The Transaction class implements the transaction used for moving assets
  *
@@ -192,7 +183,7 @@ public class Transaction {
      * Gets the public key used for verifying the tx
      * @return public key as String : e.g. 046f8a4352...
      */
-    public String getPublicKey(){return (pubKey);}
+    public String getPubKey(){return (pubKey);}
 
     /**
      * Sets the public key used for verifying the tx

@@ -9,7 +9,7 @@ public class AppContext implements Serializable {
     private String masterPeerIpAddress;
     private Integer masterPeerPort;
 
-    private boolean emitter = false;
+    private String blockchainBasePath = "main";
 
 
     public Integer getPeerId() {
@@ -44,13 +44,8 @@ public class AppContext implements Serializable {
         this.masterPeerPort = masterPeerPort;
     }
 
-    public boolean isEmitter() {
-        return emitter;
-    }
+    public String getBlockchainBasePath(){return(blockchainBasePath);}
 
-    public void setEmitter(boolean emitter) {
-        this.emitter = emitter;
-    }
-
+    public void setBlockchainBasePath(String blockchainBasePath) {this.blockchainBasePath = blockchainBasePath;}
 
 }

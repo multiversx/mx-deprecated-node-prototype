@@ -37,13 +37,19 @@ public class Application implements Serializable {
     public void start() throws IOException {
 
         // Start P2P communications
-        AppProcessors.P2P_CONNECTION_STARTER.process(this);
+        AppProcessors.BOOTSTRAP_P2P_CONNECTION.process(this);
+
+        //  Start blockchain
+        AppProcessors.BOOTSTRAP_BLOCKCHAIN.process(this);
+
 
         // Intercept P2P transactions
         AppProcessors.P2P_TRANSACTIONS_INTERCEPTOR.process(this);
 
         // Intercept P2P blocks
         AppProcessors.P2P_BLOCKS_INTERCEPTOR.process(this);
+
+
     }
 
     public void stop() {
