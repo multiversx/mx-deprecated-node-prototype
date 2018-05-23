@@ -7,14 +7,15 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-//import java.math.BigInteger;
+import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 
-//import org.ethereum.core.AccountState;
+import network.elrond.account.AccountState;
+import network.elrond.data.Block;
 //import org.ethereum.db.DatabaseImpl;
 import network.elrond.db.MockDB;
 //import org.json.simple.JSONArray;
@@ -55,6 +56,50 @@ public class TrieTest {
     public void closeMockDb() throws IOException {
         mockDb.close();
         mockDb_2.close();
+    }
+
+    @Test
+    public void testAccountState() {
+
+        String[] addresses = new String[] {
+                "0x00",
+                "0x01",
+                "0x02",
+                "0x03",
+                "0x04",
+                "0x05",
+                "0x06",
+                "0x07",
+        };
+
+        BigInteger[] balances = new BigInteger[] {
+                BigInteger.valueOf(2),
+                BigInteger.valueOf(12),
+                BigInteger.valueOf(6),
+                BigInteger.valueOf(7),
+                BigInteger.valueOf(4),
+                BigInteger.valueOf(1),
+                BigInteger.valueOf(22),
+                BigInteger.valueOf(15)
+        };
+
+
+
+        Trie state = new TrieImpl(null);
+
+        int i = 0;
+        for (String address : addresses) {
+            AccountState acctState = new AccountState();
+            acctState.addToBalance(balances[i]);
+            state.update(address.getBytes(), acctState.getEncoded());
+            i++;
+        }
+
+        System.out.println("roothash:  => " + Hex.toHexString( state.getRootHash()));
+        System.out.println(addresses[0] + " => " + ((TrieImpl) state).get(addresses[0]));
+
+//        Block block = new Block();
+//        block.setAppStateHash(state.getRootHash());
     }
 
     @Test
@@ -832,11 +877,11 @@ public class TrieTest {
 
         for (int i = 0; i < dbDumpJSONArray.size(); ++i){
 
-            JSONObject obj = (JSONObject)dbDumpJSONArray.getAccountState(i);
-            byte[] key = Hex.decode(obj.getAccountState("key").toString());
-            byte[] val = Hex.decode(obj.getAccountState("val").toString());
+            JSONObject obj = (JSONObject)dbDumpJSONArray.get(i);
+            byte[] key = Hex.decode(obj.get("key").toString());
+            byte[] val = Hex.decode(obj.get("val").toString());
 
-            db.setAccountState(key, val);
+            db.put(key, val);
         }
 
         // TEST: load trie out of this run up to block#33
@@ -844,7 +889,7 @@ public class TrieTest {
         TrieImpl trie = new TrieImpl(db.getDb(), rootNode);
 
         // first key added in genesis
-        byte[] val1 = trie.getAccountState(Hex.decode("51ba59315b3a95761d0863b05ccc7a7f54703d99"));
+        byte[] val1 = trie.get(Hex.decode("51ba59315b3a95761d0863b05ccc7a7f54703d99"));
         AccountState accountState1 = new AccountState(val1);
 
         assertEquals(BigInteger.valueOf(2).pow(200), accountState1.getBalance());
@@ -853,7 +898,7 @@ public class TrieTest {
         assertEquals(null, accountState1.getStateRoot());
 
         // last key added up to block#33
-        byte[] val2 = trie.getAccountState(Hex.decode("a39c2067eb45bc878818946d0f05a836b3da44fa"));
+        byte[] val2 = trie.get(Hex.decode("a39c2067eb45bc878818946d0f05a836b3da44fa"));
         AccountState accountState2 = new AccountState(val2);
 
         assertEquals(new BigInteger("1500000000000000000"), accountState2.getBalance());

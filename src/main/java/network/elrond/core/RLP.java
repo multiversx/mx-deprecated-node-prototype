@@ -2,6 +2,7 @@ package network.elrond.core;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static java.util.Arrays.copyOfRange;
 import static network.elrond.core.ByteUtil.byteArrayToInt;
@@ -257,5 +258,101 @@ public class RLP {
             return toBytes(val.asObj());
         }
         throw new RuntimeException("Unsupported type: Only accepting String, Integer and BigInteger for now");
+    }
+
+    public static byte[] encodeByte(byte singleByte) {
+        if ((singleByte & 0xFF) == 0) {
+            return new byte[] { (byte) OFFSET_SHORT_ITEM };
+        } else if ((singleByte & 0xFF) < 0x7F) {
+            return new byte[] { singleByte };
+        } else {
+            return new byte[] { (byte) (OFFSET_SHORT_ITEM + 1), singleByte };
+        }
+    }
+
+    public static byte[] encodeElement(byte[] srcData) {
+
+        if (srcData == null)
+            return new byte[]{(byte) OFFSET_SHORT_ITEM};
+        else if (srcData.length == 1 && (srcData[0] & 0xFF) < 0x80) {
+            return srcData;
+        } else if (srcData.length < SIZE_THRESHOLD) {
+            // length = 8X
+            byte length = (byte) (OFFSET_SHORT_ITEM + srcData.length);
+            byte[] data = Arrays.copyOf(srcData, srcData.length + 1);
+            System.arraycopy(data, 0, data, 1, srcData.length);
+            data[0] = length;
+
+            return data;
+        } else {
+            // length of length = BX
+            // prefix = [BX, [length]]
+            int tmpLength = srcData.length;
+            byte byteNum = 0;
+            while (tmpLength != 0) {
+                ++byteNum;
+                tmpLength = tmpLength >> 8;
+            }
+            byte[] lenBytes = new byte[byteNum];
+            for (int i = 0; i < byteNum; ++i) {
+                lenBytes[byteNum - 1 - i] = (byte) ((srcData.length >> (8 * i)) & 0xFF);
+            }
+            // first byte = F7 + bytes.length
+            byte[] data = Arrays.copyOf(srcData, srcData.length + 1 + byteNum);
+            System.arraycopy(data, 0, data, 1 + byteNum, srcData.length);
+            data[0] = (byte) (OFFSET_LONG_ITEM + byteNum);
+            System.arraycopy(lenBytes, 0, data, 1, lenBytes.length);
+
+            return data;
+        }
+    }
+
+    public static byte[] encodeBigInteger(BigInteger srcBigInteger) {
+        if(srcBigInteger == BigInteger.ZERO)
+            return encodeByte((byte)0);
+        else
+            return encodeElement(asUnsignedByteArray(srcBigInteger));
+    }
+
+    public static byte[] encodeList(byte[]... elements) {
+
+        int totalLength = 0;
+        for (int i = 0; i < elements.length; ++i) {
+            totalLength += elements[i].length;
+        }
+
+        byte[] data;
+        int copyPos = 0;
+        if (totalLength < SIZE_THRESHOLD) {
+
+            data = new byte[1 + totalLength];
+            data[0] = (byte) (OFFSET_SHORT_LIST + totalLength);
+            copyPos = 1;
+        } else {
+            // length of length = BX
+            // prefix = [BX, [length]]
+            int tmpLength = totalLength;
+            byte byteNum = 0;
+            while (tmpLength != 0) {
+                ++byteNum;
+                tmpLength = tmpLength >> 8;
+            }
+            tmpLength = totalLength;
+            byte[] lenBytes = new byte[byteNum];
+            for (int i = 0; i < byteNum; ++i) {
+                lenBytes[byteNum - 1 - i] = (byte) ((tmpLength >> (8 * i)) & 0xFF);
+            }
+            // first byte = F7 + bytes.length
+            data = new byte[1 + lenBytes.length + totalLength];
+            data[0] = (byte) (OFFSET_LONG_LIST + byteNum);
+            System.arraycopy(lenBytes, 0, data, 1, lenBytes.length);
+
+            copyPos = lenBytes.length + 1;
+        }
+        for (int i = 0; i < elements.length; ++i) {
+            System.arraycopy(elements[i], 0, data, copyPos, elements[i].length);
+            copyPos += elements[i].length;
+        }
+        return data;
     }
 }
