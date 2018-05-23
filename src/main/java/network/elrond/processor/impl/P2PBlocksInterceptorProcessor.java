@@ -5,7 +5,6 @@ import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.data.Block;
-import network.elrond.data.BlockService;
 import network.elrond.p2p.AppP2PManager;
 import network.elrond.processor.AppProcessor;
 import network.elrond.processor.AppProcessors;
@@ -20,7 +19,6 @@ public class P2PBlocksInterceptorProcessor implements AppProcessor {
 
     private Logger logger = LoggerFactory.getLogger(AppProcessors.class);
     private static String CHANNEL_NAME = "BLOCKS";
-    BlockService blks = AppServiceProvider.getBlockService();
 
     @Override
     public void process(Application application) throws IOException {
