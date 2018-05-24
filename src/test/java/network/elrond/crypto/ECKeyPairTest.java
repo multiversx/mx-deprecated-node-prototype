@@ -6,7 +6,7 @@ import org.junit.Test;
 public class ECKeyPairTest {
 
     @Test
-    public void TestKeyPairDefaultConstruction(){
+    public void TestKeyPairDefaultConstruction() {
         ECKeyPair keyPair = new ECKeyPair();
 
         PrivateKey privateKey = keyPair.getPrivateKey();

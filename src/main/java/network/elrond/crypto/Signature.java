@@ -10,7 +10,7 @@ public class Signature {
     public Signature() {
         signature = new byte[0];
         commitment = new byte[0];
-        signature = new byte[0];
+        challenge = new byte[0];
     }
 
     public Signature(byte[] signature) {
@@ -26,20 +26,37 @@ public class Signature {
     }
 
     public byte[] getSignature() {
-        return signature.clone();
+        byte[] result = signature;
+
+        if (0 != signature.length) {
+            result = signature.clone();
+        }
+
+        return result;
     }
 
     public byte[] getCommitment() {
-        return commitment.clone();
+        byte[] result = commitment;
+
+        if (0 != commitment.length) {
+            result = commitment.clone();
+        }
+        return result;
     }
 
     public byte[] getChallenge() {
-        return challenge.clone();
+        byte[] result = challenge;
+
+        if (0 != challenge.length) {
+            result = challenge.clone();
+        }
+
+        return result;
     }
 
     public boolean setSignature(byte[] signature) {
 
-        if (null == signature || (new BigInteger(signature)).equals(BigInteger.ZERO)) {
+        if (0 == signature.length || (new BigInteger(signature)).equals(BigInteger.ZERO)) {
             return false;
         }
 
@@ -50,7 +67,7 @@ public class Signature {
 
     public boolean setCommitment(byte[] commitment) {
 
-        if (null == commitment || (new BigInteger(commitment)).equals(BigInteger.ZERO)) {
+        if (0 == commitment.length || (new BigInteger(commitment)).equals(BigInteger.ZERO)) {
             return false;
         }
 
@@ -60,7 +77,7 @@ public class Signature {
     }
 
     public boolean setChallenge(byte[] challenge) {
-        if (null == challenge || (new BigInteger(challenge)).equals(BigInteger.ZERO)) {
+        if (0 == challenge.length || (new BigInteger(challenge)).equals(BigInteger.ZERO)) {
             return false;
         }
 

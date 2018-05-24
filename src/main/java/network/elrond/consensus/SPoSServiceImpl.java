@@ -71,7 +71,7 @@ public class SPoSServiceImpl implements SPoSService {
 
     /**
      * The method computes the score for each validator and multiply its entrance in the output list
-     * The score is an integer from 0 to Util.MAX_RATING and 0 means it appears once in the list, 1 twice and so on
+     * The score is an integer from 0 to Util.MAX_SCORE and 0 means it appears once in the list, 1 twice and so on
      * @param cleanedUpListObject the objcet that holds the input data of the cleaned up list
      *                            (call method generateCleanupList first)
      * @return the weighted validators list
@@ -95,8 +95,8 @@ public class SPoSServiceImpl implements SPoSService {
             if (cleanedUpListObject.maxStake.compareTo(Util.MIN_STAKE) == 0) {
                 v.setScoreStake(0);
             } else {
-                //(current_stake - minStake) * Util.MAX_RATING / (maxStake - minStake)
-                int sStake = (v.getStake().subtract(Util.MIN_STAKE)).multiply(BigInteger.valueOf(Util.MAX_RATING)).
+                //(current_stake - minStake) * Util.MAX_SCORE / (maxStake - minStake)
+                int sStake = (v.getStake().subtract(Util.MIN_STAKE)).multiply(BigInteger.valueOf(Util.MAX_SCORE)).
                         divide(cleanedUpListObject.maxStake.subtract(Util.MIN_STAKE)).intValue();
                 v.setScoreStake(sStake);
             }
@@ -104,8 +104,8 @@ public class SPoSServiceImpl implements SPoSService {
             if (cleanedUpListObject.maxRating == cleanedUpListObject.minRating) {
                 v.setScoreRating(0);
             } else {
-                //(current_rating - minRating) * Util.MAX_RATING / (maxRating - minRating)
-                int sRating = (v.getRating() - cleanedUpListObject.minRating) * Util.MAX_RATING /
+                //(current_rating - minRating) * Util.MAX_SCORE / (maxRating - minRating)
+                int sRating = (v.getRating() - cleanedUpListObject.minRating) * Util.MAX_SCORE /
                         (cleanedUpListObject.maxRating - cleanedUpListObject.minRating);
                 v.setScoreRating(sRating);
             }

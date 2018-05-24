@@ -71,8 +71,8 @@ public class TransactionTest {
             buff[i] = (byte) i;
         }
         tx.setData(buff);
-        tx.setPubKey(Util.byteArrayToHexString(pbKey.getEncoded()));
-        tx.setSendAddress(Util.getAddressFromPublicKey(pbKey.getEncoded()));
+        tx.setPubKey(Util.byteArrayToHexString(pbKey.getValue()));
+        tx.setSendAddress(Util.getAddressFromPublicKey(pbKey.getValue()));
         tx.setReceiverAddress("0x0000000000000000000000000000000000000000");
         tx.setNonce(BigInteger.ZERO);
         tx.setValue(BigInteger.TEN.pow(8)); //1 ERD
@@ -99,8 +99,8 @@ public class TransactionTest {
             buff[i] = (byte) i;
         }
         tx.setData(buff);
-        tx.setPubKey(Util.byteArrayToHexString(pbKey.getEncoded()));
-        tx.setSendAddress(Util.getAddressFromPublicKey(pbKey.getEncoded()));
+        tx.setPubKey(Util.byteArrayToHexString(pbKey.getQ().getEncoded(true)));
+        tx.setSendAddress(Util.getAddressFromPublicKey(pbKey.getQ().getEncoded(true)));
         tx.setReceiverAddress("0x0000000000000000000000000000000000000000");
         tx.setNonce(BigInteger.ZERO);
         tx.setValue(BigInteger.TEN.pow(8)); //1 ERD
@@ -113,9 +113,9 @@ public class TransactionTest {
         tx2.setGasLimit(BigInteger.ONE);
 
         System.out.println(serializationService.encodeJSON(tx2));
+        TestCase.assertTrue(transactionService.verifyTransaction(tx));
+        TestCase.assertFalse(transactionService.verifyTransaction(tx2));
 
-        TestCase.assertEquals(true, transactionService.verifyTransaction(tx));
-        TestCase.assertEquals(false, transactionService.verifyTransaction(tx2));
     }
 
 }

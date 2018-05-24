@@ -1,20 +1,18 @@
 package network.elrond.core;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.SecureRandom;
-import java.util.Arrays;
-
 import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.bouncycastle.jcajce.provider.digest.SHA3.DigestSHA3;
 import org.bouncycastle.util.encoders.Base64;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.Arrays;
+
 public class Util {
     public static final int VERIFIER_GROUP_SIZE = 21;
     public static String CRT_PUB_KEY = "0xA8";
-    public static final int MAX_RATING = 10;
+    public static final int MAX_SCORE = 10;
     //base cryptoeconomics:
     //  1 ERD  = 1000 mERDs (mili-ERDs)
     //  1 mERD = 1000 uERDs (micro-ERDs)
@@ -111,7 +109,17 @@ public class Util {
         return(new String(Base64.encode(buff)));
     }
 
-    public static String getHashEncoded64(byte[] data){
-        return(new String(Base64.encode(data)));
+    public static String getHashEncoded64(byte[] data) {
+        return (new String(Base64.encode(data)));
+    }
+
+    /**
+     * Throws an IllegalArgumentException in case boolean expression is not true
+     *
+     * @param test    boolean expression
+     * @param message string message to be given as argument to the exception in case of failure
+     */
+    public static void check(boolean test, String message) {
+        if (!test) throw new IllegalArgumentException(message);
     }
 }

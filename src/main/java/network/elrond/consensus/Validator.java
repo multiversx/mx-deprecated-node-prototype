@@ -1,7 +1,8 @@
 package network.elrond.consensus;
 
-import java.math.BigInteger;
 import network.elrond.core.Util;
+
+import java.math.BigInteger;
 
 /**
  * The Validator class implements the node that can be part of consensus
@@ -35,16 +36,10 @@ public class Validator {
      * @param answer node's answer in consensus
      * @param stake node's locked stake as sERDs
      * @param rating node's rating value
-     * @param scoreStake computed stake score
-     * @param scoreRating computed rating score
      */
     public Validator(String pubKey, String ip, ConsensusAnswerType answer, BigInteger stake, int rating,
                      int scoreStake, int scoreRating){
-        this.pubKey = pubKey;
-        this.ip = ip;
-        this.answer = answer;
-        this.stake = stake;
-        this.rating = rating;
+        this(pubKey, ip, answer, stake, rating);
         this.scoreRating = scoreRating;
         this.scoreStake = scoreStake;
     }
@@ -58,9 +53,7 @@ public class Validator {
      * @param rating node's rating value
      */
     public Validator(String pubKey, String ip, ConsensusAnswerType answer, BigInteger stake, int rating) {
-        this.pubKey = pubKey;
-        this.ip = ip;
-        this.answer = answer;
+        this(pubKey, ip, answer);
         this.stake = stake;
         this.rating = rating;
         scoreRating = 0;
@@ -74,6 +67,9 @@ public class Validator {
      * @param answer node's answer in consensus
      */
     public Validator(String pubKey, String ip, ConsensusAnswerType answer) {
+        if(pubKey == null || pubKey.isEmpty()){
+            throw new IllegalArgumentException("pubkey cannot be null!");
+        }
         this.pubKey = pubKey;
         this.ip = ip;
         this.answer = answer;
@@ -103,22 +99,16 @@ public class Validator {
      */
     public Validator(Validator src) {
         if (src == null) {
-            this.pubKey = "";
-            this.answer = ConsensusAnswerType.NOT_AVAILABLE;
-            this.ip = "";
-            stake = BigInteger.ZERO;
-            rating = 0;
-            scoreRating = 0;
-            scoreStake = 0;
-        } else {
-            this.pubKey = src.getPubKey();
-            this.answer = src.getAnswer();
-            this.ip = src.getIP();
-            this.stake = src.getStake();
-            this.rating = src.getRating();
-            this.scoreRating = src.scoreRating;
-            this.scoreStake = src.scoreStake;
+            throw new IllegalArgumentException("src cannot be null");
         }
+        this.pubKey = src.getPubKey();
+        this.answer = src.getAnswer();
+        this.ip = src.getIP();
+        this.stake = src.getStake();
+        this.rating = src.getRating();
+        this.scoreRating = src.scoreRating;
+        this.scoreStake = src.scoreStake;
+
     }
 
     /**
@@ -208,8 +198,8 @@ public class Validator {
     public int getScoreRating() {
         if (scoreRating < 0) {
             return (0);
-        } else if (scoreRating > Util.MAX_RATING) {
-            return (Util.MAX_RATING);
+        } else if (scoreRating > Util.MAX_SCORE) {
+            return (Util.MAX_SCORE);
         } else {
             return (scoreRating);
         }
@@ -231,8 +221,8 @@ public class Validator {
     public int getScoreStake() {
         if (scoreStake < 0) {
             return (0);
-        } else if (scoreStake > Util.MAX_RATING) {
-            return (Util.MAX_RATING);
+        } else if (scoreStake > Util.MAX_SCORE) {
+            return (Util.MAX_SCORE);
         } else {
             return (scoreStake);
         }
