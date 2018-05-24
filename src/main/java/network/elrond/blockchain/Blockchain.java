@@ -43,11 +43,6 @@ public class Blockchain implements Serializable {
         return (BlockchainPersistenceUnit<H, B>) blockchain.get(type);
     }
 
-    public <H extends Object, B> DB getDatabase(BlockchainUnitType type) {
-        BlockchainPersistenceUnit<H, B> unit = getUnit(type);
-        return unit.database;
-    }
-
     public <H extends Object, B> Class<B> getClazz(BlockchainUnitType type) {
         BlockchainPersistenceUnit<H, B> unit = getUnit(type);
         return unit.clazz;
@@ -63,7 +58,7 @@ public class Blockchain implements Serializable {
 
     public void flush() {
         for (BlockchainUnitType key : blockchain.keySet()) {
-            blockchain.get(key).cache.clear();
+            blockchain.get(key).getCache().clear();
         }
 
     }

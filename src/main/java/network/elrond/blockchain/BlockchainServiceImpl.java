@@ -23,7 +23,7 @@ public class BlockchainServiceImpl implements BlockchainService {
 
         BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
         P2PConnection connection = blockchain.getConnection();
-        LRUMap<H, B> cache = unit.cache;
+        LRUMap<H, B> cache = unit.getCache();
 
         if (cache.contains(hash)) {
             return true;
@@ -51,9 +51,9 @@ public class BlockchainServiceImpl implements BlockchainService {
         BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
         P2PConnection connection = blockchain.getConnection();
 
-        unit.cache.put(hash, object);
+        unit.getCache().put(hash, object);
         String strJSONData = AppServiceProvider.getSerializationService().encodeJSON(object);
-        unit.database.put(bytes(hash.toString()), bytes(strJSONData));
+        unit.put(bytes(hash.toString()), bytes(strJSONData));
 
         if (!isOffline(connection)) {
             AppServiceProvider.getP2PObjectService().put(connection, hash.toString(), strJSONData);
@@ -76,7 +76,7 @@ public class BlockchainServiceImpl implements BlockchainService {
         BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
         P2PConnection connection = blockchain.getConnection();
 
-        LRUMap<H, B> cache = unit.cache;
+        LRUMap<H, B> cache = unit.getCache();
 
         boolean exists = cache.get(hash) != null;
         if (!exists) {
@@ -105,7 +105,7 @@ public class BlockchainServiceImpl implements BlockchainService {
     }
 
     private <B, H extends Object> B getDataFromDatabase(H hash, BlockchainPersistenceUnit<H, B> unit) {
-        byte[] data = unit.database.get(bytes(hash.toString()));
+        byte[] data = unit.get(bytes(hash.toString()));
         if (data == null) {
             return null;
         }
