@@ -3,7 +3,6 @@ package network.elrond.application;
 
 import network.elrond.account.Accounts;
 import network.elrond.blockchain.Blockchain;
-import network.elrond.data.Transaction;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PConnection;
 
@@ -18,7 +17,7 @@ public class AppState implements Serializable {
 
     private Blockchain blockchain;
 
-    private Accounts<?> accounts;
+    private Accounts accounts;
 
     private P2PConnection connection;
     private Map<String, P2PBroadcastChanel> channels = new HashMap<>();
@@ -56,11 +55,11 @@ public class AppState implements Serializable {
         return blockchain;
     }
 
-    public Accounts<?> getAccounts() {
+    public Accounts getAccounts() {
         return accounts;
     }
 
-    public void setAccounts(Accounts<?> accounts) {
+    public void setAccounts(Accounts accounts) {
         this.accounts = accounts;
     }
 

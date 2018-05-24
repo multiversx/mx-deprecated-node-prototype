@@ -1,10 +1,15 @@
 package network.elrond.data;
 
-public interface TransactionService {
+import network.elrond.blockchain.Blockchain;
 
-    //byte[] getHash(Transaction tx, boolean withSig);
+import java.io.IOException;
+import java.util.List;
+
+public interface TransactionService {
 
     void signTransaction(Transaction tx, byte[] privateKeysBytes);
 
     boolean verifyTransaction(Transaction tx);
+
+    List<Transaction> getTransactions(Blockchain blockchain, Block block) throws IOException, ClassNotFoundException;
 }

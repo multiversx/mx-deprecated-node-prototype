@@ -7,10 +7,9 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
+import org.bouncycastle.util.encoders.Base64;
 
 import java.io.IOException;
-
-import static com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter.serializeAllExcept;
 
 public class SerializationServiceImpl implements SerializationService {
 
@@ -76,4 +75,11 @@ public class SerializationServiceImpl implements SerializationService {
         }
         return (Util.SHA3.digest(json.getBytes()));
     }
+
+    @Override
+    public String getHashString(Object object, boolean withSig) {
+        return new String(Base64.encode(getHash(object, true)));
+    }
+
+
 }

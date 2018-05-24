@@ -1,16 +1,12 @@
 package network.elrond.account;
 
 import junit.framework.TestCase;
-import network.elrond.account.AccountState;
-import network.elrond.account.AccountStateService;
-import network.elrond.account.Accounts;
-import network.elrond.account.AccountsContext;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.SerializationService;
 import network.elrond.data.Transaction;
-import network.elrond.data.TransactionExecutionService;
+import network.elrond.data.ExecutionService;
 import network.elrond.data.TransactionService;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
@@ -25,7 +21,7 @@ public class AccountStateTest {
     TransactionService transactionService = AppServiceProvider.getTransactionService();
     AccountStateService accountStateService = AppServiceProvider.getAccountStateService();
     SerializationService serializationService = AppServiceProvider.getSerializationService();
-    TransactionExecutionService transactionExecutionService = AppServiceProvider.getTransactionExecutionService();
+    ExecutionService transactionExecutionService = AppServiceProvider.getExecutionService();
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -53,7 +49,7 @@ public class AccountStateTest {
 
         AccountsContext context = new AccountsContext();
         context.setDatabasePath("test");
-        Accounts<String> accounts = new Accounts<>(context);
+        Accounts accounts = new Accounts(context);
 
 
         TestCase.assertFalse(transactionExecutionService.processTransaction(accounts, null));

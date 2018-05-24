@@ -23,7 +23,7 @@ public class AccountStateServiceImpl implements AccountStateService {
 
 
     @Override
-    public synchronized <A extends String> AccountState getOrCreateAccountState(A address, Accounts<A> accounts) throws IOException, ClassNotFoundException {
+    public synchronized AccountState getOrCreateAccountState(String address, Accounts accounts) throws IOException, ClassNotFoundException {
         AccountState state = getAccountState(address, accounts);
         if (state == null) {
             setAccountState(address, new AccountState(), accounts);
@@ -33,10 +33,10 @@ public class AccountStateServiceImpl implements AccountStateService {
     }
 
     @Override
-    public synchronized <A extends String> AccountState getAccountState(A address, Accounts<A> accounts) throws IOException, ClassNotFoundException {
-        AccountsPersistenceUnit<A, AccountState> unit = accounts.getAccountsPersistenceUnit();
+    public synchronized AccountState getAccountState(String address, Accounts accounts) {
+        AccountsPersistenceUnit<String, AccountState> unit = accounts.getAccountsPersistenceUnit();
 
-        LRUMap<A, AccountState> cache = unit.cache;
+        LRUMap<String, AccountState> cache = unit.cache;
 
         boolean exists = cache.get(address) != null;
         if (!exists) {
@@ -50,12 +50,12 @@ public class AccountStateServiceImpl implements AccountStateService {
 
 
     @Override
-    public synchronized <A extends String> void rollbackAccountStates(Accounts<A> accounts) {
+    public synchronized void rollbackAccountStates(Accounts accounts) {
 
-        AccountsPersistenceUnit<A, AccountState> unit = accounts.getAccountsPersistenceUnit();
+        AccountsPersistenceUnit<String, AccountState> unit = accounts.getAccountsPersistenceUnit();
         unit.queue.clear();
 
-        for (A address : unit.cache.keySet()) {
+        for (String address : unit.cache.keySet()) {
 
             AccountState state = unit.cache.get(address);
             if (!state.isDirty()) {
@@ -71,12 +71,12 @@ public class AccountStateServiceImpl implements AccountStateService {
 
 
     @Override
-    public synchronized <A extends String> void commitAccountStates(Accounts<A> accounts) {
-        AccountsPersistenceUnit<A, AccountState> unit = accounts.getAccountsPersistenceUnit();
+    public synchronized void commitAccountStates(Accounts accounts) {
+        AccountsPersistenceUnit<String, AccountState> unit = accounts.getAccountsPersistenceUnit();
 
-        for (Fun.Tuple2<A, AccountState> entry = unit.queue.poll(); entry != null; entry = unit.queue.poll()) {
+        for (Fun.Tuple2<String, AccountState> entry = unit.queue.poll(); entry != null; entry = unit.queue.poll()) {
 
-            A address = entry.a;
+            String address = entry.a;
             AccountState state = entry.b;
             if (!state.isDirty()) {
                 continue;
@@ -90,14 +90,14 @@ public class AccountStateServiceImpl implements AccountStateService {
 
 
     @Override
-    public synchronized <A extends String> void setAccountState(A address, AccountState state, Accounts<A> accounts) {
+    public synchronized void setAccountState(String address, AccountState state, Accounts accounts) {
 
 
         if (address == null || state == null) {
             return;
         }
 
-        AccountsPersistenceUnit<A, AccountState> unit = accounts.getAccountsPersistenceUnit();
+        AccountsPersistenceUnit<String, AccountState> unit = accounts.getAccountsPersistenceUnit();
         unit.cache.put(address, state);
         state.setDirty(true);
         unit.scheduleForPersistence(address, state);
@@ -122,14 +122,14 @@ public class AccountStateServiceImpl implements AccountStateService {
         return AppServiceProvider.getSerializationService().decodeJSON(strJSONData, clazz);
     }
 
-    public byte[] getRLPencoded(AccountState accountState){
+    public byte[] getRLPencoded(AccountState accountState) {
         byte[] nonce = RLP.encodeBigInteger(accountState.getNonce());
         byte[] balance = RLP.encodeBigInteger(accountState.getBalance());
 
         return RLP.encodeList(nonce, balance);
     }
 
-    public AccountState getAccountStateFromRLP(byte[] rlpData){
+    public AccountState getAccountStateFromRLP(byte[] rlpData) {
         AccountState accountState = new AccountState();
 
         RLPList items = (RLPList) RLP.decode2(rlpData).get(0);

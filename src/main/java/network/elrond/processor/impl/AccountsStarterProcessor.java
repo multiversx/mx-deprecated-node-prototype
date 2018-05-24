@@ -29,7 +29,7 @@ public class AccountsStarterProcessor implements AppProcessor {
         AccountsContext accountContext = new AccountsContext();
         accountContext.setDatabasePath(databasePath.toString());
 
-        Accounts<String> accounts = new Accounts(accountContext);
+        Accounts accounts = new Accounts(accountContext);
         state.setAccounts(accounts);
     }
 

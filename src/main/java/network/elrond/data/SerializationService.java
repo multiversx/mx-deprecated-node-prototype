@@ -9,4 +9,6 @@ public interface SerializationService {
     <T> T decodeJSON(String strJSONData, Class<T> clazz);
 
     byte[] getHash(Object object, boolean withSig);
+
+    String getHashString(Object object, boolean withSig);
 }

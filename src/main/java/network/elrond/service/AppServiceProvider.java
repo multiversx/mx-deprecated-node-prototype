@@ -52,7 +52,7 @@ public class AppServiceProvider {
         putService(SignatureService.class, new SchnorrSignatureServiceImpl());
         putService(MultiSignatureService.class, new BNMultiSignatureServiceImpl());
         putService(AccountStateService.class, new AccountStateServiceImpl());
-        putService(TransactionExecutionService.class, new TransactionExecutionServiceImpl());
+        putService(ExecutionService.class, new ExecutionServiceImpl());
     }
 
     public static P2PBroadcastService getP2PBroadcastService() {
@@ -95,8 +95,8 @@ public class AppServiceProvider {
         return getService(AccountStateService.class);
     }
 
-    public static TransactionExecutionService getTransactionExecutionService() {
-        return getService(TransactionExecutionService.class);
+    public static ExecutionService getExecutionService() {
+        return getService(ExecutionService.class);
     }
 
     private static BlockchainService appPersistanceService = new AppPersistanceServiceImpl();

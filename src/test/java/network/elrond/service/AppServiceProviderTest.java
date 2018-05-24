@@ -66,7 +66,7 @@ public class AppServiceProviderTest {
 
     @Test
     public void TestDefaultTransactionExecutionService (){
-        Assert.assertEquals(TransactionExecutionServiceImpl.class, AppServiceProvider.getTransactionExecutionService().getClass());
+        Assert.assertEquals(ExecutionServiceImpl.class, AppServiceProvider.getExecutionService().getClass());
     }
 
     @Test(expected = NullPointerException.class)

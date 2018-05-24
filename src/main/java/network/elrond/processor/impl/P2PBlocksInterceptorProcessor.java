@@ -1,6 +1,7 @@
 package network.elrond.processor.impl;
 
 import network.elrond.Application;
+import network.elrond.account.Accounts;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
@@ -28,6 +29,7 @@ public class P2PBlocksInterceptorProcessor implements AppProcessor {
 
         AppState state = application.getState();
         Blockchain blockchain = state.getBlockchain();
+        Accounts accounts = state.getAccounts();
 
         Thread threadProcessBlockHashes = new Thread(() -> {
 
@@ -45,6 +47,8 @@ public class P2PBlocksInterceptorProcessor implements AppProcessor {
 
                     if (block != null) {
                         AppServiceProvider.getBlockchainService().put(block.getNonce(), hash, blockchain, BlockchainUnitType.BLOCK_INDEX);
+                        AppServiceProvider.getExecutionService().processBlock(accounts, blockchain, block);
+
                         logger.info("Got new block " + hash);
                     } else {
                         logger.info("Block not found !!!: " + hash);

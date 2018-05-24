@@ -6,15 +6,15 @@ public interface AccountStateService {
 
     byte[] getHash(AccountState state);
 
-    <A extends String> void rollbackAccountStates(Accounts<A> accounts);
+    void rollbackAccountStates(Accounts accounts);
 
-    <A extends String> void commitAccountStates(Accounts<A> accounts);
+    void commitAccountStates(Accounts accounts);
 
-    <A extends String> void setAccountState(A address, AccountState state, Accounts<A> accounts) throws IOException;
+    void setAccountState(String address, AccountState state, Accounts accounts) throws IOException;
 
-    <A extends String> AccountState getAccountState(A address, Accounts<A> accounts) throws IOException, ClassNotFoundException;
+    AccountState getAccountState(String address, Accounts accounts) throws IOException, ClassNotFoundException;
 
-    <A extends String> AccountState getOrCreateAccountState(A address, Accounts<A> accounts) throws IOException, ClassNotFoundException;
+    AccountState getOrCreateAccountState(String address, Accounts accounts) throws IOException, ClassNotFoundException;
 
     byte[] getRLPencoded(AccountState accountState);
 

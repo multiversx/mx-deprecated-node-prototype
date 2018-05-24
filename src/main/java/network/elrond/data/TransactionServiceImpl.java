@@ -1,5 +1,7 @@
 package network.elrond.data;
 
+import network.elrond.blockchain.Blockchain;
+import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
@@ -9,7 +11,10 @@ import network.elrond.service.AppServiceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The TransactionServiceImpl class implements TransactionService and is used to maintain Transaction objects
@@ -105,4 +110,21 @@ public class TransactionServiceImpl implements TransactionService {
 
         return (true);
     }
+
+    @Override
+    public List<Transaction> getTransactions(Blockchain blockchain, Block block) throws IOException, ClassNotFoundException {
+
+        List<Transaction> transactions = new ArrayList<>();
+
+        List<byte[]> hashes = block.getListTXHashes();
+        for (byte[] hash : hashes) {
+            String hashString = Util.getHashEncoded64(hash);
+            Transaction transaction = AppServiceProvider.getBlockchainService().get(hashString, blockchain, BlockchainUnitType.TRANSACTION);
+            transactions.add(transaction);
+        }
+
+        return transactions;
+    }
+
+
 }
