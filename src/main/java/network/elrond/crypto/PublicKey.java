@@ -1,5 +1,6 @@
 package network.elrond.crypto;
 
+import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
@@ -15,15 +16,10 @@ import java.security.NoSuchProviderException;
 import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
 
-public class PublicKey implements ECPublicKey {
+public class PublicKey {
     private ECPoint q;
     private boolean initialized;
-
-    static {
-        if (Security.getProvider("BC") == null) {
-            Security.addProvider(new BouncyCastleProvider());
-        }
-    }
+    private static final ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
     /**
      * Default constructor
@@ -39,17 +35,16 @@ public class PublicKey implements ECPublicKey {
      * @param key the public point Q encoding, as a byte array
      */
     public PublicKey(byte[] key) {
-        X9ECParameters ecParameters = PrivateKey.getEcParameters();
         ECParameterSpec ecParameterSpec = new ECParameterSpec(
-                ecParameters.getCurve(),
-                ecParameters.getG(),
-                ecParameters.getN(),
-                ecParameters.getH(),
-                ecParameters.getSeed());
-        ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(ecParameters.getCurve().decodePoint(key), ecParameterSpec);
-        KeyFactory keyFactory = null;
+                ecCryptoService.getCurve(),
+                ecCryptoService.getG(),
+                ecCryptoService.getN(),
+                ecCryptoService.getH(),
+                ecCryptoService.getSeed());
+        ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(ecCryptoService.getCurve().decodePoint(key), ecParameterSpec);
+        KeyFactory keyFactory;
         try {
-            keyFactory = KeyFactory.getInstance("EC", "BC");
+            keyFactory = KeyFactory.getInstance(ecCryptoService.getAlgorithm(), ecCryptoService.getProvider());
             q = ((ECPublicKey) keyFactory.generatePublic(publicKeySpec)).getQ();
             initialized = true;
         } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
@@ -64,17 +59,20 @@ public class PublicKey implements ECPublicKey {
      * @param privateKey the corresponding private key
      */
     public PublicKey(PrivateKey privateKey) {
-        X9ECParameters ecParameters = PrivateKey.getEcParameters();
         ECDomainParameters domainParameters = new ECDomainParameters(
-                ecParameters.getCurve(),
-                ecParameters.getG(),
-                ecParameters.getN(),
-                ecParameters.getH(),
-                ecParameters.getSeed());
+                ecCryptoService.getCurve(),
+                ecCryptoService.getG(),
+                ecCryptoService.getN(),
+                ecCryptoService.getH(),
+                ecCryptoService.getSeed());
 
         // compute the public key based on the private key
         q = domainParameters.getG().multiply(new BigInteger(privateKey.getValue()));
         initialized = true;
+    }
+
+    public void setFromPrivateKey(byte[] privateKey) {
+        PrivateKey privKey = new PrivateKey(privateKey);
     }
 
     /**
@@ -95,18 +93,27 @@ public class PublicKey implements ECPublicKey {
      * @throws InvalidKeySpecException
      */
     public void setPublicKey(byte[] key) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
-        X9ECParameters ecParameters = PrivateKey.getEcParameters();
         ECParameterSpec ecParameterSpec = new ECParameterSpec(
-                ecParameters.getCurve(),
-                ecParameters.getG(),
-                ecParameters.getN(),
-                ecParameters.getH(),
-                ecParameters.getSeed());
-        ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(ecParameters.getCurve().decodePoint(key), ecParameterSpec);
-        KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC");
+                ecCryptoService.getCurve(),
+                ecCryptoService.getG(),
+                ecCryptoService.getN(),
+                ecCryptoService.getH(),
+                ecCryptoService.getSeed());
+        ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(ecCryptoService.getCurve().decodePoint(key), ecParameterSpec);
+        KeyFactory keyFactory = KeyFactory.getInstance(ecCryptoService.getAlgorithm(), ecCryptoService.getProvider());
         q = ((ECPublicKey) keyFactory.generatePublic(publicKeySpec)).getQ();
         initialized = true;
     }
+
+    /**
+     * Get the encoded form of public key as a byte array
+     *
+     * @return a byte array representing the signature
+     */
+    public byte[] getValue() {
+        return q.getEncoded(true);
+    }
+
 
     /**
      * Checks if public key is valid
@@ -130,35 +137,8 @@ public class PublicKey implements ECPublicKey {
         return initialized;
     }
 
-    @Override
     public ECPoint getQ() {
         return (initialized) ? q : null;
     }
 
-    @Override
-    public String getAlgorithm() {
-        return "EC";
-    }
-
-    @Override
-    public String getFormat() {
-        return null;
-    }
-
-    @Override
-    public byte[] getEncoded() {
-        return (initialized) ? q.getEncoded(true) : null;
-    }
-
-    @Override
-    public ECParameterSpec getParameters() {
-        X9ECParameters ecParameters = PrivateKey.getEcParameters();
-        ECParameterSpec ecParameterSpec = new ECParameterSpec(
-                ecParameters.getCurve(),
-                ecParameters.getG(),
-                ecParameters.getN(),
-                ecParameters.getH());
-
-        return ecParameterSpec;
-    }
 }

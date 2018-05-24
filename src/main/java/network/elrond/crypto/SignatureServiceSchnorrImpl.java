@@ -1,14 +1,16 @@
 package network.elrond.crypto;
 
 import network.elrond.core.Util;
+import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.math.ec.ECPoint;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
-public class SchnorrSignatureServiceImpl implements SignatureService {
+public class SignatureServiceSchnorrImpl implements SignatureService {
     private static SecureRandom secureRandom;
+    private static ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
     static {
         byte[] seed;
@@ -33,26 +35,25 @@ public class SchnorrSignatureServiceImpl implements SignatureService {
      * @return signature object containing signature, commitment and challenge
      */
     @Override
-    public Signature signMessage(byte[] message, PrivateKey privateKey, PublicKey publicKey) {
+    public Signature signMessage(byte[] message, byte[] privateKey, byte[] publicKey) {
         // Choose random private part r
         byte[] r = new byte[32];
         BigInteger rInteger;
         ECPoint basePointG;
         ECPoint commitPointR;
         byte[] challengeC;
+        BigInteger challengeCInteger;
         boolean cValid = false;
         boolean calculated = false;
         Signature signature = new Signature();
+        BigInteger sInteger;
 
-        // check message not null
-        if (message == null || message.length == 0) {
-            return signature;
-        }
-
-        // check private key is valid
-        if (!privateKey.isValid()) {
-            return signature;
-        }
+        Util.check(message != null, "message != null");
+        Util.check(privateKey != null, "privateKey != null");
+        Util.check(publicKey != null, "publicKey != null");
+        Util.check(message.length != 0, "message.length != 0");
+        Util.check(privateKey.length != 0, "privateKey.length != 0");
+        Util.check(publicKey.length != 0, "publicKey.length != 0");
 
         while (!cValid || !calculated) {
             secureRandom.nextBytes(r);
@@ -68,28 +69,26 @@ public class SchnorrSignatureServiceImpl implements SignatureService {
             rInteger = new BigInteger(r);
 
             // Calculate public part (commit point) Q = k*G
-            basePointG = PrivateKey.getEcParameters().getG();
+            basePointG = ecCryptoService.getG();
             commitPointR = basePointG.multiply(rInteger);
 
             // Calculate the challenge
             // First concatenate R, public key and message
-            challengeC = Util.concatenateArrays(commitPointR.getEncoded(true), publicKey.getEncoded());
+            challengeC = Util.concatenateArrays(commitPointR.getEncoded(true), publicKey);
             challengeC = Util.concatenateArrays(challengeC, message);
             // Calculate the digest of the byte array to getAccountState the challenge
             challengeC = Util.SHA3.digest(challengeC);
-            BigInteger challengeCInteger = new BigInteger(challengeC);
+            challengeCInteger = new BigInteger(challengeC);
+
             if (challengeCInteger.equals(BigInteger.ZERO)) {
                 cValid = false;
-                System.out.println("challenge zero: " + Util.byteArrayToHexString(challengeCInteger.toByteArray()));
             } else {
                 cValid = true;
-
                 // Compute signature as s = r - c * privateKey
-                BigInteger sInteger = rInteger.subtract(challengeCInteger.multiply(new BigInteger(privateKey.getValue())));
+                sInteger = rInteger.subtract(challengeCInteger.multiply(new BigInteger(privateKey)));
 
                 if (sInteger.equals(BigInteger.ZERO)) {
                     calculated = false;
-                    System.out.println("signature zero: " + Util.byteArrayToHexString(sInteger.toByteArray()));
                 } else {
                     signature.setSignature(sInteger.toByteArray());
                     signature.setChallenge(challengeC);
@@ -111,7 +110,7 @@ public class SchnorrSignatureServiceImpl implements SignatureService {
      * @return signature object containing signature, commitment and challenge
      */
     @Override
-    public Signature signMessage(String message, PrivateKey privateKey, PublicKey publicKey) {
+    public Signature signMessage(String message, byte[] privateKey, byte[] publicKey) {
         return signMessage(message.getBytes(), privateKey, publicKey);
     }
 
@@ -128,44 +127,34 @@ public class SchnorrSignatureServiceImpl implements SignatureService {
      * @return true if the public key verifies the signature and message, false otherwise
      */
     @Override
-    public boolean verifySignature(byte[] signature, byte[] challenge, byte[] message, PublicKey publicKey) {
+    public boolean verifySignature(byte[] signature, byte[] challenge, byte[] message, byte[] publicKey) {
         ECPoint basePointG;
         ECPoint commitPointR;
         byte[] c2;
         BigInteger challengeInt;
 
-        // check signature
-        if (null == signature) {
-            return false;
-        }
-
-        // check challenge
-        if (null == challenge) {
-            return false;
-        }
-
-        // check message
-        if (null == message || 0 == message.length) {
-            return false;
-        }
-
-        // check public key
-        if (null == publicKey || (new BigInteger(publicKey.getEncoded())).equals(BigInteger.ZERO)) {
-            return false;
-        }
+        Util.check(signature != null, "signature != null");
+        Util.check(challenge != null, "challenge != null");
+        Util.check(message != null, "message != null");
+        Util.check(publicKey != null, "publicKey != null");
+        Util.check(signature.length != 0, "signature.length != 0");
+        Util.check(challenge.length != 0, "challenge.length != 0");
+        Util.check(message.length != 0, "message.length != 0");
+        Util.check(publicKey.length != 0, "publicKey.length != 0");
 
         // Compute R = s*G + c*publicKey
-        basePointG = PrivateKey.getEcParameters().getG();
+        ECPoint publicKeyPoint = (new PublicKey(publicKey)).getQ();
+        basePointG = ecCryptoService.getG();
         challengeInt = new BigInteger(challenge);
         commitPointR = basePointG.multiply(new BigInteger(signature))
-                .add(publicKey.getQ().multiply(challengeInt));
+                .add(publicKeyPoint.multiply(challengeInt));
 
         if (commitPointR.isInfinity()) {
             return false;
         }
 
         // if not at infinity calculate c2 = H(R, publicKey, message)
-        c2 = Util.concatenateArrays(commitPointR.getEncoded(true), publicKey.getEncoded());
+        c2 = Util.concatenateArrays(commitPointR.getEncoded(true), publicKey);
         c2 = Util.concatenateArrays(c2, message);
         c2 = Util.SHA3.digest(c2);
 
@@ -180,7 +169,7 @@ public class SchnorrSignatureServiceImpl implements SignatureService {
      * @return true if the public key verifies the signature and message, false otherwise
      */
     @Override
-    public boolean verifySignature(byte[] signature, byte[] challenge, String message, PublicKey publicKey) {
+    public boolean verifySignature(byte[] signature, byte[] challenge, String message, byte[] publicKey) {
         return verifySignature(signature, challenge, message.getBytes(), publicKey);
     }
 }

@@ -28,7 +28,7 @@ public class PublicKeyTest {
         // verify the pair is valid
         TestCase.assertEquals(
                 "0302fa311fac6aa56c1a5b08e6c9bcea32fc1939cbef5010c2ab853afb5563976c",
-                Util.byteArrayToHexString(pubk.getEncoded()));
+                Util.byteArrayToHexString(pubk.getQ().getEncoded(true)));
     }
 
     @Test
@@ -42,12 +42,12 @@ public class PublicKeyTest {
 
         try {
             // sets public key ECPoint from encoded byte array
-            pubk2.setPublicKey(pubk.getEncoded());
+            pubk2.setPublicKey(pubk.getQ().getEncoded(true));
 
             // test encoded form form both public keys is the same
             TestCase.assertEquals(
                     "021a50a33eb266ace1597f4399086b15b989d5c303dfc4ada06454dd7325062286",
-                    Util.byteArrayToHexString(pubk2.getEncoded()));
+                    Util.byteArrayToHexString(pubk2.getQ().getEncoded(true)));
         } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
             TestCase.fail(e.toString());
         }

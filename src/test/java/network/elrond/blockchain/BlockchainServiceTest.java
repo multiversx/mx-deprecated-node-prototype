@@ -35,7 +35,6 @@ public class BlockchainServiceTest {
                     System.out.println("Reached " + Integer.toString(i) + " blocks...");
                 }
 
-
                 blockchainService.put(new String(Base64.encode(serializationService.getHash(blk, true))), blk, blkc, BlockchainUnitType.BLOCK);
             }
         } catch (Exception ex) {

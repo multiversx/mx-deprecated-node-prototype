@@ -111,7 +111,17 @@ public class Util {
         return(new String(Base64.encode(buff)));
     }
 
-    public static String getHashEncoded64(byte[] data){
-        return(new String(Base64.encode(data)));
+    public static String getHashEncoded64(byte[] data) {
+        return (new String(Base64.encode(data)));
+    }
+
+    /**
+     * Throws an IllegalArgumentException in case boolean expression is not true
+     *
+     * @param test    boolean expression
+     * @param message string message to be given as argument to the exception in case of failure
+     */
+    public static void check(boolean test, String message) {
+        if (!test) throw new IllegalArgumentException(message);
     }
 }

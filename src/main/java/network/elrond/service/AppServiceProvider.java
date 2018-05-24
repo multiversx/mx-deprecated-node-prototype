@@ -10,10 +10,7 @@ import network.elrond.consensus.SPoSService;
 import network.elrond.consensus.SPoSServiceImpl;
 import network.elrond.consensus.ValidatorService;
 import network.elrond.consensus.ValidatorServiceImpl;
-import network.elrond.crypto.BNMultiSignatureServiceImpl;
-import network.elrond.crypto.MultiSignatureService;
-import network.elrond.crypto.SchnorrSignatureServiceImpl;
-import network.elrond.crypto.SignatureService;
+import network.elrond.crypto.*;
 import network.elrond.data.*;
 import network.elrond.p2p.P2PBroadcastService;
 import network.elrond.p2p.P2PBroadcastServiceImpl;
@@ -32,7 +29,7 @@ public class AppServiceProvider {
     }
 
     public static <T> void putService(Class<T> key, T value) {
-        if(value == null){
+        if (value == null) {
             throw new NullPointerException();
         }
         values.put(key, value);
@@ -50,8 +47,9 @@ public class AppServiceProvider {
         putService(ValidatorService.class, new ValidatorServiceImpl());
         putService(SPoSService.class, new SPoSServiceImpl());
         putService(BlockchainService.class, new BlockchainServiceImpl());
-        putService(SignatureService.class, new SchnorrSignatureServiceImpl());
-        putService(MultiSignatureService.class, new BNMultiSignatureServiceImpl());
+        putService(ECCryptoService.class, new ECCryptoServiceSecp256k1Impl());
+        putService(SignatureService.class, new SignatureServiceSchnorrImpl());
+        putService(MultiSignatureService.class, new MultiSignatureServiceBNImpl());
         putService(AccountStateService.class, new AccountStateServiceImpl());
         putService(TransactionExecutionService.class, new TransactionExecutionServiceImpl());
         putService(AppPersistenceService.class, new AppPersistenceServiceImpl());
@@ -86,6 +84,10 @@ public class AppServiceProvider {
         return getService(BlockchainService.class);
     }
 
+    public static ECCryptoService getECCryptoService() {
+        return getService(ECCryptoService.class);
+    }
+
     public static SignatureService getSignatureService() {
         return getService(SignatureService.class);
     }
@@ -110,5 +112,4 @@ public class AppServiceProvider {
         return getService(BootstrapService.class
         );
     }
-
 }

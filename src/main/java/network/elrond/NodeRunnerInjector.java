@@ -77,8 +77,8 @@ public class NodeRunnerInjector {
         rdm.nextBytes(buff);
 
         tx.setData(buff);
-        tx.setPubKey(Util.byteArrayToHexString(pbKey.getEncoded()));
-        tx.setSendAddress(Util.getAddressFromPublicKey(pbKey.getEncoded()));
+        tx.setPubKey(Util.byteArrayToHexString(pbKey.getQ().getEncoded(true)));
+        tx.setSendAddress(Util.getAddressFromPublicKey(pbKey.getQ().getEncoded(true)));
         tx.setReceiverAddress("0x0000000000000000000000000000000000000000");
         tx.setNonce(BigInteger.ZERO);
         tx.setValue(BigInteger.TEN.pow(8)); //1 ERD

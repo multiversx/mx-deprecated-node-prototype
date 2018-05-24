@@ -68,9 +68,9 @@ public class AccountStateTest {
         tx.setNonce(BigInteger.ZERO);
         //2 ERDs
         tx.setValue(BigInteger.valueOf(10).pow(8).multiply(BigInteger.valueOf(2)));
-        tx.setSendAddress(Util.getAddressFromPublicKey(pbKeySender.getEncoded()));
-        tx.setReceiverAddress(Util.getAddressFromPublicKey(pbKeyRecv.getEncoded()));
-        tx.setPubKey(Util.byteArrayToHexString(pbKeySender.getEncoded()));
+        tx.setSendAddress(Util.getAddressFromPublicKey(pbKeySender.getValue()));
+        tx.setReceiverAddress(Util.getAddressFromPublicKey(pbKeyRecv.getValue()));
+        tx.setPubKey(Util.byteArrayToHexString(pbKeySender.getValue()));
 
         transactionService.signTransaction(tx, pvKeySender.getValue());
 
@@ -88,7 +88,7 @@ public class AccountStateTest {
 
 
         //Test tx nonce mismatch
-        AccountState acsSender = accountStateService.getOrCreateAccountState(Util.getAddressFromPublicKey(pbKeySender.getEncoded()), accounts);
+        AccountState acsSender = accountStateService.getOrCreateAccountState(Util.getAddressFromPublicKey(pbKeySender.getValue()), accounts);
 
         //mint 100 ERDs
         acsSender.setBalance(BigInteger.TEN.pow(10));
