@@ -35,11 +35,6 @@ public class AppServiceProviderTest {
     }
 
     @Test
-    public void TestDefaultBlockService (){
-        Assert.assertEquals(BlockServiceImpl.class, AppServiceProvider.getBlockService().getClass());
-    }
-
-    @Test
     public void TestDefaultValidatorService (){
         Assert.assertEquals(ValidatorServiceImpl.class, AppServiceProvider.getValidatorService().getClass());
     }

@@ -20,6 +20,7 @@ import java.math.BigInteger;
  */
 public class TransactionServiceImpl implements TransactionService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private SerializationService serializationService = AppServiceProvider.getSerializationService();
 
 
     /**
@@ -30,10 +31,10 @@ public class TransactionServiceImpl implements TransactionService {
      * @param withSig whether or not to include the signature parts in hash
      * @return hash as byte array
      */
-    public byte[] getHash(Transaction tx, boolean withSig) {
-        String json = AppServiceProvider.getSerializationService().encodeJSON(tx);
-        return (Util.SHA3.digest(json.getBytes()));
-    }
+//    public byte[] getHash(Transaction tx, boolean withSig) {
+//        String json = AppServiceProvider.getSerializationService().encodeJSON(tx);
+//        return (Util.SHA3.digest(json.getBytes()));
+//    }
 
     /**
      * Signs the transaction using private keys
@@ -43,7 +44,7 @@ public class TransactionServiceImpl implements TransactionService {
      */
     public void signTransaction(Transaction tx, byte[] privateKeysBytes) {
         PrivateKey pvkey = new PrivateKey(privateKeysBytes);
-        byte[] hashNoSigLocal = getHash(tx, false);
+        byte[] hashNoSigLocal = serializationService.getHash(tx, false);
         PublicKey pbkey = new PublicKey(pvkey);
         Signature sig;
 
@@ -81,7 +82,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         //test 3. verify the signature
-        byte[] message = getHash(tx, false);
+        byte[] message = serializationService.getHash(tx, false);
         SignatureService schnorr = AppServiceProvider.getSignatureService();
         Signature sig = new Signature();
         if ((tx.getSig1() != null) && (tx.getSig1().length > 0) &&

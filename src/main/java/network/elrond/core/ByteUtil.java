@@ -1,11 +1,28 @@
 package network.elrond.core;
 
+import org.bouncycastle.util.encoders.Hex;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 
 public class ByteUtil {
 
     public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
+
+    /**
+     * Convert a byte-array into a hex String.<br>
+     * Works similar to {@link Hex#toHexString}
+     * but allows for <code>null</code>
+     *
+     * @param data - byte-array to convert to a hex-string
+     * @return hex representation of the data.<br>
+     * 		Returns an empty String if the input is <code>null</code>
+     *
+     * @see Hex#toHexString
+     */
+    public static String toHexString(byte[] data) {
+        return data == null ? "" : Hex.toHexString(data);
+    }
 
     /**
      * Creates a copy of bytes and appends b to the end of it

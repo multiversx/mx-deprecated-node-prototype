@@ -2,6 +2,7 @@ package network.elrond.service;
 
 import network.elrond.account.AccountStateService;
 import network.elrond.account.AccountStateServiceImpl;
+import network.elrond.blockchain.AppPersistanceServiceImpl;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainServiceImpl;
 import network.elrond.consensus.SPoSService;
@@ -45,7 +46,6 @@ public class AppServiceProvider {
         putService(SerializationService.class, new SerializationServiceImpl());
         putService(P2PObjectService.class, new P2PObjectServiceImpl());
         putService(TransactionService.class, new TransactionServiceImpl());
-        putService(BlockService.class, new BlockServiceImpl());
         putService(ValidatorService.class, new ValidatorServiceImpl());
         putService(SPoSService.class, new SPoSServiceImpl());
         putService(BlockchainService.class, new BlockchainServiceImpl());
@@ -69,10 +69,6 @@ public class AppServiceProvider {
 
     public static TransactionService getTransactionService() {
         return getService(TransactionService.class);
-    }
-
-    public static BlockService getBlockService() {
-        return getService(BlockService.class);
     }
 
     public static ValidatorService getValidatorService() {
@@ -101,6 +97,18 @@ public class AppServiceProvider {
 
     public static TransactionExecutionService getTransactionExecutionService() {
         return getService(TransactionExecutionService.class);
+    }
+
+    private static BlockchainService appPersistanceService = new AppPersistanceServiceImpl();
+
+    public static BlockchainService getAppPersistanceService() {
+        return appPersistanceService;
+    }
+
+    private static BootstrapService bootstrapService = new BootstrapServiceImpl();
+
+    public static BootstrapService getBootstrapService() {
+        return bootstrapService;
     }
 
 }

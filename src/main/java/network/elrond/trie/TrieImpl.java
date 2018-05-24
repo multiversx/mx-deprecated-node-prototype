@@ -110,7 +110,7 @@ public class TrieImpl implements Trie {
 
         this.root = this.insertOrDelete(this.root, k, value);
         if(logger.isDebugEnabled()) {
-            logger.debug("Added key {} and value {}", Hex.toHexString(key), Hex.toHexString(value));
+            logger.info("Added key {} and value {}", Hex.toHexString(key), Hex.toHexString(value));
             logger.debug("New root-hash: {}", Hex.toHexString(this.getRootHash()));
         }
     }

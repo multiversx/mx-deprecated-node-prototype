@@ -7,8 +7,6 @@ import org.junit.Test;
 import java.math.BigInteger;
 
 public class DataBlockTest {
-    BlockService blks = AppServiceProvider.getBlockService();
-
     @Test
     public void testBlock() {
         DataBlock db = new DataBlock();

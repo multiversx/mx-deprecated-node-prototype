@@ -1,11 +1,10 @@
 /.idea
 /target
 /bin
-/blockchain.block.data-test
-/blockchain.transaction.data-test
-.project
-/blockchain.block.data
-/blockchain.transaction.data
+/blockchain.block*
+/blockchain.settings*
+/blockchain.transaction*
 /consumer
 /producer
-
+/test
+.project

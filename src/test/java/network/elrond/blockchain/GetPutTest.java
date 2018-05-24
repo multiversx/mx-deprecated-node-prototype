@@ -7,7 +7,6 @@ import network.elrond.application.AppState;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
-import network.elrond.data.BlockService;
 import network.elrond.data.SerializationService;
 import network.elrond.data.Transaction;
 import network.elrond.data.TransactionService;
@@ -22,7 +21,7 @@ import java.util.Scanner;
 
 public class GetPutTest {
     private TransactionService transactionService = AppServiceProvider.getTransactionService();
-    private BlockService blkServ = AppServiceProvider.getBlockService();
+    private SerializationService serializationService = AppServiceProvider.getSerializationService();
 
     private PrivateKey pvKeySender = new PrivateKey("a");
     private PublicKey pbKeySender = new PublicKey(pvKeySender);
@@ -30,7 +29,7 @@ public class GetPutTest {
     private PrivateKey pvKeyRecv = new PrivateKey("b");
     private PublicKey pbKeyRecv = new PublicKey(pvKeyRecv);
 
-    @Test
+    //@Test
     public void mainProducer() throws Exception {
 
         AppContext context = new AppContext();
@@ -92,7 +91,7 @@ public class GetPutTest {
         }
     }
 
-    @Test
+    //@Test
     public void mainConsumer() throws Exception {
 
         AppContext context = new AppContext();
@@ -115,12 +114,15 @@ public class GetPutTest {
 
             AppState state = app.getState();
 
-            BlockchainService blkcServ = AppServiceProvider.getBlockchainService();
+            BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
+
 
             BlockchainContext blockchainContext = new BlockchainContext();
             blockchainContext.setConnection(state.getConnection());
             blockchainContext.setDatabasePath(BlockchainUnitType.BLOCK, "blockchain.block.data-test");
             blockchainContext.setDatabasePath(BlockchainUnitType.TRANSACTION, "blockchain.transaction.data-test");
+            blockchainContext.setDatabasePath(BlockchainUnitType.SETTINGS, "blockchain.settings.data-test");
+
             Blockchain blockchain = null;
 
             try {
@@ -148,7 +150,7 @@ public class GetPutTest {
                     Transaction tx = null;
 
                     try {
-                        tx = blkcServ.get(hash, blockchain, BlockchainUnitType.TRANSACTION);
+                        tx = blockchainService.get(hash, blockchain, BlockchainUnitType.TRANSACTION);
 
 
                         if (tx != null) {
@@ -210,6 +212,6 @@ public class GetPutTest {
     }
 
     private String getTxHash(Transaction tx) {
-        return (new String(Base64.encode(transactionService.getHash(tx, true))));
+        return (new String(Base64.encode(serializationService.getHash(tx, true))));
     }
 }

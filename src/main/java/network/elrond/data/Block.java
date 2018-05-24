@@ -1,5 +1,11 @@
 package network.elrond.data;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +17,7 @@ import java.util.List;
  * @version 1.0
  * @since   2018-05-14
  */
+@JsonFilter("filterSigs")
 public class Block {
     //block counter
     protected BigInteger nonce;

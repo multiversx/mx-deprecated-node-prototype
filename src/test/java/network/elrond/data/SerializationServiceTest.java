@@ -56,15 +56,17 @@ public class SerializationServiceTest {
         blk.setListTXHashes(listHashes);
 
         SerializationService serv = AppServiceProvider.getSerializationService();
-        BlockService blkServ = AppServiceProvider.getBlockService();
 
         String strEncoded = serv.encodeJSON(blk);
+        String strEncoded2 = serv.encodeJSON(blk, "filterSigs","sig1", "sig2");
 
         System.out.println(strEncoded);
+        System.out.println(strEncoded2);
 
         Block blk2 = serv.decodeJSON(strEncoded, DataBlock.class);
 
         TestCase.assertEquals(AppServiceProvider.getSerializationService().encodeJSON(blk), AppServiceProvider.getSerializationService().encodeJSON(blk2));
+        TestCase.assertEquals(false, strEncoded2.contains("sig1"));
     }
 
 
