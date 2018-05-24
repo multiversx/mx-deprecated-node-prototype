@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public interface AccountStateService {
 
-    byte[] getHash(AccountState state);
+//    byte[] getHash(AccountState state);
 
     <A extends String> void rollbackAccountStates(Accounts<A> accounts);
 
@@ -16,8 +16,7 @@ public interface AccountStateService {
 
     <A extends String> AccountState getOrCreateAccountState(A address, Accounts<A> accounts) throws IOException, ClassNotFoundException;
 
-    byte[] getRLPencoded(AccountState accountState);
+    byte[] getRLPencoded(AccountState state);
 
     AccountState getAccountStateFromRLP(byte[] rlpData);
-
 }

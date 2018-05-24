@@ -30,4 +30,28 @@ public class AccountsPersistenceUnit<K, V> extends AbstractPersistenceUnit<K, V>
     public byte[] get(byte[] key) {
         return trie.get(key);
     }
+
+    public void delete(byte[] key) {
+        trie.delete(key);
+    }
+
+    public void commit() {
+        trie.sync();
+    }
+
+    public void rollBack() {
+        trie.undo();
+    }
+
+    public void cleanCache() {
+        ((TrieImpl)trie).cleanCache();
+    }
+
+    public TrieImpl copyTrie() {
+        return ((TrieImpl)trie).copy();
+    }
+
+    public byte[] getRootHash() {
+        return trie.getRootHash();
+    }
 }
