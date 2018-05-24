@@ -16,8 +16,8 @@ public class ValidatorServiceImpl implements  ValidatorService{
             score = 0;
         }
 
-        if (score > Util.MAX_RATING) {
-            score = Util.MAX_RATING;
+        if (score > Util.MAX_SCORE) {
+            score = Util.MAX_SCORE;
         }
 
         return (score);

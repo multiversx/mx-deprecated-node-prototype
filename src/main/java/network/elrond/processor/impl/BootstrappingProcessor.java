@@ -2,7 +2,6 @@ package network.elrond.processor.impl;
 
 import network.elrond.Application;
 import network.elrond.application.AppState;
-import network.elrond.blockchain.AppPersistanceServiceImpl;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.blockchain.SettingsType;

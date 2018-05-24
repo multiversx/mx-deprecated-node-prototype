@@ -94,7 +94,7 @@ public class AppServiceProviderTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void TestPutNullService(){
+    public void TestPutNullServiceShouldThrowException(){
         AppServiceProvider.InjectDefaultServices();
         AppServiceProvider.putService(TransactionService.class, null);
     }
