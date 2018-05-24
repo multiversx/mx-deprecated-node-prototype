@@ -31,7 +31,7 @@ public class BootstrappingProcessor implements AppProcessor {
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
         BlockchainService appPersistanceService = AppServiceProvider.getAppPersistanceService();
         TransactionService transactionService = AppServiceProvider.getTransactionService();
-        BlockService blockService = AppServiceProvider.getBlockService();
+        //BlockService blockService = AppServiceProvider.getBlockService();
         SerializationService serializationService = AppServiceProvider.getSerializationService();
 
         P2PBroadcastChanel chanTx = state.getChanel("TRANSACTIONS");
@@ -72,7 +72,7 @@ public class BootstrappingProcessor implements AppProcessor {
 
                     //put locally not broadcasting it
                     try {
-                        String strHashGB = new String(Base64.encode(blockService.getHash(gb, true)));
+                        String strHashGB = new String(Base64.encode(serializationService.getHash(gb, true)));
                         appPersistanceService.put(strHashGB, gb, state.getBlockchain(), BlockchainUnitType.BLOCK);
                         appPersistanceService.put(gb.getNonce(), strHashGB, state.getBlockchain(), BlockchainUnitType.BLOCK_INDEX);
                         bootstrapService.setMaxBlockSizeLocal(state.getBlockchain(), BigInteger.ONE);
@@ -129,7 +129,7 @@ public class BootstrappingProcessor implements AppProcessor {
                         Block blk = serializationService.decodeJSON(strJSON, Block.class);
 
                         try {
-                            blockService.executeBlock(state.getBlockchain(), blk);
+                            //blockService.executeBlock(state.getBlockchain(), blk);
                         } catch (Exception ex) {
                             logger.warn("Can not process block hash " + strHashBlock + "! " + ex.getMessage());
                             break;

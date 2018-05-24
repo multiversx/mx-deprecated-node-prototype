@@ -13,15 +13,18 @@ import java.math.BigInteger;
 //import java.nio.charset.StandardCharsets;
 //import java.nio.file.Files;
 import java.util.*;
+import org.bouncycastle.util.encoders.Base64;
 
 import network.elrond.account.AccountState;
 //import network.elrond.data.Block;
 //import org.ethereum.db.DatabaseImpl;
+import network.elrond.account.AccountStateService;
 import network.elrond.db.MockDB;
 //import org.json.simple.JSONArray;
 //import org.json.simple.JSONObject;
 //import org.json.simple.parser.JSONParser;
 //import org.json.simple.parser.ParseException;
+import network.elrond.service.AppServiceProvider;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -61,6 +64,8 @@ public class TrieTest {
     @Test
     public void testAccountState() {
 
+        AccountStateService accountStateService = AppServiceProvider.getAccountStateService();
+
         String address = "0x00";
         BigInteger value = BigInteger.valueOf(5);
 
@@ -68,13 +73,13 @@ public class TrieTest {
         accountState.addToBalance(value);
 
         TrieImpl merkleTrieOfState = new TrieImpl(null);
-        merkleTrieOfState.update(address.getBytes(), accountState.getEncoded());
+        merkleTrieOfState.update(address.getBytes(), accountStateService.getRLPencoded(accountState));
 
-        System.out.println("roothash:  => " + merkleTrieOfState.getRootHash().toString());
+        System.out.println("roothash:  => " + new String(Base64.encode(merkleTrieOfState.getRootHash())));
 //        Block block = new Block();
 //        block.setAppStateHash(state.getRootHash());
 
-        AccountState accountStateDecoded = new AccountState(merkleTrieOfState.get(address));
+        AccountState accountStateDecoded = accountStateService.getAccountStateFromRLP(merkleTrieOfState.get(address));
 
         assertEquals(accountState.getNonce(), accountStateDecoded.getNonce());
         assertEquals(accountState.getBalance(), accountStateDecoded.getBalance());

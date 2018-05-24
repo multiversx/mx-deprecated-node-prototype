@@ -16,4 +16,8 @@ public interface AccountStateService {
 
     <A extends String> AccountState getOrCreateAccountState(A address, Accounts<A> accounts) throws IOException, ClassNotFoundException;
 
+    byte[] getRLPencoded(AccountState accountState);
+
+    AccountState getAccountStateFromRLP(byte[] rlpData);
+
 }

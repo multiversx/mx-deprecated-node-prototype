@@ -1,11 +1,14 @@
 package network.elrond.account;
 
 import network.elrond.core.LRUMap;
+import network.elrond.core.RLP;
+import network.elrond.core.RLPList;
 import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
 import org.mapdb.Fun;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 import static org.iq80.leveldb.impl.Iq80DBFactory.asString;
 import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
@@ -117,6 +120,25 @@ public class AccountStateServiceImpl implements AccountStateService {
             return null;
         }
         return AppServiceProvider.getSerializationService().decodeJSON(strJSONData, clazz);
+    }
+
+    public byte[] getRLPencoded(AccountState accountState){
+        byte[] nonce = RLP.encodeBigInteger(accountState.getNonce());
+        byte[] balance = RLP.encodeBigInteger(accountState.getBalance());
+
+        return RLP.encodeList(nonce, balance);
+    }
+
+    public AccountState getAccountStateFromRLP(byte[] rlpData){
+        AccountState accountState = new AccountState();
+
+        RLPList items = (RLPList) RLP.decode2(rlpData).get(0);
+        accountState.setNonce(new BigInteger(1, ((items.get(0).getRLPData()) == null ? new byte[]{0} :
+                items.get(0).getRLPData())));
+        accountState.setBalance(new BigInteger(1, ((items.get(1).getRLPData()) == null ? new byte[]{0} :
+                items.get(1).getRLPData())));
+
+        return (accountState);
     }
 
 

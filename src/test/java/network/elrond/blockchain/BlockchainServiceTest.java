@@ -20,6 +20,7 @@ public class BlockchainServiceTest {
 
         BlockchainContext context = new BlockchainContext();
         context.setDatabasePath(BlockchainUnitType.BLOCK, "blockchain.block.data-test");
+        context.setDatabasePath(BlockchainUnitType.BLOCK_INDEX, "blockchain.block-index.data-test");
         context.setDatabasePath(BlockchainUnitType.TRANSACTION, "blockchain.transaction.data-test");
 
         context.setDatabasePath(BlockchainUnitType.SETTINGS, "blockchain.settings.data-test");
@@ -27,7 +28,7 @@ public class BlockchainServiceTest {
         try {
             Blockchain blkc = new Blockchain(context);
 
-            for (int i = 0; i < 400; i++) {
+            for (int i = 0; i < 200; i++) {
                 Block blk = GenerateRandomBlock();
 
                 if (i % 100 == 0) {
