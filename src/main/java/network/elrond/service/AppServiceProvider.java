@@ -19,74 +19,84 @@ import network.elrond.p2p.P2PBroadcastServiceImpl;
 import network.elrond.p2p.P2PObjectService;
 import network.elrond.p2p.P2PObjectServiceImpl;
 
+import java.util.HashMap;
+import java.util.Map;
 
 public class AppServiceProvider {
 
-    private static P2PBroadcastService p2PBroadcastService = new P2PBroadcastServiceImpl();
+    private static final Map<Class<?>, Object> values = new HashMap<>();
+
+    static {
+        InjectDefaultServices();
+    }
+
+    public static <T> void putService(Class<T> key, T value) {
+        if(value == null){
+            throw new NullPointerException();
+        }
+        values.put(key, value);
+    }
+
+    public static <T> T getService(Class<T> key) {
+        return key.cast(values.get(key));
+    }
+
+    public static void InjectDefaultServices() {
+        putService(P2PBroadcastService.class, new P2PBroadcastServiceImpl());
+        putService(SerializationService.class, new SerializationServiceImpl());
+        putService(P2PObjectService.class, new P2PObjectServiceImpl());
+        putService(TransactionService.class, new TransactionServiceImpl());
+        putService(ValidatorService.class, new ValidatorServiceImpl());
+        putService(SPoSService.class, new SPoSServiceImpl());
+        putService(BlockchainService.class, new BlockchainServiceImpl());
+        putService(SignatureService.class, new SchnorrSignatureServiceImpl());
+        putService(MultiSignatureService.class, new BNMultiSignatureServiceImpl());
+        putService(AccountStateService.class, new AccountStateServiceImpl());
+        putService(TransactionExecutionService.class, new TransactionExecutionServiceImpl());
+    }
 
     public static P2PBroadcastService getP2PBroadcastService() {
-        return p2PBroadcastService;
+        return getService(P2PBroadcastService.class);
     }
-
-    private static SerializationService serializationService = new SerializationServiceImpl();
 
     public static SerializationService getSerializationService() {
-        return serializationService;
+        return getService(SerializationService.class);
     }
-
-    private static P2PObjectService p2PObjectService = new P2PObjectServiceImpl();
 
     public static P2PObjectService getP2PObjectService() {
-        return p2PObjectService;
+        return getService(P2PObjectService.class);
     }
-
-    private static TransactionService transactionService = new TransactionServiceImpl();
 
     public static TransactionService getTransactionService() {
-        return (transactionService);
+        return getService(TransactionService.class);
     }
-
-    private static ValidatorService validatorService = new ValidatorServiceImpl();
 
     public static ValidatorService getValidatorService() {
-        return validatorService;
+        return getService(ValidatorService.class);
     }
-
-    private static SPoSService sPoSService = new SPoSServiceImpl();
 
     public static SPoSService getSPoSService() {
-        return sPoSService;
+        return getService(SPoSService.class);
     }
-
-    private static BlockchainService blockchainService = new BlockchainServiceImpl();
 
     public static BlockchainService getBlockchainService() {
-        return blockchainService;
+        return getService(BlockchainService.class);
     }
-
-
-    private static SignatureService signatureService = new SchnorrSignatureServiceImpl();
 
     public static SignatureService getSignatureService() {
-        return signatureService;
+        return getService(SignatureService.class);
     }
-
-    private static MultiSignatureService multiSignatureService = new BNMultiSignatureServiceImpl();
 
     public static MultiSignatureService getMultiSignatureService() {
-        return multiSignatureService;
+        return getService(MultiSignatureService.class);
     }
-
-    private static AccountStateService accountStateService = new AccountStateServiceImpl();
 
     public static AccountStateService getAccountStateService() {
-        return accountStateService;
+        return getService(AccountStateService.class);
     }
 
-    private static TransactionExecutionService transactionExecutionService = new TransactionExecutionServiceImpl();
-
     public static TransactionExecutionService getTransactionExecutionService() {
-        return transactionExecutionService;
+        return getService(TransactionExecutionService.class);
     }
 
     private static BlockchainService appPersistanceService = new AppPersistanceServiceImpl();
