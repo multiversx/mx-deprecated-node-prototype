@@ -92,6 +92,8 @@ public class AccountStateTest {
 
         //mint 100 ERDs
         acsSender.setBalance(BigInteger.TEN.pow(10));
+        accountStateService.setAccountState(tx.getSendAddress(), acsSender, accounts); // PMS
+
         tx.setNonce(BigInteger.ONE);
         transactionService.signTransaction(tx, pvKeySender.getValue());
         TestCase.assertFalse(transactionExecutionService.processTransaction(accounts, tx));

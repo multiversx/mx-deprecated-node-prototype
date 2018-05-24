@@ -21,7 +21,6 @@ public class TransactionExecutionServiceImpl implements TransactionExecutionServ
             return false;
         }
 
-
         String strHash = new String(Base64.encode(serializationService.getHash(transaction, true)));
 
         if (!AppServiceProvider.getTransactionService().verifyTransaction(transaction)) {
@@ -48,14 +47,13 @@ public class TransactionExecutionServiceImpl implements TransactionExecutionServ
 
         //transfer asset
         receiverAccountState.setBalance(receiverAccountState.getBalance().add(transaction.getValue()));
+        AppServiceProvider.getAccountStateService().setAccountState(receiverAddress, receiverAccountState, accounts); // PMS
+
         senderAccountState.setBalance(senderAccountState.getBalance().subtract(transaction.getValue()));
         //increase sender nonce
         senderAccountState.setNonce(senderAccountState.getNonce().add(BigInteger.ONE));
+        AppServiceProvider.getAccountStateService().setAccountState(sendAddress, senderAccountState, accounts); // PMS
 
         return true;
-
-
     }
-
-
 }

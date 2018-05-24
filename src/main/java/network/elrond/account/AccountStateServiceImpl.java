@@ -23,18 +23,23 @@ public class AccountStateServiceImpl implements AccountStateService {
     @Override
     public synchronized <A extends String> AccountState getOrCreateAccountState(A address, Accounts<A> accounts) throws IOException, ClassNotFoundException {
         AccountState state = getAccountState(address, accounts);
-        if (state == null) {
-            setAccountState(address, new AccountState(), accounts);
-        }
 
+        if (state != null) return state;
+
+        setAccountState(address, new AccountState(), accounts);
         return getAccountState(address, accounts);
     }
 
     @Override
     public synchronized <A extends String> AccountState getAccountState(A address, Accounts<A> accounts) throws IOException, ClassNotFoundException {
+
+        if (address == null) return null;
+
         AccountsPersistenceUnit<A, AccountState> unit = accounts.getAccountsPersistenceUnit();
 
-        return getAccountStateFromRLP(unit.get(address.getBytes()));
+        byte[] rlpData = unit.get(address.getBytes());
+
+        return ((rlpData != null) ? getAccountStateFromRLP(rlpData) : null);
 
 //        LRUMap<A, AccountState> cache = unit.cache;
 //
@@ -129,6 +134,7 @@ public class AccountStateServiceImpl implements AccountStateService {
     }
 
     public AccountState getAccountStateFromRLP(byte[] rlpData){
+        if (rlpData == null || rlpData.length == 0) return null;
         AccountState accountState = new AccountState();
 
         RLPList items = (RLPList) RLP.decode2(rlpData).get(0);
