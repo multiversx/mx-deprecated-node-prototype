@@ -5,10 +5,95 @@ import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
-public class BNMultiSignatureTest {
+public class MultiSignatureBNTest {
+
+    @Test
+    public void testComputeCommitmentSecretNotZero() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        byte[] commitmentSecret = signatureService.computeCommitmentSecret();
+        BigInteger secret = new BigInteger(commitmentSecret);
+
+        TestCase.assertNotSame(BigInteger.ZERO, secret);
+    }
+
+    @Test
+    public void testComputeCommitmentNullSecret() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        byte[] commitmentSecret = null;
+
+        try {
+            signatureService.computeCommitment(commitmentSecret);
+            TestCase.fail("Exception expected but not thrown");
+        } catch (IllegalArgumentException ex) {
+            TestCase.assertEquals("commitmentSecret != null", ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testComputeCommitmentHash() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        byte[] commitment = signatureService.computeCommitment(signatureService.computeCommitmentSecret());
+        byte[] commitmentHash = signatureService.computeCommitmentHash(commitment);
+
+        TestCase.assertFalse(Arrays.equals(commitment, commitmentHash));
+    }
+
+    @Test
+    public void testValidateCommitmentValid() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        byte[] commitment = signatureService.computeCommitment(signatureService.computeCommitmentSecret());
+        byte[] commitmentHash = signatureService.computeCommitmentHash(commitment);
+
+        TestCase.assertTrue(signatureService.validateCommitment(commitment, commitmentHash));
+    }
+
+    @Test
+    public void testAggregateCommitmentsNullCommitments() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        long bitmap = 3;
+        ArrayList<byte[]> commitments = null;
+
+        try {
+            signatureService.aggregateCommitments(commitments, bitmap);
+            TestCase.fail("Exception expected but not thrown");
+        } catch (Exception ex) {
+            TestCase.assertEquals("commitments != null", ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testAggregateCommitmentsEmptyCommitments() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        long bitmap = 3;
+        ArrayList<byte[]> commitments = new ArrayList<>();
+
+        try {
+            signatureService.aggregateCommitments(commitments, bitmap);
+            TestCase.fail("Exception expected but not thrown");
+        } catch (Exception ex) {
+            TestCase.assertEquals("!commitments.isEmpty()", ex.getMessage());
+        }
+    }
+
+
+    @Test
+    public void testCalculateCommitmentEmptySecret() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        byte[] commitmentSecret = new byte[0];
+
+        try {
+            signatureService.computeCommitment(commitmentSecret);
+            TestCase.fail("Exception expected but not thrown");
+        } catch (IllegalArgumentException ex) {
+            TestCase.assertEquals("commitmentSecret.length != 0", ex.getMessage());
+        }
+    }
+
 
     @Test
     public void testSignVerify() {

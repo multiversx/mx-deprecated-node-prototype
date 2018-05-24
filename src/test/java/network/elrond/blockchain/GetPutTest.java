@@ -202,9 +202,9 @@ public class GetPutTest {
         transaction.setNonce(BigInteger.ZERO);
         //2 ERDs
         transaction.setValue(BigInteger.valueOf(10).pow(8).multiply(BigInteger.valueOf(value)));
-        transaction.setSendAddress(Util.getAddressFromPublicKey(pbKeySender.getEncoded()));
-        transaction.setReceiverAddress(Util.getAddressFromPublicKey(pbKeyRecv.getEncoded()));
-        transaction.setPubKey(Util.byteArrayToHexString(pbKeySender.getEncoded()));
+        transaction.setSendAddress(Util.getAddressFromPublicKey(pbKeySender.getValue()));
+        transaction.setReceiverAddress(Util.getAddressFromPublicKey(pbKeyRecv.getValue()));
+        transaction.setPubKey(Util.byteArrayToHexString(pbKeySender.getValue()));
 
         //transactionService.signTransaction(transaction, pvKeySender.getValue());
 

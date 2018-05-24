@@ -1,8 +1,7 @@
 package network.elrond.crypto;
 
 import network.elrond.core.Util;
-import org.bouncycastle.asn1.sec.SECNamedCurves;
-import org.bouncycastle.asn1.x9.X9ECParameters;
+import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.bouncycastle.crypto.params.ECDomainParameters;
@@ -14,21 +13,7 @@ import java.security.SecureRandom;
 
 public class PrivateKey {
     private byte[] privateKey;
-    //private BigInteger privateKey;
-    private static final X9ECParameters EC_PARAMETERS = SECNamedCurves.getByName("secp256k1");
-
-    public static BigInteger getCurveOrder() {
-        return EC_PARAMETERS.getN();
-    }
-
-    /**
-     * Getter for the used Elliptic Curve parameters
-     *
-     * @return the EC parameters
-     */
-    public static final X9ECParameters getEcParameters() {
-        return EC_PARAMETERS;
-    }
+    private static final ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
     /**
      * Default constructor
@@ -40,11 +25,11 @@ public class PrivateKey {
         ECKeyGenerationParameters keyParameters;
         ECKeyPairGenerator keyPairGenerator;
 
-        domainParameters = new ECDomainParameters(EC_PARAMETERS.getCurve(),
-                EC_PARAMETERS.getG(),
-                EC_PARAMETERS.getN(),
-                EC_PARAMETERS.getH(),
-                EC_PARAMETERS.getSeed());
+        domainParameters = new ECDomainParameters(ecCryptoService.getCurve(),
+                ecCryptoService.getG(),
+                ecCryptoService.getN(),
+                ecCryptoService.getH(),
+                ecCryptoService.getSeed());
 
         keyParameters = new ECKeyGenerationParameters(
                 domainParameters,
@@ -82,7 +67,7 @@ public class PrivateKey {
         // to be a valid private key it needs to verify:
         // 0 < pk < n, where n is the order of the largest prime order subgroup
         while (1 != seedInt.compareTo(BigInteger.ZERO) ||
-                0 <= seedInt.compareTo(getCurveOrder())) {
+                0 <= seedInt.compareTo(ecCryptoService.getN())) {
             seedArray = Util.SHA3.digest(seedArray);
             seedInt = new BigInteger(1, seedArray);
         }
@@ -100,7 +85,7 @@ public class PrivateKey {
         BigInteger privateKeyInt = new BigInteger(privateKey);
 
         if (1 != privateKeyInt.compareTo(BigInteger.ZERO) ||
-                0 <= privateKeyInt.compareTo(getCurveOrder())) {
+                0 <= privateKeyInt.compareTo(ecCryptoService.getN())) {
             return false;
         }
         return true;

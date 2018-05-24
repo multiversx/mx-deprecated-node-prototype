@@ -2,7 +2,7 @@ package network.elrond.crypto;
 
 
 import network.elrond.core.Util;
-import org.bouncycastle.asn1.x9.X9ECParameters;
+import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.math.ec.ECPoint;
 
 import java.math.BigInteger;
@@ -13,8 +13,9 @@ import java.util.Arrays;
 /**
  * Class implementing Belare and Neven Multi-signature
  */
-public class BNMultiSignatureServiceImpl implements MultiSignatureService {
+public class MultiSignatureServiceBNImpl implements MultiSignatureService {
     private static SecureRandom secureRandom;
+    private static ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
     static {
         byte[] seed;
@@ -26,11 +27,11 @@ public class BNMultiSignatureServiceImpl implements MultiSignatureService {
     /**
      * Default constructor
      */
-    public BNMultiSignatureServiceImpl() {
+    public MultiSignatureServiceBNImpl() {
     }
 
     /**
-     * Calculate the commitment secret
+     * Compute the commitment secret
      *
      * @return commitment secret as a byte array
      */
@@ -44,7 +45,7 @@ public class BNMultiSignatureServiceImpl implements MultiSignatureService {
         // make sure r is not 0
         // r below order of curve
         while (commitmentSecret.compareTo(BigInteger.ONE) < 0 ||
-                commitmentSecret.compareTo(PrivateKey.getEcParameters().getN()) >= 0) {
+                commitmentSecret.compareTo(ecCryptoService.getN()) >= 0) {
             r = Util.SHA3.digest(r);
             commitmentSecret = new BigInteger(r);
         }
@@ -52,19 +53,23 @@ public class BNMultiSignatureServiceImpl implements MultiSignatureService {
     }
 
     /**
-     * Calculate the commitment Point
+     * Compute the commitment Point
      *
      * @param commitmentSecret the commitment secret as a byte array
      * @return commitment as a byte array
      */
     @Override
     public byte[] computeCommitment(byte[] commitmentSecret) {
-        BigInteger secretInt = new BigInteger(commitmentSecret);
+        BigInteger secretInt;
         ECPoint basePointG;
         ECPoint commitmentPointR;
 
+        Util.check(commitmentSecret != null, "commitmentSecret != null");
+        Util.check(commitmentSecret.length != 0, "commitmentSecret.length != 0");
+
+        secretInt = new BigInteger(commitmentSecret);
         // compute commitment R = r*G
-        basePointG = PrivateKey.getEcParameters().getG();
+        basePointG = ecCryptoService.getG();
         commitmentPointR = basePointG.multiply(secretInt);
 
         return commitmentPointR.getEncoded(true);
@@ -80,6 +85,10 @@ public class BNMultiSignatureServiceImpl implements MultiSignatureService {
     public byte[] computeCommitmentHash(byte[] commitment) {
         // Hash function needs to be different than what is used
         // for challenge so use SHA256 for commitment
+
+        Util.check(commitment != null, "commitment != null");
+        Util.check(commitment.length != 0, "commitment.length != 0");
+
         return Util.SHA256.digest(commitment);
     }
 
@@ -92,7 +101,15 @@ public class BNMultiSignatureServiceImpl implements MultiSignatureService {
      */
     @Override
     public boolean validateCommitment(byte[] commitment, byte[] commitmentHash) {
-        byte[] computedHash = Util.SHA256.digest(commitment);
+        byte[] computedHash;
+
+        Util.check(commitment != null, "commitment != null");
+        Util.check(commitmentHash != null, "commitmentHash != null");
+        Util.check(commitment.length != 0, "commitment.length != 0");
+        Util.check(commitmentHash.length != 0, "commitmentHash.length != 0");
+
+        computedHash = Util.SHA256.digest(commitment);
+
         return Arrays.equals(computedHash, commitmentHash);
     }
 
@@ -107,14 +124,16 @@ public class BNMultiSignatureServiceImpl implements MultiSignatureService {
     public byte[] aggregateCommitments(ArrayList<byte[]> commitments, long bitmapCommitments) {
         int idx = 0;
         ECPoint aggregatedCommitment = null;
-        X9ECParameters ecParameters = PrivateKey.getEcParameters();
         ECPoint decodedCommitment;
         byte[] result = new byte[0];
+
+        Util.check(commitments != null, "commitments != null");
+        Util.check(!commitments.isEmpty(), "!commitments.isEmpty()");
 
         for (byte[] commitment : commitments) {
             if (0 != ((1 << idx) & bitmapCommitments)) {
                 // aggregate the commits
-                decodedCommitment = ecParameters.getCurve().decodePoint(commitment.clone());
+                decodedCommitment = ecCryptoService.getCurve().decodePoint(commitment.clone());
                 if (null == aggregatedCommitment) {
                     aggregatedCommitment = decodedCommitment;
                 } else {
@@ -142,6 +161,9 @@ public class BNMultiSignatureServiceImpl implements MultiSignatureService {
         int idx = 0;
         byte[] result = new byte[0];
 
+        Util.check(publicKeys != null, "publicKeys != null");
+        Util.check(!publicKeys.isEmpty(), "!publicKeys.isEmpty()");
+
         // computing <L'> as concatenation of participating signers public keys
         for (PublicKey key : publicKeys) {
             if (0 != ((1 << idx) & bitmapCommitments)) {
@@ -155,7 +177,7 @@ public class BNMultiSignatureServiceImpl implements MultiSignatureService {
     }
 
     /**
-     * Calculates the challenge according to Belare Naveen multi-signature algorithm:
+     * Computes the challenge according to Belare Naveen multi-signature algorithm:
      * H1(<L'>||Xi||R||m), where H1 is a Hashing function, e.g Sha3, Xi is the public key,
      * R is the aggregated commitment, and m is the message.
      *
@@ -172,8 +194,20 @@ public class BNMultiSignatureServiceImpl implements MultiSignatureService {
                                    byte[] aggregatedCommitment,
                                    byte[] message,
                                    long bitmapCommitments) {
-        byte[] challenge;
+        byte[] challenge = new byte[0];
         BigInteger challengeInt;
+
+        Util.check(signers != null, "signers != null");
+        Util.check(publicKey != null, "publicKey != null");
+        Util.check(aggregatedCommitment != null, "aggregatedCommitment != null");
+        Util.check(message != null, "message != null");
+        Util.check(!signers.isEmpty(), "!signers.isEmpty()");
+        Util.check(aggregatedCommitment.length != 0, "aggregatedCommitment.length != 0");
+        Util.check(message.length != 0, "message.length != 0");
+
+        if (0 == bitmapCommitments) {
+            return challenge;
+        }
 
         // computing <L'> as concatenation of participating signers public keys
         challenge = concatenatePublicKeys(signers, bitmapCommitments);
@@ -188,13 +222,13 @@ public class BNMultiSignatureServiceImpl implements MultiSignatureService {
         challengeInt = new BigInteger(1, challenge);
 
         //reduce the challenge modulo curve order
-        challengeInt = challengeInt.mod(PrivateKey.getCurveOrder());
+        challengeInt = challengeInt.mod(ecCryptoService.getN());
 
         return challengeInt.toByteArray();
     }
 
     /**
-     * Calculates the signature share associated to this private key according to formula:
+     * Computes the signature share associated to this private key according to formula:
      * s = ri + challenge * xi, where ri is the private part of the commitment, xi is own
      * private key, and challenge is the result of computeChallenge
      *
@@ -205,11 +239,21 @@ public class BNMultiSignatureServiceImpl implements MultiSignatureService {
      */
     @Override
     public byte[] computeSignatureShare(byte[] challenge, PrivateKey privateKey, byte[] commitmentSecret) {
-        BigInteger curveOrder = PrivateKey.getCurveOrder();
+        BigInteger curveOrder = ecCryptoService.getN();
         BigInteger sigShare;
-        BigInteger challengeInt = new BigInteger(challenge);
-        BigInteger privateKeyInt = new BigInteger(privateKey.getValue());
-        BigInteger commitmentSecretInt = new BigInteger(commitmentSecret);
+        BigInteger challengeInt;
+        BigInteger privateKeyInt;
+        BigInteger commitmentSecretInt;
+
+        Util.check(challenge != null, "challenge != null");
+        Util.check(privateKey != null, "privateKey != null");
+        Util.check(commitmentSecret != null, "commitmentSecret != null");
+        Util.check(challenge.length != 0, "challenge.length != 0");
+        Util.check(commitmentSecret.length != 0, "commitmentSecret.length != 0");
+
+        challengeInt = new BigInteger(challenge);
+        privateKeyInt = new BigInteger(privateKey.getValue());
+        commitmentSecretInt = new BigInteger(commitmentSecret);
         sigShare = commitmentSecretInt.add(challengeInt.multiply(privateKeyInt).mod(curveOrder)).mod(curveOrder);
 
         return sigShare.toByteArray();
@@ -241,12 +285,25 @@ public class BNMultiSignatureServiceImpl implements MultiSignatureService {
                                         byte[] message,
                                         long bitmap) {
         // Compute R2 = s*G + c*publicKey
-        ECPoint basePointG = PrivateKey.getEcParameters().getG();
-        BigInteger commitmentRInt = new BigInteger(commitment);
+        ECPoint basePointG = ecCryptoService.getG();
+        BigInteger commitmentRInt;
         byte[] challenge;
         BigInteger challengeInt;
         ECPoint commitmentR2;
 
+        Util.check(publicKeys != null, "publicKeys != null");
+        Util.check(publicKey != null, "publicKey != null");
+        Util.check(signature != null, "signature != null");
+        Util.check(aggCommitment != null, "aggCommitment != null");
+        Util.check(commitment != null, "commitment != null");
+        Util.check(message != null, "message != null");
+        Util.check(!publicKeys.isEmpty(), "!publicKeys.isEmpty()");
+        Util.check(signature.length != 0, "signature.length != 0");
+        Util.check(aggCommitment.length != 0, "aggCommitment.length != 0");
+        Util.check(commitment.length != 0, "commitment.length != 0");
+        Util.check(message.length != 0, "message.length != 0");
+
+        commitmentRInt = new BigInteger(commitment);
         // calculate challenge
         challenge = computeChallenge(publicKeys, publicKey, aggCommitment, message, bitmap);
         // getAccountState BigInteger challenge
@@ -267,8 +324,11 @@ public class BNMultiSignatureServiceImpl implements MultiSignatureService {
     @Override
     public byte[] aggregateSignatures(ArrayList<byte[]> signatureShares, long bitmapSigners) {
         byte idx = 0;
-        BigInteger curveOrder = PrivateKey.getCurveOrder();
+        BigInteger curveOrder = ecCryptoService.getN();
         BigInteger aggregatedSignature = BigInteger.ZERO;
+
+        Util.check(signatureShares != null, "signatureShares != null");
+        Util.check(!signatureShares.isEmpty(), "!signatureShares.isEmpty()");
 
         for (byte[] signature : signatureShares) {
             if (0 != ((1 << idx) & bitmapSigners)) {
@@ -301,16 +361,24 @@ public class BNMultiSignatureServiceImpl implements MultiSignatureService {
      */
     @Override
     public boolean verifyAggregatedSignature(ArrayList<PublicKey> signers,
-                                             byte[] aggregatedSignature, byte[] aggregatedCommitment,
-                                             byte[] message, long bitmapSigners) {
-        X9ECParameters ecParameters = PrivateKey.getEcParameters();
-        ECPoint aggregatedCommitmentPoint = ecParameters.getCurve().decodePoint(aggregatedCommitment.clone());
+                                             byte[] aggregatedSignature,
+                                             byte[] aggregatedCommitment,
+                                             byte[] message,
+                                             long bitmapSigners) {
+        ECPoint aggregatedCommitmentPoint;
         int idx = 0;
         ECPoint sum = null;
         ECPoint sG;
         BigInteger tempChallenge;
         ECPoint tmp;
 
+        Util.check(signers != null, "signers != null");
+        Util.check(aggregatedSignature != null, "aggregatedSignature != null");
+        Util.check(aggregatedCommitment != null, "aggregatedCommitment != null");
+        Util.check(message != null, "message != null");
+        Util.check(!signers.isEmpty(), "!signers.isEmpty()");
+
+        aggregatedCommitmentPoint = ecCryptoService.getCurve().decodePoint(aggregatedCommitment.clone());
         // compute sum(H1(<L'> || Xi || R || m)*Xi*Bitmap[i])
         for (PublicKey publicKey : signers) {
             if (0 != ((1 << idx) & bitmapSigners)) {
@@ -329,11 +397,11 @@ public class BNMultiSignatureServiceImpl implements MultiSignatureService {
         }
 
         // calculate s*G
-        sG = ecParameters.getG().multiply(new BigInteger(aggregatedSignature));
+        sG = ecCryptoService.getG().multiply(new BigInteger(aggregatedSignature));
         // calculate sG-sum(H1(...)Xi)
         sum = sG.subtract(sum);
 
-        // comparison R = sG - sum(H1(<L'>||Xi||R||m)Xi)
+        // comparison R == sG - sum(H1(<L'>||Xi||R||m)Xi)
         return aggregatedCommitmentPoint.equals(sum);
     }
 }

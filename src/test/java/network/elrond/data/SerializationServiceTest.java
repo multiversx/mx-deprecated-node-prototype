@@ -75,9 +75,9 @@ public class SerializationServiceTest {
         tx.setNonce(BigInteger.ZERO);
         //2 ERDs
         tx.setValue(BigInteger.valueOf(10).pow(8).multiply(BigInteger.valueOf(value)));
-        tx.setSendAddress(Util.getAddressFromPublicKey(pbKeySender.getEncoded()));
-        tx.setReceiverAddress(Util.getAddressFromPublicKey(pbKeyRecv.getEncoded()));
-        tx.setPubKey(Util.byteArrayToHexString(pbKeySender.getEncoded()));
+        tx.setSendAddress(Util.getAddressFromPublicKey(pbKeySender.getValue()));
+        tx.setReceiverAddress(Util.getAddressFromPublicKey(pbKeyRecv.getValue()));
+        tx.setPubKey(Util.byteArrayToHexString(pbKeySender.getValue()));
 
         trxServ.signTransaction(tx, pvKeySender.getValue());
 

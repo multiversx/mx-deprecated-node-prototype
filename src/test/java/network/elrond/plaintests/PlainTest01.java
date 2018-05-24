@@ -55,7 +55,7 @@ public class PlainTest01 {
         PrivateKey privKey = new PrivateKey("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent ultrices velit elit, non bibendum leo suscipit ac.");
         PublicKey pubKey = new PublicKey(privKey);
 
-        System.out.println("Public key: " + Util.getHashEncoded64(pubKey.getEncoded()) + " address: " + Util.getAddressFromPublicKey(pubKey.getEncoded()));
+        System.out.println("Public key: " + Util.getHashEncoded64(pubKey.getValue()) + " address: " + Util.getAddressFromPublicKey(pubKey.getValue()));
     }
 
 
