@@ -1,9 +1,3 @@
-# prototype1
-The first Elrond prototype
+# Elrond Network
+World’s First High Throughput Blockchain Platform Implementing Adaptive State Sharding and Secure Proof of Stake
 
-#Elrond network protocol
-
-
-Sebi a modificat si el ceva!
-
-Sebi a modificat inca ceva!
