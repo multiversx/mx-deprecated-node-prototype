@@ -8,6 +8,7 @@ import network.elrond.account.AccountsContext;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
+import network.elrond.data.BaseBlockchainTest;
 import network.elrond.data.Block;
 import network.elrond.data.DataBlock;
 import network.elrond.data.Transaction;
@@ -19,13 +20,13 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BlockchainProcessTest {
+public class BlockchainProcessTest extends BaseBlockchainTest {
 
 
     @Test
     public void testProcessBlock() throws Exception {
 
-        Blockchain blockchain = initBlockchain();
+        Blockchain blockchain = new Blockchain(getDefaultTestBlockchainContext());
         Accounts accounts = initAccounts();
 
 
@@ -105,14 +106,5 @@ public class BlockchainProcessTest {
         AppServiceProvider.getAccountStateService().setAccountState(address, accountState, accounts);
 
         return accounts;
-    }
-
-    private Blockchain initBlockchain() throws IOException {
-        BlockchainContext context = new BlockchainContext();
-        context.setDatabasePath(BlockchainUnitType.BLOCK, "blockchain.block.data-test");
-        context.setDatabasePath(BlockchainUnitType.TRANSACTION, "blockchain.transaction.data-test");
-        context.setDatabasePath(BlockchainUnitType.SETTINGS, "blockchain.settings.data-test");
-        context.setDatabasePath(BlockchainUnitType.BLOCK_INDEX, "blockchain.index.data-test");
-        return new Blockchain(context);
     }
 }

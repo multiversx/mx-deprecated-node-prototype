@@ -1,30 +1,24 @@
 package network.elrond.blockchain;
 
-import org.apache.commons.io.FileUtils;
+import network.elrond.data.BaseBlockchainTest;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
 public class BlockchainPersistenceUnitTest {
-
-    File currentPath;
     Random r;
+
     @Before
     public void setUp(){
         r = new Random();
-        currentPath = new File(System.getProperty("user.dir"), r.nextInt() + "");
-        currentPath.mkdirs();
     }
 
     @After
     public void TearDown() throws IOException, InterruptedException {
-        Thread.sleep(200);
-        FileUtils.deleteDirectory(currentPath);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -36,7 +30,7 @@ public class BlockchainPersistenceUnitTest {
     @Test
     public void testPutNullObjectShouldThrowException() throws IOException {
         BlockchainPersistenceUnit<String, String> blockchainPersistenceUnit =
-                new BlockchainPersistenceUnit<String,String>(currentPath.getPath(), String.class);
+                new BlockchainPersistenceUnit<String,String>(BaseBlockchainTest.BLOCKCHAIN_BLOCK_DATA_TEST_PATH, String.class);
         byte[] key = new byte[] { (byte)r.nextInt()};
         byte[] value = new byte[] { (byte)r.nextInt()};
          blockchainPersistenceUnit.put(key,value);

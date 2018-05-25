@@ -1,7 +1,6 @@
 package network.elrond.data;
 
 import network.elrond.blockchain.Blockchain;
-import network.elrond.blockchain.BlockchainContext;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
@@ -15,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class BlockchainTest {
+public class BlockchainTest extends BaseBlockchainTest{
     private SerializationService serializationService = AppServiceProvider.getSerializationService();
 
     static Blockchain blockchain;
@@ -28,11 +27,7 @@ public class BlockchainTest {
             return;
         }
 
-        BlockchainContext context = new BlockchainContext();
-        context.setDatabasePath(BlockchainUnitType.BLOCK, "blockchain.block.data-test");
-        context.setDatabasePath(BlockchainUnitType.TRANSACTION, "blockchain.transaction.data-test");
-
-        blockchain = new Blockchain(context);
+       blockchain = new Blockchain(getDefaultTestBlockchainContext());
     }
 
 

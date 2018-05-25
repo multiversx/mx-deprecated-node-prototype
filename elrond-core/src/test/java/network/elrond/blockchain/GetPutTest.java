@@ -7,19 +7,20 @@ import network.elrond.application.AppState;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
+import network.elrond.data.BaseBlockchainTest;
 import network.elrond.data.SerializationService;
 import network.elrond.data.Transaction;
 import network.elrond.data.TransactionService;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
-import org.junit.Test;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Random;
 import java.util.Scanner;
 
-public class GetPutTest {
+public class GetPutTest extends BaseBlockchainTest {
     private TransactionService transactionService = AppServiceProvider.getTransactionService();
     private SerializationService serializationService = AppServiceProvider.getSerializationService();
 
@@ -116,21 +117,17 @@ public class GetPutTest {
 
             BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
 
-
-            BlockchainContext blockchainContext = new BlockchainContext();
-            blockchainContext.setConnection(state.getConnection());
-            blockchainContext.setDatabasePath(BlockchainUnitType.BLOCK, "blockchain.block.data-test");
-            blockchainContext.setDatabasePath(BlockchainUnitType.TRANSACTION, "blockchain.transaction.data-test");
-            blockchainContext.setDatabasePath(BlockchainUnitType.SETTINGS, "blockchain.settings.data-test");
-
+            BlockchainContext blockchainContext = null;
             Blockchain blockchain = null;
-
             try {
+                blockchainContext = getDefaultTestBlockchainContext();
+                blockchainContext.setConnection(state.getConnection());
                 blockchain = new Blockchain(blockchainContext);
-            } catch (Exception ex) {
-                ex.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
                 return;
             }
+
 
             try {
                 Thread.sleep(1000);
