@@ -7,14 +7,18 @@ public class Accounts implements Serializable {
 
     private final AccountsContext context;
 
-    private final AccountsPersistenceUnit<AccountAddress, AccountState> accounts;
+    private final AccountsPersistenceUnit<AccountAddress, AccountState> unit;
 
     public Accounts(AccountsContext context) throws IOException {
         this.context = context;
-        this.accounts = new AccountsPersistenceUnit<>(context.getDatabasePath());
+        this.unit = new AccountsPersistenceUnit<>(context.getDatabasePath());
     }
 
     public AccountsPersistenceUnit<AccountAddress, AccountState> getAccountsPersistenceUnit() {
-        return accounts;
+        return unit;
+    }
+
+    public void flush() {
+        unit.getCache().clear();
     }
 }
