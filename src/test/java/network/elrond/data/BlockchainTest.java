@@ -20,7 +20,7 @@ public class BlockchainTest {
 
     static Blockchain blockchain;
 
-    //@Before
+    @Before
     public void setUp() throws IOException {
 
 
@@ -36,7 +36,7 @@ public class BlockchainTest {
     }
 
 
-    //@Test
+    @Test
     public void testNullBlock() throws IOException, ClassNotFoundException {
 
         String hash = "kKmANYmd+WewCmBwLmK2id7ry/Zz8mExKwFZFxyTMDQ=";

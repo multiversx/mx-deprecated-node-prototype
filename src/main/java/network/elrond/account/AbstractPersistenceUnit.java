@@ -19,6 +19,9 @@ public abstract class AbstractPersistenceUnit<K, V> {
     final ArrayBlockingQueue<Fun.Tuple2<K, V>> queue = new ArrayBlockingQueue<>(10000);
 
     public AbstractPersistenceUnit(String databasePath) throws IOException {
+        if(databasePath == null || databasePath.isEmpty() ){
+            throw new IllegalArgumentException("databasePath cannot be null");
+        }
         this.database = initDatabase(databasePath);
     }
 
