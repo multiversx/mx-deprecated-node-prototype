@@ -10,6 +10,7 @@ import java.io.Serializable;
 
 public class Application implements Serializable {
 
+    
 
     private AppState state = new AppState();
     private AppContext context;
