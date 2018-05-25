@@ -5,7 +5,7 @@ import java.io.Serializable;
 
 public class Accounts implements Serializable {
 
-    
+
     private final AccountsContext context;
 
     private final AccountsPersistenceUnit<AccountAddress, AccountState> unit;
