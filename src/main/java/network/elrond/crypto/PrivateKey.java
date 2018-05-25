@@ -13,7 +13,6 @@ import java.security.SecureRandom;
 
 public class PrivateKey {
     private byte[] privateKey;
-    private static final ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
     /**
      * Default constructor
@@ -24,6 +23,7 @@ public class PrivateKey {
         ECDomainParameters domainParameters;
         ECKeyGenerationParameters keyParameters;
         ECKeyPairGenerator keyPairGenerator;
+        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
         domainParameters = new ECDomainParameters(ecCryptoService.getCurve(),
                 ecCryptoService.getG(),
@@ -60,6 +60,7 @@ public class PrivateKey {
     public PrivateKey(String seed) {
         byte[] seedArray = seed.getBytes();
         BigInteger seedInt;
+        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
         seedArray = Util.SHA3.digest(seedArray);
         seedInt = new BigInteger(1, seedArray);
@@ -83,6 +84,7 @@ public class PrivateKey {
      */
     public boolean isValid() {
         BigInteger privateKeyInt = new BigInteger(privateKey);
+        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
         if (1 != privateKeyInt.compareTo(BigInteger.ZERO) ||
                 0 <= privateKeyInt.compareTo(ecCryptoService.getN())) {

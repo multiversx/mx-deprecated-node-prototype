@@ -1,10 +1,8 @@
 package network.elrond.crypto;
 
-
 import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.math.ec.ECPoint;
-
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -15,7 +13,6 @@ import java.util.Arrays;
  */
 public class MultiSignatureServiceBNImpl implements MultiSignatureService {
     private static SecureRandom secureRandom;
-    private static ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
     static {
         byte[] seed;
@@ -41,6 +38,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
         byte[] r = new byte[32];
         secureRandom.nextBytes(r);
         BigInteger commitmentSecret = new BigInteger(r);
+        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
         // make sure r is not 0
         // r below order of curve
@@ -63,6 +61,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
         BigInteger secretInt;
         ECPoint basePointG;
         ECPoint commitmentPointR;
+        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
         Util.check(commitmentSecret != null, "commitmentSecret != null");
         Util.check(commitmentSecret.length != 0, "commitmentSecret.length != 0");
@@ -126,6 +125,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
         ECPoint aggregatedCommitment = null;
         ECPoint decodedCommitment;
         byte[] result = new byte[0];
+        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
         Util.check(commitments != null, "commitments != null");
         Util.check(!commitments.isEmpty(), "!commitments.isEmpty()");
@@ -196,6 +196,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
                                    long bitmapCommitments) {
         byte[] challenge = new byte[0];
         BigInteger challengeInt;
+        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
         Util.check(signers != null, "signers != null");
         Util.check(publicKey != null, "publicKey != null");
@@ -239,6 +240,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
      */
     @Override
     public byte[] computeSignatureShare(byte[] challenge, byte[] privateKey, byte[] commitmentSecret) {
+        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
         BigInteger curveOrder = ecCryptoService.getN();
         BigInteger sigShare;
         BigInteger challengeInt;
@@ -286,6 +288,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
                                         byte[] message,
                                         long bitmap) {
         // Compute R2 = s*G + c*publicKey
+        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
         ECPoint basePointG = ecCryptoService.getG();
         BigInteger commitmentRInt;
         byte[] challenge;
@@ -327,6 +330,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
     @Override
     public byte[] aggregateSignatures(ArrayList<byte[]> signatureShares, long bitmapSigners) {
         byte idx = 0;
+        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
         BigInteger curveOrder = ecCryptoService.getN();
         BigInteger aggregatedSignature = BigInteger.ZERO;
 
@@ -374,6 +378,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
         ECPoint sG;
         BigInteger tempChallenge;
         ECPoint tmp;
+        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
         Util.check(signers != null, "signers != null");
         Util.check(aggregatedSignature != null, "aggregatedSignature != null");

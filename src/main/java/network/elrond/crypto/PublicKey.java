@@ -19,7 +19,6 @@ import java.security.spec.InvalidKeySpecException;
 public class PublicKey {
     private ECPoint q;
     private boolean initialized;
-    private static final ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
     /**
      * Default constructor
@@ -35,6 +34,7 @@ public class PublicKey {
      * @param key the public point Q encoding, as a byte array
      */
     public PublicKey(byte[] key) {
+        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
         ECParameterSpec ecParameterSpec = new ECParameterSpec(
                 ecCryptoService.getCurve(),
                 ecCryptoService.getG(),
@@ -59,6 +59,7 @@ public class PublicKey {
      * @param privateKey the corresponding private key
      */
     public PublicKey(PrivateKey privateKey) {
+        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
         ECDomainParameters domainParameters = new ECDomainParameters(
                 ecCryptoService.getCurve(),
                 ecCryptoService.getG(),
@@ -93,6 +94,7 @@ public class PublicKey {
      * @throws InvalidKeySpecException
      */
     public void setPublicKey(byte[] key) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
+        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
         ECParameterSpec ecParameterSpec = new ECParameterSpec(
                 ecCryptoService.getCurve(),
                 ecCryptoService.getG(),

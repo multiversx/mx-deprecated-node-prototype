@@ -4,6 +4,8 @@
 /blockchain.block*
 /blockchain.settings*
 /blockchain.transaction*
+/blockchain.account*
+/blockchain.index*
 /consumer
 /producer
 /test

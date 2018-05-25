@@ -10,7 +10,6 @@ import java.util.Arrays;
 
 public class SignatureServiceSchnorrImpl implements SignatureService {
     private static SecureRandom secureRandom;
-    private static ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
     static {
         byte[] seed;
@@ -47,6 +46,7 @@ public class SignatureServiceSchnorrImpl implements SignatureService {
         boolean calculated = false;
         Signature signature = new Signature();
         BigInteger sInteger;
+        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
         Util.check(message != null, "message != null");
         Util.check(privateKey != null, "privateKey != null");
@@ -132,6 +132,7 @@ public class SignatureServiceSchnorrImpl implements SignatureService {
         ECPoint commitPointR;
         byte[] c2;
         BigInteger challengeInt;
+        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
         Util.check(signature != null, "signature != null");
         Util.check(challenge != null, "challenge != null");
