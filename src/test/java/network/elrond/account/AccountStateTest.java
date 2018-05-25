@@ -52,7 +52,7 @@ public class AccountStateTest {
         Accounts accounts = new Accounts(context);
 
 
-        TestCase.assertFalse(transactionExecutionService.processTransaction(accounts, null));
+        TestCase.assertFalse(transactionExecutionService.processTransaction(null, accounts).isOk());
 
         PrivateKey pvKeySender = new PrivateKey();
         PublicKey pbKeySender = new PublicKey(pvKeySender);
@@ -74,13 +74,13 @@ public class AccountStateTest {
 
         //Test tampered tx
 
-        TestCase.assertFalse(transactionExecutionService.processTransaction(accounts, tx));
+        TestCase.assertFalse(transactionExecutionService.processTransaction(tx, accounts).isOk());
 
 
         tx.setNonce(BigInteger.ZERO);
         transactionService.signTransaction(tx, pvKeySender.getValue());
         //test balance less than value
-        TestCase.assertFalse(transactionExecutionService.processTransaction(accounts, tx));
+        TestCase.assertFalse(transactionExecutionService.processTransaction(tx, accounts).isOk());
 
 
         //Test tx nonce mismatch
@@ -93,7 +93,7 @@ public class AccountStateTest {
 
         tx.setNonce(BigInteger.ONE);
         transactionService.signTransaction(tx, pvKeySender.getValue());
-        TestCase.assertFalse(transactionExecutionService.processTransaction(accounts, tx));
+        TestCase.assertFalse(transactionExecutionService.processTransaction(tx, accounts).isOk());
 
 
         //output 2 accounts
@@ -101,7 +101,7 @@ public class AccountStateTest {
         transactionService.signTransaction(tx, pvKeySender.getValue());
         try {
 
-            TestCase.assertTrue(transactionExecutionService.processTransaction(accounts, tx));
+            TestCase.assertTrue(transactionExecutionService.processTransaction(tx, accounts).isOk());
 
             AccountState senderAccount = accountStateService.getAccountState(tx.getSendAccountAddress(), accounts);
             AccountState reciverAccount = accountStateService.getAccountState(tx.getReceiverAccountAddress(), accounts);

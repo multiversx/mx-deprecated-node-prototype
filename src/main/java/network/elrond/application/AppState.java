@@ -15,9 +15,9 @@ public class AppState implements Serializable {
     private boolean stillRunning = true;
     private boolean bootstrapping = false;
 
+    private Accounts accounts;
     private Blockchain blockchain;
 
-    private Accounts accounts;
 
     private P2PConnection connection;
     private Map<String, P2PBroadcastChanel> channels = new HashMap<>();

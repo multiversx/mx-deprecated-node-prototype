@@ -47,7 +47,7 @@ public class P2PBlocksInterceptorProcessor implements AppProcessor {
 
                     if (block != null) {
                         AppServiceProvider.getBlockchainService().put(block.getNonce(), hash, blockchain, BlockchainUnitType.BLOCK_INDEX);
-                        AppServiceProvider.getExecutionService().processBlock(accounts, blockchain, block);
+                        AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain);
 
                         logger.info("Got new block " + hash);
                     } else {
