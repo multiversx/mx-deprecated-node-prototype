@@ -4,19 +4,17 @@ import java.io.IOException;
 
 public interface AccountStateService {
 
-//    byte[] getHash(AccountState state);
-
     void rollbackAccountStates(Accounts accounts);
 
     void commitAccountStates(Accounts accounts);
 
-    void setAccountState(String address, AccountState state, Accounts accounts) throws IOException;
+    void setAccountState(AccountAddress address, AccountState state, Accounts accounts) throws IOException;
 
-    AccountState getAccountState(String address, Accounts accounts) throws IOException, ClassNotFoundException;
+    AccountState getAccountState(AccountAddress address, Accounts accounts) throws IOException, ClassNotFoundException;
 
-    AccountState getOrCreateAccountState(String address, Accounts accounts) throws IOException, ClassNotFoundException;
+    AccountState getOrCreateAccountState(AccountAddress address, Accounts accounts) throws IOException, ClassNotFoundException;
 
-    byte[] getRLPencoded(AccountState state);
+    byte[] convertAccountStateToRLP(AccountState accountState);
 
-    AccountState getAccountStateFromRLP(byte[] rlpData);
+    AccountState convertToAccountStateFromRLP(byte[] data);
 }

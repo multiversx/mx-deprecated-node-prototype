@@ -5,7 +5,7 @@ import network.elrond.trie.TrieImpl;
 
 import java.io.IOException;
 
-public class AccountsPersistenceUnit<K, V> extends AbstractPersistenceUnit<K, V> {
+public class AccountsPersistenceUnit<K extends AccountAddress, S extends AccountState> extends AbstractPersistenceUnit<K, S> {
 
     final Trie trie;
 
@@ -37,11 +37,11 @@ public class AccountsPersistenceUnit<K, V> extends AbstractPersistenceUnit<K, V>
     }
 
     public void cleanCache() {
-        ((TrieImpl)trie).cleanCache();
+        ((TrieImpl) trie).cleanCache();
     }
 
     public TrieImpl copyTrie() {
-        return ((TrieImpl)trie).copy();
+        return ((TrieImpl) trie).copy();
     }
 
     public byte[] getRootHash() {

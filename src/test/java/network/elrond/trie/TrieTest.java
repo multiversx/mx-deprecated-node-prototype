@@ -1,34 +1,32 @@
 package network.elrond.trie;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import network.elrond.account.AccountState;
+import network.elrond.account.AccountStateService;
+import network.elrond.db.MockDB;
+import network.elrond.service.AppServiceProvider;
+import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.encoders.Hex;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
 
-//import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.*;
+
+import static org.junit.Assert.*;
+
+//import java.io.File;
 //import java.net.URISyntaxException;
 //import java.net.URL;
 //import java.nio.charset.StandardCharsets;
 //import java.nio.file.Files;
-import java.util.*;
-import org.bouncycastle.util.encoders.Base64;
-
-import network.elrond.account.AccountState;
 //import network.elrond.data.Block;
 //import org.ethereum.db.DatabaseImpl;
-import network.elrond.account.AccountStateService;
-import network.elrond.db.MockDB;
 //import org.json.simple.JSONArray;
 //import org.json.simple.JSONObject;
 //import org.json.simple.parser.JSONParser;
 //import org.json.simple.parser.ParseException;
-import network.elrond.service.AppServiceProvider;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
-import org.bouncycastle.util.encoders.Hex;
 
 public class TrieTest {
 
@@ -73,13 +71,13 @@ public class TrieTest {
         accountState.addToBalance(value);
 
         TrieImpl merkleTrieOfState = new TrieImpl(null);
-        merkleTrieOfState.update(address.getBytes(), accountStateService.getRLPencoded(accountState));
+        merkleTrieOfState.update(address.getBytes(), accountStateService.convertAccountStateToRLP(accountState));
 
         System.out.println("roothash:  => " + new String(Base64.encode(merkleTrieOfState.getRootHash())));
 //        Block block = new Block();
 //        block.setAppStateHash(state.getRootHash());
 
-        AccountState accountStateDecoded = accountStateService.getAccountStateFromRLP(merkleTrieOfState.get(address));
+        AccountState accountStateDecoded = accountStateService.convertToAccountStateFromRLP(merkleTrieOfState.get(address));
 
         assertEquals(accountState.getNonce(), accountStateDecoded.getNonce());
         assertEquals(accountState.getBalance(), accountStateDecoded.getBalance());

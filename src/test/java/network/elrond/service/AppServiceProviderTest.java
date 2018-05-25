@@ -78,7 +78,7 @@ public class AppServiceProviderTest {
     @Test
     public void TestDefaultTransactionExecutionService (){
         AppServiceProvider.InjectDefaultServices();
-        Assert.assertEquals(TransactionExecutionServiceImpl.class, AppServiceProvider.getTransactionExecutionService().getClass());
+        Assert.assertEquals(ExecutionServiceImpl.class, AppServiceProvider.getExecutionService().getClass());
     }
 
     @Test

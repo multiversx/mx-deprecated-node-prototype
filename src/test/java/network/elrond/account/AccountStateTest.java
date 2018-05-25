@@ -84,7 +84,8 @@ public class AccountStateTest {
 
 
         //Test tx nonce mismatch
-        AccountState acsSender = accountStateService.getOrCreateAccountState(Util.getAddressFromPublicKey(pbKeySender.getEncoded()), accounts);
+
+        AccountState acsSender = accountStateService.getOrCreateAccountState(AccountAddress.fromPublicKey(pbKeySender), accounts);
 
         //mint 100 ERDs
         acsSender.setBalance(BigInteger.TEN.pow(10));
@@ -100,8 +101,8 @@ public class AccountStateTest {
 
             TestCase.assertTrue(transactionExecutionService.processTransaction(accounts, tx));
 
-            AccountState senderAccount = accountStateService.getAccountState(tx.getSendAddress(), accounts);
-            AccountState reciverAccount = accountStateService.getAccountState(tx.getReceiverAddress(), accounts);
+            AccountState senderAccount = accountStateService.getAccountState(tx.getSendAccountAddress(), accounts);
+            AccountState reciverAccount = accountStateService.getAccountState(tx.getReceiverAccountAddress(), accounts);
 
 
             logger.info(AppServiceProvider.getSerializationService().encodeJSON(senderAccount));

@@ -1,7 +1,10 @@
 package network.elrond.data;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import network.elrond.account.AccountAddress;
 
+import java.beans.Transient;
 import java.math.BigInteger;
 
 /**
@@ -104,6 +107,12 @@ public class Transaction {
      */
     public String getReceiverAddress(){ return (receiverAddress); }
 
+    @JsonIgnore
+    @Transient
+    public AccountAddress getReceiverAccountAddress() {
+        return AccountAddress.fromString(receiverAddress);
+    }
+
     /**
      * Sets the receiving address
      * @param receiverAddress to be set
@@ -115,6 +124,12 @@ public class Transaction {
      * @return address as String
      */
     public String getSendAddress(){ return (sendAddress); }
+
+    @JsonIgnore
+    @Transient
+    public AccountAddress getSendAccountAddress() {
+        return AccountAddress.fromString(sendAddress);
+    }
 
     /**
      * Sets the sender address
