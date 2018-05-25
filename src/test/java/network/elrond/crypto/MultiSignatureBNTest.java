@@ -22,30 +22,20 @@ public class MultiSignatureBNTest {
         TestCase.assertNotSame(BigInteger.ZERO, secret);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testComputeCommitmentNullSecret() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         byte[] commitmentSecret = null;
 
-        try {
-            signatureService.computeCommitment(commitmentSecret);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (IllegalArgumentException ex) {
-            TestCase.assertEquals("commitmentSecret != null", ex.getMessage());
-        }
+        signatureService.computeCommitment(commitmentSecret);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testComputeCommitmentEmptySecret() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         byte[] commitmentSecret = new byte[0];
 
-        try {
-            signatureService.computeCommitment(commitmentSecret);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (IllegalArgumentException ex) {
-            TestCase.assertEquals("commitmentSecret.length != 0", ex.getMessage());
-        }
+        signatureService.computeCommitment(commitmentSecret);
     }
 
     @Test
@@ -66,32 +56,22 @@ public class MultiSignatureBNTest {
         TestCase.assertTrue(signatureService.validateCommitment(commitment, commitmentHash));
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testAggregateCommitmentsNullCommitments() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         long bitmap = 3;
         ArrayList<byte[]> commitments = null;
 
-        try {
-            signatureService.aggregateCommitments(commitments, bitmap);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (Exception ex) {
-            TestCase.assertEquals("commitments != null", ex.getMessage());
-        }
+        signatureService.aggregateCommitments(commitments, bitmap);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testAggregateCommitmentsEmptyCommitments() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         long bitmap = 3;
         ArrayList<byte[]> commitments = new ArrayList<>();
 
-        try {
-            signatureService.aggregateCommitments(commitments, bitmap);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (Exception ex) {
-            TestCase.assertEquals("!commitments.isEmpty()", ex.getMessage());
-        }
+        signatureService.aggregateCommitments(commitments, bitmap);
     }
 
     @Test
@@ -108,7 +88,7 @@ public class MultiSignatureBNTest {
                 Util.byteArrayToHexString(signatureService.aggregateCommitments(commitments, bitmap)));
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testComputeChallengeNullPublicKeys() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         long bitmap = 0b111;
@@ -121,16 +101,10 @@ public class MultiSignatureBNTest {
         commitments.add(Util.hexStringToByteArray("02ef67409f09053060e79d8ad5b1fe60690b5eaa35b67f071ca111a0a7edeb6b38"));
 
         aggregatedCommitment = signatureService.aggregateCommitments(commitments, bitmap);
-
-        try {
-            signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, "hello".getBytes(), bitmap);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (IllegalArgumentException ex) {
-            TestCase.assertEquals("signers != null", ex.getMessage());
-        }
+        signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, "hello".getBytes(), bitmap);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testComputeChallengeEmptyPublicKeys() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         long bitmap = 0b111;
@@ -143,16 +117,10 @@ public class MultiSignatureBNTest {
         commitments.add(Util.hexStringToByteArray("02ef67409f09053060e79d8ad5b1fe60690b5eaa35b67f071ca111a0a7edeb6b38"));
 
         aggregatedCommitment = signatureService.aggregateCommitments(commitments, bitmap);
-
-        try {
-            signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, "hello".getBytes(), bitmap);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (IllegalArgumentException ex) {
-            TestCase.assertEquals("!signers.isEmpty()", ex.getMessage());
-        }
+        signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, "hello".getBytes(), bitmap);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testComputeChallengeNullPublicKey() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         long bitmap = 0b111;
@@ -167,15 +135,10 @@ public class MultiSignatureBNTest {
         publicKeys.add(new PublicKey(new PrivateKey()).getValue());
         aggregatedCommitment = signatureService.aggregateCommitments(commitments, bitmap);
 
-        try {
-            signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, "hello".getBytes(), bitmap);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (IllegalArgumentException ex) {
-            TestCase.assertEquals("publicKey != null", ex.getMessage());
-        }
+        signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, "hello".getBytes(), bitmap);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testComputeChallengeNullAggregatedCommitment() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         long bitmap = 0b111;
@@ -192,15 +155,10 @@ public class MultiSignatureBNTest {
         publicKeys.add(publicKey);
         aggregatedCommitment = null;
 
-        try {
-            signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, "hello".getBytes(), bitmap);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (IllegalArgumentException ex) {
-            TestCase.assertEquals("aggregatedCommitment != null", ex.getMessage());
-        }
+        signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, "hello".getBytes(), bitmap);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testComputeChallengeEmptyAggregatedCommitment() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         long bitmap = 0b111;
@@ -216,15 +174,10 @@ public class MultiSignatureBNTest {
         publicKeys.add(new PublicKey((new PrivateKey())).getValue());
         publicKeys.add(publicKey);
 
-        try {
-            signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, "hello".getBytes(), bitmap);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (IllegalArgumentException ex) {
-            TestCase.assertEquals("aggregatedCommitment.length != 0", ex.getMessage());
-        }
+        signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, "hello".getBytes(), bitmap);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testComputeChallengeNullMessage() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         long bitmap = 0b111;
@@ -240,17 +193,12 @@ public class MultiSignatureBNTest {
         publicKeys.add(new PublicKey(new PrivateKey()).getValue());
         publicKeys.add(new PublicKey((new PrivateKey())).getValue());
         publicKeys.add(publicKey);
-        aggregatedCommitment = signatureService.aggregateCommitments(commitments, bitmap);
 
-        try {
-            signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, message, bitmap);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (IllegalArgumentException ex) {
-            TestCase.assertEquals("message != null", ex.getMessage());
-        }
+        aggregatedCommitment = signatureService.aggregateCommitments(commitments, bitmap);
+        signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, message, bitmap);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testComputeChallengeEmptyMessage() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         long bitmap = 0b111;
@@ -266,104 +214,69 @@ public class MultiSignatureBNTest {
         publicKeys.add(new PublicKey(new PrivateKey()).getValue());
         publicKeys.add(new PublicKey((new PrivateKey())).getValue());
         publicKeys.add(publicKey);
-        aggregatedCommitment = signatureService.aggregateCommitments(commitments, bitmap);
 
-        try {
-            signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, message, bitmap);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (IllegalArgumentException ex) {
-            TestCase.assertEquals("message.length != 0", ex.getMessage());
-        }
+        aggregatedCommitment = signatureService.aggregateCommitments(commitments, bitmap);
+        signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, message, bitmap);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testComputeSignatureShareNullChallenge() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         byte[] challenge = null;
         byte[] privateKey = new PrivateKey().getValue();
         byte[] commitmentSecret = signatureService.computeCommitmentSecret();
 
-        try {
-            signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);
-            TestCase.fail("Exception expected but not thrown");
-        }catch(IllegalArgumentException ex){
-            TestCase.assertEquals("challenge != null", ex.getMessage());
-        }
+        signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testComputeSignatureShareEmptyChallenge() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         byte[] challenge = new byte[0];
         byte[] privateKey = new PrivateKey().getValue();
         byte[] commitmentSecret = signatureService.computeCommitmentSecret();
 
-        try {
-            signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);
-            TestCase.fail("Exception expected but not thrown");
-        }catch(IllegalArgumentException ex){
-            TestCase.assertEquals("challenge.length != 0", ex.getMessage());
-        }
+        signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testComputeSignatureShareNullPrivateKey() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         byte[] challenge = Util.SHA3.digest("dummy challenge".getBytes());
         byte[] privateKey = null;
         byte[] commitmentSecret = signatureService.computeCommitmentSecret();
 
-        try {
-            signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);
-            TestCase.fail("Exception expected but not thrown");
-        }catch(IllegalArgumentException ex){
-            TestCase.assertEquals("privateKey != null", ex.getMessage());
-        }
+        signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testComputeSignatureShareEmptyPrivateKey() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         byte[] commitmentSecret = signatureService.computeCommitmentSecret();
         byte[] challenge = Util.SHA3.digest("dummy challenge".getBytes());
         byte[] privateKey = new byte[0];
 
-        try {
-            signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);
-            TestCase.fail("Exception expected but not thrown");
-        } catch(IllegalArgumentException ex) {
-            TestCase.assertEquals("privateKey.length != 0", ex.getMessage());
-        }
+        signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testComputeSignatureShareNullCommitmentSecret() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         byte[] challenge = Util.SHA3.digest("dummy challenge".getBytes());
         byte[] privateKey = new PrivateKey().getValue();;
         byte[] commitmentSecret = null;
 
-        try {
-            signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);
-            TestCase.fail("Exception expected but not thrown");
-        } catch(IllegalArgumentException ex) {
-            TestCase.assertEquals("commitmentSecret != null", ex.getMessage());
-        }
+        signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testComputeSignatureShareEmptyCommitmentSecret() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         byte[] commitmentSecret = new byte[0];
         byte[] challenge = Util.SHA3.digest("dummy challenge".getBytes());
         byte[] privateKey = new PrivateKey().getValue();
 
-        try {
-            signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);
-            TestCase.fail("Exception expected but not thrown");
-        } catch(IllegalArgumentException ex) {
-            TestCase.assertEquals("commitmentSecret.length != 0", ex.getMessage());
-        }
+        signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);
     }
 
     @Test
@@ -390,50 +303,36 @@ public class MultiSignatureBNTest {
             commitments.add(signatureService.computeCommitment(commitmentSecrets.get(i)));
         }
 
-        try {
-            aggregatedCommitment = signatureService.aggregateCommitments(commitments, bitmap);
-            challenge = signatureService.computeChallenge(signers, publicKey, aggregatedCommitment, message, bitmap);
-            signature = signatureService.computeSignatureShare(challenge, privateKey, commitmentSecrets.get(0));
-            TestCase.assertTrue(
-                    signatureService.verifySignatureShare(
-                            signers,
-                            publicKey,
-                            signature,
-                            aggregatedCommitment,
-                            commitments.get(0),
-                            message,
-                            bitmap));
-        } catch(IllegalArgumentException ex) {
-            TestCase.fail("Unexpected failure with message: " + ex.getMessage());
-        }
+        aggregatedCommitment = signatureService.aggregateCommitments(commitments, bitmap);
+        challenge = signatureService.computeChallenge(signers, publicKey, aggregatedCommitment, message, bitmap);
+        signature = signatureService.computeSignatureShare(challenge, privateKey, commitmentSecrets.get(0));
+        TestCase.assertTrue(
+                signatureService.verifySignatureShare(
+                        signers,
+                        publicKey,
+                        signature,
+                        aggregatedCommitment,
+                        commitments.get(0),
+                        message,
+                        bitmap));
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testAggregateSignaturesNullSignatureShares(){
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         ArrayList<byte[]> signatureShares = null;
         long bitmap = 0b111;
 
-        try {
-            signatureService.aggregateSignatures(signatureShares, bitmap);
-            TestCase.fail("Exception expected but not thrown");
-        } catch(IllegalArgumentException ex) {
-            TestCase.assertEquals("signatureShares != null", ex.getMessage());
-        }
+        signatureService.aggregateSignatures(signatureShares, bitmap);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testAggregateSignaturesEmptySignatureShares(){
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         ArrayList<byte[]> signatureShares = new ArrayList<>();
         long bitmap = 0b111;
 
-        try {
-            signatureService.aggregateSignatures(signatureShares, bitmap);
-            TestCase.fail("Exception expected but not thrown");
-        } catch(IllegalArgumentException ex) {
-            TestCase.assertEquals("!signatureShares.isEmpty()", ex.getMessage());
-        }
+        signatureService.aggregateSignatures(signatureShares, bitmap);
     }
 
     @Test

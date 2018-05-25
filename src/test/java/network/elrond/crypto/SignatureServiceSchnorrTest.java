@@ -6,7 +6,7 @@ import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
 public class SignatureServiceSchnorrTest {
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testSignNullMessage() {
         SignatureService signatureService = AppServiceProvider.getSignatureService();
         byte[] msg = null;
@@ -14,15 +14,10 @@ public class SignatureServiceSchnorrTest {
         byte[] publicKey = keyPair.getPublicKey().getValue();
         byte[] privateKey = keyPair.getPrivateKey().getValue();
 
-        try {
-            signatureService.signMessage(msg, privateKey, publicKey);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (IllegalArgumentException ex) {
-            TestCase.assertEquals("message != null", ex.getMessage());
-        }
+        signatureService.signMessage(msg, privateKey, publicKey);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testSignEmptyMessage() {
         SignatureService sigService = AppServiceProvider.getSignatureService();
         byte[] msg = "".getBytes();
@@ -30,72 +25,47 @@ public class SignatureServiceSchnorrTest {
         byte[] publicKey = keyPair.getPublicKey().getValue();
         byte[] privateKey = keyPair.getPrivateKey().getValue();
 
-        try {
-            sigService.signMessage(msg, privateKey, publicKey);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (IllegalArgumentException ex) {
-            TestCase.assertEquals("message.length != 0", ex.getMessage());
-        }
+        sigService.signMessage(msg, privateKey, publicKey);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testSignNullPrivateKey() {
         SignatureService sigService = AppServiceProvider.getSignatureService();
         ECKeyPair keyPair = new ECKeyPair();
         byte[] publicKey = keyPair.getPublicKey().getValue();
         byte[] privateKey = null;
 
-        try {
-            sigService.signMessage("hello", privateKey, publicKey);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (IllegalArgumentException ex) {
-            TestCase.assertEquals("privateKey != null", ex.getMessage());
-        }
+        sigService.signMessage("hello", privateKey, publicKey);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testSignEmptyPrivateKey() {
         SignatureService sigService = AppServiceProvider.getSignatureService();
         ECKeyPair keyPair = new ECKeyPair();
         byte[] publicKey = keyPair.getPublicKey().getValue();
         byte[] privateKey = new byte[0];
 
-        try {
-            sigService.signMessage("hello", privateKey, publicKey);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (IllegalArgumentException ex) {
-            TestCase.assertEquals("privateKey.length != 0", ex.getMessage());
-        }
+        sigService.signMessage("hello", privateKey, publicKey);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testSignNullPublicKey() {
         SignatureService sigService = AppServiceProvider.getSignatureService();
         ECKeyPair keyPair = new ECKeyPair();
         byte[] publicKey = null;
         byte[] privateKey = keyPair.getPrivateKey().getValue();
 
-        try {
-            sigService.signMessage("hello", privateKey, publicKey);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (IllegalArgumentException ex) {
-            TestCase.assertEquals("publicKey != null", ex.getMessage());
-        }
+        sigService.signMessage("hello", privateKey, publicKey);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testSignEmptyPublicKey() {
         SignatureService sigService = AppServiceProvider.getSignatureService();
         ECKeyPair keyPair = new ECKeyPair();
         byte[] publicKey = new byte[0];
         byte[] privateKey = keyPair.getPrivateKey().getValue();
 
-        try {
-            sigService.signMessage("hello", privateKey, publicKey);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (IllegalArgumentException ex) {
-            TestCase.assertEquals("publicKey.length != 0", ex.getMessage());
-        }
+        sigService.signMessage("hello", privateKey, publicKey);
     }
 
     @Test
@@ -113,7 +83,7 @@ public class SignatureServiceSchnorrTest {
         TestCase.assertFalse(sigService.verifySignature(sig.getSignature(), sig.getChallenge(), msg, publicKey2));
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testVerifyNullSignature() {
         SignatureService signatureService = AppServiceProvider.getSignatureService();
         byte[] message = "Hello".getBytes();
@@ -121,15 +91,10 @@ public class SignatureServiceSchnorrTest {
         byte[] challenge = Util.SHA3.digest("dummy challenge".getBytes());
         byte[] publicKey = Util.SHA3.digest("hello".getBytes());
 
-        try {
-            signatureService.verifySignature(signature, challenge, message, publicKey);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (Exception ex) {
-            TestCase.assertEquals("signature != null", ex.getMessage());
-        }
+        signatureService.verifySignature(signature, challenge, message, publicKey);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testVerifyNullChallenge() {
         SignatureService signatureService = AppServiceProvider.getSignatureService();
         byte[] message = "Hello".getBytes();
@@ -137,49 +102,32 @@ public class SignatureServiceSchnorrTest {
         byte[] challenge = null;
         byte[] publicKey = Util.SHA3.digest("hello".getBytes());
 
-        try {
-            signatureService.verifySignature(signature, challenge, message, publicKey);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (Exception ex) {
-            TestCase.assertEquals("challenge != null", ex.getMessage());
-        }
+        signatureService.verifySignature(signature, challenge, message, publicKey);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testVerifyNullMessage() {
         SignatureService signatureService = AppServiceProvider.getSignatureService();
         byte[] message = null;
         byte[] signature = Util.SHA3.digest("dummy signature".getBytes());
         byte[] challenge = Util.SHA3.digest("dummy challenge".getBytes());
-        ;
         byte[] publicKey = Util.SHA3.digest("hello".getBytes());
 
-        try {
-            signatureService.verifySignature(signature, challenge, message, publicKey);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (Exception ex) {
-            TestCase.assertEquals("message != null", ex.getMessage());
-        }
+        signatureService.verifySignature(signature, challenge, message, publicKey);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testVerifyNullPublicKey() {
         SignatureService signatureService = AppServiceProvider.getSignatureService();
         byte[] message = "Hello".getBytes();
         byte[] signature = Util.SHA3.digest("dummy signature".getBytes());
         byte[] challenge = Util.SHA3.digest("dummy challenge".getBytes());
-        ;
         byte[] publicKey = null;
 
-        try {
-            signatureService.verifySignature(signature, challenge, message, publicKey);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (Exception ex) {
-            TestCase.assertEquals("publicKey != null", ex.getMessage());
-        }
+        signatureService.verifySignature(signature, challenge, message, publicKey);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testVerifyEmptySignature() {
         SignatureService signatureService = AppServiceProvider.getSignatureService();
         byte[] message = "Hello".getBytes();
@@ -187,15 +135,10 @@ public class SignatureServiceSchnorrTest {
         byte[] challenge = Util.SHA3.digest("dummy challenge".getBytes());
         byte[] publicKey = Util.SHA3.digest("hello".getBytes());
 
-        try {
-            signatureService.verifySignature(signature, challenge, message, publicKey);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (Exception ex) {
-            TestCase.assertEquals("signature.length != 0", ex.getMessage());
-        }
+        signatureService.verifySignature(signature, challenge, message, publicKey);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testVerifyEmptyChallenge() {
         SignatureService signatureService = AppServiceProvider.getSignatureService();
         byte[] message = "Hello".getBytes();
@@ -203,46 +146,29 @@ public class SignatureServiceSchnorrTest {
         byte[] challenge = new byte[0];
         byte[] publicKey = Util.SHA3.digest("hello".getBytes());
 
-        try {
-            signatureService.verifySignature(signature, challenge, message, publicKey);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (Exception ex) {
-            TestCase.assertEquals("challenge.length != 0", ex.getMessage());
-        }
+        signatureService.verifySignature(signature, challenge, message, publicKey);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testVerifyEmptyMessage() {
         SignatureService signatureService = AppServiceProvider.getSignatureService();
         byte[] message = new byte[0];
         byte[] signature = Util.SHA3.digest("dummy signature".getBytes());
         byte[] challenge = Util.SHA3.digest("dummy challenge".getBytes());
-        ;
         byte[] publicKey = Util.SHA3.digest("hello".getBytes());
 
-        try {
-            signatureService.verifySignature(signature, challenge, message, publicKey);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (Exception ex) {
-            TestCase.assertEquals("message.length != 0", ex.getMessage());
-        }
+        signatureService.verifySignature(signature, challenge, message, publicKey);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testVerifyEmptyPublicKey() {
         SignatureService signatureService = AppServiceProvider.getSignatureService();
         byte[] message = "Hello".getBytes();
         byte[] signature = Util.SHA3.digest("dummy signature".getBytes());
         byte[] challenge = Util.SHA3.digest("dummy challenge".getBytes());
-        ;
         byte[] publicKey = new byte[0];
 
-        try {
-            signatureService.verifySignature(signature, challenge, message, publicKey);
-            TestCase.fail("Exception expected but not thrown");
-        } catch (Exception ex) {
-            TestCase.assertEquals("publicKey.length != 0", ex.getMessage());
-        }
+        signatureService.verifySignature(signature, challenge, message, publicKey);
     }
 
     @Test
