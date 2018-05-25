@@ -64,9 +64,9 @@ public class AccountStateTest {
         tx.setNonce(BigInteger.ZERO);
         //2 ERDs
         tx.setValue(BigInteger.valueOf(10).pow(8).multiply(BigInteger.valueOf(2)));
-        tx.setSendAddress(Util.getAddressFromPublicKey(pbKeySender.getEncoded()));
-        tx.setReceiverAddress(Util.getAddressFromPublicKey(pbKeyRecv.getEncoded()));
-        tx.setPubKey(Util.byteArrayToHexString(pbKeySender.getEncoded()));
+        tx.setSendAddress(Util.getAddressFromPublicKey(pbKeySender.getValue()));
+        tx.setReceiverAddress(Util.getAddressFromPublicKey(pbKeyRecv.getValue()));
+        tx.setPubKey(Util.byteArrayToHexString(pbKeySender.getValue()));
 
         transactionService.signTransaction(tx, pvKeySender.getValue());
 
@@ -89,6 +89,8 @@ public class AccountStateTest {
 
         //mint 100 ERDs
         acsSender.setBalance(BigInteger.TEN.pow(10));
+        accountStateService.setAccountState(tx.getSendAccountAddress(), acsSender, accounts); // PMS
+
         tx.setNonce(BigInteger.ONE);
         transactionService.signTransaction(tx, pvKeySender.getValue());
         TestCase.assertFalse(transactionExecutionService.processTransaction(accounts, tx));

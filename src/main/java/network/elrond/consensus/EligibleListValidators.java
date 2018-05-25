@@ -1,9 +1,10 @@
 package network.elrond.consensus;
 
+import network.elrond.core.Util;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import network.elrond.core.Util;
 
 /**
  * The EligibleListValidators class implements a node-type
@@ -31,7 +32,7 @@ public class EligibleListValidators {
         list = new ArrayList<Validator>();
         maxStake = BigInteger.ZERO;
 
-        minRating = Util.MAX_RATING;
+        minRating = Util.MAX_SCORE;
         maxRating = 0;
     }
 }

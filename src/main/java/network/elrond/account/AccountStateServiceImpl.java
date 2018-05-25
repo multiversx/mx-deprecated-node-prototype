@@ -16,17 +16,24 @@ public class AccountStateServiceImpl implements AccountStateService {
     @Override
     public synchronized AccountState getOrCreateAccountState(AccountAddress address, Accounts accounts) throws IOException, ClassNotFoundException {
         AccountState state = getAccountState(address, accounts);
-        if (state == null) {
-            setAccountState(address, new AccountState(), accounts);
-        }
 
+        if (state != null) return state;
+
+        setAccountState(address, new AccountState(), accounts);
         return getAccountState(address, accounts);
     }
 
     @Override
     public synchronized AccountState getAccountState(AccountAddress address, Accounts accounts) {
+
+        if (address == null) {
+            return null;
+        }
+
         AccountsPersistenceUnit<AccountAddress, AccountState> unit = accounts.getAccountsPersistenceUnit();
-        return convertToAccountStateFromRLP(unit.get(address.getBytes()));
+        byte[] bytes = address.getBytes();
+        return (bytes != null) ? convertToAccountStateFromRLP(unit.get(bytes)) : null;
+
     }
 
     @Override
@@ -62,10 +69,14 @@ public class AccountStateServiceImpl implements AccountStateService {
         return RLP.encodeList(nonce, balance);
     }
 
+
     @Override
     public AccountState convertToAccountStateFromRLP(byte[] data) {
-        AccountState accountState = new AccountState();
+        if (data == null || data.length == 0) {
+            return null;
+        }
 
+        AccountState accountState = new AccountState();
         RLPList items = (RLPList) RLP.decode2(data).get(0);
         accountState.setNonce(new BigInteger(1, ((items.get(0).getRLPData()) == null ? new byte[]{0} :
                 items.get(0).getRLPData())));

@@ -5,8 +5,7 @@ import network.elrond.blockchain.AppPersistenceServiceImpl;
 import network.elrond.blockchain.BlockchainServiceImpl;
 import network.elrond.consensus.SPoSServiceImpl;
 import network.elrond.consensus.ValidatorServiceImpl;
-import network.elrond.crypto.BNMultiSignatureServiceImpl;
-import network.elrond.crypto.SchnorrSignatureServiceImpl;
+import network.elrond.crypto.*;
 import network.elrond.data.*;
 import network.elrond.p2p.P2PBroadcastServiceImpl;
 import network.elrond.p2p.P2PObjectServiceImpl;
@@ -60,13 +59,13 @@ public class AppServiceProviderTest {
     @Test
     public void TestDefaultSignatureService (){
         AppServiceProvider.InjectDefaultServices();
-        Assert.assertEquals(SchnorrSignatureServiceImpl.class, AppServiceProvider.getSignatureService().getClass());
+        Assert.assertEquals(SignatureServiceSchnorrImpl.class, AppServiceProvider.getSignatureService().getClass());
     }
 
     @Test
     public void TestDefaultMultiSignatureService (){
         AppServiceProvider.InjectDefaultServices();
-        Assert.assertEquals(BNMultiSignatureServiceImpl.class, AppServiceProvider.getMultiSignatureService().getClass());
+        Assert.assertEquals(MultiSignatureServiceBNImpl.class, AppServiceProvider.getMultiSignatureService().getClass());
     }
 
     @Test
@@ -94,7 +93,7 @@ public class AppServiceProviderTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void TestPutNullService(){
+    public void TestPutNullServiceShouldThrowException(){
         AppServiceProvider.InjectDefaultServices();
         AppServiceProvider.putService(TransactionService.class, null);
     }

@@ -2,11 +2,11 @@ package network.elrond.crypto;
 
 public interface SignatureService {
 
-    public Signature signMessage(byte[] message, PrivateKey privateKey, PublicKey publicKey);
+    Signature signMessage(byte[] message, byte[] privateKey, byte[] publicKey);
 
-    public Signature signMessage(String message, PrivateKey privateKey, PublicKey publicKey);
+    Signature signMessage(String message, byte[] privateKey, byte[] publicKey);
 
-    public boolean verifySignature(byte[] signature, byte[] challenge, byte[] message, PublicKey publicKey);
+    boolean verifySignature(byte[] signature, byte[] challenge, byte[] message, byte[] publicKey);
 
-    public boolean verifySignature(byte[] signature, byte[] challenge, String message, PublicKey publicKey);
+    boolean verifySignature(byte[] signature, byte[] challenge, String message, byte[] publicKey);
 }

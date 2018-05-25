@@ -54,7 +54,7 @@ public class TransactionServiceImpl implements TransactionService {
         Signature sig;
 
         SignatureService schnorr = AppServiceProvider.getSignatureService();
-        sig = schnorr.signMessage(hashNoSigLocal, pvkey, pbkey);
+        sig = schnorr.signMessage(hashNoSigLocal, privateKeysBytes, pbkey.getValue());
 
         tx.setSig1(sig.getSignature());
         tx.setSig2(sig.getChallenge());
@@ -104,7 +104,7 @@ public class TransactionServiceImpl implements TransactionService {
             return (false);
         }
 
-        if (!schnorr.verifySignature(sig.getSignature(), sig.getChallenge(), message, pbKey)) {
+        if (!schnorr.verifySignature(sig.getSignature(), sig.getChallenge(), message, pbKey.getValue())) {
             return (false);
         }
 
