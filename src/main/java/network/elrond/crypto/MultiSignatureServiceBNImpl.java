@@ -157,7 +157,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
      * @param bitmapCommitments bitmap showing which elements from publicKeys to concatenate
      * @return a byte array holding the concatenation of public keys
      */
-    private byte[] concatenatePublicKeys(ArrayList<PublicKey> publicKeys, long bitmapCommitments) {
+    private byte[] concatenatePublicKeys(ArrayList<byte[]> publicKeys, long bitmapCommitments) {
         int idx = 0;
         byte[] result = new byte[0];
 
@@ -165,10 +165,10 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
         Util.check(!publicKeys.isEmpty(), "!publicKeys.isEmpty()");
 
         // computing <L'> as concatenation of participating signers public keys
-        for (PublicKey key : publicKeys) {
+        for (byte[] key : publicKeys) {
             if (0 != ((1 << idx) & bitmapCommitments)) {
                 // concatenate the public keys
-                result = Util.concatenateArrays(result, key.getQ().getEncoded(true));
+                result = Util.concatenateArrays(result, key);
             }
             idx++;
         }
@@ -189,8 +189,8 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
      *                             or 0 otherwise
      * @return the challenge as a byte array
      */
-    public byte[] computeChallenge(ArrayList<PublicKey> signers,
-                                   PublicKey publicKey,
+    public byte[] computeChallenge(ArrayList<byte[]> signers,
+                                   byte[] publicKey,
                                    byte[] aggregatedCommitment,
                                    byte[] message,
                                    long bitmapCommitments) {
@@ -212,7 +212,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
         // computing <L'> as concatenation of participating signers public keys
         challenge = concatenatePublicKeys(signers, bitmapCommitments);
         // do rest of concatenation <L'> || public key
-        challenge = Util.concatenateArrays(challenge, publicKey.getQ().getEncoded(true));
+        challenge = Util.concatenateArrays(challenge, publicKey);
         // <L'> || public key || R
         challenge = Util.concatenateArrays(challenge, aggregatedCommitment);
         // <L'> || public key || R || m
@@ -238,7 +238,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
      * @return the signature share
      */
     @Override
-    public byte[] computeSignatureShare(byte[] challenge, PrivateKey privateKey, byte[] commitmentSecret) {
+    public byte[] computeSignatureShare(byte[] challenge, byte[] privateKey, byte[] commitmentSecret) {
         BigInteger curveOrder = ecCryptoService.getN();
         BigInteger sigShare;
         BigInteger challengeInt;
@@ -249,10 +249,11 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
         Util.check(privateKey != null, "privateKey != null");
         Util.check(commitmentSecret != null, "commitmentSecret != null");
         Util.check(challenge.length != 0, "challenge.length != 0");
+        Util.check(privateKey.length != 0, "privateKey.length != 0");
         Util.check(commitmentSecret.length != 0, "commitmentSecret.length != 0");
 
         challengeInt = new BigInteger(challenge);
-        privateKeyInt = new BigInteger(privateKey.getValue());
+        privateKeyInt = new BigInteger(privateKey);
         commitmentSecretInt = new BigInteger(commitmentSecret);
         sigShare = commitmentSecretInt.add(challengeInt.multiply(privateKeyInt).mod(curveOrder)).mod(curveOrder);
 
@@ -277,8 +278,8 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
      * @return true if signature is verified, false otherwise
      */
     @Override
-    public boolean verifySignatureShare(ArrayList<PublicKey> publicKeys,
-                                        PublicKey publicKey,
+    public boolean verifySignatureShare(ArrayList<byte[]> publicKeys,
+                                        byte[] publicKey,
                                         byte[] signature,
                                         byte[] aggCommitment,
                                         byte[] commitment,
@@ -290,6 +291,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
         byte[] challenge;
         BigInteger challengeInt;
         ECPoint commitmentR2;
+        ECPoint publicKeyPoint;
 
         Util.check(publicKeys != null, "publicKeys != null");
         Util.check(publicKey != null, "publicKey != null");
@@ -303,13 +305,14 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
         Util.check(commitment.length != 0, "commitment.length != 0");
         Util.check(message.length != 0, "message.length != 0");
 
+        publicKeyPoint = ecCryptoService.getCurve().decodePoint(publicKey.clone());
         commitmentRInt = new BigInteger(commitment);
         // calculate challenge
         challenge = computeChallenge(publicKeys, publicKey, aggCommitment, message, bitmap);
         // getAccountState BigInteger challenge
         challengeInt = (new BigInteger(1, challenge));
         // Compute R2 = s*G - c*publicKey
-        commitmentR2 = basePointG.multiply(new BigInteger(signature)).subtract(publicKey.getQ().multiply(challengeInt));
+        commitmentR2 = basePointG.multiply(new BigInteger(signature)).subtract(publicKeyPoint.multiply(challengeInt));
 
         return (new BigInteger(commitmentR2.getEncoded(true))).equals(commitmentRInt);
     }
@@ -360,7 +363,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
      * @return true if aggregated signature is valid, false otherwise
      */
     @Override
-    public boolean verifyAggregatedSignature(ArrayList<PublicKey> signers,
+    public boolean verifyAggregatedSignature(ArrayList<byte[]> signers,
                                              byte[] aggregatedSignature,
                                              byte[] aggregatedCommitment,
                                              byte[] message,
@@ -377,14 +380,17 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
         Util.check(aggregatedCommitment != null, "aggregatedCommitment != null");
         Util.check(message != null, "message != null");
         Util.check(!signers.isEmpty(), "!signers.isEmpty()");
+        ECPoint publicKeyPoint;
 
         aggregatedCommitmentPoint = ecCryptoService.getCurve().decodePoint(aggregatedCommitment.clone());
         // compute sum(H1(<L'> || Xi || R || m)*Xi*Bitmap[i])
-        for (PublicKey publicKey : signers) {
+        for (byte[] publicKey : signers) {
             if (0 != ((1 << idx) & bitmapSigners)) {
+                publicKeyPoint = ecCryptoService.getCurve().decodePoint(publicKey.clone());
+
                 //compute challenge H1(<L'>||Xi||R||m)
                 tempChallenge = new BigInteger(computeChallenge(signers, publicKey, aggregatedCommitment, message, bitmapSigners));
-                tmp = publicKey.getQ().multiply(tempChallenge);
+                tmp = publicKeyPoint.multiply(tempChallenge);
                 // do the sum
                 if (null == sum) {
                     // H1 * Xi * Bitmap[i]

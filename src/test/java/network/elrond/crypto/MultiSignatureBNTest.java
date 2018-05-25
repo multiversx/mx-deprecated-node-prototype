@@ -5,6 +5,7 @@ import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
+import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +32,19 @@ public class MultiSignatureBNTest {
             TestCase.fail("Exception expected but not thrown");
         } catch (IllegalArgumentException ex) {
             TestCase.assertEquals("commitmentSecret != null", ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testComputeCommitmentEmptySecret() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        byte[] commitmentSecret = new byte[0];
+
+        try {
+            signatureService.computeCommitment(commitmentSecret);
+            TestCase.fail("Exception expected but not thrown");
+        } catch (IllegalArgumentException ex) {
+            TestCase.assertEquals("commitmentSecret.length != 0", ex.getMessage());
         }
     }
 
@@ -80,20 +94,386 @@ public class MultiSignatureBNTest {
         }
     }
 
+    @Test
+    public void testAggregatedCommitment() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        long bitmap = 0b111;
+        ArrayList<byte[]> commitments = new ArrayList<>();
+
+        commitments.add(Util.hexStringToByteArray("02181b4df800671642e3df9a953a29a4f571acc1bf0714ed5ae714a9804d97079f"));
+        commitments.add(Util.hexStringToByteArray("02e8196913323fbb7a34d9455b778e877e1d1fa0205b5949504e55a2d999931366"));
+        commitments.add(Util.hexStringToByteArray("02ef67409f09053060e79d8ad5b1fe60690b5eaa35b67f071ca111a0a7edeb6b38"));
+
+        TestCase.assertEquals("02534d4371d6ea9f8b856a632e4e31d784eec9120b3252080702d872c696012289",
+                Util.byteArrayToHexString(signatureService.aggregateCommitments(commitments, bitmap)));
+    }
 
     @Test
-    public void testCalculateCommitmentEmptySecret() {
+    public void testComputeChallengeNullPublicKeys() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
-        byte[] commitmentSecret = new byte[0];
+        long bitmap = 0b111;
+        ArrayList<byte[]> publicKeys = null;
+        byte[] publicKey = new PublicKey(new PrivateKey()).getValue();
+        ArrayList<byte[]> commitments = new ArrayList<>();
+        byte[] aggregatedCommitment;
+        commitments.add(Util.hexStringToByteArray("02181b4df800671642e3df9a953a29a4f571acc1bf0714ed5ae714a9804d97079f"));
+        commitments.add(Util.hexStringToByteArray("02e8196913323fbb7a34d9455b778e877e1d1fa0205b5949504e55a2d999931366"));
+        commitments.add(Util.hexStringToByteArray("02ef67409f09053060e79d8ad5b1fe60690b5eaa35b67f071ca111a0a7edeb6b38"));
+
+        aggregatedCommitment = signatureService.aggregateCommitments(commitments, bitmap);
 
         try {
-            signatureService.computeCommitment(commitmentSecret);
+            signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, "hello".getBytes(), bitmap);
             TestCase.fail("Exception expected but not thrown");
         } catch (IllegalArgumentException ex) {
+            TestCase.assertEquals("signers != null", ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testComputeChallengeEmptyPublicKeys() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        long bitmap = 0b111;
+        ArrayList<byte[]> publicKeys = new ArrayList<>();
+        byte[] publicKey = new PublicKey(new PrivateKey()).getValue();
+        ArrayList<byte[]> commitments = new ArrayList<>();
+        byte[] aggregatedCommitment;
+        commitments.add(Util.hexStringToByteArray("02181b4df800671642e3df9a953a29a4f571acc1bf0714ed5ae714a9804d97079f"));
+        commitments.add(Util.hexStringToByteArray("02e8196913323fbb7a34d9455b778e877e1d1fa0205b5949504e55a2d999931366"));
+        commitments.add(Util.hexStringToByteArray("02ef67409f09053060e79d8ad5b1fe60690b5eaa35b67f071ca111a0a7edeb6b38"));
+
+        aggregatedCommitment = signatureService.aggregateCommitments(commitments, bitmap);
+
+        try {
+            signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, "hello".getBytes(), bitmap);
+            TestCase.fail("Exception expected but not thrown");
+        } catch (IllegalArgumentException ex) {
+            TestCase.assertEquals("!signers.isEmpty()", ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testComputeChallengeNullPublicKey() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        long bitmap = 0b111;
+        ArrayList<byte[]> publicKeys = new ArrayList<>();
+        byte[] publicKey = null;
+        ArrayList<byte[]> commitments = new ArrayList<>();
+        byte[] aggregatedCommitment;
+
+        commitments.add(Util.hexStringToByteArray("02181b4df800671642e3df9a953a29a4f571acc1bf0714ed5ae714a9804d97079f"));
+        commitments.add(Util.hexStringToByteArray("02e8196913323fbb7a34d9455b778e877e1d1fa0205b5949504e55a2d999931366"));
+        commitments.add(Util.hexStringToByteArray("02ef67409f09053060e79d8ad5b1fe60690b5eaa35b67f071ca111a0a7edeb6b38"));
+        publicKeys.add(new PublicKey(new PrivateKey()).getValue());
+        aggregatedCommitment = signatureService.aggregateCommitments(commitments, bitmap);
+
+        try {
+            signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, "hello".getBytes(), bitmap);
+            TestCase.fail("Exception expected but not thrown");
+        } catch (IllegalArgumentException ex) {
+            TestCase.assertEquals("publicKey != null", ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testComputeChallengeNullAggregatedCommitment() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        long bitmap = 0b111;
+        ArrayList<byte[]> publicKeys = new ArrayList<>();
+        byte[] publicKey = new PublicKey(new PrivateKey()).getValue();
+        ArrayList<byte[]> commitments = new ArrayList<>();
+        byte[] aggregatedCommitment;
+
+        commitments.add(Util.hexStringToByteArray("02181b4df800671642e3df9a953a29a4f571acc1bf0714ed5ae714a9804d97079f"));
+        commitments.add(Util.hexStringToByteArray("02e8196913323fbb7a34d9455b778e877e1d1fa0205b5949504e55a2d999931366"));
+        commitments.add(Util.hexStringToByteArray("02ef67409f09053060e79d8ad5b1fe60690b5eaa35b67f071ca111a0a7edeb6b38"));
+        publicKeys.add(new PublicKey(new PrivateKey()).getValue());
+        publicKeys.add(new PublicKey((new PrivateKey())).getValue());
+        publicKeys.add(publicKey);
+        aggregatedCommitment = null;
+
+        try {
+            signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, "hello".getBytes(), bitmap);
+            TestCase.fail("Exception expected but not thrown");
+        } catch (IllegalArgumentException ex) {
+            TestCase.assertEquals("aggregatedCommitment != null", ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testComputeChallengeEmptyAggregatedCommitment() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        long bitmap = 0b111;
+        ArrayList<byte[]> publicKeys = new ArrayList<>();
+        byte[] publicKey = new PublicKey(new PrivateKey()).getValue();
+        ArrayList<byte[]> commitments = new ArrayList<>();
+        byte[] aggregatedCommitment = new byte[0];
+
+        commitments.add(Util.hexStringToByteArray("02181b4df800671642e3df9a953a29a4f571acc1bf0714ed5ae714a9804d97079f"));
+        commitments.add(Util.hexStringToByteArray("02e8196913323fbb7a34d9455b778e877e1d1fa0205b5949504e55a2d999931366"));
+        commitments.add(Util.hexStringToByteArray("02ef67409f09053060e79d8ad5b1fe60690b5eaa35b67f071ca111a0a7edeb6b38"));
+        publicKeys.add(new PublicKey(new PrivateKey()).getValue());
+        publicKeys.add(new PublicKey((new PrivateKey())).getValue());
+        publicKeys.add(publicKey);
+
+        try {
+            signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, "hello".getBytes(), bitmap);
+            TestCase.fail("Exception expected but not thrown");
+        } catch (IllegalArgumentException ex) {
+            TestCase.assertEquals("aggregatedCommitment.length != 0", ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testComputeChallengeNullMessage() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        long bitmap = 0b111;
+        ArrayList<byte[]> publicKeys = new ArrayList<>();
+        byte[] publicKey = new PublicKey(new PrivateKey()).getValue();
+        ArrayList<byte[]> commitments = new ArrayList<>();
+        byte[] aggregatedCommitment;
+        byte[] message = null;
+
+        commitments.add(Util.hexStringToByteArray("02181b4df800671642e3df9a953a29a4f571acc1bf0714ed5ae714a9804d97079f"));
+        commitments.add(Util.hexStringToByteArray("02e8196913323fbb7a34d9455b778e877e1d1fa0205b5949504e55a2d999931366"));
+        commitments.add(Util.hexStringToByteArray("02ef67409f09053060e79d8ad5b1fe60690b5eaa35b67f071ca111a0a7edeb6b38"));
+        publicKeys.add(new PublicKey(new PrivateKey()).getValue());
+        publicKeys.add(new PublicKey((new PrivateKey())).getValue());
+        publicKeys.add(publicKey);
+        aggregatedCommitment = signatureService.aggregateCommitments(commitments, bitmap);
+
+        try {
+            signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, message, bitmap);
+            TestCase.fail("Exception expected but not thrown");
+        } catch (IllegalArgumentException ex) {
+            TestCase.assertEquals("message != null", ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testComputeChallengeEmptyMessage() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        long bitmap = 0b111;
+        ArrayList<byte[]> publicKeys = new ArrayList<>();
+        byte[] publicKey = new PublicKey(new PrivateKey()).getValue();
+        ArrayList<byte[]> commitments = new ArrayList<>();
+        byte[] aggregatedCommitment;
+        byte[] message = "".getBytes();
+
+        commitments.add(Util.hexStringToByteArray("02181b4df800671642e3df9a953a29a4f571acc1bf0714ed5ae714a9804d97079f"));
+        commitments.add(Util.hexStringToByteArray("02e8196913323fbb7a34d9455b778e877e1d1fa0205b5949504e55a2d999931366"));
+        commitments.add(Util.hexStringToByteArray("02ef67409f09053060e79d8ad5b1fe60690b5eaa35b67f071ca111a0a7edeb6b38"));
+        publicKeys.add(new PublicKey(new PrivateKey()).getValue());
+        publicKeys.add(new PublicKey((new PrivateKey())).getValue());
+        publicKeys.add(publicKey);
+        aggregatedCommitment = signatureService.aggregateCommitments(commitments, bitmap);
+
+        try {
+            signatureService.computeChallenge(publicKeys, publicKey, aggregatedCommitment, message, bitmap);
+            TestCase.fail("Exception expected but not thrown");
+        } catch (IllegalArgumentException ex) {
+            TestCase.assertEquals("message.length != 0", ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testComputeSignatureShareNullChallenge() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        byte[] challenge = null;
+        byte[] privateKey = new PrivateKey().getValue();
+        byte[] commitmentSecret = signatureService.computeCommitmentSecret();
+
+        try {
+            signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);
+            TestCase.fail("Exception expected but not thrown");
+        }catch(IllegalArgumentException ex){
+            TestCase.assertEquals("challenge != null", ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testComputeSignatureShareEmptyChallenge() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        byte[] challenge = new byte[0];
+        byte[] privateKey = new PrivateKey().getValue();
+        byte[] commitmentSecret = signatureService.computeCommitmentSecret();
+
+        try {
+            signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);
+            TestCase.fail("Exception expected but not thrown");
+        }catch(IllegalArgumentException ex){
+            TestCase.assertEquals("challenge.length != 0", ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testComputeSignatureShareNullPrivateKey() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        byte[] challenge = Util.SHA3.digest("dummy challenge".getBytes());
+        byte[] privateKey = null;
+        byte[] commitmentSecret = signatureService.computeCommitmentSecret();
+
+        try {
+            signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);
+            TestCase.fail("Exception expected but not thrown");
+        }catch(IllegalArgumentException ex){
+            TestCase.assertEquals("privateKey != null", ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testComputeSignatureShareEmptyPrivateKey() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        byte[] commitmentSecret = signatureService.computeCommitmentSecret();
+        byte[] challenge = Util.SHA3.digest("dummy challenge".getBytes());
+        byte[] privateKey = new byte[0];
+
+        try {
+            signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);
+            TestCase.fail("Exception expected but not thrown");
+        } catch(IllegalArgumentException ex) {
+            TestCase.assertEquals("privateKey.length != 0", ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testComputeSignatureShareNullCommitmentSecret() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        byte[] challenge = Util.SHA3.digest("dummy challenge".getBytes());
+        byte[] privateKey = new PrivateKey().getValue();;
+        byte[] commitmentSecret = null;
+
+        try {
+            signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);
+            TestCase.fail("Exception expected but not thrown");
+        } catch(IllegalArgumentException ex) {
+            TestCase.assertEquals("commitmentSecret != null", ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testComputeSignatureShareEmptyCommitmentSecret() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        byte[] commitmentSecret = new byte[0];
+        byte[] challenge = Util.SHA3.digest("dummy challenge".getBytes());
+        byte[] privateKey = new PrivateKey().getValue();
+
+        try {
+            signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);
+            TestCase.fail("Exception expected but not thrown");
+        } catch(IllegalArgumentException ex) {
             TestCase.assertEquals("commitmentSecret.length != 0", ex.getMessage());
         }
     }
 
+    @Test
+    public void testVerifySignatureShareOK() {
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        ArrayList<byte[]> signers = new ArrayList<>();
+        ArrayList<byte[]> commitmentSecrets = new ArrayList<>();
+        ArrayList<byte[]> commitments = new ArrayList<>();
+        byte[] privateKey = new PrivateKey().getValue();
+        byte[] publicKey = new PublicKey(new PrivateKey(privateKey)).getValue();
+        byte[] challenge;
+        byte[] aggregatedCommitment;
+        long bitmap = 0;
+        byte[] message = "Hello Elrond".getBytes();
+        byte[] signature;
+
+        signers.add(publicKey);
+        signers.add(new PublicKey(new PrivateKey()).getValue());
+        signers.add(new PublicKey(new PrivateKey()).getValue());
+
+        for(int i = 0; i< signers.size(); i++) {
+            bitmap = (bitmap << 1) | 1;
+            commitmentSecrets.add(signatureService.computeCommitmentSecret());
+            commitments.add(signatureService.computeCommitment(commitmentSecrets.get(i)));
+        }
+
+        try {
+            aggregatedCommitment = signatureService.aggregateCommitments(commitments, bitmap);
+            challenge = signatureService.computeChallenge(signers, publicKey, aggregatedCommitment, message, bitmap);
+            signature = signatureService.computeSignatureShare(challenge, privateKey, commitmentSecrets.get(0));
+            TestCase.assertTrue(
+                    signatureService.verifySignatureShare(
+                            signers,
+                            publicKey,
+                            signature,
+                            aggregatedCommitment,
+                            commitments.get(0),
+                            message,
+                            bitmap));
+        } catch(IllegalArgumentException ex) {
+            TestCase.fail("Unexpected failure with message: " + ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testAggregateSignaturesNullSignatureShares(){
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        ArrayList<byte[]> signatureShares = null;
+        long bitmap = 0b111;
+
+        try {
+            signatureService.aggregateSignatures(signatureShares, bitmap);
+            TestCase.fail("Exception expected but not thrown");
+        } catch(IllegalArgumentException ex) {
+            TestCase.assertEquals("signatureShares != null", ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testAggregateSignaturesEmptySignatureShares(){
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        ArrayList<byte[]> signatureShares = new ArrayList<>();
+        long bitmap = 0b111;
+
+        try {
+            signatureService.aggregateSignatures(signatureShares, bitmap);
+            TestCase.fail("Exception expected but not thrown");
+        } catch(IllegalArgumentException ex) {
+            TestCase.assertEquals("!signatureShares.isEmpty()", ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testAggregateSignaturesOK(){
+        MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
+        ArrayList<byte[]> signers = new ArrayList<>();
+        ArrayList<byte[]> privateKeys = new ArrayList<>();
+        ArrayList<byte[]> commitmentSecrets = new ArrayList<>();
+        ArrayList<byte[]> commitments = new ArrayList<>();
+        ArrayList<byte[]> signatureShares = new ArrayList<>();
+        ArrayList<byte[]> challenges = new ArrayList<>();
+        byte[] aggregatedCommitment;
+        byte[] message = "Hello Elrond".getBytes();
+        byte[] aggregatedSignature;
+        long bitmap = 0b111;
+
+        privateKeys.add(Util.hexStringToByteArray("00f0d3f52e126349dc8523c6c91385222fcf4c60a9df9214bfdf8844896a75998b"));
+        privateKeys.add(Util.hexStringToByteArray("3ecc42f09822043b8a32fef767e780c3f370fdf9f014ee15d44af642f8f08646"));
+        privateKeys.add(Util.hexStringToByteArray("00d171f06d911ba66ad35c2c800f9864c7e22e3ac5b149db7f3712e31c74cda568"));
+
+        commitmentSecrets.add(Util.hexStringToByteArray("3f9d94eaa0edf5652b5f738255a59970aa2c78a5d828a0ebc82b9eb3b1109696"));
+        commitmentSecrets.add(Util.hexStringToByteArray("1fc5f4cd690f50be2442899d85e8971fbf2d49fb8a6a679cfc86bacb9a8f7f24"));
+        commitmentSecrets.add(Util.hexStringToByteArray("54892cd9275b92d169b376b44281af5611b7c6b4f9c7cce45d478df4761dba36"));
+
+        for(int i=0; i< commitmentSecrets.size(); i++) {
+            signers.add(new PublicKey(new PrivateKey(privateKeys.get(i))).getValue());
+            commitments.add(signatureService.computeCommitment(commitmentSecrets.get(i)));
+        }
+
+        aggregatedCommitment = signatureService.aggregateCommitments(commitments, bitmap);
+
+        for(int i=0; i< signers.size(); i++){
+            challenges.add(signatureService.computeChallenge(signers, signers.get(0), aggregatedCommitment, message, bitmap));
+            signatureShares.add(signatureService.computeSignatureShare(challenges.get(i), privateKeys.get(i), commitmentSecrets.get(i)));
+        }
+
+        aggregatedSignature = signatureService.aggregateSignatures(signatureShares, bitmap);
+        TestCase.assertEquals("0090abcf904cc8be814e73f19e302f3b889e3b4267b6127682d610aa5379157bc4",
+                Util.byteArrayToHexString(aggregatedSignature));
+    }
 
     @Test
     public void testSignVerify() {
@@ -101,11 +481,11 @@ public class MultiSignatureBNTest {
         final int CONSENSUS_GROUP_SIZE = 21;
         final int MASK_BITMAP = (1 << CONSENSUS_GROUP_SIZE) - 1;
         final int CONSENSUS_MALICIOUS = ((CONSENSUS_GROUP_SIZE) - 3) / 3;
-        final int SIGNING_ROUNDS = 50;
+        final int SIGNING_ROUNDS = 20;
 
         MultiSignatureService multiSignatureService = AppServiceProvider.getMultiSignatureService();
         ArrayList<ECKeyPair> signers = new ArrayList<>();
-        ArrayList<PublicKey> signersPublicKeys = new ArrayList<>();
+        ArrayList<byte[]> signersPublicKeys = new ArrayList<>();
         ArrayList<byte[]> commitmentSecrets = new ArrayList<>();
         ArrayList<byte[]> commitments = new ArrayList<>();
         ArrayList<byte[]> challenges = new ArrayList<>();
@@ -135,7 +515,7 @@ public class MultiSignatureBNTest {
             for (int pubKeyIdx = 0; pubKeyIdx < CONSENSUS_GROUP_SIZE; pubKeyIdx++) {
                 ecKeyPair = new ECKeyPair();
                 signers.add(ecKeyPair);
-                signersPublicKeys.add(ecKeyPair.getPublicKey());
+                signersPublicKeys.add(ecKeyPair.getPublicKey().getValue());
             }
 
             // generate a bitmap for (2/3) + 1 signers out of all consensus members
@@ -163,6 +543,7 @@ public class MultiSignatureBNTest {
             aggregatedCommitment = multiSignatureService.aggregateCommitments(commitments, bitmap);
             System.out.println("aggregated commitment: " + Util.byteArrayToHexString(aggregatedCommitment));
 
+
             // compute challenges and signatures for each signer
             for (int i = 0; i < CONSENSUS_GROUP_SIZE; i++) {
                 if (0 != ((1 << i) & bitmap)) {
@@ -180,7 +561,7 @@ public class MultiSignatureBNTest {
                     signatureShares.add(
                             multiSignatureService.computeSignatureShare(
                                     challenges.get(i),
-                                    signers.get(i).getPrivateKey(),
+                                    signers.get(i).getPrivateKey().getValue(),
                                     commitmentSecrets.get(i)
                             )
                     );
@@ -201,6 +582,7 @@ public class MultiSignatureBNTest {
                     signatureShares.add(new byte[0]);
                 }
             }
+
             // aggregate signature
             aggregatedSignature = multiSignatureService.aggregateSignatures(signatureShares, bitmap);
             System.out.println("aggregated signature: " + Util.byteArrayToHexString(aggregatedSignature));
