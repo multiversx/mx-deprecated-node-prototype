@@ -16,18 +16,18 @@ public interface MultiSignatureService {
                                 long bitmapCommitments);
 
     // compute or get the challenge from leader
-    byte[] computeChallenge(ArrayList<PublicKey> signers,
-                            PublicKey publicKey,
+    byte[] computeChallenge(ArrayList<byte[]> signers,
+                            byte[] publicKey,
                             byte[] aggregatedCommitment,
                             byte[] message,
                             long bitmapCommitments);
 
     byte[] computeSignatureShare(byte[] challenge,
-                                 PrivateKey privateKey,
+                                 byte[] privateKey,
                                  byte[] commitmentSecret);
 
-    boolean verifySignatureShare(ArrayList<PublicKey> publicKeys,
-                                 PublicKey publicKey,
+    boolean verifySignatureShare(ArrayList<byte[]> publicKeys,
+                                 byte[] publicKey,
                                  byte[] signature,
                                  byte[] aggCommitment,
                                  byte[] commitment,
@@ -37,7 +37,7 @@ public interface MultiSignatureService {
     byte[] aggregateSignatures(ArrayList<byte[]> signatureShares,
                                long bitmapSigners);
 
-    boolean verifyAggregatedSignature(ArrayList<PublicKey> signers,
+    boolean verifyAggregatedSignature(ArrayList<byte[]> signers,
                                       byte[] aggregatedSignature,
                                       byte[] aggregatedCommitment,
                                       byte[] message,
