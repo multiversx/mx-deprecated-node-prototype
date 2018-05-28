@@ -55,6 +55,9 @@ public class Application implements Serializable {
         // Start bootstrapping process
         AppProcessors.BOOTSTRAP_SYSTEM.process(this);
 
+        // Execute transactions and emit block
+        AppProcessors.BLOCK_ASSEMBLY_PROCESSOR.process(this);
+
     }
 
     public void stop() {

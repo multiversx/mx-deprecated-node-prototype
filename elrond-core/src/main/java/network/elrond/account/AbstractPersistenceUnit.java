@@ -16,10 +16,9 @@ public abstract class AbstractPersistenceUnit<K, V> {
 
     final protected LRUMap<K, V> cache = new LRUMap<>(0, MAX_ENTRIES);
     final protected DB database;
-    final ArrayBlockingQueue<Fun.Tuple2<K, V>> queue = new ArrayBlockingQueue<>(10000);
 
     public AbstractPersistenceUnit(String databasePath) throws IOException {
-        if(databasePath == null || databasePath.isEmpty() ){
+        if (databasePath == null || databasePath.isEmpty()) {
             throw new IllegalArgumentException("databasePath cannot be null");
         }
         this.database = initDatabase(databasePath);
@@ -34,10 +33,6 @@ public abstract class AbstractPersistenceUnit<K, V> {
 
     public LRUMap<K, V> getCache() {
         return cache;
-    }
-
-    public void scheduleForPersistence(K key, V val) {
-        queue.add(new Fun.Tuple2<>(key, val));
     }
 
     public abstract void put(byte[] key, byte[] val);

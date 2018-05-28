@@ -18,7 +18,7 @@ public interface P2PBroadcastService {
     ) throws IOException;
 
 
-    P2PBroadcastChanel createChannel(P2PConnection connection, String chanelName);
+    P2PBroadcastChanel createChannel(P2PConnection connection, P2PChannelName chanelName);
 
     boolean subscribeToChannel(P2PBroadcastChanel chanel);
 

@@ -55,16 +55,16 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         return new P2PConnection(peerId, peer, dht);
     }
 
-    public P2PBroadcastChanel createChannel(P2PConnection connection, String channelName) {
+    public P2PBroadcastChanel createChannel(P2PConnection connection, P2PChannelName channelName) {
 
         try {
 
             PeerDHT dht = connection.getDht();
 
-            FutureGet futureGet = dht.get(Number160.createHash(channelName)).start();
+            FutureGet futureGet = dht.get(Number160.createHash(channelName.toString())).start();
             futureGet.awaitUninterruptibly();
             if (futureGet.isSuccess() && futureGet.isEmpty())
-                dht.put(Number160.createHash(channelName))
+                dht.put(Number160.createHash(channelName.toString()))
                         .data(new Data(new HashSet<PeerAddress>()))
                         .start()
                         .awaitUninterruptibly();
@@ -88,17 +88,17 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
 
 
             P2PConnection connection = chanel.getConnection();
-            String channelName = chanel.getName();
+            P2PChannelName channelName = chanel.getName();
             PeerDHT dht = connection.getDht();
 
-            FutureGet futureGet = dht.get(Number160.createHash(channelName)).start();
+            FutureGet futureGet = dht.get(Number160.createHash(channelName.toString())).start();
             futureGet.awaitUninterruptibly();
             if (futureGet.isSuccess()) {
                 if (futureGet.isEmpty()) return false;
                 HashSet<PeerAddress> peersOnChannel;
                 peersOnChannel = (HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object();
                 peersOnChannel.add(dht.peer().peerAddress());
-                dht.put(Number160.createHash(channelName)).data(new Data(peersOnChannel)).start().awaitUninterruptibly();
+                dht.put(Number160.createHash(channelName.toString())).data(new Data(peersOnChannel)).start().awaitUninterruptibly();
 
                 return true;
             }
@@ -113,11 +113,11 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         try {
 
             P2PConnection connection = chanel.getConnection();
-            String channelName = chanel.getName();
+            P2PChannelName channelName = chanel.getName();
 
             PeerDHT dht = connection.getDht();
 
-            FutureGet futureGet = dht.get(Number160.createHash(channelName)).start();
+            FutureGet futureGet = dht.get(Number160.createHash(channelName.toString())).start();
             futureGet.awaitUninterruptibly();
             if (futureGet.isSuccess()) {
                 HashSet<PeerAddress> peersOnChannel;
@@ -152,18 +152,18 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         try {
 
             P2PConnection connection = chanel.getConnection();
-            String channelName = chanel.getName();
+            P2PChannelName channelName = chanel.getName();
 
             PeerDHT dht = connection.getDht();
 
-            FutureGet futureGet = dht.get(Number160.createHash(channelName)).start();
+            FutureGet futureGet = dht.get(Number160.createHash(channelName.toString())).start();
             futureGet.awaitUninterruptibly();
             if (futureGet.isSuccess()) {
                 if (futureGet.isEmpty()) return false;
                 HashSet<PeerAddress> peersOnChannel;
                 peersOnChannel = (HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object();
                 peersOnChannel.remove(dht.peer().peerAddress());
-                dht.put(Number160.createHash(channelName)).data(new Data(peersOnChannel)).start().awaitUninterruptibly();
+                dht.put(Number160.createHash(channelName.toString())).data(new Data(peersOnChannel)).start().awaitUninterruptibly();
 
                 return true;
             }

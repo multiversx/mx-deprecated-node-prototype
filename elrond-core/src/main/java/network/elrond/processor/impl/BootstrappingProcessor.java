@@ -8,6 +8,7 @@ import network.elrond.blockchain.SettingsType;
 import network.elrond.core.Util;
 import network.elrond.data.*;
 import network.elrond.p2p.P2PBroadcastChanel;
+import network.elrond.p2p.P2PChannelName;
 import network.elrond.processor.AppProcessor;
 import network.elrond.processor.AppProcessors;
 import network.elrond.service.AppServiceProvider;
@@ -33,8 +34,8 @@ public class BootstrappingProcessor implements AppProcessor {
         //BlockService blockService = AppServiceProvider.getBlockService();
         SerializationService serializationService = AppServiceProvider.getSerializationService();
 
-        P2PBroadcastChanel chanTx = state.getChanel("TRANSACTIONS");
-        P2PBroadcastChanel blkTx = state.getChanel("BLOCKS");
+        P2PBroadcastChanel chanTx = state.getChanel(P2PChannelName.TRANSACTION);
+        P2PBroadcastChanel blkTx = state.getChanel(P2PChannelName.BLOCK);
 
         Thread threadProcess = new Thread(() -> {
 

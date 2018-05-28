@@ -21,10 +21,6 @@ import java.util.List;
 public class Block {
     //block counter
     protected BigInteger nonce;
-    //plain message hash
-    protected byte[] hashNoSig;
-    //complete tx hash
-    protected byte[] hash;
     //blob of data containing first part of sig
     private byte[] sig1;
     //blob of data containing second part of sig
@@ -42,8 +38,6 @@ public class Block {
 
     public Block() {
         nonce = BigInteger.ZERO;
-        hashNoSig = new byte[0];
-        hash = new byte[0];
         listPubKeys = new ArrayList<String>();
         prevBlockHash = new byte[0];
         listTXHashes = new ArrayList<byte[]>();

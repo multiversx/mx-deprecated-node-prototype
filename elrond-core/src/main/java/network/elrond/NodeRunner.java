@@ -3,6 +3,7 @@ package network.elrond;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.p2p.P2PBroadcastChanel;
+import network.elrond.p2p.P2PChannelName;
 import network.elrond.service.AppServiceProvider;
 
 import java.util.Random;
@@ -29,7 +30,7 @@ public class NodeRunner {
             AppState state = app.getState();
 
             do {
-                P2PBroadcastChanel chanel = state.getChanel("TRANSACTIONS");
+                P2PBroadcastChanel chanel = state.getChanel(P2PChannelName.TRANSACTION);
                 AppServiceProvider.getP2PBroadcastService().publishToChannel(chanel, new Random().nextInt());
                 try {
                     Thread.sleep(1000);

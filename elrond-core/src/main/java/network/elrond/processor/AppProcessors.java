@@ -22,6 +22,15 @@ public class AppProcessors {
     };
 
     /**
+     * P2P transactions broadcast
+     */
+    public static AppProcessor BLOCK_ASSEMBLY_PROCESSOR = (application) -> {
+
+        new BlockAssemblyProcessor().process(application);
+    };
+
+
+    /**
      * P2P block broadcast
      */
     public static AppProcessor P2P_BLOCKS_INTERCEPTOR = (application) -> {
@@ -40,7 +49,7 @@ public class AppProcessors {
     /**
      * Init blockchain
      */
-    public static AppProcessor BOOTSTRAP_ACCOUNTS= (application) -> {
+    public static AppProcessor BOOTSTRAP_ACCOUNTS = (application) -> {
         new AccountsStarterProcessor().process(application);
     };
 

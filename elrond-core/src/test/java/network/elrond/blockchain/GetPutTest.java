@@ -12,6 +12,7 @@ import network.elrond.data.SerializationService;
 import network.elrond.data.Transaction;
 import network.elrond.data.TransactionService;
 import network.elrond.p2p.P2PBroadcastChanel;
+import network.elrond.p2p.P2PChannelName;
 import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
 
@@ -47,7 +48,7 @@ public class GetPutTest extends BaseBlockchainTest {
         Thread thread = new Thread(() -> {
 
             AppState state = app.getState();
-            P2PBroadcastChanel channel = state.getChanel("TRANSACTIONS");
+            P2PBroadcastChanel channel = state.getChanel(P2PChannelName.TRANSACTION);
 
             int value = 0;
 

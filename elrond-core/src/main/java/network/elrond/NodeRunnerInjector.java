@@ -8,6 +8,7 @@ import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.*;
 import network.elrond.p2p.P2PBroadcastChanel;
+import network.elrond.p2p.P2PChannelName;
 import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.LoggerFactory;
@@ -69,7 +70,7 @@ public class NodeRunnerInjector {
     }
 
     private static void InjectTx(AppState state, Random rdm, PublicKey pbKey, PrivateKey pvKey) {
-        P2PBroadcastChanel channel = state.getChanel("TRANSACTIONS");
+        P2PBroadcastChanel channel = state.getChanel(P2PChannelName.TRANSACTION);
 
         Transaction tx = new Transaction();
 
@@ -106,7 +107,7 @@ public class NodeRunnerInjector {
     }
 
     private static void InjectBlk(AppState state, Random rdm) {
-        P2PBroadcastChanel channel = state.getChanel("BLOCKS");
+        P2PBroadcastChanel channel = state.getChanel(P2PChannelName.BLOCK);
 
         Block b = new DataBlock();
 

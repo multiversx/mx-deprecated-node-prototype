@@ -20,8 +20,6 @@ public class GenesisBlock extends Block{
      */
     public GenesisBlock() {
         this.nonce = BigInteger.ZERO;
-        hashNoSig = new byte[0];
-        hash = new byte[0];
         listPubKeys = new ArrayList<String>();
         prevBlockHash = STR_GENESIS_BLOCK.getBytes();
         listTXHashes = new ArrayList<byte[]>();
