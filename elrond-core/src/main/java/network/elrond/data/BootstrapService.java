@@ -16,4 +16,10 @@ public interface BootstrapService {
 
     void setMaxBlockSizeLocal(Blockchain structure, BigInteger height) throws IOException, ClassNotFoundException;
 
+    void setMaxBlockSizeNetwork(BigInteger blockHeight, P2PConnection connection) throws IOException;
+
+    void setBlockHeightHashNetwork(BigInteger blockHeight, String strHash, P2PConnection connection) throws IOException;
+
+    String getBlockHeightHashNetwork(BigInteger blockHeight, P2PConnection connection) throws IOException, ClassNotFoundException;
+
 }

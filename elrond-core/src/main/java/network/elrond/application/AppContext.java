@@ -1,5 +1,7 @@
 package network.elrond.application;
 
+import network.elrond.data.BootstrapType;
+
 import java.io.Serializable;
 
 public class AppContext implements Serializable {
@@ -10,6 +12,8 @@ public class AppContext implements Serializable {
     private Integer masterPeerPort;
 
     private String storageBasePath = "main";
+
+    private BootstrapType bootstrapType = BootstrapType.START_FROM_SCRATCH;
 
 
     public Integer getPeerId() {
@@ -47,5 +51,9 @@ public class AppContext implements Serializable {
     public String getStorageBasePath(){return(storageBasePath);}
 
     public void setStorageBasePath(String storageBasePath) {this.storageBasePath = storageBasePath;}
+
+    public BootstrapType getBootstrapType() { return this.bootstrapType;}
+
+    public void setBootstrapType(BootstrapType bootstrapType) { this.bootstrapType = bootstrapType;}
 
 }
