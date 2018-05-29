@@ -7,14 +7,14 @@ import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainContext;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.p2p.P2PConnection;
-import network.elrond.processor.AppProcessor;
+import network.elrond.processor.AppTask;
 
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class BlockchainStarterProcessor implements AppProcessor {
+public class BlockchainStarterProcessor implements AppTask {
 
     public static final String BLOCKCHAIN_BLOCK_DATA = "blockchain.block.data";
     public static final String BLOCKCHAIN_TRANSACTION_DATA = "blockchain.transaction.data";

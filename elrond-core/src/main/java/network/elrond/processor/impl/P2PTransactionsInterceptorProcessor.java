@@ -7,14 +7,14 @@ import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.application.AppState;
 import network.elrond.data.Transaction;
 import network.elrond.p2p.P2PChannelName;
-import network.elrond.processor.AppProcessors;
+import network.elrond.processor.AppTasks;
 import network.elrond.service.AppServiceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class P2PTransactionsInterceptorProcessor extends AbstractChannelProcessor<String> {
+public class P2PTransactionsInterceptorProcessor extends AbstractChannelTask<String> {
 
-    private Logger logger = LoggerFactory.getLogger(AppProcessors.class);
+    private Logger logger = LoggerFactory.getLogger(AppTasks.class);
 
     @Override
     protected P2PChannelName getChannelName() {

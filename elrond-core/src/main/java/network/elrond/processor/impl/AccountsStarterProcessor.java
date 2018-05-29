@@ -5,13 +5,13 @@ import network.elrond.account.Accounts;
 import network.elrond.account.AccountsContext;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
-import network.elrond.processor.AppProcessor;
+import network.elrond.processor.AppTask;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class AccountsStarterProcessor implements AppProcessor {
+public class AccountsStarterProcessor implements AppTask {
 
     public static final String ACCOUNTS_DATA = "blockchain.accounts.data";
 

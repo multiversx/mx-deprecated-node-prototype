@@ -8,16 +8,16 @@ import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.data.Block;
 import network.elrond.p2p.P2PChannelName;
-import network.elrond.processor.AppProcessors;
+import network.elrond.processor.AppTasks;
 import network.elrond.service.AppServiceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class P2PBlocksInterceptorProcessor extends AbstractChannelProcessor<String> {
+public class P2PBlocksInterceptorProcessor extends AbstractChannelTask<String> {
 
-    private Logger logger = LoggerFactory.getLogger(AppProcessors.class);
+    private Logger logger = LoggerFactory.getLogger(AppTasks.class);
 
     @Override
     protected P2PChannelName getChannelName() {

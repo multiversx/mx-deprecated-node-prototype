@@ -9,8 +9,8 @@ import network.elrond.core.Util;
 import network.elrond.data.*;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PChannelName;
-import network.elrond.processor.AppProcessor;
-import network.elrond.processor.AppProcessors;
+import network.elrond.processor.AppTask;
+import network.elrond.processor.AppTasks;
 import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
@@ -19,9 +19,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.math.BigInteger;
 
-public class BootstrappingProcessor implements AppProcessor {
+public class BootstrappingProcessor implements AppTask {
 
-    private Logger logger = LoggerFactory.getLogger(AppProcessors.class);
+    private Logger logger = LoggerFactory.getLogger(AppTasks.class);
 
     @Override
     public void process(Application application) throws IOException {
