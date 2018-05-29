@@ -11,7 +11,7 @@ public interface P2PBroadcastService {
     P2PConnection createConnection(AppContext context) throws IOException;
 
     P2PConnection createConnection(
-            Integer peerId,
+            String nodeName,
             int peerPort,
             String masterPeerIpAddress,
             int masterPeerPort

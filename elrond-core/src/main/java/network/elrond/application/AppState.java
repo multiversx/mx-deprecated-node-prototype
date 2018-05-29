@@ -86,22 +86,7 @@ public class AppState implements Serializable {
     }
 
     public void shutdown() {
-        //closes handlers for blockchain
-        for (BlockchainUnitType blockchainUnitType : BlockchainUnitType.values()) {
-            BlockchainPersistenceUnit<Object, Object> blockchainPersistenceUnit = this.getBlockchain().getUnit(blockchainUnitType);
-
-            if (blockchainPersistenceUnit == null) {
-                continue;
-            }
-
-            try {
-                blockchainPersistenceUnit.close();
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-        this.blockchain = null;
-
+        this.blockchain.stopPersistenceUnit();
+        this.accounts.stopPersistenceUnit();
     }
 }

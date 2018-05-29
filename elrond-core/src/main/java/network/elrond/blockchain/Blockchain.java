@@ -1,9 +1,9 @@
 package network.elrond.blockchain;
 
+import network.elrond.account.AbstractPersistenceUnit;
 import network.elrond.data.DataBlock;
 import network.elrond.data.Transaction;
 import network.elrond.p2p.P2PConnection;
-import org.iq80.leveldb.DB;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class Blockchain implements Serializable {
+public class Blockchain implements Serializable, PersistenceUnitContainer {
 
     private final BlockchainContext context;
 
@@ -61,5 +61,16 @@ public class Blockchain implements Serializable {
             blockchain.get(key).getCache().clear();
         }
 
+    }
+
+    @Override
+    public void stopPersistenceUnit() {
+        for (AbstractPersistenceUnit<?, ?> unit : blockchain.values()) {
+            try {
+                unit.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

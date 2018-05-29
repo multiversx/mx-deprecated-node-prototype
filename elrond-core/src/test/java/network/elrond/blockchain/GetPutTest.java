@@ -39,7 +39,7 @@ public class GetPutTest extends BaseBlockchainTest {
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(4000);
         context.setPort(4000);
-        context.setPeerId(1);
+        context.setNodeName("1");
 
 
         Application app = new Application(context);
@@ -101,7 +101,7 @@ public class GetPutTest extends BaseBlockchainTest {
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(4000);
         context.setPort(4001);
-        context.setPeerId(0);
+        context.setNodeName("0");
 
 
         Application app = new Application(context);

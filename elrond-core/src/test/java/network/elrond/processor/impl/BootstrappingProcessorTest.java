@@ -37,7 +37,7 @@ public class BootstrappingProcessorTest {
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(4000);
         context.setPort(4001 /*+ new Random().nextInt(10000)*/);
-        context.setPeerId(0);
+        context.setNodeName("0");
         context.setBootstrapType(BootstrapType.START_FROM_SCRATCH);
         context.setStorageBasePath("test");
 

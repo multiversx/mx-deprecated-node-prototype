@@ -24,22 +24,22 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
 
     public P2PConnection createConnection(AppContext context) throws IOException {
 
-        Integer peerId = context.getPeerId();
+        String nodeName = context.getNodeName();
         int peerPort = context.getPort();
         String masterPeerIpAddress = context.getMasterPeerIpAddress();
         int masterPeerPort = context.getMasterPeerPort();
 
-        return createConnection(peerId, peerPort, masterPeerIpAddress, masterPeerPort);
+        return createConnection(nodeName, peerPort, masterPeerIpAddress, masterPeerPort);
 
     }
 
     public P2PConnection createConnection(
-            Integer peerId,
+            String nodeName,
             int peerPort,
             String masterPeerIpAddress,
             int masterPeerPort
     ) throws IOException {
-        Peer peer = new PeerBuilder(Number160.createHash(peerId)).ports(peerPort).start();
+        Peer peer = new PeerBuilder(Number160.createHash(nodeName)).ports(peerPort).start();
         PeerDHT dht = new PeerBuilderDHT(peer).start();
 
 
@@ -52,7 +52,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
             peer.discover().peerAddress(fb.bootstrapTo().iterator().next()).start().awaitUninterruptibly();
         }
 
-        return new P2PConnection(peerId, peer, dht);
+        return new P2PConnection(nodeName, peer, dht);
     }
 
     public P2PBroadcastChanel createChannel(P2PConnection connection, P2PChannelName channelName) {

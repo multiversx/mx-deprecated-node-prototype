@@ -28,7 +28,7 @@ public class NodeRunnerInjector {
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(4000);
         context.setPort(4001);
-        context.setPeerId(0);
+        context.setNodeName("0");
 
 
         Application app = new Application(context);
