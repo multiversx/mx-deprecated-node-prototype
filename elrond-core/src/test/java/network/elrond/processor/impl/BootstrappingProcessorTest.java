@@ -13,8 +13,6 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.*;
-import network.elrond.processor.AppProcessors;
-import network.elrond.processor.impl.BootstrappingProcessor;
 import network.elrond.service.AppServiceProvider;
 import org.junit.After;
 import org.junit.Before;
@@ -34,7 +32,7 @@ public class BootstrappingProcessorTest {
     AccountStateService accountStateService = AppServiceProvider.getAccountStateService();
 
     @Before
-    public void setup() throws Exception{
+    public void setup() throws Exception {
         AppContext context = new AppContext();
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(4000);
@@ -51,12 +49,12 @@ public class BootstrappingProcessorTest {
     }
 
     @After
-    public void teardown() throws Exception{
+    public void teardown() throws Exception {
         app.stop();
     }
 
     @Test
-    public void bootstrapMethodsTest() throws Exception{
+    public void bootstrapMethodsTest() throws Exception {
         AppState state = app.getState();
 
         BootstrappingProcessor bootstrappingProcessor = new BootstrappingProcessor();
@@ -66,7 +64,7 @@ public class BootstrappingProcessorTest {
         for (BlockchainUnitType blockchainUnitType : BlockchainUnitType.values()) {
             BlockchainPersistenceUnit<Object, Object> blockchainPersistenceUnit = state.getBlockchain().getUnit(blockchainUnitType);
 
-            if (blockchainPersistenceUnit == null){
+            if (blockchainPersistenceUnit == null) {
                 continue;
             }
 
@@ -133,7 +131,7 @@ public class BootstrappingProcessorTest {
     }
 
 
-    public void bootstrapMethods2() throws Exception{
+    public void bootstrapMethods2() throws Exception {
         AppState state = app.getState();
 
         BootstrappingProcessor bootstrappingProcessor = new BootstrappingProcessor();
