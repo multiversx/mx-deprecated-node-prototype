@@ -3,9 +3,7 @@ package network.elrond.data;
 import network.elrond.account.AccountAddress;
 import network.elrond.account.AccountState;
 import network.elrond.account.Accounts;
-import network.elrond.blockchain.AppPersistenceService;
 import network.elrond.blockchain.Blockchain;
-import network.elrond.blockchain.BlockchainService;
 import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
 
@@ -42,6 +40,7 @@ public class ExecutionServiceImpl implements ExecutionService {
                 blockExecutionReport.combine(transactionExecutionReport);
                 break;
             }
+
         }
 
 
