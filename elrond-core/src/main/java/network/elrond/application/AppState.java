@@ -3,6 +3,8 @@ package network.elrond.application;
 
 import network.elrond.account.Accounts;
 import network.elrond.blockchain.Blockchain;
+import network.elrond.blockchain.BlockchainPersistenceUnit;
+import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PConnection;
 
@@ -71,4 +73,23 @@ public class AppState implements Serializable {
         this.bootstrapping = bootstrapping;
     }
 
+    public void shutdown(){
+        //closes handlers for blockchain
+        for (BlockchainUnitType blockchainUnitType : BlockchainUnitType.values()) {
+            BlockchainPersistenceUnit<Object, Object> blockchainPersistenceUnit = this.getBlockchain().getUnit(blockchainUnitType);
+
+            if (blockchainPersistenceUnit == null){
+                continue;
+            }
+
+            try {
+                blockchainPersistenceUnit.close();
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        this.blockchain = null;
+    }
 }

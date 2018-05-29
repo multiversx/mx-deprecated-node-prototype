@@ -61,4 +61,9 @@ public abstract class AbstractPersistenceUnit<K, V> {
         options.createIfMissing(true);
         factory.destroy(new File(databasePath), options);
     }
+
+    public void close() throws IOException{
+        this.database.close();
+
+    }
 }

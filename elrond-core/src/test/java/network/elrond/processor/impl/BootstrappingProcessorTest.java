@@ -16,6 +16,8 @@ import network.elrond.data.*;
 import network.elrond.processor.AppProcessors;
 import network.elrond.processor.impl.BootstrappingProcessor;
 import network.elrond.service.AppServiceProvider;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -24,8 +26,15 @@ import java.util.List;
 import java.util.Scanner;
 
 public class BootstrappingProcessorTest {
-    @Test
-    public void bootstrapMethodsTest() throws Exception{
+    private Application app;
+
+    SerializationService serializationService = AppServiceProvider.getSerializationService();
+    TransactionService transactionService = AppServiceProvider.getTransactionService();
+    BootstrapService bootstrapService = AppServiceProvider.getBootstrapService();
+    AccountStateService accountStateService = AppServiceProvider.getAccountStateService();
+
+    @Before
+    public void setup() throws Exception{
         AppContext context = new AppContext();
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(4000);
@@ -34,16 +43,21 @@ public class BootstrappingProcessorTest {
         context.setBootstrapType(BootstrapType.START_FROM_SCRATCH);
         context.setStorageBasePath("test");
 
-        Application app = new Application(context);
+        app = new Application(context);
         AppState state = app.getState();
         state.setStillRunning(false);
 
         app.start();
+    }
 
-        SerializationService serializationService = AppServiceProvider.getSerializationService();
-        TransactionService transactionService = AppServiceProvider.getTransactionService();
-        BootstrapService bootstrapService = AppServiceProvider.getBootstrapService();
-        AccountStateService accountStateService = AppServiceProvider.getAccountStateService();
+    @After
+    public void teardown() throws Exception{
+        app.stop();
+    }
+
+    @Test
+    public void bootstrapMethodsTest() throws Exception{
+        AppState state = app.getState();
 
         BootstrappingProcessor bootstrappingProcessor = new BootstrappingProcessor();
         bootstrappingProcessor.process(app);
@@ -116,31 +130,11 @@ public class BootstrappingProcessorTest {
 
         TestCase.assertEquals(true, executionReport.isOk());
         TestCase.assertEquals(BigInteger.valueOf(1), bootstrapService.getMaxBlockSizeLocal(state.getBlockchain()));
-
-
-        app.stop();
     }
 
-    @Test
+
     public void bootstrapMethods2() throws Exception{
-        AppContext context = new AppContext();
-        context.setMasterPeerIpAddress("127.0.0.1");
-        context.setMasterPeerPort(4000);
-        context.setPort(4001 /*+ new Random().nextInt(10000)*/);
-        context.setPeerId(0);
-        context.setBootstrapType(BootstrapType.REBUILD_FROM_DISK);
-        context.setStorageBasePath("test");
-
-        Application app = new Application(context);
         AppState state = app.getState();
-        state.setStillRunning(false);
-
-        app.start();
-
-        SerializationService serializationService = AppServiceProvider.getSerializationService();
-        TransactionService transactionService = AppServiceProvider.getTransactionService();
-        BootstrapService bootstrapService = AppServiceProvider.getBootstrapService();
-        AccountStateService accountStateService = AppServiceProvider.getAccountStateService();
 
         BootstrappingProcessor bootstrappingProcessor = new BootstrappingProcessor();
         bootstrappingProcessor.process(app);
@@ -149,8 +143,5 @@ public class BootstrappingProcessorTest {
         ExecutionReport executionReport = bootstrappingProcessor.rebuildFromDisk(app, bootstrapService.getMaxBlockSizeLocal(state.getBlockchain()));
 
         TestCase.assertEquals(BigInteger.valueOf(1), bootstrapService.getMaxBlockSizeNetwork(state.getConnection()));
-
-
-
     }
 }

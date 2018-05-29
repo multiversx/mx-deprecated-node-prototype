@@ -59,6 +59,7 @@ public class Application implements Serializable {
 
     public void stop() {
         this.state.setStillRunning(false);
+        this.state.shutdown();
     }
 
 
