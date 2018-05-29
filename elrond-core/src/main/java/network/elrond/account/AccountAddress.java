@@ -22,6 +22,9 @@ public class AccountAddress implements Serializable {
     }
 
     public static AccountAddress fromHexaString(String value) {
+        if(value == null || value.isEmpty() || !value.startsWith("0x")){
+            throw new IllegalArgumentException("value is not a HexaString!!!");
+        }
         String hexVal = value != null ? value.substring(2) : null;
         return new AccountAddress(Util.hexStringToByteArray(hexVal));
     }

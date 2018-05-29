@@ -144,6 +144,7 @@ public class SignatureServiceSchnorrImpl implements SignatureService {
         Util.check(publicKey.length != 0, "publicKey.length != 0");
 
         // Compute R = s*G + c*publicKey
+        //TODO: Do not recreate PublicKey!!!
         ECPoint publicKeyPoint = (new PublicKey(publicKey)).getQ();
         basePointG = ecCryptoService.getG();
         challengeInt = new BigInteger(challenge);

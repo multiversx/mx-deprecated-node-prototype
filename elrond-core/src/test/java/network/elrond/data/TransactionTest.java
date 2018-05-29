@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 
 public class TransactionTest {
 
@@ -124,7 +123,7 @@ public class TransactionTest {
     }
 
     @Test
-    public void testHash(){
+    public void testHashWithAndWithoutSignature(){
         PrivateKey pvKey = new PrivateKey();
         PublicKey pbKey = new PublicKey(pvKey);
 
@@ -134,52 +133,66 @@ public class TransactionTest {
             buff[i] = (byte) i;
         }
         tx.setData(buff);
-        tx.setPubKey(Util.byteArrayToHexString(pbKey.getValue()));
-        tx.setSendAddress(Util.getAddressFromPublicKey(pbKey.getValue()));
-        tx.setReceiverAddress("0x0000000000000000000000000000000000000000");
-        tx.setNonce(BigInteger.ZERO);
-        tx.setValue(BigInteger.TEN.pow(8)); //1 ERD
-
 
         tx.setSignature(new byte[]{1, 2, 3});
         tx.setChallenge(new byte[]{4, 5, 6});
 
-        System.out.println(new String(Base64.encode(serializationService.getHash(tx))));
-        System.out.println(new String(Base64.encode(serializationService.getHash(tx))));
+        String hashWithSignature = new String(Base64.encode(serializationService.getHash(tx)));
 
-        TestCase.assertEquals(false, Arrays.equals(serializationService.getHash(tx), serializationService.getHash(tx)));
+        tx.setChallenge(null);
+        tx.setSignature(null);
+        String hashWithoutSignature = new String(Base64.encode(serializationService.getHash(tx)));
+
+        System.out.println(hashWithoutSignature);
+        System.out.println(hashWithSignature);
+
+        TestCase.assertFalse(hashWithoutSignature == hashWithSignature);
 
     }
 
     @Test
-    public void signTransaction() {
+    public void testSignTransactionSetsSignatureAndChallenge() {
         PrivateKey pvKey = new PrivateKey();
         PublicKey pbKey = new PublicKey(pvKey);
 
         PrivateKey pvKey1 = new PrivateKey();
         PublicKey pbKey1 = new PublicKey(pvKey1);
 
-        Transaction tx = new Transaction(Util.getAddressFromPublicKey(pbKey.getValue()),
-                Util.getAddressFromPublicKey(pbKey1.getValue()), value, nonce);
+        Transaction tx = transactionService.generateTransaction(pbKey, pbKey1, value.longValue(), nonce.longValue());
 
         byte[] buff = new byte[5];
         for (int i = 0; i < buff.length; i++) {
             buff[i] = (byte) i;
         }
         tx.setData(buff);
-        tx.setPubKey(Util.byteArrayToHexString(pbKey.getValue()));
+        //tx.setPubKey(Util.byteArrayToHexString(pbKey.getValue()));
 
         transactionService.signTransaction(tx, pvKey.getValue());
 
-        System.out.println(serializationService.encodeJSON(tx));
-
-        Transaction tx2 = serializationService.decodeJSON(serializationService.encodeJSON(tx), Transaction.class);
-        tx2.setGasLimit(BigInteger.ONE);
-
-        System.out.println(serializationService.encodeJSON(tx2));
-        TestCase.assertTrue(transactionService.verifyTransaction(tx));
-        TestCase.assertFalse(transactionService.verifyTransaction(tx2));
-
+        Assert.assertTrue(tx.getSignature()!=null && tx.getSignature().length > 0);
+        Assert.assertTrue(tx.getChallenge()!=null && tx.getChallenge().length > 0);
     }
+
+    @Test
+    public void testVerifyTransactionShouldComputeSameSignature() {
+        PrivateKey pvKey = new PrivateKey();
+        PublicKey pbKey = new PublicKey(pvKey);
+
+        PrivateKey pvKey1 = new PrivateKey();
+        PublicKey pbKey1 = new PublicKey(pvKey1);
+
+        Transaction tx = transactionService.generateTransaction(pbKey, pbKey1, value.longValue(), nonce.longValue());
+
+        byte[] buff = new byte[5];
+        for (int i = 0; i < buff.length; i++) {
+            buff[i] = (byte) i;
+        }
+        tx.setData(buff);
+        transactionService.signTransaction(tx, pvKey.getValue());
+
+        Assert.assertTrue(transactionService.verifyTransaction(tx));
+    }
+
+
 
 }

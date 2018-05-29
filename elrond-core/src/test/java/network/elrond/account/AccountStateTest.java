@@ -60,7 +60,7 @@ public class AccountStateTest {
         PrivateKey pvKeyRecv = new PrivateKey();
         PublicKey pbKeyRecv = new PublicKey(pvKeyRecv);
 
-        Transaction tx = transactionService.generateTransaction(pbKeySender, pbKeyRecv, 2, 0);
+        Transaction tx = transactionService.generateTransaction(pbKeySender, pbKeyRecv, (long)Math.pow(10,8) * 2, 0);
         tx.setPubKey(Util.byteArrayToHexString(pbKeySender.getValue()));
 
         transactionService.signTransaction(tx, pvKeySender.getValue());

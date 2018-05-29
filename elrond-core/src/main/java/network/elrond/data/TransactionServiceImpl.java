@@ -49,18 +49,18 @@ public class TransactionServiceImpl implements TransactionService {
      * @param privateKeysBytes private key as byte array
      */
     public void signTransaction(Transaction tx, byte[] privateKeysBytes) {
+        //TODO: do not recreate PrivateKey
         PrivateKey pvkey = new PrivateKey(privateKeysBytes);
 
-        byte[] signature = tx.getSignature();
         tx.setSignature(null);
-
-        byte[] challenge = tx.getChallenge();
         tx.setChallenge(null);
 
         byte[] hashNoSigLocal = serializationService.getHash(tx);
 
-        tx.setSignature(signature);
-        tx.setChallenge(challenge);
+//        tx.setSignature(signature);
+//        tx.setChallenge(challenge);
+
+        //TODO: do not recreate PublicKey
         PublicKey pbkey = new PublicKey(pvkey);
         Signature sig;
 
@@ -135,10 +135,12 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction generateTransaction(PublicKey sender, PublicKey receiver, long value, long nonce) {
-        return new Transaction(Util.getAddressFromPublicKey(sender.getValue()),
+        Transaction t = new Transaction(Util.getAddressFromPublicKey(sender.getValue()),
                 Util.getAddressFromPublicKey(receiver.getValue()),
-                BigInteger.valueOf(10).pow(8).multiply(BigInteger.valueOf(value)),
+                BigInteger.valueOf(value),
                 BigInteger.valueOf(nonce));
+        t.setPubKey(Util.getAddressFromPublicKey(sender.getValue()));
+        return t;
     }
 
 

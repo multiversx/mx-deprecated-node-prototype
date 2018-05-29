@@ -124,7 +124,8 @@ public class Transaction{
     @JsonIgnore
     @Transient
     public AccountAddress getReceiverAccountAddress() {
-        return AccountAddress.fromHexaString(receiverAddress);
+        //return AccountAddress.fromHexaString(receiverAddress);
+        return AccountAddress.fromString(receiverAddress);
     }
 
     /**
@@ -142,7 +143,8 @@ public class Transaction{
     @JsonIgnore
     @Transient
     public AccountAddress getSendAccountAddress() {
-        return AccountAddress.fromHexaString(sendAddress);
+        //return AccountAddress.fromHexaString(sendAddress);
+        return AccountAddress.fromString(sendAddress);
     }
 
     /**
