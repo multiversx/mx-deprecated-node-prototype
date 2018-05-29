@@ -21,7 +21,6 @@ import org.junit.Test;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class BootstrappingProcessorTest {
     private Application app;
@@ -95,26 +94,22 @@ public class BootstrappingProcessorTest {
         Block blk1 = new DataBlock();
         blk1.setNonce(BigInteger.ONE);
 
-        Transaction trx1 = new Transaction();
-        trx1.setNonce(BigInteger.ZERO);
-        trx1.setValue(BigInteger.valueOf(1));
-        trx1.setSendAddress(Util.getAddressFromPublicKey(pbk1.getValue()));
-        trx1.setReceiverAddress(Util.getAddressFromPublicKey(pbk2.getValue()));
-        trx1.setPubKey(Util.byteArrayToHexString(pbk1.getValue()));
+        Transaction trx1 = transactionService.generateTransaction(pbk1, pbk2, 1, 0);
+        //trx1.setPubKey(Util.byteArrayToHexString(pbk1.getValue()));
         transactionService.signTransaction(trx1, pvk1.getValue());
 
         //put tx on wire
-        AppServiceProvider.getP2PObjectService().putJSONencoded(trx1, serializationService.getHashString(trx1, true), state.getConnection());
+        AppServiceProvider.getP2PObjectService().putJSONencoded(trx1, serializationService.getHashString(trx1), state.getConnection());
 
         List<byte[]> listTxHash = new ArrayList<>();
-        listTxHash.add(AppServiceProvider.getSerializationService().getHash(trx1, true));
+        listTxHash.add(AppServiceProvider.getSerializationService().getHash(trx1));
         blk1.setListTXHashes(listTxHash);
 
         //put block on wire
-        AppServiceProvider.getP2PObjectService().putJSONencoded(blk1, serializationService.getHashString(blk1, true), state.getConnection());
+        AppServiceProvider.getP2PObjectService().putJSONencoded(blk1, serializationService.getHashString(blk1), state.getConnection());
 
         //put block hash height and block height on wire
-        bootstrapService.setBlockHashFromHeightNetwork(blk1.getNonce(), serializationService.getHashString(blk1, true), state.getConnection());
+        bootstrapService.setBlockHashFromHeightNetwork(blk1.getNonce(), serializationService.getHashString(blk1), state.getConnection());
         bootstrapService.setMaxBlockSizeNetwork(blk1.getNonce(), state.getConnection());
 
         //mint

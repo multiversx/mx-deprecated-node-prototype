@@ -96,7 +96,7 @@ public class BootstrappingProcessor implements AppTask {
 
         result.combine(new ExecutionReport().ok("Start from scratch..."));
         GenesisBlock gb = new GenesisBlock();
-        String strHashGB = new String(Base64.encode(serializationService.getHash(gb, true)));
+        String strHashGB = new String(Base64.encode(serializationService.getHash(gb)));
 
         //put locally not broadcasting it
         try {
@@ -128,7 +128,7 @@ public class BootstrappingProcessor implements AppTask {
 
             maxBlkHeightLocal = BigInteger.ZERO;
 
-            result.combine(putBlockInBlockchain(gb, serializationService.getHashString(gb, true), state));
+            result.combine(putBlockInBlockchain(gb, serializationService.getHashString(gb), state));
 
             if (!result.isOk()) {
                 return (result);

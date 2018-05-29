@@ -25,7 +25,7 @@ public class AppBlockManager {
         AppState state = application.getState();
         Block block = new Block();
         Block currentBlock = state.getCurrentBlock();
-        byte[] hash = AppServiceProvider.getSerializationService().getHash(currentBlock, true);
+        byte[] hash = AppServiceProvider.getSerializationService().getHash(currentBlock);
         block.setPrevBlockHash(hash);
         for (Transaction transaction : transactions) {
             boolean valid = AppServiceProvider.getTransactionService().verifyTransaction(transaction);
@@ -34,7 +34,7 @@ public class AppBlockManager {
                 continue;
             }
 
-            byte[] txHash = AppServiceProvider.getSerializationService().getHash(transaction, true);
+            byte[] txHash = AppServiceProvider.getSerializationService().getHash(transaction);
             block.getListTXHashes().add(txHash);
         }
 

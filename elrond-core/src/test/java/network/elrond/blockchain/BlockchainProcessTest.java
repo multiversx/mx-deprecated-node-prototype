@@ -5,8 +5,6 @@ import network.elrond.account.AccountAddress;
 import network.elrond.account.AccountState;
 import network.elrond.account.Accounts;
 import network.elrond.account.AccountsContext;
-import network.elrond.blockchain.Blockchain;
-import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
@@ -27,18 +25,19 @@ public class BlockchainProcessTest extends BaseBlockchainTest {
 
     @Test
     public void testProcessBlock() throws Exception {
+        PrivateKey privateKeySender = new PrivateKey("PRIVATE KEY".getBytes());
+        PublicKey publicKeySender = new PublicKey(privateKeySender);
+        PrivateKey privateKeyReceiver = new PrivateKey("PRIVATE KEY2".getBytes());
+        PublicKey publicKeyReceiver = new PublicKey(privateKeyReceiver);
 
         Blockchain blockchain = new Blockchain(getDefaultTestBlockchainContext());
-        Accounts accounts = initAccounts();
-
+        Accounts accounts = initAccounts(publicKeySender);
 
         byte[] prevBlockHash = null;
         List<String> blocksHashes = new ArrayList<>();
 
-        PrivateKey key = new PrivateKey("PRIVATE KEY".getBytes());
-        PublicKey publicKey = new PublicKey(key);
-        String addressFromPublicKey = Util.getAddressFromPublicKey(publicKey.getQ().getEncoded(true));
-
+        String senderAddress = Util.getAddressFromPublicKey(publicKeySender.getValue());
+        String receiverAddress = Util.getAddressFromPublicKey(publicKeyReceiver.getValue());
 
         for (int i = 0; i < 10; i++) {
             Block block = new DataBlock();
@@ -50,29 +49,26 @@ public class BlockchainProcessTest extends BaseBlockchainTest {
             }
 
 
-            Transaction transaction = new Transaction();
-            transaction.setNonce(BigInteger.ZERO.add(BigInteger.valueOf(i)));
-            transaction.setReceiverAddress("0xAABBCC0b727509404c8f0ffa2f9e5344744794CC");
-            transaction.setSendAddress(addressFromPublicKey);
-            transaction.setValue(BigInteger.TEN);
-            transaction.setPubKey(Util.byteArrayToHexString(publicKey.getValue()));
+            Transaction transaction = new Transaction(senderAddress,
+                    receiverAddress,
+                    BigInteger.TEN, BigInteger.ZERO.add(BigInteger.valueOf(i)));
+            transaction.setPubKey(Util.byteArrayToHexString(publicKeySender.getValue()));
 
-            byte[] hash = AppServiceProvider.getSerializationService().getHash(transaction, true);
+            byte[] hash = AppServiceProvider.getSerializationService().getHash(transaction);
             block.getListTXHashes().add(hash);
 
-            String hashString = AppServiceProvider.getSerializationService().getHashString(transaction, true);
-            AppServiceProvider.getTransactionService().signTransaction(transaction, key.getValue());
+            String hashString = AppServiceProvider.getSerializationService().getHashString(transaction);
+            AppServiceProvider.getTransactionService().signTransaction(transaction, privateKeySender.getValue());
             AppServiceProvider.getBlockchainService().put(hashString, transaction, blockchain, BlockchainUnitType.TRANSACTION);
 
 
-            byte[] blockHash = AppServiceProvider.getSerializationService().getHash(block, true);
-            String blockHashString = AppServiceProvider.getSerializationService().getHashString(block, true);
+            byte[] blockHash = AppServiceProvider.getSerializationService().getHash(block);
+            String blockHashString = AppServiceProvider.getSerializationService().getHashString(block);
             AppServiceProvider.getBlockchainService().put(blockHashString, block, blockchain, BlockchainUnitType.BLOCK);
 
             blocksHashes.add(blockHashString);
 
             prevBlockHash = blockHash;
-
         }
 
         // Flush memory and read from database engine
@@ -85,27 +81,32 @@ public class BlockchainProcessTest extends BaseBlockchainTest {
             TestCase.assertTrue(AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain).isOk());
         }
 
-        AccountState acc1 = AppServiceProvider.getAccountStateService().getAccountState(AccountAddress.fromHexaString("0xAABBCC0b727509404c8f0ffa2f9e5344744794CC"), accounts);
-        TestCase.assertEquals(acc1.getBalance(),BigInteger.valueOf(100));
+        System.out.println("SenderAccountState Account state" + AccountAddress.fromPublicKey(publicKeySender));
+        AccountState senderAccountState = AppServiceProvider.getAccountStateService().getAccountState(AccountAddress.fromPublicKey(publicKeySender), accounts);
+        TestCase.assertEquals(senderAccountState.getBalance(), BigInteger.valueOf(123456689));
+
+        System.out.println("ReceiverAccountState AccountAddress" + AccountAddress.fromPublicKey(publicKeyReceiver));
+        AccountState receiverAccountState = AppServiceProvider.getAccountStateService().getAccountState(AccountAddress.fromPublicKey(publicKeyReceiver), accounts);
+        TestCase.assertEquals(receiverAccountState.getBalance(),BigInteger.valueOf(100));
 
 
-        AccountState acc2 = AppServiceProvider.getAccountStateService().getAccountState(AccountAddress.fromHexaString("0x940fdf49dd15eb830ea9c65282a47def5982d53a"), accounts);
-        TestCase.assertEquals(acc2.getBalance(), BigInteger.valueOf(123456689));
 
 
     }
 
-    private Accounts initAccounts() throws IOException, ClassNotFoundException {
+    private Accounts initAccounts(PublicKey publicKey) throws IOException, ClassNotFoundException {
         AccountsContext accountContext = new AccountsContext();
         accountContext.setDatabasePath("blockchain.account.data-test");
         Accounts accounts = new Accounts(accountContext);
 
-        AccountAddress address = AccountAddress.fromHexaString("0x940fdf49dd15eb830ea9c65282a47def5982d53a");
+        AccountAddress address = AccountAddress.fromPublicKey(publicKey);
         AccountState accountState = AppServiceProvider.getAccountStateService()
                 .getOrCreateAccountState(address, accounts);
         accountState.setBalance(BigInteger.valueOf(123456789));
 
         AppServiceProvider.getAccountStateService().setAccountState(address, accountState, accounts);
+
+        System.out.println("Initial Account address" + address.toString());
 
         return accounts;
     }

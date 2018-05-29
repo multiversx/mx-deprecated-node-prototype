@@ -58,7 +58,7 @@ public class BlockchainTest extends BaseBlockchainTest {
                 block.getListTXHashes().add(buff);
             }
 
-            String hash = new String(Base64.encode(serializationService.getHash(block, true)
+            String hash = new String(Base64.encode(serializationService.getHash(block)
             ));
             blocks.put(hash, block);
 

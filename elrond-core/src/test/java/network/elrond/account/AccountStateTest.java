@@ -60,12 +60,7 @@ public class AccountStateTest {
         PrivateKey pvKeyRecv = new PrivateKey();
         PublicKey pbKeyRecv = new PublicKey(pvKeyRecv);
 
-        Transaction tx = new Transaction();
-        tx.setNonce(BigInteger.ZERO);
-        //2 ERDs
-        tx.setValue(BigInteger.valueOf(10).pow(8).multiply(BigInteger.valueOf(2)));
-        tx.setSendAddress(Util.getAddressFromPublicKey(pbKeySender.getValue()));
-        tx.setReceiverAddress(Util.getAddressFromPublicKey(pbKeyRecv.getValue()));
+        Transaction tx = transactionService.generateTransaction(pbKeySender, pbKeyRecv, 2, 0);
         tx.setPubKey(Util.byteArrayToHexString(pbKeySender.getValue()));
 
         transactionService.signTransaction(tx, pvKeySender.getValue());

@@ -31,7 +31,7 @@ public class AccountAddress implements Serializable {
     }
 
     public static AccountAddress fromPublicKey(PublicKey key) {
-        String address = Util.getAddressFromPublicKey(key.getQ().getEncoded(true));
+        String address = Util.getAddressFromPublicKey(key.getValue());
         return fromString(address);
     }
 
