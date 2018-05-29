@@ -1,6 +1,9 @@
 package network.elrond.account;
 
+import network.elrond.data.GenesisBlock;
+
 import java.io.IOException;
+import java.math.BigInteger;
 
 public interface AccountStateService {
 
@@ -17,4 +20,8 @@ public interface AccountStateService {
     byte[] convertAccountStateToRLP(AccountState accountState);
 
     AccountState convertToAccountStateFromRLP(byte[] data);
+
+    void initialMintingToKnownAddress(Accounts accounts);
+
+    GenesisBlock generateGenesisBlock(String strAddressMint, BigInteger startValue, AccountsContext accountsContextTemporary);
 }

@@ -2,6 +2,11 @@ package network.elrond.account;
 
 import network.elrond.core.RLP;
 import network.elrond.core.RLPList;
+import network.elrond.core.Util;
+import network.elrond.data.ExecutionReport;
+import network.elrond.data.ExecutionService;
+import network.elrond.data.GenesisBlock;
+import network.elrond.service.AppServiceProvider;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -84,5 +89,40 @@ public class AccountStateServiceImpl implements AccountStateService {
                 items.get(1).getRLPData())));
 
         return (accountState);
+    }
+
+    public void initialMintingToKnownAddress(Accounts accounts){
+
+        AccountState accountState = null;
+
+        try {
+            accountState = getOrCreateAccountState(AccountAddress.fromPublicKey(Util.PUBLIC_KEY_MINTING), accounts);
+            accountState.setBalance(Util.VALUE_MINTING);
+            setAccountState(AccountAddress.fromPublicKey(Util.PUBLIC_KEY_MINTING), accountState, accounts);
+        } catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    public GenesisBlock generateGenesisBlock(String strAddressMint, BigInteger startValue, AccountsContext accountsContextTemporary){
+        GenesisBlock gb = new GenesisBlock(strAddressMint, startValue);
+
+        //compute state root hash
+        try {
+            Accounts accountsTemp = new Accounts(accountsContextTemporary);
+            ExecutionService executionService = AppServiceProvider.getExecutionService();
+            ExecutionReport executionReport = executionService.processTransaction(gb.getTransactionMint(), accountsTemp);
+            if (!executionReport.isOk()){
+                return(null);
+            }
+
+            gb.setAppStateHash(accountsTemp.getAccountsPersistenceUnit().getRootHash());
+            accountsTemp.getAccountsPersistenceUnit().close();
+        } catch (Exception ex){
+            ex.printStackTrace();
+            return(null);
+        }
+
+        return (gb);
     }
 }

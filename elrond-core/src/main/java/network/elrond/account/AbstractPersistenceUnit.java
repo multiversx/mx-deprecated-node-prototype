@@ -21,11 +21,13 @@ public abstract class AbstractPersistenceUnit<K, V> {
     private final String databasePath;
 
     public AbstractPersistenceUnit(String databasePath) throws IOException {
-        this.databasePath = databasePath;
-        if(databasePath == null || databasePath.isEmpty() ){
-            throw new IllegalArgumentException("databasePath cannot be null");
+        if (databasePath == null || databasePath.isEmpty()) {
+            this.databasePath = null;
+            this.database = null;
+        } else {
+            this.databasePath = databasePath;
+            this.database = initDatabase(databasePath);
         }
-        this.database = initDatabase(databasePath);
     }
 
     protected DB initDatabase(String databasePath) throws IOException {
@@ -48,22 +50,26 @@ public abstract class AbstractPersistenceUnit<K, V> {
     public abstract byte[] get(byte[] key);
 
     public void destroyAndReCreate() throws IOException{
-        destroy();
+        if (databasePath != null) {
+            destroy();
 
-        this.database = initDatabase(databasePath);
-
+            this.database = initDatabase(databasePath);
+        }
     }
 
     public void destroy() throws IOException{
-        Iq80DBFactory factory = new Iq80DBFactory();
-        this.database.close();
-        Options options = new Options();
-        options.createIfMissing(true);
-        factory.destroy(new File(databasePath), options);
+        if (databasePath != null) {
+            Iq80DBFactory factory = new Iq80DBFactory();
+            this.database.close();
+            Options options = new Options();
+            options.createIfMissing(true);
+            factory.destroy(new File(databasePath), options);
+        }
     }
 
     public void close() throws IOException{
-        this.database.close();
-
+        if (database != null) {
+            this.database.close();
+        }
     }
 }

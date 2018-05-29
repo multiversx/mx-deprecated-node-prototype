@@ -15,6 +15,9 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+
 public class AccountStateTest {
 
 
@@ -120,6 +123,24 @@ public class AccountStateTest {
         } catch (Exception ex) {
             TestCase.assertEquals("NOK", ex.getMessage());
         }
+    }
+
+    @Test
+    public void testMintingAccountState() throws Exception{
+
+        AccountStateService accountStateService = AppServiceProvider.getAccountStateService();
+
+        AccountsContext context = new AccountsContext();
+        context.setDatabasePath("testAccounts");
+        Accounts accounts = new Accounts(context);
+
+        AccountState asRecv = accountStateService.getAccountState(new AccountAddress(Util.PUBLIC_KEY_MINTING.getValue()), accounts);
+        assertNotEquals( "Not expected null ", null, asRecv);
+        assertEquals( "Expected balance " + Util.VALUE_MINTING.toString(10), Util.VALUE_MINTING, asRecv.getBalance());
+
+        asRecv = accountStateService.getAccountState(AccountAddress.fromHexaString(Util.getAddressFromPublicKey(Util.PUBLIC_KEY_MINTING.getValue())), accounts);
+        assertNotEquals( "Not expected null ", null, asRecv);
+        assertEquals( "Expected balance " + Util.VALUE_MINTING.toString(10), Util.VALUE_MINTING, asRecv.getBalance());
     }
 
 //    @Test

@@ -1,5 +1,7 @@
 package network.elrond.core;
 
+import network.elrond.crypto.PrivateKey;
+import network.elrond.crypto.PublicKey;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.bouncycastle.jcajce.provider.digest.SHA3.DigestSHA3;
 import org.bouncycastle.util.encoders.Base64;
@@ -32,9 +34,19 @@ public class Util {
     public static byte[] EMPTY_BYTE_ARRAY;
     public static byte[] EMPTY_DATA_HASH;
 
+    public static final PrivateKey PRIVATE_KEY_MINTING;
+    public static final PublicKey PUBLIC_KEY_MINTING;
+    public static final BigInteger VALUE_MINTING;
+
     static{
         EMPTY_BYTE_ARRAY = new byte[0];
         EMPTY_DATA_HASH = SHA3.digest(EMPTY_BYTE_ARRAY);
+
+        PRIVATE_KEY_MINTING = new PrivateKey("MINTING ADDRESS FOR INITIAL TRANSFER");
+        PUBLIC_KEY_MINTING = new PublicKey(PRIVATE_KEY_MINTING);
+
+        //21 milion ERDs
+        VALUE_MINTING = BigInteger.TEN.pow(14).multiply(BigInteger.valueOf(21));
     }
 
     public static byte[] hexStringToByteArray(String s) {
@@ -55,31 +67,39 @@ public class Util {
         return sb.toString();
     }
 
-
-    public static String getAddressFromPublicKey(byte[] pubKeyBytes) {
+    public static byte[] getAddressFromPublicKeyAsByteArray(byte[] pubKeyBytes) {
         if (pubKeyBytes == null) {
-            return ("");
+            return (null);
         }
 
         //step 1. getAccountState the data in the hexa form
         String strHexa = byteArrayToHexString(pubKeyBytes);
 
         if (strHexa.length() != Util.MAX_LEN_PUB_KEY * 2) {
-            return ("");
+            return (null);
         }
 
         //step 2. compute hash based on hexa form
         byte[] hash = SHA3.digest(strHexa.getBytes());
 
         if (hash.length != 32) {
-            return ("");
+            return (null);
         }
 
         //step 3. trim to last 20 bytes
         byte[] addr = Arrays.copyOfRange(hash, 12, 32);
 
         //step 4. convert to hexa form and add 0x
-        return ("0x" + byteArrayToHexString(addr));
+        return (addr);
+    }
+
+    public static String getAddressFromPublicKey(byte[] pubKeyBytes) {
+        byte[] buff = getAddressFromPublicKeyAsByteArray(pubKeyBytes);
+        if (buff == null){
+            return("");
+        }
+
+        return ("0x" + byteArrayToHexString(buff));
     }
 
     /**

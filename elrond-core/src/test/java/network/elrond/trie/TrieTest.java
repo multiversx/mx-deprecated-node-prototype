@@ -1,7 +1,6 @@
 package network.elrond.trie;
 
-import network.elrond.account.AccountState;
-import network.elrond.account.AccountStateService;
+import network.elrond.account.*;
 import network.elrond.db.MockDB;
 import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;

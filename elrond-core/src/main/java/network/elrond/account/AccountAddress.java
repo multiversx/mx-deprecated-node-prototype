@@ -17,9 +17,10 @@ public class AccountAddress implements Serializable {
         this.bytes = bytes;
     }
 
-    public static AccountAddress fromString(String value) {
-        return new AccountAddress(value.getBytes());
-    }
+    //JLS - NO!
+//    public static AccountAddress fromString(String value) {
+//        return new AccountAddress(value.getBytes());
+//    }
 
     public static AccountAddress fromHexaString(String value) {
         String hexVal = value != null ? value.substring(2) : null;
@@ -31,8 +32,8 @@ public class AccountAddress implements Serializable {
     }
 
     public static AccountAddress fromPublicKey(PublicKey key) {
-        String address = Util.getAddressFromPublicKey(key.getQ().getEncoded(true));
-        return fromString(address);
+        byte[] buff = Util.getAddressFromPublicKeyAsByteArray(key.getQ().getEncoded(true));
+        return fromBytes(buff);
     }
 
     @Override
@@ -54,5 +55,9 @@ public class AccountAddress implements Serializable {
                 "bytes=" + Arrays.toString(bytes) +
                 "hex=" + Util.byteArrayToHexString(bytes) +
                 '}';
+    }
+
+    public String toAddressString(){
+        return("0x"+Util.byteArrayToHexString(bytes));
     }
 }

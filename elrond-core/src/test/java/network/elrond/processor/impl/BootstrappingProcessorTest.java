@@ -26,15 +26,13 @@ import java.util.List;
 import java.util.Scanner;
 
 public class BootstrappingProcessorTest {
-    private Application app;
-
     SerializationService serializationService = AppServiceProvider.getSerializationService();
     TransactionService transactionService = AppServiceProvider.getTransactionService();
     BootstrapService bootstrapService = AppServiceProvider.getBootstrapService();
     AccountStateService accountStateService = AppServiceProvider.getAccountStateService();
 
-    @Before
-    public void setup() throws Exception{
+    @Test
+    public void bootstrapMethodsTest() throws Exception{
         AppContext context = new AppContext();
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(4000);
@@ -43,21 +41,11 @@ public class BootstrappingProcessorTest {
         context.setBootstrapType(BootstrapType.START_FROM_SCRATCH);
         context.setStorageBasePath("test");
 
-        app = new Application(context);
+        Application app  = new Application(context);
         AppState state = app.getState();
         state.setStillRunning(false);
-
         app.start();
-    }
 
-    @After
-    public void teardown() throws Exception{
-        app.stop();
-    }
-
-    @Test
-    public void bootstrapMethodsTest() throws Exception{
-        AppState state = app.getState();
 
         BootstrappingProcessor bootstrappingProcessor = new BootstrappingProcessor();
         bootstrappingProcessor.process(app);
@@ -130,18 +118,23 @@ public class BootstrappingProcessorTest {
 
         TestCase.assertEquals(true, executionReport.isOk());
         TestCase.assertEquals(BigInteger.valueOf(1), bootstrapService.getMaxBlockSizeLocal(state.getBlockchain()));
+
+
+        app.stop();
+
     }
 
 
-    public void bootstrapMethods2() throws Exception{
-        AppState state = app.getState();
+//    public void bootstrapMethods2() throws Exception{
+//        AppState state = app.getState();
+//
+//        BootstrappingProcessor bootstrappingProcessor = new BootstrappingProcessor();
+//        bootstrappingProcessor.process(app);
+//
+//
+//        ExecutionReport executionReport = bootstrappingProcessor.rebuildFromDisk(app, bootstrapService.getMaxBlockSizeLocal(state.getBlockchain()));
+//
+//        TestCase.assertEquals(BigInteger.valueOf(1), bootstrapService.getMaxBlockSizeNetwork(state.getConnection()));
+//    }
 
-        BootstrappingProcessor bootstrappingProcessor = new BootstrappingProcessor();
-        bootstrappingProcessor.process(app);
-
-
-        ExecutionReport executionReport = bootstrappingProcessor.rebuildFromDisk(app, bootstrapService.getMaxBlockSizeLocal(state.getBlockchain()));
-
-        TestCase.assertEquals(BigInteger.valueOf(1), bootstrapService.getMaxBlockSizeNetwork(state.getConnection()));
-    }
 }

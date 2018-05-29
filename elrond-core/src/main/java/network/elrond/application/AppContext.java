@@ -3,6 +3,7 @@ package network.elrond.application;
 import network.elrond.data.BootstrapType;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 
 public class AppContext implements Serializable {
 
@@ -14,7 +15,8 @@ public class AppContext implements Serializable {
     private String storageBasePath = "main";
 
     private BootstrapType bootstrapType = BootstrapType.START_FROM_SCRATCH;
-
+    private String strAddressMint = "0x0000000000000000000000000000000000000000";
+    private BigInteger valueMint = BigInteger.ZERO;
 
     public Integer getPeerId() {
         return peerId;
@@ -55,5 +57,13 @@ public class AppContext implements Serializable {
     public BootstrapType getBootstrapType() { return this.bootstrapType;}
 
     public void setBootstrapType(BootstrapType bootstrapType) { this.bootstrapType = bootstrapType;}
+
+    public String getStrAddressMint(){return strAddressMint;}
+
+    public void setStrAddressMint(String strAddressMint) {this.strAddressMint = strAddressMint;}
+
+    public BigInteger getValueMint(){return valueMint;}
+
+    public void setValueMint(BigInteger valueMint){this.valueMint = valueMint;}
 
 }
