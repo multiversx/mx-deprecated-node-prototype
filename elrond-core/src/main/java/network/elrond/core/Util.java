@@ -25,6 +25,7 @@ public class Util {
     public static final float WEIGHT_RATING_SPOS = 0.6f;
     public static final int MAX_LEN_ADDR = 42; //20 bytes x 2 chars + 0x
     public static final int MAX_LEN_PUB_KEY = 33;
+    public static final String SIGNATURE_FILTER = "filterSigs";
     public static DigestSHA3 SHA3 = new DigestSHA3(256);
     public static SHA256.Digest SHA256 = new SHA256.Digest();
     public static BigInteger BIG_INT_MIN_ONE = BigInteger.valueOf(-1);

@@ -48,11 +48,9 @@ public class BlockchainProcessTest extends BaseBlockchainTest {
             }
 
 
-            Transaction transaction = new Transaction();
-            transaction.setNonce(BigInteger.ZERO.add(BigInteger.valueOf(i)));
-            transaction.setReceiverAddress("0xAABBCC0b727509404c8f0ffa2f9e5344744794CC");
-            transaction.setSendAddress(addressFromPublicKey);
-            transaction.setValue(BigInteger.TEN);
+            Transaction transaction = new Transaction(addressFromPublicKey,
+                    "0xAABBCC0b727509404c8f0ffa2f9e5344744794CC",
+                    BigInteger.TEN, BigInteger.ZERO.add(BigInteger.valueOf(i)));
             transaction.setPubKey(Util.byteArrayToHexString(publicKey.getValue()));
 
             byte[] hash = AppServiceProvider.getSerializationService().getHash(transaction, true);

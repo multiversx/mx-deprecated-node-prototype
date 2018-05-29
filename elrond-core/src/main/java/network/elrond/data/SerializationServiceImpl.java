@@ -1,8 +1,8 @@
 package network.elrond.data;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import network.elrond.core.Util;
@@ -16,38 +16,25 @@ public class SerializationServiceImpl implements SerializationService {
 
     @Override
     public <T> String encodeJSON(T object) {
-        ObjectMapper mapper = new ObjectMapper();
-        FilterProvider filter = new SimpleFilterProvider().setDefaultFilter(SimpleBeanPropertyFilter.serializeAll());
-        mapper.setFilterProvider(filter);
-        try {
-            return mapper.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return encodeJSON(object, "", "");
     }
 
     public <T> String encodeJSON(T object, String filterName, String... ignoredFields) {
         ObjectMapper mapper = new ObjectMapper();
+        SimpleFilterProvider filter = new SimpleFilterProvider();
 
-        if (ignoredFields.length > 0) {
-            FilterProvider filter = new SimpleFilterProvider();
-            ((SimpleFilterProvider) filter).addFilter(filterName, SimpleBeanPropertyFilter.serializeAllExcept(ignoredFields));
-            mapper.setFilterProvider(filter);
-
-            try {
-                return(mapper.writeValueAsString(object));
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-                return null;
-            }
+        if (ignoredFields!=null && ignoredFields.length > 0 &&
+                filterName!=null && !filterName.isEmpty()) {
+            filter.addFilter(filterName, SimpleBeanPropertyFilter.serializeAllExcept(ignoredFields));
+        }
+        else{
+            filter.setDefaultFilter(SimpleBeanPropertyFilter.serializeAll());
         }
 
-        FilterProvider filter = new SimpleFilterProvider().setDefaultFilter(SimpleBeanPropertyFilter.serializeAll());
         mapper.setFilterProvider(filter);
 
         try {
-            return mapper.writeValueAsString(object);
+            return(mapper.writeValueAsString(object));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return null;
@@ -66,19 +53,31 @@ public class SerializationServiceImpl implements SerializationService {
     }
 
     public byte[] getHash(Object object, boolean withSig) {
+        if(object == null){
+            throw new IllegalArgumentException();
+        }
+
+        String[] filterStrings = null;
+        String filter = null;
+        if(object instanceof BaseObject){
+            BaseObject baseObject = (BaseObject) object;
+            filterStrings = baseObject.getIgnoredFields();
+            filter = baseObject.getClass().getAnnotation(JsonFilter.class).value();
+        }
+
         String json;
 
         if (withSig) {
             json = AppServiceProvider.getSerializationService().encodeJSON(object);
         } else {
-            json = AppServiceProvider.getSerializationService().encodeJSON(object, "filterSigs", "sig1", "sig2");
+            json = AppServiceProvider.getSerializationService().encodeJSON(object, filter, filterStrings);
         }
         return (Util.SHA3.digest(json.getBytes()));
     }
 
     @Override
     public String getHashString(Object object, boolean withSig) {
-        return new String(Base64.encode(getHash(object, true)));
+        return new String(Base64.encode(getHash(object, withSig)));
     }
 
 

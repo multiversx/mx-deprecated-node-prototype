@@ -16,7 +16,6 @@ import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -195,12 +194,7 @@ public class GetPutTest extends BaseBlockchainTest {
     }
 
     private Transaction generateTransaction(int value) {
-        Transaction transaction = new Transaction();
-        transaction.setNonce(BigInteger.ZERO);
-        //2 ERDs
-        transaction.setValue(BigInteger.valueOf(10).pow(8).multiply(BigInteger.valueOf(value)));
-        transaction.setSendAddress(Util.getAddressFromPublicKey(pbKeySender.getValue()));
-        transaction.setReceiverAddress(Util.getAddressFromPublicKey(pbKeyRecv.getValue()));
+        Transaction transaction = transactionService.generateTransaction(pbKeySender, pbKeyRecv, 2, 0);
         transaction.setPubKey(Util.byteArrayToHexString(pbKeySender.getValue()));
 
         //transactionService.signTransaction(transaction, pvKeySender.getValue());

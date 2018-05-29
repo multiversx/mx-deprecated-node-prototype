@@ -1,11 +1,8 @@
 package network.elrond.data;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
+import network.elrond.core.Util;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +14,8 @@ import java.util.List;
  * @version 1.0
  * @since   2018-05-14
  */
-@JsonFilter("filterSigs")
-public class Block {
+@JsonFilter(Util.SIGNATURE_FILTER)
+public class Block extends BaseObject {
     //block counter
     protected BigInteger nonce;
     //plain message hash
@@ -39,6 +36,8 @@ public class Block {
     protected int shard;
     //app state hash
     protected byte[] appStateHash;
+
+    private String[] ignoreFields = new String[]{"sig1", "sig2"};
 
     public Block() {
         nonce = BigInteger.ZERO;
@@ -148,6 +147,11 @@ public class Block {
      * @param appStateHash to be set
      */
     public void setAppStateHash(byte[] appStateHash) {this.appStateHash = appStateHash;}
+
+    @Override
+    String[] getIgnoredFields() {
+        return ignoreFields;
+    }
 
 
 //    public static Block createInstance(String strDataJSON)

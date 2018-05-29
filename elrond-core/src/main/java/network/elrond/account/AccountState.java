@@ -1,8 +1,5 @@
 package network.elrond.account;
 
-import network.elrond.core.RLP;
-import network.elrond.core.RLPList;
-
 import java.math.BigInteger;
 
 public class AccountState {

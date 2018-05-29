@@ -89,26 +89,8 @@ public class TransactionServiceImpl implements TransactionService {
         //test 3. verify the signature
         byte[] message = serializationService.getHash(tx, false);
         SignatureService schnorr = AppServiceProvider.getSignatureService();
-        Signature sig = new Signature();
-        if ((tx.getSig1() != null) && (tx.getSig1().length > 0) &&
-                (tx.getSig2() != null) && (tx.getSig2().length > 0)) {
-            sig.setSignature(tx.getSig1());
-            sig.setChallenge(tx.getSig2());
-        }
 
-        PublicKey pbKey = new PublicKey();
-        try {
-            pbKey.setPublicKey(Util.hexStringToByteArray(tx.getPubKey()));
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return (false);
-        }
-
-        if (!schnorr.verifySignature(sig.getSignature(), sig.getChallenge(), message, pbKey.getValue())) {
-            return (false);
-        }
-
-        return (true);
+        return schnorr.verifySignature(tx.getSig1(), tx.getSig2(), message, Util.hexStringToByteArray(tx.getPubKey()));
     }
 
     @Override
@@ -124,6 +106,14 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         return transactions;
+    }
+
+    @Override
+    public Transaction generateTransaction(PublicKey sender, PublicKey receiver, long value, long nonce) {
+        return new Transaction(Util.getAddressFromPublicKey(sender.getValue()),
+                Util.getAddressFromPublicKey(receiver.getValue()),
+                BigInteger.valueOf(10).pow(8).multiply(BigInteger.valueOf(value)),
+                BigInteger.valueOf(nonce));
     }
 
 

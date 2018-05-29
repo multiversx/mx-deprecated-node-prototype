@@ -3,6 +3,7 @@ package network.elrond.data;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import network.elrond.account.AccountAddress;
+import network.elrond.core.Util;
 
 import java.beans.Transient;
 import java.math.BigInteger;
@@ -14,8 +15,8 @@ import java.math.BigInteger;
  * @version 1.0
  * @since   2018-05-11
  */
-@JsonFilter("filterSigs")
-public class Transaction {
+@JsonFilter(Util.SIGNATURE_FILTER)
+public class Transaction extends BaseObject{
     //tx counter
     private BigInteger nonce;
     //value used in transaction in sERDs see core.Util
@@ -37,11 +38,11 @@ public class Transaction {
     //plain public key in hexa form
     private String pubKey;
 
-
+    private String[] ignoreFields = new String[]{"sig1", "sig2"};
     /**
      * Default constructor
      */
-    public Transaction()
+    private Transaction()
     {
         nonce = BigInteger.ZERO;
         value = BigInteger.ZERO;
@@ -62,8 +63,25 @@ public class Transaction {
      * @param recvAddress receiving address as 0x0024f2849a...
      * @param sendAddress sender address as 0x0024f22323...
      */
-    public Transaction(BigInteger nonce, BigInteger value, String recvAddress, String sendAddress)
+    public Transaction(String sendAddress, String recvAddress, BigInteger value, BigInteger nonce)
     {
+        if(sendAddress == null || sendAddress.isEmpty()){
+            throw new IllegalArgumentException("SendAddress cannot be null");
+        }
+
+        if(recvAddress == null || recvAddress.isEmpty()){
+            throw new IllegalArgumentException("RecvAddress cannot be null");
+        }
+
+        if(value.compareTo(BigInteger.ZERO) < 0){
+            throw new IllegalArgumentException(("Value cannot be lower than zero"));
+        }
+
+        if(nonce.compareTo(BigInteger.ZERO) < 0){
+            throw new IllegalArgumentException(("Nonce cannot be lower than zero"));
+        }
+
+
         this.nonce = nonce;
         this.value = value;
         this.receiverAddress = recvAddress;
@@ -209,4 +227,8 @@ public class Transaction {
      */
     public void setPubKey(String pubKey) {this.pubKey = pubKey;}
 
+    @Override
+    String[] getIgnoredFields() {
+        return ignoreFields;
+    }
 }

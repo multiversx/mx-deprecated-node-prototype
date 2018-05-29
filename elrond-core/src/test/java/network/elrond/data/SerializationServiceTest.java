@@ -5,6 +5,10 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.service.AppServiceProvider;
+import org.bouncycastle.util.encoders.Base64;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -18,24 +22,128 @@ public class SerializationServiceTest {
     private PrivateKey pvKeyRecv = new PrivateKey("b");
     private PublicKey pbKeyRecv = new PublicKey(pvKeyRecv);
 
-    @Test
-    public void txSerializationTest() {
-        SerializationService serializationService = AppServiceProvider.getSerializationService();
-        TransactionService transactionService = AppServiceProvider.getTransactionService();
+    SerializationService serializationService = null;
+    TransactionService transactionService = null;
 
-        Transaction tx = generateTransaction(0, transactionService);
+    @Before
+    public void SetUp(){
+        AppServiceProvider.InjectDefaultServices();
+        serializationService = AppServiceProvider.getSerializationService();
+        transactionService = AppServiceProvider.getTransactionService();
+    }
 
-        String strEncoded = serializationService.encodeJSON(tx);
-
-        System.out.println(strEncoded);
-
-        Transaction tx2 = serializationService.decodeJSON(strEncoded, Transaction.class);
-
-        TestCase.assertEquals(serializationService.encodeJSON(tx), serializationService.encodeJSON(tx2));
+    @After
+    public void TearDown(){
     }
 
     @Test
-    public void blkSerializationTest() {
+    public void testEncodeDecodeWithFilterAndNullFilterValueShouldNotThrowException(){
+        Transaction tx = transactionService.generateTransaction(pbKeySender, pbKeyRecv, 0, 0);
+        String encodedTransaction = serializationService.encodeJSON(tx, null, tx.getIgnoredFields());
+
+        for (String ignoredField : tx.getIgnoredFields()) {
+            TestCase.assertTrue(encodedTransaction.contains(ignoredField));
+        }
+
+    }
+
+    @Test
+    public void testEncodeDecodeWithFilterAndEmptyFilterValueShouldNotThrowException(){
+        Transaction tx = transactionService.generateTransaction(pbKeySender, pbKeyRecv, 0, 0);
+        String encodedTransaction = serializationService.encodeJSON(tx, "", tx.getIgnoredFields());
+
+        for (String ignoredField : tx.getIgnoredFields()) {
+            TestCase.assertTrue(encodedTransaction.contains(ignoredField));
+        }
+    }
+
+    @Test
+    public void testEncodeDecodeWithFilterAndNullIgnoredFieldsShouldNotThrowException(){
+        Transaction tx = transactionService.generateTransaction(pbKeySender, pbKeyRecv, 0, 0);
+        String encodedTransaction = serializationService.encodeJSON(tx, Util.SIGNATURE_FILTER, null);
+
+        for (String ignoredField : tx.getIgnoredFields()) {
+            TestCase.assertTrue(encodedTransaction.contains(ignoredField));
+        }
+
+    }
+
+    @Test
+    public void testEncodeDecodeWithFilterAndEmptyIgnoredFieldsShouldNotThrowException(){
+        Transaction tx = transactionService.generateTransaction(pbKeySender, pbKeyRecv, 0, 0);
+        String encodedTransaction = serializationService.encodeJSON(tx, Util.SIGNATURE_FILTER, new String[0]);
+
+        for (String ignoredField : tx.getIgnoredFields()) {
+            TestCase.assertTrue(encodedTransaction.contains(ignoredField));
+        }
+    }
+
+    @Test
+    public void testTransactionEncodeDecodeWithoutFilter(){
+        Transaction tx = transactionService.generateTransaction(pbKeySender, pbKeyRecv, 0, 0);
+        String encodedTransaction = serializationService.encodeJSON(tx);
+        //System.out.println(strEncoded);
+        Transaction decodedTransaction = serializationService.decodeJSON(encodedTransaction, Transaction.class);
+
+        TestCase.assertEquals(serializationService.encodeJSON(tx), serializationService.encodeJSON(decodedTransaction));
+    }
+
+    @Test
+    public void testTransactionEncodeDecodeWithFilter(){
+        Transaction tx = transactionService.generateTransaction(pbKeySender, pbKeyRecv, 0, 0);
+        String encodedTransaction = serializationService.encodeJSON(tx, Util.SIGNATURE_FILTER, tx.getIgnoredFields());
+        //System.out.println(strEncoded);
+        Transaction decodedTransaction = serializationService.decodeJSON(encodedTransaction, Transaction.class);
+
+        TestCase.assertEquals(serializationService.encodeJSON(tx), serializationService.encodeJSON(decodedTransaction));
+    }
+
+    @Test
+    public void testBlkEncodeDecode() {
+        Block blk = getTestBlock();
+
+        String encodedBlock = serializationService.encodeJSON(blk);
+        String encodedBlockWithFilter = serializationService.encodeJSON(blk, Util.SIGNATURE_FILTER, blk.getIgnoredFields());
+
+        //System.out.println(strEncoded);
+        //System.out.println(strEncoded2);
+
+        Block decodedBlock = serializationService.decodeJSON(encodedBlock, DataBlock.class);
+
+        TestCase.assertEquals(encodedBlock, serializationService.encodeJSON(decodedBlock));
+        TestCase.assertFalse(encodedBlockWithFilter.contains("sig1"));
+    }
+
+
+
+    @Test
+    public void testBlockHashWithSig() {
+        Block blk = getTestBlock();
+
+        byte[] hash = serializationService.getHash(blk, true);
+    }
+
+    @Test
+    public void testBlockHashStringWithSig() {
+        Block blk = getTestBlock();
+
+        String hashString = new String(Base64.encode(serializationService.getHash(blk, true)));
+        String blkHashString = serializationService.getHashString(blk, true);
+
+        Assert.assertEquals(hashString, blkHashString);
+    }
+
+    @Test
+    public void testBlockHashStringWithoutSig() {
+        Block blk = getTestBlock();
+
+        String hashString = new String(Base64.encode(serializationService.getHash(blk, false)));
+        String blkHashString = serializationService.getHashString(blk, false);
+
+        Assert.assertEquals(hashString, blkHashString);
+    }
+
+    private Block getTestBlock() {
         Block blk = new DataBlock();
         blk.setNonce(BigInteger.ONE);
         blk.setPrevBlockHash(new byte[]{0, 1, 2});
@@ -54,33 +162,6 @@ public class SerializationServiceTest {
         listHashes.add(new byte[]{15, 16, 17});
         listHashes.add(new byte[]{18, 19, 20});
         blk.setListTXHashes(listHashes);
-
-        SerializationService serv = AppServiceProvider.getSerializationService();
-
-        String strEncoded = serv.encodeJSON(blk);
-        String strEncoded2 = serv.encodeJSON(blk, "filterSigs","sig1", "sig2");
-
-        System.out.println(strEncoded);
-        System.out.println(strEncoded2);
-
-        Block blk2 = serv.decodeJSON(strEncoded, DataBlock.class);
-
-        TestCase.assertEquals(AppServiceProvider.getSerializationService().encodeJSON(blk), AppServiceProvider.getSerializationService().encodeJSON(blk2));
-        TestCase.assertEquals(false, strEncoded2.contains("sig1"));
-    }
-
-
-    private Transaction generateTransaction(int value, TransactionService trxServ) {
-        Transaction tx = new Transaction();
-        tx.setNonce(BigInteger.ZERO);
-        //2 ERDs
-        tx.setValue(BigInteger.valueOf(10).pow(8).multiply(BigInteger.valueOf(value)));
-        tx.setSendAddress(Util.getAddressFromPublicKey(pbKeySender.getValue()));
-        tx.setReceiverAddress(Util.getAddressFromPublicKey(pbKeyRecv.getValue()));
-        tx.setPubKey(Util.byteArrayToHexString(pbKeySender.getValue()));
-
-        trxServ.signTransaction(tx, pvKeySender.getValue());
-
-        return (tx);
+        return blk;
     }
 }
