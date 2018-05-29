@@ -15,9 +15,12 @@ public abstract class AbstractPersistenceUnit<K, V> {
     private static final int MAX_ENTRIES = 10000;
 
     final protected LRUMap<K, V> cache = new LRUMap<>(0, MAX_ENTRIES);
-    final protected DB database;
+    protected DB database;
+
+    private final String databasePath;
 
     public AbstractPersistenceUnit(String databasePath) throws IOException {
+        this.databasePath = databasePath;
         if (databasePath == null || databasePath.isEmpty()) {
             throw new IllegalArgumentException("databasePath cannot be null");
         }
@@ -38,4 +41,24 @@ public abstract class AbstractPersistenceUnit<K, V> {
     public abstract void put(byte[] key, byte[] val);
 
     public abstract byte[] get(byte[] key);
+
+    public void destroyAndReCreate() throws IOException {
+        destroy();
+
+        this.database = initDatabase(databasePath);
+
+    }
+
+    public void destroy() throws IOException {
+        Iq80DBFactory factory = new Iq80DBFactory();
+        this.database.close();
+        Options options = new Options();
+        options.createIfMissing(true);
+        factory.destroy(new File(databasePath), options);
+    }
+
+    public void close() throws IOException {
+        this.database.close();
+
+    }
 }

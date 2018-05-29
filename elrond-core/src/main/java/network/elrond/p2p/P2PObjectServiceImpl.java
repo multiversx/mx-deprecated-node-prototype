@@ -5,6 +5,7 @@ import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
+import network.elrond.service.AppServiceProvider;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
@@ -41,6 +42,30 @@ public class P2PObjectServiceImpl implements P2PObjectService {
         fp.awaitUninterruptibly();
 
         return (fp);
+    }
+
+    public void putJSONencoded(Object object, String hash, P2PConnection connection) throws IOException{
+        if (object == null || hash == null) {
+            return;
+        }
+
+        String strJSONData = AppServiceProvider.getSerializationService().encodeJSON(object);
+
+        AppServiceProvider.getP2PObjectService().put(connection, hash.toString(), strJSONData);
+    }
+
+    public <T> T getJSONdecoded(String hash, P2PConnection connection, Class<T> clazz) throws IOException, ClassNotFoundException{
+        if (hash == null) {
+            return null;
+        }
+
+        String strJSONData = (String) AppServiceProvider.getP2PObjectService().get(connection, hash);
+
+        if (strJSONData == null){
+            return (null);
+        }
+
+        return (T)AppServiceProvider.getSerializationService().decodeJSON(strJSONData, clazz);
     }
 
 }

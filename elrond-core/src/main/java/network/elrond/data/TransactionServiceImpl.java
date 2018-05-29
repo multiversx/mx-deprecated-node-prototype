@@ -1,6 +1,7 @@
 package network.elrond.data;
 
 import network.elrond.blockchain.Blockchain;
+import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
@@ -116,11 +117,15 @@ public class TransactionServiceImpl implements TransactionService {
 
         List<Transaction> transactions = new ArrayList<>();
 
+        //JLS 2018.05.29 - need to store fetched transaction!
+        BlockchainService appPersistenceService = AppServiceProvider.getAppPersistanceService();
+
         List<byte[]> hashes = block.getListTXHashes();
         for (byte[] hash : hashes) {
-            String hashString = Util.getHashEncoded64(hash);
+            String hashString = Util.getDataEncoded64(hash);
             Transaction transaction = AppServiceProvider.getBlockchainService().get(hashString, blockchain, BlockchainUnitType.TRANSACTION);
             transactions.add(transaction);
+            appPersistenceService.put(hashString, transaction, blockchain, BlockchainUnitType.TRANSACTION);
         }
 
         return transactions;
