@@ -5,6 +5,8 @@ import network.elrond.account.AccountAddress;
 import network.elrond.account.AccountState;
 import network.elrond.account.Accounts;
 import network.elrond.account.AccountsContext;
+import network.elrond.blockchain.Blockchain;
+import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;

@@ -18,56 +18,68 @@ public class BootstrapServiceImpl implements BootstrapService {
     private SerializationService serServ = AppServiceProvider.getSerializationService();
     private P2PObjectService p2PObjectService = AppServiceProvider.getP2PObjectService();
 
-
-    @Override
+    //returns max block height from local data (disk)
     public BigInteger getMaxBlockSizeLocal(Blockchain structure) throws IOException, ClassNotFoundException {
         String maxHeight = apsServ.get(SettingsType.MAX_BLOCK_HEIGHT.toString(), structure, BlockchainUnitType.SETTINGS);
 
         if (maxHeight == null) {
-            String json = serServ.encodeJSON(BigInteger.ZERO);
-            apsServ.put(SettingsType.MAX_BLOCK_HEIGHT.toString(), json, structure, BlockchainUnitType.SETTINGS);
-            return (BigInteger.ZERO);
+            return(Util.BIG_INT_MIN_ONE);
         }
 
         return (new BigInteger(maxHeight));
     }
 
-    @Override
+    //sets max block height on local (disk)
     public void setMaxBlockSizeLocal(Blockchain structure, BigInteger height) throws IOException, ClassNotFoundException {
         BigInteger maxHeight = getMaxBlockSizeLocal(structure);
 
-        if (height.compareTo(maxHeight) > 0) {
+        if ((maxHeight == null) || (height.compareTo(maxHeight)) > 0) {
             String json = serServ.encodeJSON(height);
             apsServ.put(SettingsType.MAX_BLOCK_HEIGHT.toString(), json, structure, BlockchainUnitType.SETTINGS);
         }
     }
 
-    @Override
+    //returns max block height from network (DHT)
     public BigInteger getMaxBlockSizeNetwork(P2PConnection connection) throws IOException, ClassNotFoundException {
 
-        return (p2PObjectService.getJSONdecoded(SettingsType.MAX_BLOCK_HEIGHT.toString(),connection, BigInteger.class));
+        BigInteger maxHeight = p2PObjectService.getJSONdecoded(SettingsType.MAX_BLOCK_HEIGHT.toString(),connection, BigInteger.class);
+
+        if (maxHeight == null){
+            return(Util.BIG_INT_MIN_ONE);
+        }
+
+        return (maxHeight);
     }
 
+    //sets max block height on network (DHT)
     public void setMaxBlockSizeNetwork(BigInteger blockHeight, P2PConnection connection) throws IOException{
 
         p2PObjectService.putJSONencoded(blockHeight, SettingsType.MAX_BLOCK_HEIGHT.toString(), connection);
     }
 
-    public void setBlockHeightHashNetwork(BigInteger blockHeight, String strHash, P2PConnection connection) throws IOException {
-
-        p2PObjectService.putJSONencoded(strHash, getHeightBlockHashString(blockHeight), connection);
+    //gets the hash for the block height from local data (disk)
+    public String getBlockHashFromHeightLocal(Blockchain structure, BigInteger blockHeight) throws IOException, ClassNotFoundException {
+        return ((String) apsServ.get(getHeightBlockHashString(blockHeight), structure, BlockchainUnitType.BLOCK_INDEX));
     }
 
-    public String getBlockHeightHashNetwork(BigInteger blockHeight, P2PConnection connection) throws IOException, ClassNotFoundException {
+    //sets the hash for a block height on local (disk)
+    public void setBlockHashFromHeightLocal(Blockchain structure, BigInteger blockHeight, String strHash) throws IOException {
+        apsServ.put(getHeightBlockHashString(blockHeight), strHash, structure, BlockchainUnitType.BLOCK_INDEX);
+    }
+
+    //gets the hash for the block height from network (DHT)
+    public String getBlockHashFromHeightNetwork(BigInteger blockHeight, P2PConnection connection) throws IOException, ClassNotFoundException {
 
         return(p2PObjectService.getJSONdecoded(getHeightBlockHashString(blockHeight), connection, String.class));
     }
 
-    @Override
-    public String getBlockHashFromBlockHeight(Blockchain structure, BigInteger blockHeight) throws IOException, ClassNotFoundException {
-        return ((String) apsServ.get(getHeightBlockHashString(blockHeight), structure, BlockchainUnitType.BLOCK_INDEX));
+    //sets the hash for a block height on network (DHT)
+    public void setBlockHashFromHeightNetwork(BigInteger blockHeight, String strHash, P2PConnection connection) throws IOException {
+
+        p2PObjectService.putJSONencoded(strHash, getHeightBlockHashString(blockHeight), connection);
     }
 
+    //generate block height name to search the hash
     public String getHeightBlockHashString(BigInteger blockHeight){
         return(SettingsType.HEIGHT_BLOCK.toString() + "_" + blockHeight.toString(10));
     }

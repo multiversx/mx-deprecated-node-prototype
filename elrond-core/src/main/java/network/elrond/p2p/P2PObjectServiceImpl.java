@@ -60,6 +60,11 @@ public class P2PObjectServiceImpl implements P2PObjectService {
         }
 
         String strJSONData = (String) AppServiceProvider.getP2PObjectService().get(connection, hash);
+
+        if (strJSONData == null){
+            return (null);
+        }
+
         return (T)AppServiceProvider.getSerializationService().decodeJSON(strJSONData, clazz);
     }
 

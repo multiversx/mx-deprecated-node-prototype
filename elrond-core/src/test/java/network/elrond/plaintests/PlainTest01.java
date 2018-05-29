@@ -6,12 +6,8 @@ import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.net.Socket;
 import java.nio.file.Path;
@@ -55,7 +51,7 @@ public class PlainTest01 {
         PrivateKey privKey = new PrivateKey("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent ultrices velit elit, non bibendum leo suscipit ac.");
         PublicKey pubKey = new PublicKey(privKey);
 
-        System.out.println("Public key: " + Util.getHashEncoded64(pubKey.getValue()) + " address: " + Util.getAddressFromPublicKey(pubKey.getValue()));
+        System.out.println("Public key: " + Util.getDataEncoded64(pubKey.getValue()) + " address: " + Util.getAddressFromPublicKey(pubKey.getValue()));
     }
 
 

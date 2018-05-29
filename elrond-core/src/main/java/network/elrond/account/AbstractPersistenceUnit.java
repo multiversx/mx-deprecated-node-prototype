@@ -48,13 +48,17 @@ public abstract class AbstractPersistenceUnit<K, V> {
     public abstract byte[] get(byte[] key);
 
     public void destroyAndReCreate() throws IOException{
+        destroy();
+
+        this.database = initDatabase(databasePath);
+
+    }
+
+    public void destroy() throws IOException{
         Iq80DBFactory factory = new Iq80DBFactory();
         this.database.close();
         Options options = new Options();
         options.createIfMissing(true);
         factory.destroy(new File(databasePath), options);
-
-        this.database = initDatabase(databasePath);
-
     }
 }

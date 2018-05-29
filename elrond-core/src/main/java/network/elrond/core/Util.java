@@ -110,7 +110,7 @@ public class Util {
         return(new String(Base64.encode(buff)));
     }
 
-    public static String getHashEncoded64(byte[] data) {
+    public static String getDataEncoded64(byte[] data) {
         return (new String(Base64.encode(data)));
     }
 
