@@ -29,6 +29,11 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
     @Override
     protected void process(ArrayBlockingQueue<String> queue, Application application) {
 
+        if (!application.getContext().isSeedNode()) {
+            return;
+        }
+
+
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {

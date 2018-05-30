@@ -13,7 +13,8 @@ public class SeedNodeRunner {
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(4000);
         context.setPort(4000);
-        context.setNodeName("1");
+        context.setStorageBasePath("./master");
+        context.setNodeName("master-node");
 
 
         Application app = new Application(context);

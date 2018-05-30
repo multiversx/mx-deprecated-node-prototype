@@ -1,5 +1,6 @@
 package network.elrond.application;
 
+import network.elrond.crypto.PrivateKey;
 import network.elrond.data.BootstrapType;
 
 import java.io.Serializable;
@@ -61,6 +62,10 @@ public class AppContext implements Serializable {
 
     public void setBootstrapType(BootstrapType bootstrapType) {
         this.bootstrapType = bootstrapType;
+    }
+
+    public boolean isSeedNode() {
+        return masterPeerIpAddress == null;
     }
 
 }
