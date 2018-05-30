@@ -1,5 +1,7 @@
 package network.elrond.account;
 
+import network.elrond.service.AppServiceProvider;
+
 import network.elrond.blockchain.PersistenceUnitContainer;
 
 import java.io.IOException;
@@ -15,6 +17,7 @@ public class Accounts implements Serializable, PersistenceUnitContainer {
     public Accounts(AccountsContext context) throws IOException {
         this.context = context;
         this.unit = new AccountsPersistenceUnit<>(context.getDatabasePath());
+        AppServiceProvider.getAccountStateService().initialMintingToKnownAddress(this);
     }
 
     public AccountsPersistenceUnit<AccountAddress, AccountState> getAccountsPersistenceUnit() {

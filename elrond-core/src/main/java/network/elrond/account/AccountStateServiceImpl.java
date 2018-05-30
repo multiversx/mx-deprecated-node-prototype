@@ -2,9 +2,18 @@ package network.elrond.account;
 
 import network.elrond.core.RLP;
 import network.elrond.core.RLPList;
+import network.elrond.core.Util;
+import network.elrond.crypto.PublicKey;
+import network.elrond.data.Block;
+import network.elrond.data.ExecutionReport;
+import network.elrond.data.ExecutionService;
+import network.elrond.data.Transaction;
+import network.elrond.service.AppServiceProvider;
+import org.mapdb.Fun;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 
 public class AccountStateServiceImpl implements AccountStateService {
 
@@ -84,5 +93,51 @@ public class AccountStateServiceImpl implements AccountStateService {
                 items.get(1).getRLPData())));
 
         return (accountState);
+    }
+
+    public void initialMintingToKnownAddress(Accounts accounts){
+
+        AccountState accountState = null;
+
+        try {
+            accountState = getOrCreateAccountState(AccountAddress.fromPublicKey(Util.PUBLIC_KEY_MINTING), accounts);
+            accountState.setBalance(Util.VALUE_MINTING);
+            setAccountState(AccountAddress.fromPublicKey(Util.PUBLIC_KEY_MINTING), accountState, accounts);
+        } catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    public Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue, AccountsContext accountsContextTemporary){
+
+        if (initialValue.compareTo(Util.VALUE_MINTING) > 0){
+            initialValue = Util.VALUE_MINTING;
+        }
+
+        Transaction transactionMint = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING,
+                new PublicKey(Util.hexStringToByteArray(initialAddress)), initialValue, BigInteger.ZERO);
+        AppServiceProvider.getTransactionService().signTransaction(transactionMint, Util.PRIVATE_KEY_MINTING.getValue());
+
+        Block genesisBlock = new Block();
+        genesisBlock.setNonce(BigInteger.ZERO);
+        genesisBlock.getListTXHashes().add(AppServiceProvider.getSerializationService().getHash(transactionMint));
+
+        //compute state root hash
+        try {
+            Accounts accountsTemp = new Accounts(accountsContextTemporary);
+            ExecutionService executionService = AppServiceProvider.getExecutionService();
+            ExecutionReport executionReport = executionService.processTransaction(transactionMint, accountsTemp);
+            if (!executionReport.isOk()){
+                return(null);
+            }
+
+            genesisBlock.setAppStateHash(accountsTemp.getAccountsPersistenceUnit().getRootHash());
+            accountsTemp.getAccountsPersistenceUnit().close();
+        } catch (Exception ex){
+            ex.printStackTrace();
+            return(null);
+        }
+
+        return (new Fun.Tuple2<>(genesisBlock, transactionMint ));
     }
 }

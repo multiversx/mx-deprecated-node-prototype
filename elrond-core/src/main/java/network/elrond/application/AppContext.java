@@ -4,6 +4,7 @@ import network.elrond.crypto.PrivateKey;
 import network.elrond.data.BootstrapType;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 
 public class AppContext implements Serializable {
 
@@ -15,6 +16,8 @@ public class AppContext implements Serializable {
     private String storageBasePath = "main";
 
     private BootstrapType bootstrapType = BootstrapType.START_FROM_SCRATCH;
+    private String strAddressMint = "000000000000000000000000000000000000000000000000000000000000000000";
+    private BigInteger valueMint = BigInteger.ZERO;
 
     public String getNodeName() {
         return nodeName;
@@ -67,5 +70,22 @@ public class AppContext implements Serializable {
     public boolean isSeedNode() {
         return masterPeerIpAddress == null;
     }
+
+    public String getStrAddressMint() {
+        return strAddressMint;
+    }
+
+    public void setStrAddressMint(String strAddressMint) {
+        this.strAddressMint = strAddressMint;
+    }
+
+    public BigInteger getValueMint() {
+        return valueMint;
+    }
+
+    public void setValueMint(BigInteger valueMint) {
+        this.valueMint = valueMint;
+    }
+
 
 }

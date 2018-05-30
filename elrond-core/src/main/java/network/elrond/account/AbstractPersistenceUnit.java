@@ -4,9 +4,11 @@ import network.elrond.core.LRUMap;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.impl.Iq80DBFactory;
+import org.mapdb.Fun;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.ArrayBlockingQueue;
 
 public abstract class AbstractPersistenceUnit<K, V> {
 
@@ -14,15 +16,18 @@ public abstract class AbstractPersistenceUnit<K, V> {
 
     final protected LRUMap<K, V> cache = new LRUMap<>(0, MAX_ENTRIES);
     protected DB database;
+    final ArrayBlockingQueue<Fun.Tuple2<K, V>> queue = new ArrayBlockingQueue<>(10000);
 
     private final String databasePath;
 
     public AbstractPersistenceUnit(String databasePath) throws IOException {
         this.databasePath = databasePath;
         if (databasePath == null || databasePath.isEmpty()) {
-            throw new IllegalArgumentException("databasePath cannot be null");
+            this.database = new MockDB();
+
+        }else {
+            this.database = initDatabase(databasePath);
         }
-        this.database = initDatabase(databasePath);
     }
 
     protected DB initDatabase(String databasePath) throws IOException {
