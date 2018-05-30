@@ -45,9 +45,11 @@ public class Application implements Serializable {
         // Start P2P communications
         AppTasks.INIT_P2P_CONNECTION.process(this);
 
-
         //  Start blockchain
         AppTasks.INIT_BLOCKCHAIN.process(this);
+
+        AppTasks.INITIALIZE_PUBLIC_PRIVATE_KEYS.process(this);
+
         //  Start accounts
         AppTasks.INIT_ACCOUNTS.process(this);
 

@@ -4,8 +4,8 @@ package network.elrond.application;
 import network.elrond.account.Accounts;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.data.Block;
-import network.elrond.blockchain.BlockchainPersistenceUnit;
-import network.elrond.blockchain.BlockchainUnitType;
+import network.elrond.crypto.PrivateKey;
+import network.elrond.crypto.PublicKey;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.p2p.P2PConnection;
@@ -21,8 +21,9 @@ public class AppState implements Serializable {
 
     private Accounts accounts;
     private Blockchain blockchain;
-
     private Block currentBlock;
+    private PrivateKey privateKey;
+    private PublicKey publicKey;
 
     private P2PConnection connection;
     private Map<P2PChannelName, P2PBroadcastChanel> channels = new HashMap<>();
@@ -76,7 +77,6 @@ public class AppState implements Serializable {
         this.bootstrapping = bootstrapping;
     }
 
-
     public Block getCurrentBlock() {
         return currentBlock;
     }
@@ -88,5 +88,21 @@ public class AppState implements Serializable {
     public void shutdown() {
         this.blockchain.stopPersistenceUnit();
         this.accounts.stopPersistenceUnit();
+    }
+
+    public void setPrivateKey(PrivateKey privateKey){
+        this.privateKey = privateKey;
+    }
+
+    public PrivateKey getPrivateKey(){
+        return privateKey;
+    }
+
+    public void setPublicKey(PublicKey publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public PublicKey getPublicKey() {
+        return publicKey;
     }
 }

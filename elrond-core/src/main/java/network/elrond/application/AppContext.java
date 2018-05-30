@@ -2,6 +2,7 @@ package network.elrond.application;
 
 import network.elrond.crypto.PrivateKey;
 import network.elrond.data.BootstrapType;
+import network.elrond.crypto.PrivateKey;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -12,8 +13,8 @@ public class AppContext implements Serializable {
     private Integer port;
     private String masterPeerIpAddress;
     private Integer masterPeerPort;
-
     private String storageBasePath = "main";
+    private PrivateKey privateKey;
 
     private BootstrapType bootstrapType = BootstrapType.START_FROM_SCRATCH;
     private String strAddressMint = "000000000000000000000000000000000000000000000000000000000000000000";
@@ -87,5 +88,13 @@ public class AppContext implements Serializable {
         this.valueMint = valueMint;
     }
 
+
+    public void setPrivateKey(PrivateKey privateKey) {
+        this.privateKey = privateKey;
+    }
+
+    public PrivateKey getPrivateKey() {
+        return privateKey;
+    }
 
 }
