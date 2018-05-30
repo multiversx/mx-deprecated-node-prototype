@@ -14,6 +14,9 @@ public class AccountAddress implements Serializable {
     }
 
     public AccountAddress(byte[] bytes) {
+        if(bytes == null){
+            throw new IllegalArgumentException("Bytes cannot be null");
+        }
         this.bytes = bytes;
     }
 
@@ -36,6 +39,9 @@ public class AccountAddress implements Serializable {
 
     public static AccountAddress fromPublicKey(PublicKey key) {
         //String address = Util.getAddressFromPublicKey(key.getQ().getEncoded(true));
+        if(key == null){
+            throw new IllegalArgumentException("PublicKey cannot be null");
+        }
         return fromBytes(key.getValue());
     }
 

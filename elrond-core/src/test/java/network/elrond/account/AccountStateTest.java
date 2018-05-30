@@ -9,6 +9,7 @@ import network.elrond.data.Transaction;
 import network.elrond.data.ExecutionService;
 import network.elrond.data.TransactionService;
 import network.elrond.service.AppServiceProvider;
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,13 @@ public class AccountStateTest {
     ExecutionService transactionExecutionService = AppServiceProvider.getExecutionService();
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @Test
+    public void testAccountStateDefaultConstructor(){
+        AccountState accountState = new AccountState();
+        Assert.assertEquals(BigInteger.ZERO, accountState.getBalance());
+        Assert.assertEquals(BigInteger.ZERO, accountState.getNonce());
+    }
 
     @Test
     public void testAccountStatesSerDeser() {
