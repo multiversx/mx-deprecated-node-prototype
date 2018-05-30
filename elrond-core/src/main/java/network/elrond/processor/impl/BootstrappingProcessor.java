@@ -108,7 +108,7 @@ public class BootstrappingProcessor implements AppTask {
         Fun.Tuple2<Block, Transaction> genesisData = AppServiceProvider.getAccountStateService().generateGenesisBlock(context.getStrAddressMint(), context.getValueMint(),
                 accountsContext);
         String strHashGB = new String(Base64.encode(serializationService.getHash(genesisData.a)));
-        String strHashTx = new String(Base64.decode(serializationService.getHash(genesisData.b)));
+        String strHashTx = new String(Base64.encode(serializationService.getHash(genesisData.b)));
 
         //put locally not broadcasting it
         try {
