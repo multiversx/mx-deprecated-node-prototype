@@ -23,6 +23,9 @@ public class AccountAddress implements Serializable {
 //    }
 
     public static AccountAddress fromHexaString(String value) {
+        if(value == null || value.isEmpty() || !value.startsWith("0x")){
+            throw new IllegalArgumentException("value is not a HexaString!!!");
+        }
         String hexVal = value != null ? value.substring(2) : null;
         return new AccountAddress(Util.hexStringToByteArray(hexVal));
     }
@@ -32,8 +35,8 @@ public class AccountAddress implements Serializable {
     }
 
     public static AccountAddress fromPublicKey(PublicKey key) {
-        byte[] buff = Util.getAddressFromPublicKeyAsByteArray(key.getQ().getEncoded(true));
-        return fromBytes(buff);
+        //String address = Util.getAddressFromPublicKey(key.getQ().getEncoded(true));
+        return fromBytes(key.getValue());
     }
 
     @Override
@@ -55,9 +58,5 @@ public class AccountAddress implements Serializable {
                 "bytes=" + Arrays.toString(bytes) +
                 "hex=" + Util.byteArrayToHexString(bytes) +
                 '}';
-    }
-
-    public String toAddressString(){
-        return("0x"+Util.byteArrayToHexString(bytes));
     }
 }

@@ -4,8 +4,6 @@ import network.elrond.Application;
 
 import java.io.IOException;
 
-public interface AppProcessor {
-
+public interface AppTask {
     void process(Application application) throws IOException;
-
 }

@@ -32,7 +32,7 @@ public class BlockchainServiceTest extends BaseBlockchainTest {
                     System.out.println("Reached " + Integer.toString(i) + " blocks...");
                 }
 
-                blockchainService.put(new String(Base64.encode(serializationService.getHash(blk, true))), blk, blkc, BlockchainUnitType.BLOCK);
+                blockchainService.put(new String(Base64.encode(serializationService.getHash(blk))), blk, blkc, BlockchainUnitType.BLOCK);
             }
         } catch (Exception ex) {
             ex.printStackTrace();

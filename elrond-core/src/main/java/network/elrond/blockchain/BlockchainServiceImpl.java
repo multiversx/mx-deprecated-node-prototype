@@ -5,6 +5,8 @@ import network.elrond.p2p.P2PConnection;
 import network.elrond.service.AppServiceProvider;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.iq80.leveldb.impl.Iq80DBFactory.asString;
 import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
@@ -59,6 +61,18 @@ public class BlockchainServiceImpl implements BlockchainService {
             AppServiceProvider.getP2PObjectService().put(connection, hash.toString(), strJSONData);
         }
 
+    }
+
+    @Override
+    public <H, B> List<B> getAll(List<H> hashes, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
+
+        List<B> list = new ArrayList<>();
+
+        for (H hash : hashes) {
+            list.add(get(hash, blockchain, type));
+        }
+
+        return list;
     }
 
     /**

@@ -49,16 +49,26 @@ public class TransactionServiceImpl implements TransactionService {
      * @param privateKeysBytes private key as byte array
      */
     public void signTransaction(Transaction tx, byte[] privateKeysBytes) {
+        //TODO: do not recreate PrivateKey
         PrivateKey pvkey = new PrivateKey(privateKeysBytes);
-        byte[] hashNoSigLocal = serializationService.getHash(tx, false);
+
+        tx.setSignature(null);
+        tx.setChallenge(null);
+
+        byte[] hashNoSigLocal = serializationService.getHash(tx);
+
+//        tx.setSignature(signature);
+//        tx.setChallenge(challenge);
+
+        //TODO: do not recreate PublicKey
         PublicKey pbkey = new PublicKey(pvkey);
         Signature sig;
 
         SignatureService schnorr = AppServiceProvider.getSignatureService();
         sig = schnorr.signMessage(hashNoSigLocal, privateKeysBytes, pbkey.getValue());
 
-        tx.setSig1(sig.getSignature());
-        tx.setSig2(sig.getChallenge());
+        tx.setSignature(sig.getSignature());
+        tx.setChallenge(sig.getChallenge());
     }
 
     /**
@@ -71,10 +81,10 @@ public class TransactionServiceImpl implements TransactionService {
         //test 1. consistency checks
         if ((tx.getNonce().compareTo(BigInteger.ZERO) < 0) ||
                 (tx.getValue().compareTo(BigInteger.ZERO) < 0) ||
-                (tx.getSig1() == null) ||
-                (tx.getSig2() == null) ||
-                (tx.getSig1().length == 0) ||
-                (tx.getSig2().length == 0) ||
+                (tx.getSignature() == null) ||
+                (tx.getChallenge() == null) ||
+                (tx.getSignature().length == 0) ||
+                (tx.getChallenge().length == 0) ||
                 (tx.getSendAddress().length() != Util.MAX_LEN_ADDR) ||
                 (tx.getReceiverAddress().length() != Util.MAX_LEN_ADDR) ||
                 (tx.getPubKey().length() != Util.MAX_LEN_PUB_KEY * 2)
@@ -88,28 +98,20 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         //test 3. verify the signature
-        byte[] message = serializationService.getHash(tx, false);
+        byte[] signature = tx.getSignature();
+        byte[] challenge = tx.getChallenge();
+
+        tx.setSignature(null);
+        tx.setChallenge(null);
+
+        byte[] message = serializationService.getHash(tx);
+
+        tx.setSignature(signature);
+        tx.setChallenge(challenge);
+
         SignatureService schnorr = AppServiceProvider.getSignatureService();
-        Signature sig = new Signature();
-        if ((tx.getSig1() != null) && (tx.getSig1().length > 0) &&
-                (tx.getSig2() != null) && (tx.getSig2().length > 0)) {
-            sig.setSignature(tx.getSig1());
-            sig.setChallenge(tx.getSig2());
-        }
 
-        PublicKey pbKey = new PublicKey();
-        try {
-            pbKey.setPublicKey(Util.hexStringToByteArray(tx.getPubKey()));
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return (false);
-        }
-
-        if (!schnorr.verifySignature(sig.getSignature(), sig.getChallenge(), message, pbKey.getValue())) {
-            return (false);
-        }
-
-        return (true);
+        return schnorr.verifySignature(tx.getSignature(), tx.getChallenge(), message, Util.hexStringToByteArray(tx.getPubKey()));
     }
 
     @Override
@@ -129,6 +131,16 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         return transactions;
+    }
+
+    @Override
+    public Transaction generateTransaction(PublicKey sender, PublicKey receiver, long value, long nonce) {
+        Transaction t = new Transaction(Util.getAddressFromPublicKey(sender.getValue()),
+                Util.getAddressFromPublicKey(receiver.getValue()),
+                BigInteger.valueOf(value),
+                BigInteger.valueOf(nonce));
+        t.setPubKey(Util.getAddressFromPublicKey(sender.getValue()));
+        return t;
     }
 
 

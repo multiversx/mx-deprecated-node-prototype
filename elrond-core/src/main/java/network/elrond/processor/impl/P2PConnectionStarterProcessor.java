@@ -4,12 +4,12 @@ import network.elrond.Application;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.p2p.P2PConnection;
-import network.elrond.processor.AppProcessor;
+import network.elrond.processor.AppTask;
 import network.elrond.service.AppServiceProvider;
 
 import java.io.IOException;
 
-public class P2PConnectionStarterProcessor implements AppProcessor {
+public class P2PConnectionStarterProcessor implements AppTask {
 
     @Override
     public void process(Application application) throws IOException {

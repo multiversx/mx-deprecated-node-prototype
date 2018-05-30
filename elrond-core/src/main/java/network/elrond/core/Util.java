@@ -67,39 +67,33 @@ public class Util {
         return sb.toString();
     }
 
-    public static byte[] getAddressFromPublicKeyAsByteArray(byte[] pubKeyBytes) {
+
+    public static String getAddressFromPublicKey(byte[] pubKeyBytes) {
         if (pubKeyBytes == null) {
-            return (null);
+            return ("");
         }
 
         //step 1. getAccountState the data in the hexa form
         String strHexa = byteArrayToHexString(pubKeyBytes);
 
         if (strHexa.length() != Util.MAX_LEN_PUB_KEY * 2) {
-            return (null);
+            return ("");
         }
 
-        //step 2. compute hash based on hexa form
-        byte[] hash = SHA3.digest(strHexa.getBytes());
+        return strHexa;
 
-        if (hash.length != 32) {
-            return (null);
-        }
-
-        //step 3. trim to last 20 bytes
-        byte[] addr = Arrays.copyOfRange(hash, 12, 32);
-
-        //step 4. convert to hexa form and add 0x
-        return (addr);
-    }
-
-    public static String getAddressFromPublicKey(byte[] pubKeyBytes) {
-        byte[] buff = getAddressFromPublicKeyAsByteArray(pubKeyBytes);
-        if (buff == null){
-            return("");
-        }
-
-        return ("0x" + byteArrayToHexString(buff));
+//        //step 2. compute hash based on hexa form
+//        byte[] hash = SHA3.digest(strHexa.getBytes());
+//
+//        if (hash.length != 32) {
+//            return ("");
+//        }
+//
+//        //step 3. trim to last 20 bytes
+//        byte[] addr = Arrays.copyOfRange(hash, 12, 32);
+//
+//        //step 4. convert to hexa form and add 0x
+//        return ("0x" + byteArrayToHexString(addr));
     }
 
     /**

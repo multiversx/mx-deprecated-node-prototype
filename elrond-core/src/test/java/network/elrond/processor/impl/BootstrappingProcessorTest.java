@@ -13,8 +13,6 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.*;
-import network.elrond.processor.AppProcessors;
-import network.elrond.processor.impl.BootstrappingProcessor;
 import network.elrond.service.AppServiceProvider;
 import org.junit.After;
 import org.junit.Before;
@@ -37,7 +35,7 @@ public class BootstrappingProcessorTest {
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(4000);
         context.setPort(4001 /*+ new Random().nextInt(10000)*/);
-        context.setPeerId(0);
+        context.setNodeName("0");
         context.setBootstrapType(BootstrapType.START_FROM_SCRATCH);
         context.setStorageBasePath("test");
 
@@ -85,26 +83,22 @@ public class BootstrappingProcessorTest {
         Block blk1 = new DataBlock();
         blk1.setNonce(BigInteger.ONE);
 
-        Transaction trx1 = new Transaction();
-        trx1.setNonce(BigInteger.ZERO);
-        trx1.setValue(BigInteger.valueOf(1));
-        trx1.setSendAddress(Util.getAddressFromPublicKey(pbk1.getValue()));
-        trx1.setReceiverAddress(Util.getAddressFromPublicKey(pbk2.getValue()));
-        trx1.setPubKey(Util.byteArrayToHexString(pbk1.getValue()));
+        Transaction trx1 = transactionService.generateTransaction(pbk1, pbk2, 1, 0);
+        //trx1.setPubKey(Util.byteArrayToHexString(pbk1.getValue()));
         transactionService.signTransaction(trx1, pvk1.getValue());
 
         //put tx on wire
-        AppServiceProvider.getP2PObjectService().putJSONencoded(trx1, serializationService.getHashString(trx1, true), state.getConnection());
+        AppServiceProvider.getP2PObjectService().putJSONencoded(trx1, serializationService.getHashString(trx1), state.getConnection());
 
         List<byte[]> listTxHash = new ArrayList<>();
-        listTxHash.add(AppServiceProvider.getSerializationService().getHash(trx1, true));
+        listTxHash.add(AppServiceProvider.getSerializationService().getHash(trx1));
         blk1.setListTXHashes(listTxHash);
 
         //put block on wire
-        AppServiceProvider.getP2PObjectService().putJSONencoded(blk1, serializationService.getHashString(blk1, true), state.getConnection());
+        AppServiceProvider.getP2PObjectService().putJSONencoded(blk1, serializationService.getHashString(blk1), state.getConnection());
 
         //put block hash height and block height on wire
-        bootstrapService.setBlockHashFromHeightNetwork(blk1.getNonce(), serializationService.getHashString(blk1, true), state.getConnection());
+        bootstrapService.setBlockHashFromHeightNetwork(blk1.getNonce(), serializationService.getHashString(blk1), state.getConnection());
         bootstrapService.setMaxBlockSizeNetwork(blk1.getNonce(), state.getConnection());
 
         //mint

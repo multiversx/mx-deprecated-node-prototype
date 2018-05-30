@@ -7,7 +7,7 @@ import java.math.BigInteger;
 
 public class AppContext implements Serializable {
 
-    private Integer peerId;
+    private String nodeName;
     private Integer port;
     private String masterPeerIpAddress;
     private Integer masterPeerPort;
@@ -18,12 +18,12 @@ public class AppContext implements Serializable {
     private String strAddressMint = "0x0000000000000000000000000000000000000000";
     private BigInteger valueMint = BigInteger.ZERO;
 
-    public Integer getPeerId() {
-        return peerId;
+    public String getNodeName() {
+        return nodeName;
     }
 
-    public void setPeerId(Integer peerId) {
-        this.peerId = peerId;
+    public void setNodeName(String nodeName) {
+        this.nodeName = nodeName;
     }
 
     public Integer getPort() {
@@ -50,13 +50,21 @@ public class AppContext implements Serializable {
         this.masterPeerPort = masterPeerPort;
     }
 
-    public String getStorageBasePath(){return(storageBasePath);}
+    public String getStorageBasePath() {
+        return (storageBasePath);
+    }
 
-    public void setStorageBasePath(String storageBasePath) {this.storageBasePath = storageBasePath;}
+    public void setStorageBasePath(String storageBasePath) {
+        this.storageBasePath = storageBasePath;
+    }
 
-    public BootstrapType getBootstrapType() { return this.bootstrapType;}
+    public BootstrapType getBootstrapType() {
+        return this.bootstrapType;
+    }
 
-    public void setBootstrapType(BootstrapType bootstrapType) { this.bootstrapType = bootstrapType;}
+    public void setBootstrapType(BootstrapType bootstrapType) {
+        this.bootstrapType = bootstrapType;
+    }
 
     public String getStrAddressMint(){return strAddressMint;}
 

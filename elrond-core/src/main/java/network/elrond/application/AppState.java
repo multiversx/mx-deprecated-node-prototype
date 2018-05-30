@@ -3,9 +3,11 @@ package network.elrond.application;
 
 import network.elrond.account.Accounts;
 import network.elrond.blockchain.Blockchain;
+import network.elrond.data.Block;
 import network.elrond.blockchain.BlockchainPersistenceUnit;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.p2p.P2PBroadcastChanel;
+import network.elrond.p2p.P2PChannelName;
 import network.elrond.p2p.P2PConnection;
 
 import java.io.Serializable;
@@ -20,16 +22,17 @@ public class AppState implements Serializable {
     private Accounts accounts;
     private Blockchain blockchain;
 
+    private Block currentBlock;
 
     private P2PConnection connection;
-    private Map<String, P2PBroadcastChanel> channels = new HashMap<>();
+    private Map<P2PChannelName, P2PBroadcastChanel> channels = new HashMap<>();
 
 
-    public P2PBroadcastChanel getChanel(String name) {
+    public P2PBroadcastChanel getChanel(P2PChannelName name) {
         return channels.get(name);
     }
 
-    public void addChanel(String name, P2PBroadcastChanel chanel) {
+    public void addChanel(P2PChannelName name, P2PBroadcastChanel chanel) {
         this.channels.put(name, chanel);
     }
 
@@ -73,23 +76,17 @@ public class AppState implements Serializable {
         this.bootstrapping = bootstrapping;
     }
 
-    public void shutdown(){
-        //closes handlers for blockchain
-        for (BlockchainUnitType blockchainUnitType : BlockchainUnitType.values()) {
-            BlockchainPersistenceUnit<Object, Object> blockchainPersistenceUnit = this.getBlockchain().getUnit(blockchainUnitType);
 
-            if (blockchainPersistenceUnit == null){
-                continue;
-            }
+    public Block getCurrentBlock() {
+        return currentBlock;
+    }
 
-            try {
-                blockchainPersistenceUnit.close();
+    public void setCurrentBlock(Block currentBlock) {
+        this.currentBlock = currentBlock;
+    }
 
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        this.blockchain = null;
+    public void shutdown() {
+        this.blockchain.stopPersistenceUnit();
+        this.accounts.stopPersistenceUnit();
     }
 }

@@ -21,13 +21,11 @@ public abstract class AbstractPersistenceUnit<K, V> {
     private final String databasePath;
 
     public AbstractPersistenceUnit(String databasePath) throws IOException {
+        this.databasePath = databasePath;
         if (databasePath == null || databasePath.isEmpty()) {
-            this.databasePath = null;
-            this.database = null;
-        } else {
-            this.databasePath = databasePath;
-            this.database = initDatabase(databasePath);
+            throw new IllegalArgumentException("databasePath cannot be null");
         }
+        this.database = initDatabase(databasePath);
     }
 
     protected DB initDatabase(String databasePath) throws IOException {
@@ -41,35 +39,27 @@ public abstract class AbstractPersistenceUnit<K, V> {
         return cache;
     }
 
-    public void scheduleForPersistence(K key, V val) {
-        queue.add(new Fun.Tuple2<>(key, val));
-    }
-
     public abstract void put(byte[] key, byte[] val);
 
     public abstract byte[] get(byte[] key);
 
-    public void destroyAndReCreate() throws IOException{
-        if (databasePath != null) {
-            destroy();
+    public void destroyAndReCreate() throws IOException {
+        destroy();
 
-            this.database = initDatabase(databasePath);
-        }
+        this.database = initDatabase(databasePath);
+
     }
 
-    public void destroy() throws IOException{
-        if (databasePath != null) {
-            Iq80DBFactory factory = new Iq80DBFactory();
-            this.database.close();
-            Options options = new Options();
-            options.createIfMissing(true);
-            factory.destroy(new File(databasePath), options);
-        }
+    public void destroy() throws IOException {
+        Iq80DBFactory factory = new Iq80DBFactory();
+        this.database.close();
+        Options options = new Options();
+        options.createIfMissing(true);
+        factory.destroy(new File(databasePath), options);
     }
 
-    public void close() throws IOException{
-        if (database != null) {
-            this.database.close();
-        }
+    public void close() throws IOException {
+        this.database.close();
+
     }
 }
