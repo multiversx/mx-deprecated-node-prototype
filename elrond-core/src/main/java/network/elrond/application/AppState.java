@@ -3,6 +3,8 @@ package network.elrond.application;
 
 import network.elrond.account.Accounts;
 import network.elrond.blockchain.Blockchain;
+import network.elrond.crypto.PrivateKey;
+import network.elrond.crypto.PublicKey;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PConnection;
 
@@ -17,7 +19,8 @@ public class AppState implements Serializable {
 
     private Accounts accounts;
     private Blockchain blockchain;
-
+    private PrivateKey privateKey;
+    private PublicKey publicKey;
 
     private P2PConnection connection;
     private Map<String, P2PBroadcastChanel> channels = new HashMap<>();
@@ -71,4 +74,19 @@ public class AppState implements Serializable {
         this.bootstrapping = bootstrapping;
     }
 
+    public void setPrivateKey(PrivateKey privateKey){
+        this.privateKey = privateKey;
+    }
+
+    public PrivateKey getPrivateKey(){
+        return privateKey;
+    }
+
+    public void setPublicKey(PublicKey publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public PublicKey getPublicKey() {
+        return publicKey;
+    }
 }

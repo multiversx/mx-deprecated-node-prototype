@@ -43,6 +43,8 @@ public class Application implements Serializable {
         //  Start blockchain
         AppProcessors.BOOTSTRAP_BLOCKCHAIN.process(this);
 
+        AppProcessors.INITIALIZE_PUBLIC_PRIVATE_KEYS.process(this);
+
         //  Start accounts
         AppProcessors.BOOTSTRAP_ACCOUNTS.process(this);
 
@@ -54,7 +56,6 @@ public class Application implements Serializable {
 
         // Start bootstrapping process
         AppProcessors.BOOTSTRAP_SYSTEM.process(this);
-
     }
 
     public void stop() {

@@ -1,5 +1,6 @@
 package network.elrond.processor;
 
+import network.elrond.account.AccountState;
 import network.elrond.processor.impl.*;
 
 
@@ -17,7 +18,6 @@ public class AppProcessors {
      * P2P transactions broadcast
      */
     public static AppProcessor P2P_TRANSACTIONS_INTERCEPTOR = (application) -> {
-
         new P2PTransactionsInterceptorProcessor().process(application);
     };
 
@@ -25,9 +25,14 @@ public class AppProcessors {
      * P2P block broadcast
      */
     public static AppProcessor P2P_BLOCKS_INTERCEPTOR = (application) -> {
-
         new P2PBlocksInterceptorProcessor().process(application);
+    };
 
+    /**
+     * Init public and private keys
+     */
+    public static AppProcessor INITIALIZE_PUBLIC_PRIVATE_KEYS = (application) -> {
+        new AccountInitializerProcessor().process(application);
     };
 
     /**

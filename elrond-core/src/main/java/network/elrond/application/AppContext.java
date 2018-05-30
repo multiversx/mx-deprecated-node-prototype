@@ -1,5 +1,8 @@
 package network.elrond.application;
 
+import network.elrond.crypto.PrivateKey;
+import network.elrond.crypto.PublicKey;
+
 import java.io.Serializable;
 
 public class AppContext implements Serializable {
@@ -8,8 +11,8 @@ public class AppContext implements Serializable {
     private Integer port;
     private String masterPeerIpAddress;
     private Integer masterPeerPort;
-
     private String storageBasePath = "main";
+    private PrivateKey privateKey;
 
 
     public Integer getPeerId() {
@@ -47,5 +50,13 @@ public class AppContext implements Serializable {
     public String getStorageBasePath(){return(storageBasePath);}
 
     public void setStorageBasePath(String storageBasePath) {this.storageBasePath = storageBasePath;}
+
+    public void setPrivateKey(PrivateKey privateKey) {
+        this.privateKey = privateKey;
+    }
+
+    public PrivateKey getPrivateKey() {
+        return privateKey;
+    }
 
 }
