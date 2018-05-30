@@ -48,6 +48,9 @@ public class PrivateKey {
      * @param src The byte array
      */
     public PrivateKey(byte[] src) {
+        if(src == null){
+            throw new IllegalArgumentException("Src cannot be null");
+        }
         privateKey = src.clone();
     }
 
@@ -58,6 +61,9 @@ public class PrivateKey {
      * @param seed String seed to generate the private key
      */
     public PrivateKey(String seed) {
+        if(seed == null || seed.isEmpty()){
+            throw new IllegalArgumentException("Seed cannot be null");
+        }
         byte[] seedArray = seed.getBytes();
         BigInteger seedInt;
         ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
@@ -102,12 +108,16 @@ public class PrivateKey {
         return privateKey.clone();
     }
 
-    /**
-     * Setter for the private key
-     *
-     * @param privateKey
-     */
-    public void setPrivateKey(byte[] privateKey) {
-        this.privateKey = privateKey.clone();
-    }
+//    /**
+//     * Setter for the private key
+//     *
+//     * @param privateKey
+//     */
+//    public void setPrivateKey(byte[] privateKey) {
+//        if(privateKey == null){
+//            throw new IllegalArgumentException("PrivateKey cannot be null");
+//        }
+//
+//        this.privateKey = privateKey.clone();
+//    }
 }

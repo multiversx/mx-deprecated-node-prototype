@@ -1,10 +1,8 @@
 package network.elrond.crypto;
 
 import network.elrond.service.AppServiceProvider;
-import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.ECPoint;
@@ -13,7 +11,6 @@ import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
 
 public class PublicKey {
@@ -23,7 +20,7 @@ public class PublicKey {
     /**
      * Default constructor
      */
-    public PublicKey() {
+    private PublicKey() {
         initialized = false;
     }
 
@@ -31,9 +28,13 @@ public class PublicKey {
      * Constructor
      * Generates the corresponding public key for the given public point encoding
      *
-     * @param key the public point Q encoding, as a byte array
+     * @param publicPointQEncoding the public point Q encoding, as a byte array
      */
-    public PublicKey(byte[] key) {
+    public PublicKey(byte[] publicPointQEncoding) {
+        if(publicPointQEncoding == null){
+            throw new IllegalArgumentException("publicPointQEncoding cannot be null");
+        }
+
         ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
         ECParameterSpec ecParameterSpec = new ECParameterSpec(
                 ecCryptoService.getCurve(),
@@ -41,7 +42,30 @@ public class PublicKey {
                 ecCryptoService.getN(),
                 ecCryptoService.getH(),
                 ecCryptoService.getSeed());
-        ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(ecCryptoService.getCurve().decodePoint(key), ecParameterSpec);
+        ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(ecCryptoService.getCurve().decodePoint(publicPointQEncoding), ecParameterSpec);
+        KeyFactory keyFactory;
+        try {
+            keyFactory = KeyFactory.getInstance(ecCryptoService.getAlgorithm(), ecCryptoService.getProvider());
+            q = ((ECPublicKey) keyFactory.generatePublic(publicKeySpec)).getQ();
+            initialized = true;
+        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public PublicKey(PublicKey publicKey) {
+        if(publicKey == null){
+            throw new IllegalArgumentException();
+        }
+
+        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
+        ECParameterSpec ecParameterSpec = new ECParameterSpec(
+                ecCryptoService.getCurve(),
+                ecCryptoService.getG(),
+                ecCryptoService.getN(),
+                ecCryptoService.getH(),
+                ecCryptoService.getSeed());
+        ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(ecCryptoService.getCurve().decodePoint(publicKey.getValue()), ecParameterSpec);
         KeyFactory keyFactory;
         try {
             keyFactory = KeyFactory.getInstance(ecCryptoService.getAlgorithm(), ecCryptoService.getProvider());
@@ -59,6 +83,10 @@ public class PublicKey {
      * @param privateKey the corresponding private key
      */
     public PublicKey(PrivateKey privateKey) {
+        if(privateKey == null){
+            throw new IllegalArgumentException("PrivateKey cannot be null");
+        }
+
         ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
         ECDomainParameters domainParameters = new ECDomainParameters(
                 ecCryptoService.getCurve(),
@@ -72,18 +100,14 @@ public class PublicKey {
         initialized = true;
     }
 
-    public void setFromPrivateKey(byte[] privateKey) {
-        PrivateKey privKey = new PrivateKey(privateKey);
-    }
-
     /**
      * Setter for public key
      *
      * @param point the elliptic curve point
      */
-    public void setPublicKey(ECPoint point) {
-        q = point;
-    }
+//    public void setPublicKey(ECPoint point) {
+//        q = point;
+//    }
 
     /**
      * Sets the public key from a byte stream
@@ -93,19 +117,19 @@ public class PublicKey {
      * @throws NoSuchProviderException
      * @throws InvalidKeySpecException
      */
-    public void setPublicKey(byte[] key) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
-        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
-        ECParameterSpec ecParameterSpec = new ECParameterSpec(
-                ecCryptoService.getCurve(),
-                ecCryptoService.getG(),
-                ecCryptoService.getN(),
-                ecCryptoService.getH(),
-                ecCryptoService.getSeed());
-        ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(ecCryptoService.getCurve().decodePoint(key), ecParameterSpec);
-        KeyFactory keyFactory = KeyFactory.getInstance(ecCryptoService.getAlgorithm(), ecCryptoService.getProvider());
-        q = ((ECPublicKey) keyFactory.generatePublic(publicKeySpec)).getQ();
-        initialized = true;
-    }
+//    public void setPublicKey(byte[] key) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
+//        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
+//        ECParameterSpec ecParameterSpec = new ECParameterSpec(
+//                ecCryptoService.getCurve(),
+//                ecCryptoService.getG(),
+//                ecCryptoService.getN(),
+//                ecCryptoService.getH(),
+//                ecCryptoService.getSeed());
+//        ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(ecCryptoService.getCurve().decodePoint(key), ecParameterSpec);
+//        KeyFactory keyFactory = KeyFactory.getInstance(ecCryptoService.getAlgorithm(), ecCryptoService.getProvider());
+//        q = ((ECPublicKey) keyFactory.generatePublic(publicKeySpec)).getQ();
+//        initialized = true;
+//    }
 
     /**
      * Get the encoded form of public key as a byte array

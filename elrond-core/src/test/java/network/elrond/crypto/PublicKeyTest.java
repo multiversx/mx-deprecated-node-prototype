@@ -2,20 +2,50 @@ package network.elrond.crypto;
 
 import junit.framework.TestCase;
 import network.elrond.core.Util;
+import org.junit.Assert;
 import org.junit.Test;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
-
 public class PublicKeyTest {
-    @Test
-    public void testDefautConstructorNotInit() {
-        PublicKey publicKey = new PublicKey();
 
-        TestCase.assertFalse(publicKey.isInitialized());
-        TestCase.assertNull(publicKey.getQ());
+    @Test
+    public void testConstructorWithPrivateKeyInitializezPublicKey(){
+        PublicKey publicKey = new PublicKey(new PrivateKey("Test"));
+        Assert.assertNotNull(publicKey);
+        Assert.assertTrue(publicKey.isInitialized());
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructorWithPrivateKeyNullThrowsException(){
+        PublicKey publicKey = new PublicKey((PrivateKey) null);
+    }
+
+    @Test
+    public void testConstructorWithPublicKeyEncoding(){
+        PublicKey publicKey = new PublicKey(new PrivateKey("Test"));
+        PublicKey createdKey = new PublicKey(publicKey.getValue());
+        Assert.assertNotNull(createdKey);
+        Assert.assertTrue(createdKey.isInitialized());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructorWithPublicKeyEncodingNullShouldThrowException(){
+        PublicKey publicKey = new PublicKey((byte[]) null);
+    }
+
+    @Test
+    public void testConstructorWithPublicKey(){
+        PublicKey pbKey = new PublicKey(new PrivateKey("Test"));
+        PublicKey generatedPbKey = new PublicKey(pbKey);
+
+        Assert.assertTrue(generatedPbKey.isInitialized());
+        Assert.assertArrayEquals(pbKey.getValue(), generatedPbKey.getValue());
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void testConstructorWithPublicKeyNullShouldThrowException(){
+        PublicKey generatedPbKey = new PublicKey((PublicKey)null);
+    }
+
 
     @Test
     public void testGeneratePublicFromPrivate() {
@@ -38,17 +68,17 @@ public class PublicKeyTest {
                 Util.hexStringToByteArray("948c6246ebb299414ccd3cc8b17674d3f6fe0d14b984b6c2c84e0d5866a38da2"));
         //Generate associated public key
         PublicKey pubk = new PublicKey(privk);
-        PublicKey pubk2 = new PublicKey();
+        PublicKey pubk2 = new PublicKey(pubk);
 
         try {
             // sets public key ECPoint from encoded byte array
-            pubk2.setPublicKey(pubk.getQ().getEncoded(true));
+            //pubk2.setPublicKey(pubk.getQ().getEncoded(true));
 
             // test encoded form form both public keys is the same
             TestCase.assertEquals(
                     "021a50a33eb266ace1597f4399086b15b989d5c303dfc4ada06454dd7325062286",
                     Util.byteArrayToHexString(pubk2.getQ().getEncoded(true)));
-        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
+        } catch (Exception e) {
             TestCase.fail(e.toString());
         }
     }
