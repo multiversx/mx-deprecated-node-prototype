@@ -5,20 +5,20 @@ import java.util.List;
 
 public class P2PBroadcastChanel {
 
-    private String name;
+    private P2PChannelName name;
     private P2PConnection connection;
     private List<P2PChannelListener> listeners = new ArrayList<>();
 
-    public P2PBroadcastChanel(String chanelName, P2PConnection connection) {
+    public P2PBroadcastChanel(P2PChannelName chanelName, P2PConnection connection) {
         this.name = chanelName;
         this.connection = connection;
     }
 
-    public String getName() {
+    public P2PChannelName getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(P2PChannelName name) {
         this.name = name;
     }
 

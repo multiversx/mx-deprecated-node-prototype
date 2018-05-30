@@ -144,7 +144,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             return ExecutionReport.create().ko("Null transaction");
         }
 
-        String strHash = new String(Base64.encode(serializationService.getHash(transaction, true)));
+        String strHash = new String(Base64.encode(serializationService.getHash(transaction)));
 
         if (!AppServiceProvider.getTransactionService().verifyTransaction(transaction)) {
             return ExecutionReport.create().ko("Invalid transaction! tx hash: " + strHash);

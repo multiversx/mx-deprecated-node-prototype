@@ -4,82 +4,54 @@ import network.elrond.Application;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
+import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.data.Block;
-import network.elrond.p2p.AppP2PManager;
-import network.elrond.processor.AppProcessor;
-import network.elrond.processor.AppProcessors;
+import network.elrond.p2p.P2PChannelName;
+import network.elrond.processor.AppTasks;
 import network.elrond.service.AppServiceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.concurrent.ArrayBlockingQueue;
 
-public class P2PBlocksInterceptorProcessor implements AppProcessor {
+public class P2PBlocksInterceptorProcessor extends AbstractChannelTask<String> {
 
-    private Logger logger = LoggerFactory.getLogger(AppProcessors.class);
-    private static String CHANNEL_NAME = "BLOCKS";
+    private Logger logger = LoggerFactory.getLogger(AppTasks.class);
 
     @Override
-    public void process(Application application) throws IOException {
+    protected P2PChannelName getChannelName() {
+        return P2PChannelName.BLOCK;
+    }
 
-
-        ArrayBlockingQueue<String> queue = new ArrayBlockingQueue<>(10000);
+    @Override
+    protected void process(String hash, Application application) {
 
         AppState state = application.getState();
         Blockchain blockchain = state.getBlockchain();
         Accounts accounts = state.getAccounts();
 
-        Thread threadProcessBlockHashes = new Thread(() -> {
+        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
 
-            while (state.isStillRunning()) {
+        try {
 
-                String hash = queue.poll();
-                if (hash == null) {
-                    continue;
-                }
+            // This will retrieve block from network if required
+            Block block = blockchainService.get(hash, blockchain, BlockchainUnitType.BLOCK);
+            if (block != null) {
 
-                try {
+                blockchainService.put(block.getNonce(), hash, blockchain, BlockchainUnitType.BLOCK_INDEX);
+                AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain);
 
-                    // This will retrieve block from network if required
-                    Block block = AppServiceProvider.getBlockchainService().get(hash, blockchain, BlockchainUnitType.BLOCK);
-
-                    if (block != null) {
-                        AppServiceProvider.getBlockchainService().put(block.getNonce(), hash, blockchain, BlockchainUnitType.BLOCK_INDEX);
-                        AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain);
-
-                        logger.info("Got new block " + hash);
-                    } else {
-                        logger.info("Block not found !!!: " + hash);
-                    }
-
-
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-
+                logger.info("Got new block " + hash);
+            } else {
+                logger.info("Block not found !!!: " + hash);
             }
-        });
-        threadProcessBlockHashes.start();
 
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
 
-        AppP2PManager.instance().subscribeToChannel(application, CHANNEL_NAME, (sender, request) -> {
-            if (request == null) {
-                return;
-            }
-            String strPayload = request.getPayload().toString();
-
-            if (strPayload.startsWith("H:")) {
-                strPayload = strPayload.substring(2);
-                //pool.pushKey(strPayload);
-                try {
-                    queue.put(strPayload);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            //System.err.println(sender + " - " + request);
-        });
     }
+
+
 }

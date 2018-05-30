@@ -9,15 +9,15 @@ import java.util.List;
 
 public class P2PConnection {
 
-    private int peerId;
+    private String nodeName;
     private Peer peer;
     private PeerDHT dht;
 
     private ObjectDataReply dataReplyCallback;
     private List<P2PBroadcastChanel> channels = new ArrayList<>();
 
-    public P2PConnection(Integer peerId, Peer peer, PeerDHT dht) {
-        this.peerId = peerId;
+    public P2PConnection(String nodeName, Peer peer, PeerDHT dht) {
+        this.nodeName = nodeName;
         this.peer = peer;
         this.dht = dht;
 
@@ -40,13 +40,7 @@ public class P2PConnection {
     }
 
 
-    public int getPeerId() {
-        return peerId;
-    }
 
-    public void setPeerId(int peerId) {
-        this.peerId = peerId;
-    }
 
     public Peer getPeer() {
         return peer;

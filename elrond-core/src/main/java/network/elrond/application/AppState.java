@@ -3,9 +3,11 @@ package network.elrond.application;
 
 import network.elrond.account.Accounts;
 import network.elrond.blockchain.Blockchain;
+import network.elrond.data.Block;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.p2p.P2PBroadcastChanel;
+import network.elrond.p2p.P2PChannelName;
 import network.elrond.p2p.P2PConnection;
 
 import java.io.Serializable;
@@ -19,18 +21,19 @@ public class AppState implements Serializable {
 
     private Accounts accounts;
     private Blockchain blockchain;
+    private Block currentBlock;
     private PrivateKey privateKey;
     private PublicKey publicKey;
 
     private P2PConnection connection;
-    private Map<String, P2PBroadcastChanel> channels = new HashMap<>();
+    private Map<P2PChannelName, P2PBroadcastChanel> channels = new HashMap<>();
 
 
-    public P2PBroadcastChanel getChanel(String name) {
+    public P2PBroadcastChanel getChanel(P2PChannelName name) {
         return channels.get(name);
     }
 
-    public void addChanel(String name, P2PBroadcastChanel chanel) {
+    public void addChanel(P2PChannelName name, P2PBroadcastChanel chanel) {
         this.channels.put(name, chanel);
     }
 
@@ -72,6 +75,19 @@ public class AppState implements Serializable {
 
     public void setBootstrapping(boolean bootstrapping) {
         this.bootstrapping = bootstrapping;
+    }
+
+    public Block getCurrentBlock() {
+        return currentBlock;
+    }
+
+    public void setCurrentBlock(Block currentBlock) {
+        this.currentBlock = currentBlock;
+    }
+
+    public void shutdown() {
+        this.blockchain.stopPersistenceUnit();
+        this.accounts.stopPersistenceUnit();
     }
 
     public void setPrivateKey(PrivateKey privateKey){

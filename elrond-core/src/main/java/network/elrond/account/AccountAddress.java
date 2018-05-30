@@ -17,13 +17,17 @@ public class AccountAddress implements Serializable {
         this.bytes = bytes;
     }
 
-    public static AccountAddress fromString(String value) {
-        return new AccountAddress(value.getBytes());
-    }
+    //JLS - NO!
+//    public static AccountAddress fromString(String value) {
+//        return new AccountAddress(value.getBytes());
+//    }
 
     public static AccountAddress fromHexaString(String value) {
-        String hexVal = value != null ? value.substring(2) : null;
-        return new AccountAddress(Util.hexStringToByteArray(hexVal));
+        if(value == null || value.isEmpty()){
+            throw new IllegalArgumentException("value is not a HexaString!!!");
+        }
+        //String hexVal = value != null ? value.substring(2) : null;
+        return new AccountAddress(Util.hexStringToByteArray(value));
     }
 
     public static AccountAddress fromBytes(byte[] value) {
@@ -31,8 +35,8 @@ public class AccountAddress implements Serializable {
     }
 
     public static AccountAddress fromPublicKey(PublicKey key) {
-        String address = Util.getAddressFromPublicKey(key.getQ().getEncoded(true));
-        return fromString(address);
+        //String address = Util.getAddressFromPublicKey(key.getQ().getEncoded(true));
+        return fromBytes(key.getValue());
     }
 
     @Override

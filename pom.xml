@@ -11,8 +11,8 @@
     <description>Elrond Network APP</description>
 
     <modules>
-        <module>elrond-api</module>
         <module>elrond-core</module>
+        <module>elrond-api</module>
     </modules>
     <packaging>pom</packaging>
 

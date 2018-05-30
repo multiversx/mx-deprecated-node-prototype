@@ -1,6 +1,5 @@
 package network.elrond.data;
 
-import com.fasterxml.jackson.annotation.JsonFilter;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +11,6 @@ import java.util.List;
  * @version 1.0
  * @since   2018-05-14
  */
-@JsonFilter("filterSigs")
 public class Block {
     //block counter
     protected BigInteger nonce;
@@ -21,9 +19,9 @@ public class Block {
     //complete tx hash
     protected byte[] hash;
     //blob of data containing first part of sig
-    private byte[] sig1;
+    private byte[] signature;
     //blob of data containing second part of sig
-    private byte[] sig2;
+    private byte[] commitment;
     //list of public keys used in signing. First is the leader that proposed the block
     protected List<String> listPubKeys;
     //previus block hash
@@ -44,8 +42,8 @@ public class Block {
         listTXHashes = new ArrayList<byte[]>();
         shard = 0;
         appStateHash = new byte[0];
-        sig1 = new byte[0];
-        sig2 = new byte[0];
+        signature = new byte[0];
+        commitment = new byte[0];
     }
 
     /**
@@ -88,25 +86,25 @@ public class Block {
      * Gets the first part of signature of the tx
      * @return sig as byte array
      */
-    public byte[] getSig1(){return(sig1);}
+    public byte[] getSignature(){return(signature);}
 
     /**
      * Sets the first part of signature of the tx
-     * @param sig1 as byte array
+     * @param signature as byte array
      */
-    public void setSig1(byte[] sig1){this.sig1 = sig1;}
+    public void setSignature(byte[] signature){this.signature = signature;}
 
     /**
      * Gets the second part of signature of the tx
      * @return sig as byte array
      */
-    public byte[] getSig2(){return(sig2);}
+    public byte[] getCommitment(){return(commitment);}
 
     /**
      * Sets the second part of signature of the tx
-     * @param sig2 as byte array
+     * @param commitment as byte array
      */
-    public void setSig2(byte[] sig2){this.sig2 = sig2;}
+    public void setCommitment(byte[] commitment){this.commitment = commitment;}
 
     /**
      * Gets the shard's number

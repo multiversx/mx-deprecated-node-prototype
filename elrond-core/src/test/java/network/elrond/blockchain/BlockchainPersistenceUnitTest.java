@@ -7,13 +7,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Random;
 
 public class BlockchainPersistenceUnitTest {
     Random r;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         r = new Random();
     }
 
@@ -24,17 +25,66 @@ public class BlockchainPersistenceUnitTest {
     @Test(expected = IllegalArgumentException.class)
     public void testBlockchainPersistenceUnitWithNullPathShouldThrowException() throws IOException {
         BlockchainPersistenceUnit<String, String> blockchainPersistenceUnit =
-                new BlockchainPersistenceUnit<String,String>((String)null, String.class);
+                new BlockchainPersistenceUnit<>((String) null, String.class);
+        blockchainPersistenceUnit.close();
     }
 
     @Test
     public void testPutNullObjectShouldThrowException() throws IOException {
         BlockchainPersistenceUnit<String, String> blockchainPersistenceUnit =
-                new BlockchainPersistenceUnit<String,String>(BaseBlockchainTest.BLOCKCHAIN_BLOCK_DATA_TEST_PATH, String.class);
+                new BlockchainPersistenceUnit<>(BaseBlockchainTest.BLOCKCHAIN_BLOCK_DATA_TEST_PATH, String.class);
         byte[] key = new byte[] { (byte)r.nextInt()};
         byte[] value = new byte[] { (byte)r.nextInt()};
          blockchainPersistenceUnit.put(key,value);
          byte[] readValue = blockchainPersistenceUnit.get(key);
         Assert.assertArrayEquals(value, readValue);
+        blockchainPersistenceUnit.close();
+    }
+
+    @Test
+    public void testDestroyAndRecreate() throws IOException {
+        BlockchainPersistenceUnit<String, String> blockchainPersistenceUnit =
+                new BlockchainPersistenceUnit<>(BaseBlockchainTest.BLOCKCHAIN_BLOCK_DATA_TEST_PATH, String.class);
+
+        byte[] key = new byte[]{(byte) r.nextInt()};
+        byte[] value = new byte[]{(byte) r.nextInt()};
+
+        blockchainPersistenceUnit.put(key, value);
+
+        byte[] readValue = blockchainPersistenceUnit.get(key);
+
+        Assert.assertNotEquals(null, readValue);
+
+        blockchainPersistenceUnit.destroyAndReCreate();
+
+        readValue = blockchainPersistenceUnit.get(key);
+
+        Assert.assertEquals(null, readValue);
+        blockchainPersistenceUnit.close();
+    }
+
+    @Test
+    public void testDestroy() throws IOException {
+
+
+        BlockchainPersistenceUnit<String, String> blockchainPersistenceUnit =
+                new BlockchainPersistenceUnit<>(BaseBlockchainTest.BLOCKCHAIN_BLOCK_DATA_TEST_PATH, String.class);
+
+        byte[] key = new byte[]{(byte) r.nextInt()};
+        byte[] value = new byte[]{(byte) r.nextInt()};
+
+        blockchainPersistenceUnit.put(key, value);
+
+        byte[] readValue = blockchainPersistenceUnit.get(key);
+
+        Date dStart = new Date();
+
+        blockchainPersistenceUnit.destroy();
+
+        Date dInterim = new Date();
+
+        long ms1 = dInterim.getTime() - dStart.getTime();
+        System.out.printf("Destroy took: %d ms", ms1);
+        System.out.println();
     }
 }

@@ -1,9 +1,13 @@
 package network.elrond.account;
 
+import network.elrond.service.AppServiceProvider;
+
+import network.elrond.blockchain.PersistenceUnitContainer;
+
 import java.io.IOException;
 import java.io.Serializable;
 
-public class Accounts implements Serializable {
+public class Accounts implements Serializable, PersistenceUnitContainer {
 
 
     private final AccountsContext context;
@@ -13,6 +17,7 @@ public class Accounts implements Serializable {
     public Accounts(AccountsContext context) throws IOException {
         this.context = context;
         this.unit = new AccountsPersistenceUnit<>(context.getDatabasePath());
+        AppServiceProvider.getAccountStateService().initialMintingToKnownAddress(this);
     }
 
     public AccountsPersistenceUnit<AccountAddress, AccountState> getAccountsPersistenceUnit() {
@@ -21,5 +26,14 @@ public class Accounts implements Serializable {
 
     public void flush() {
         unit.getCache().clear();
+    }
+
+    @Override
+    public void stopPersistenceUnit() {
+        try {
+            unit.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

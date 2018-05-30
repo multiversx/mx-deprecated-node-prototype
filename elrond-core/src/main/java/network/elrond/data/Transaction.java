@@ -1,6 +1,5 @@
 package network.elrond.data;
 
-import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import network.elrond.account.AccountAddress;
 
@@ -14,8 +13,7 @@ import java.math.BigInteger;
  * @version 1.0
  * @since   2018-05-11
  */
-@JsonFilter("filterSigs")
-public class Transaction {
+public class Transaction{
     //tx counter
     private BigInteger nonce;
     //value used in transaction in sERDs see core.Util
@@ -31,17 +29,16 @@ public class Transaction {
     //blob of data to executed in Elrond Virtual Machine
     private byte[] data;
     //blob of data containing first part of sig
-    private byte[] sig1;
+    private byte[] signature;
     //blob of data containing second part of sig
-    private byte[] sig2;
+    private byte[] challenge;
     //plain public key in hexa form
     private String pubKey;
-
 
     /**
      * Default constructor
      */
-    public Transaction()
+    private Transaction()
     {
         nonce = BigInteger.ZERO;
         value = BigInteger.ZERO;
@@ -50,8 +47,8 @@ public class Transaction {
         gasPrice = BigInteger.ZERO;
         gasLimit = BigInteger.ZERO;
         data = null;
-        sig1 = null;
-        sig2 = null;
+        signature = null;
+        challenge = null;
         pubKey = "";
     }
 
@@ -62,8 +59,25 @@ public class Transaction {
      * @param recvAddress receiving address as 0x0024f2849a...
      * @param sendAddress sender address as 0x0024f22323...
      */
-    public Transaction(BigInteger nonce, BigInteger value, String recvAddress, String sendAddress)
+    public Transaction(String sendAddress, String recvAddress, BigInteger value, BigInteger nonce)
     {
+        if(sendAddress == null || sendAddress.isEmpty()){
+            throw new IllegalArgumentException("SendAddress cannot be null");
+        }
+
+        if(recvAddress == null || recvAddress.isEmpty()){
+            throw new IllegalArgumentException("RecvAddress cannot be null");
+        }
+
+        if(value.compareTo(BigInteger.ZERO) < 0){
+            throw new IllegalArgumentException(("Value cannot be lower than zero"));
+        }
+
+        if(nonce.compareTo(BigInteger.ZERO) < 0){
+            throw new IllegalArgumentException(("Nonce cannot be lower than zero"));
+        }
+
+
         this.nonce = nonce;
         this.value = value;
         this.receiverAddress = recvAddress;
@@ -72,8 +86,8 @@ public class Transaction {
         gasPrice = BigInteger.ZERO;
         gasLimit = BigInteger.ZERO;
         data = null;
-        sig1 = null;
-        sig2 = null;
+        signature = null;
+        challenge = null;
         pubKey = "";
     }
 
@@ -177,25 +191,27 @@ public class Transaction {
      * Gets the first part of signature of the tx
      * @return sig as byte array
      */
-    public byte[] getSig1(){return(sig1);}
+    //@JsonProperty(SignatureSerializationType.TransactionSignature1)
+    public byte[] getSignature(){return(signature);}
 
     /**
      * Sets the first part of signature of the tx
-     * @param sig1 as byte array
+     * @param signature as byte array
      */
-    public void setSig1(byte[] sig1){this.sig1 = sig1;}
+    public void setSignature(byte[] signature){this.signature = signature;}
 
     /**
      * Gets the second part of signature of the tx
      * @return sig as byte array
      */
-    public byte[] getSig2(){return(sig2);}
+    //@JsonProperty(SignatureSerializationType.TransactionSignature2)
+    public byte[] getChallenge(){return(challenge);}
 
     /**
      * Sets the second part of signature of the tx
-     * @param sig2 as byte array
+     * @param challenge as byte array
      */
-    public void setSig2(byte[] sig2){this.sig2 = sig2;}
+    public void setChallenge(byte[] challenge){this.challenge = challenge;}
 
     /**
      * Gets the public key used for verifying the tx

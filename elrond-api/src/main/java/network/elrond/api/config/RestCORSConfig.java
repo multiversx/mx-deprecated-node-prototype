@@ -1,4 +1,4 @@
-package network.elrond.api;
+package network.elrond.api.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -4,7 +4,6 @@ import net.tomp2p.dht.FuturePut;
 import network.elrond.Application;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
-import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.BaseBlockchainTest;
@@ -12,11 +11,11 @@ import network.elrond.data.SerializationService;
 import network.elrond.data.Transaction;
 import network.elrond.data.TransactionService;
 import network.elrond.p2p.P2PBroadcastChanel;
+import network.elrond.p2p.P2PChannelName;
 import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -38,7 +37,7 @@ public class GetPutTest extends BaseBlockchainTest {
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(4000);
         context.setPort(4000);
-        context.setPeerId(1);
+        context.setNodeName("1");
 
 
         Application app = new Application(context);
@@ -47,7 +46,7 @@ public class GetPutTest extends BaseBlockchainTest {
         Thread thread = new Thread(() -> {
 
             AppState state = app.getState();
-            P2PBroadcastChanel channel = state.getChanel("TRANSACTIONS");
+            P2PBroadcastChanel channel = state.getChanel(P2PChannelName.TRANSACTION);
 
             int value = 0;
 
@@ -56,7 +55,7 @@ public class GetPutTest extends BaseBlockchainTest {
             do {
                 if (value < 1000) {
                     //inject transaction based on value so I will know the hash on the other node
-                    Transaction tx = generateTransaction(value);
+                    Transaction tx = transactionService.generateTransaction(pbKeySender, pbKeyRecv, value, 0);
 
                     try {
                         FuturePut fp = AppServiceProvider.getP2PObjectService().put(channel.getConnection(),
@@ -100,7 +99,7 @@ public class GetPutTest extends BaseBlockchainTest {
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(4000);
         context.setPort(4001);
-        context.setPeerId(0);
+        context.setNodeName("0");
 
 
         Application app = new Application(context);
@@ -139,7 +138,7 @@ public class GetPutTest extends BaseBlockchainTest {
 
             do {
                 if (value < 1000) {
-                    Transaction txExpected = generateTransaction(value);
+                    Transaction txExpected = transactionService.generateTransaction(pbKeySender, pbKeyRecv, value, 0);
                     String hash = getTxHash(txExpected);
 
                     System.out.println("Trying to getAccountState tx hash: " + hash + "...");
@@ -194,21 +193,7 @@ public class GetPutTest extends BaseBlockchainTest {
 
     }
 
-    private Transaction generateTransaction(int value) {
-        Transaction transaction = new Transaction();
-        transaction.setNonce(BigInteger.ZERO);
-        //2 ERDs
-        transaction.setValue(BigInteger.valueOf(10).pow(8).multiply(BigInteger.valueOf(value)));
-        transaction.setSendAddress(Util.getAddressFromPublicKey(pbKeySender.getValue()));
-        transaction.setReceiverAddress(Util.getAddressFromPublicKey(pbKeyRecv.getValue()));
-        transaction.setPubKey(Util.byteArrayToHexString(pbKeySender.getValue()));
-
-        //transactionService.signTransaction(transaction, pvKeySender.getValue());
-
-        return (transaction);
-    }
-
     private String getTxHash(Transaction tx) {
-        return (new String(Base64.encode(serializationService.getHash(tx, true))));
+        return (new String(Base64.encode(serializationService.getHash(tx))));
     }
 }

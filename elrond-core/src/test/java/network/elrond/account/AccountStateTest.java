@@ -15,6 +15,9 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+
 public class AccountStateTest {
 
 
@@ -48,7 +51,7 @@ public class AccountStateTest {
         //execute a single transaction
 
         AccountsContext context = new AccountsContext();
-        context.setDatabasePath("test");
+        context.setDatabasePath(null); //memory
         Accounts accounts = new Accounts(context);
 
 
@@ -60,12 +63,7 @@ public class AccountStateTest {
         PrivateKey pvKeyRecv = new PrivateKey();
         PublicKey pbKeyRecv = new PublicKey(pvKeyRecv);
 
-        Transaction tx = new Transaction();
-        tx.setNonce(BigInteger.ZERO);
-        //2 ERDs
-        tx.setValue(BigInteger.valueOf(10).pow(8).multiply(BigInteger.valueOf(2)));
-        tx.setSendAddress(Util.getAddressFromPublicKey(pbKeySender.getValue()));
-        tx.setReceiverAddress(Util.getAddressFromPublicKey(pbKeyRecv.getValue()));
+        Transaction tx = transactionService.generateTransaction(pbKeySender, pbKeyRecv, (long)Math.pow(10,8) * 2, 0);
         tx.setPubKey(Util.byteArrayToHexString(pbKeySender.getValue()));
 
         transactionService.signTransaction(tx, pvKeySender.getValue());
@@ -120,6 +118,20 @@ public class AccountStateTest {
         } catch (Exception ex) {
             TestCase.assertEquals("NOK", ex.getMessage());
         }
+    }
+
+    @Test
+    public void testMintingAccountState() throws Exception{
+
+        AccountStateService accountStateService = AppServiceProvider.getAccountStateService();
+
+        AccountsContext context = new AccountsContext();
+        context.setDatabasePath("testAccounts");
+        Accounts accounts = new Accounts(context);
+
+        AccountState asRecv = accountStateService.getAccountState(new AccountAddress(Util.PUBLIC_KEY_MINTING.getValue()), accounts);
+        assertNotEquals( "Not expected null ", null, asRecv);
+        assertEquals( "Expected balance " + Util.VALUE_MINTING.toString(10), Util.VALUE_MINTING, asRecv.getBalance());
     }
 
 //    @Test
