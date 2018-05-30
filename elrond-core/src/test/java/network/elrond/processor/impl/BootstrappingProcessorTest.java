@@ -39,6 +39,10 @@ public class BootstrappingProcessorTest {
         context.setBootstrapType(BootstrapType.START_FROM_SCRATCH);
         context.setStorageBasePath("test");
 
+        PrivateKey pvKeyRandom = new PrivateKey("RANDOM STUFF THAT'S JUST RANDOM");
+        context.setStrAddressMint(Util.getAddressFromPublicKey(new PublicKey(pvKeyRandom).getValue()));
+        context.setValueMint(BigInteger.TEN);
+
         Application app  = new Application(context);
         AppState state = app.getState();
         state.setStillRunning(false);

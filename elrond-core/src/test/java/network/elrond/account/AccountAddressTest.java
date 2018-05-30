@@ -8,10 +8,10 @@ public class AccountAddressTest {
 
     @Test
     public void testAccountAddress(){
-        byte[] addrBytes = Util.getAddressFromPublicKeyAsByteArray(Util.PUBLIC_KEY_MINTING.getValue());
+        byte[] addrBytes = Util.PUBLIC_KEY_MINTING.getValue();
 
         TestCase.assertEquals(Util.getAddressFromPublicKey(Util.PUBLIC_KEY_MINTING.getValue()),
-                "0x" + Util.byteArrayToHexString(addrBytes));
+                Util.byteArrayToHexString(addrBytes));
 
         System.out.println(Util.getAddressFromPublicKey(Util.PUBLIC_KEY_MINTING.getValue()));
 

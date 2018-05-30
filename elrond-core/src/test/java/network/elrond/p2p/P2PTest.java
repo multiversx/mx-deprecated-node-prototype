@@ -20,7 +20,7 @@ public class P2PTest {
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(4000);
         context.setPort(4001 /*+ new Random().nextInt(10000)*/);
-        context.setPeerId(0);
+        context.setNodeName("AAA");
 
 
         Application app = new Application(context);
@@ -41,13 +41,7 @@ public class P2PTest {
         String strGet2 = p2PObjectService.get(state.getConnection(), "AAAA").toString();
         TestCase.assertEquals("\"string2\"", strGet2);
 
-        @SuppressWarnings("resource")
-        Scanner input = new Scanner(System.in);
-        while (input.hasNext()) {
-            if (input.nextLine().equals("exit")) {
-                app.stop();
-            }
-        }
+        app.stop();
     }
 
     public void testOverrideWriter() throws Exception {
@@ -55,7 +49,7 @@ public class P2PTest {
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(4000);
         context.setPort(4000);
-        context.setPeerId(1);
+        context.setNodeName("BBB");
         context.setStorageBasePath("producer");
 
 
@@ -85,7 +79,7 @@ public class P2PTest {
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(4000);
         context.setPort(4001 /*+ new Random().nextInt(10000)*/);
-        context.setPeerId(0);
+        context.setNodeName("AAA");
         context.setStorageBasePath("consumer");
 
         Application app = new Application(context);

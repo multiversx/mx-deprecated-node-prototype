@@ -51,7 +51,7 @@ public class AccountStateTest {
         //execute a single transaction
 
         AccountsContext context = new AccountsContext();
-        context.setDatabasePath("test");
+        context.setDatabasePath(null); //memory
         Accounts accounts = new Accounts(context);
 
 
@@ -130,10 +130,6 @@ public class AccountStateTest {
         Accounts accounts = new Accounts(context);
 
         AccountState asRecv = accountStateService.getAccountState(new AccountAddress(Util.PUBLIC_KEY_MINTING.getValue()), accounts);
-        assertNotEquals( "Not expected null ", null, asRecv);
-        assertEquals( "Expected balance " + Util.VALUE_MINTING.toString(10), Util.VALUE_MINTING, asRecv.getBalance());
-
-        asRecv = accountStateService.getAccountState(AccountAddress.fromHexaString(Util.getAddressFromPublicKey(Util.PUBLIC_KEY_MINTING.getValue())), accounts);
         assertNotEquals( "Not expected null ", null, asRecv);
         assertEquals( "Expected balance " + Util.VALUE_MINTING.toString(10), Util.VALUE_MINTING, asRecv.getBalance());
     }

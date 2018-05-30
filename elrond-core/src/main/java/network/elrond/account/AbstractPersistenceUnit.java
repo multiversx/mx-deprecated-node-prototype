@@ -23,9 +23,11 @@ public abstract class AbstractPersistenceUnit<K, V> {
     public AbstractPersistenceUnit(String databasePath) throws IOException {
         this.databasePath = databasePath;
         if (databasePath == null || databasePath.isEmpty()) {
-            throw new IllegalArgumentException("databasePath cannot be null");
+            this.database = new MockDB();
+
+        }else {
+            this.database = initDatabase(databasePath);
         }
-        this.database = initDatabase(databasePath);
     }
 
     protected DB initDatabase(String databasePath) throws IOException {

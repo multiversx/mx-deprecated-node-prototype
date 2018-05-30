@@ -15,7 +15,7 @@ public class AppContext implements Serializable {
     private String storageBasePath = "main";
 
     private BootstrapType bootstrapType = BootstrapType.START_FROM_SCRATCH;
-    private String strAddressMint = "0x0000000000000000000000000000000000000000";
+    private String strAddressMint = "000000000000000000000000000000000000000000000000000000000000000000";
     private BigInteger valueMint = BigInteger.ZERO;
 
     public String getNodeName() {

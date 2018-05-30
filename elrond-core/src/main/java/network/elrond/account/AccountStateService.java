@@ -1,6 +1,8 @@
 package network.elrond.account;
 
-import network.elrond.data.GenesisBlock;
+import network.elrond.data.Block;
+import network.elrond.data.Transaction;
+import org.mapdb.Fun;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -23,5 +25,5 @@ public interface AccountStateService {
 
     void initialMintingToKnownAddress(Accounts accounts);
 
-    GenesisBlock generateGenesisBlock(String strAddressMint, BigInteger startValue, AccountsContext accountsContextTemporary);
+    Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue, AccountsContext accountsContextTemporary);
 }

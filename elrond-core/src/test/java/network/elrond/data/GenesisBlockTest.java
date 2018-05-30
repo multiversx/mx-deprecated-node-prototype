@@ -7,6 +7,7 @@ import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
+import org.mapdb.Fun;
 
 import java.math.BigInteger;
 
@@ -31,9 +32,9 @@ public class GenesisBlockTest {
         AccountState acsMintTest = accountStateService.getAccountState(acMint, accounts);
         TestCase.assertEquals("Expected " + Util.VALUE_MINTING, Util.VALUE_MINTING, acsMintTest.getBalance());
 
-        GenesisBlock gb = accountStateService.generateGenesisBlock(acRecv.toAddressString(), value, accTemp);
+        Fun.Tuple2<Block, Transaction> genesisData = accountStateService.generateGenesisBlock(Util.byteArrayToHexString(pbk1.getValue()), value, accTemp);
 
-        TestCase.assertNotNull("Not expecting null for GenesisBlock ", gb);
+        TestCase.assertNotNull("Not expecting null for GenesisData ", genesisData);
 
         accounts = new Accounts(accTemp);
         AccountState acsMint = accountStateService.getAccountState(acMint, accounts);
@@ -42,7 +43,7 @@ public class GenesisBlockTest {
         TestCase.assertEquals("Expecting null ", null, acsRecv);
         TestCase.assertEquals("Expecting " + Util.VALUE_MINTING, Util.VALUE_MINTING, acsMint.getBalance());
 
-        executionService.processTransaction(gb.getTransactionMint(), accounts);
+        executionService.processTransaction(genesisData.b, accounts);
 
         acsMint = accountStateService.getAccountState(acMint, accounts);
         acsRecv = accountStateService.getAccountState(acRecv, accounts);

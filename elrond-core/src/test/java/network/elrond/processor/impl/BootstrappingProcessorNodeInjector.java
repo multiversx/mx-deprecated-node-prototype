@@ -28,7 +28,7 @@ public class BootstrappingProcessorNodeInjector {
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(4000);
         context.setPort(4000 /*+ new Random().nextInt(10000)*/);
-        context.setPeerId(0);
+        context.setNodeName("AAA");
         context.setBootstrapType(BootstrapType.START_FROM_SCRATCH);
         context.setStorageBasePath("test");
 

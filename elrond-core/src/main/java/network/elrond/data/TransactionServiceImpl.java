@@ -69,6 +69,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         tx.setSignature(sig.getSignature());
         tx.setChallenge(sig.getChallenge());
+        tx.setPubKey(Util.byteArrayToHexString(pbkey.getValue()));
     }
 
     /**
@@ -85,8 +86,8 @@ public class TransactionServiceImpl implements TransactionService {
                 (tx.getChallenge() == null) ||
                 (tx.getSignature().length == 0) ||
                 (tx.getChallenge().length == 0) ||
-                (tx.getSendAddress().length() != Util.MAX_LEN_ADDR) ||
-                (tx.getReceiverAddress().length() != Util.MAX_LEN_ADDR) ||
+                (tx.getSendAddress().length() != Util.MAX_LEN_ADDR * 2) ||
+                (tx.getReceiverAddress().length() != Util.MAX_LEN_ADDR * 2) ||
                 (tx.getPubKey().length() != Util.MAX_LEN_PUB_KEY * 2)
                 ) {
             return (false);
@@ -135,13 +136,17 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction generateTransaction(PublicKey sender, PublicKey receiver, long value, long nonce) {
+        return generateTransaction(sender, receiver, BigInteger.valueOf(value), BigInteger.valueOf(nonce));
+    }
+
+    @Override
+    public Transaction generateTransaction(PublicKey sender, PublicKey receiver, BigInteger value, BigInteger nonce) {
         Transaction t = new Transaction(Util.getAddressFromPublicKey(sender.getValue()),
                 Util.getAddressFromPublicKey(receiver.getValue()),
-                BigInteger.valueOf(value),
-                BigInteger.valueOf(nonce));
+                value,
+                nonce);
         t.setPubKey(Util.getAddressFromPublicKey(sender.getValue()));
         return t;
     }
-
 
 }

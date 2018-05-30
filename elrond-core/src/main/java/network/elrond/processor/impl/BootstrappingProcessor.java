@@ -1,12 +1,14 @@
 package network.elrond.processor.impl;
 
 import network.elrond.Application;
+import network.elrond.account.AccountsContext;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.blockchain.SettingsType;
 import network.elrond.core.Util;
+import network.elrond.crypto.PublicKey;
 import network.elrond.data.*;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PObjectService;
@@ -14,6 +16,7 @@ import network.elrond.processor.AppTask;
 import network.elrond.processor.AppTasks;
 import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
+import org.mapdb.Fun;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +89,7 @@ public class BootstrappingProcessor implements AppTask {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                continue;
+
             }
         });
         threadProcess.start();
@@ -96,17 +99,25 @@ public class BootstrappingProcessor implements AppTask {
         ExecutionReport result = new ExecutionReport();
         AppState state = application.getState();
 
+        AppContext context = application.getContext();
+
+        AccountsContext accountsContext = new AccountsContext();
+
+
         result.combine(new ExecutionReport().ok("Start from scratch..."));
-        GenesisBlock gb = new GenesisBlock(context.getStrAddressMint(), context.getValueMint());
-        String strHashGB = new String(Base64.encode(serializationService.getHash(gb, true)));
+        Fun.Tuple2<Block, Transaction> genesisData = AppServiceProvider.getAccountStateService().generateGenesisBlock(context.getStrAddressMint(), context.getValueMint(),
+                accountsContext);
+        String strHashGB = new String(Base64.encode(serializationService.getHash(genesisData.a)));
+        String strHashTx = new String(Base64.decode(serializationService.getHash(genesisData.b)));
 
         //put locally not broadcasting it
         try {
-            result.combine(putBlockInBlockchain(gb, strHashGB, state));
+            result.combine(putBlockInBlockchain(genesisData.a, strHashGB, state));
+            result.combine(putTransactionInBlockchain(genesisData.b, strHashTx, state));
             bootstrapService.setMaxBlockSizeNetwork(BigInteger.ZERO, state.getConnection());
             bootstrapService.setMaxBlockSizeLocal(state.getBlockchain(), BigInteger.ZERO);
 
-            ExecutionReport exExecuteBlock = AppServiceProvider.getExecutionService().processBlock(gb, state.getAccounts(), state.getBlockchain());
+            ExecutionReport exExecuteBlock = AppServiceProvider.getExecutionService().processBlock(genesisData.a, state.getAccounts(), state.getBlockchain());
             result.combine(exExecuteBlock);
 
             if (result.isOk()){
@@ -123,8 +134,6 @@ public class BootstrappingProcessor implements AppTask {
     ExecutionReport bootstrap(Application application, BigInteger maxBlkHeightLocal, BigInteger maxBlkHeightNetw) {
         ExecutionReport result = new ExecutionReport();
         AppState state = application.getState();
-
-
 
         result.combine(new ExecutionReport().ok("Bootstrapping... [local height: " + maxBlkHeightLocal.toString(10) + " > network height: " +
                 maxBlkHeightNetw.toString(10) + "..."));
@@ -219,15 +228,28 @@ public class BootstrappingProcessor implements AppTask {
         return(result);
     }
 
-    ExecutionReport putBlockInBlockchain(Block blk, String strBlockHash, AppState state) {
+    ExecutionReport putBlockInBlockchain(Block blk, String blockHash, AppState state) {
         ExecutionReport result = new ExecutionReport();
 
         try {
-            appPersistanceService.put(strBlockHash, blk, state.getBlockchain(), BlockchainUnitType.BLOCK);
-            bootstrapService.setBlockHashFromHeightLocal(state.getBlockchain(), blk.getNonce(), strBlockHash);
-            appPersistanceService.put(blk.getNonce(), strBlockHash, state.getBlockchain(), BlockchainUnitType.BLOCK_INDEX);
+            appPersistanceService.put(blockHash, blk, state.getBlockchain(), BlockchainUnitType.BLOCK);
+            bootstrapService.setBlockHashFromHeightLocal(state.getBlockchain(), blk.getNonce(), blockHash);
+            appPersistanceService.put(blk.getNonce(), blockHash, state.getBlockchain(), BlockchainUnitType.BLOCK_INDEX);
             bootstrapService.setMaxBlockSizeLocal(state.getBlockchain(), blk.getNonce());
-            result.combine(new ExecutionReport().ok("Put block in blockchain with hash: " + strBlockHash));
+            result.combine(new ExecutionReport().ok("Put block in blockchain with hash: " + blockHash));
+        } catch (Exception ex) {
+            result.combine(new ExecutionReport().ko(ex));
+        }
+
+        return (result);
+    }
+
+    ExecutionReport putTransactionInBlockchain(Transaction transaction, String transactionHash, AppState state) {
+        ExecutionReport result = new ExecutionReport();
+
+        try {
+            appPersistanceService.put(transactionHash, transaction, state.getBlockchain(), BlockchainUnitType.TRANSACTION);
+            result.combine(new ExecutionReport().ok("Put transaction in blockchain with hash: " + transactionHash));
         } catch (Exception ex) {
             result.combine(new ExecutionReport().ko(ex));
         }
