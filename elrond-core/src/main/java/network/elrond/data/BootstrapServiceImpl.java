@@ -41,7 +41,7 @@ public class BootstrapServiceImpl implements BootstrapService {
         }
 
         if (locationType == LocationType.NETWORK){
-            BigInteger maxHeight = p2PObjectService.getJSONdecoded(SettingsType.MAX_BLOCK_HEIGHT.toString(), structure.getConnection(), BigInteger.class);
+            BigInteger maxHeight = p2PObjectService.getJsonDecoded(SettingsType.MAX_BLOCK_HEIGHT.toString(), structure.getConnection(), BigInteger.class);
 
             if (maxHeight == null){
                 return(Util.BIG_INT_MIN_ONE);
@@ -70,7 +70,7 @@ public class BootstrapServiceImpl implements BootstrapService {
             BigInteger maxHeight = getMaxBlockSize(LocationType.NETWORK, structure);
 
             if ((maxHeight == null) || (height.compareTo(maxHeight)) > 0) {
-                p2PObjectService.putJSONencoded(height, SettingsType.MAX_BLOCK_HEIGHT.toString(), structure.getConnection());
+                p2PObjectService.putJsonEncoded(height, SettingsType.MAX_BLOCK_HEIGHT.toString(), structure.getConnection());
             }
         }
     }
@@ -86,7 +86,7 @@ public class BootstrapServiceImpl implements BootstrapService {
         }
 
         if (locationType == LocationType.NETWORK){
-            return(p2PObjectService.getJSONdecoded(getHeightBlockHashString(blockHeight), structure.getConnection(), String.class));
+            return(p2PObjectService.getJsonDecoded(getHeightBlockHashString(blockHeight), structure.getConnection(), String.class));
         }
 
         throw new Exception("Unimplemented location type: " + locationType.toString() + "!");
@@ -101,7 +101,7 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         if ((locationType.getIndex() & 2) == 2){
             //network
-            p2PObjectService.putJSONencoded(hash, getHeightBlockHashString(blockHeight), structure.getConnection());
+            p2PObjectService.putJsonEncoded(hash, getHeightBlockHashString(blockHeight), structure.getConnection());
         }
     }
 
@@ -172,7 +172,7 @@ public class BootstrapServiceImpl implements BootstrapService {
             }
 
             try {
-                blk = p2PObjectService.getJSONdecoded(strHashBlock, state.getConnection(), Block.class);
+                blk = p2PObjectService.getJsonDecoded(strHashBlock, state.getConnection(), Block.class);
             } catch (Exception ex) {
                 result.ko(ex);
                 return (result);
@@ -219,7 +219,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                 //put block
                 String strHashBlk = getBlockHashFromHeight(LocationType.NETWORK, counter, state.getBlockchain());
                 Block blk = blockchainService.get(strHashBlk, state.getBlockchain(), BlockchainUnitType.BLOCK);
-                p2PObjectService.putJSONencoded(blk, strHashBlk, state.getConnection());
+                p2PObjectService.putJsonEncoded(blk, strHashBlk, state.getConnection());
 
                 //put pair block_height - block hash
                 setBlockHashWithHeight(LocationType.NETWORK, counter, strHashBlk, state.getBlockchain());
@@ -230,7 +230,7 @@ public class BootstrapServiceImpl implements BootstrapService {
 
                     Transaction tx = blockchainService.get(strHashTx, state.getBlockchain(), BlockchainUnitType.TRANSACTION);
 
-                    p2PObjectService.putJSONencoded(tx, strHashTx, state.getConnection());
+                    p2PObjectService.putJsonEncoded(tx, strHashTx, state.getConnection());
                 }
 
                 //put settings max_block_height

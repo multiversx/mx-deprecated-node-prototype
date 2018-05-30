@@ -67,8 +67,9 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
                 String hash = AppServiceProvider.getSerializationService().getHashString(block);
                 AppServiceProvider.getBlockchainService().put(hash, block, blockchain, BlockchainUnitType.BLOCK);
 
-                AppServiceProvider.getBootstrapService().setMaxBlockSizeNetwork(block.getNonce(), state.getConnection());
-                AppServiceProvider.getBootstrapService().setMaxBlockSizeLocal(state.getBlockchain(), block.getNonce());
+                //TO DO JLS
+                //AppServiceProvider.getBootstrapService().setMaxBlockSizeNetwork(block.getNonce(), state.getConnection());
+                //AppServiceProvider.getBootstrapService().setMaxBlockSizeLocal(state.getBlockchain(), block.getNonce());
             }
 
 
