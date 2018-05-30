@@ -1,14 +1,5 @@
 package network.elrond.account;
 
-import junit.framework.TestCase;
-import network.elrond.core.Util;
-import network.elrond.crypto.PrivateKey;
-import network.elrond.crypto.PublicKey;
-import network.elrond.data.SerializationService;
-import network.elrond.data.Transaction;
-import network.elrond.data.ExecutionService;
-import network.elrond.data.TransactionService;
-import network.elrond.service.AppServiceProvider;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -16,16 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-
 public class AccountStateTest {
-
-
-    TransactionService transactionService = AppServiceProvider.getTransactionService();
-    AccountStateService accountStateService = AppServiceProvider.getAccountStateService();
-    SerializationService serializationService = AppServiceProvider.getSerializationService();
-    ExecutionService transactionExecutionService = AppServiceProvider.getExecutionService();
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -36,111 +18,176 @@ public class AccountStateTest {
         Assert.assertEquals(BigInteger.ZERO, accountState.getNonce());
     }
 
-    @Test
-    public void testAccountStatesSerDeser() {
-        //AccountState->JSON->AccountState
+    @Test(expected = IllegalArgumentException.class)
+    public void testAccountStateConstructorWithNegativeBalanceShouldThrowException(){
+        AccountState accountState = new AccountState(BigInteger.ZERO, BigInteger.valueOf(-1));
+        Assert.fail();
+    }
 
+    @Test
+    public void testAccountStateConstructorWithCorrectBalance(){
+        AccountState accountState = new AccountState(BigInteger.ZERO, BigInteger.valueOf(2));
+        Assert.assertTrue(accountState.getBalance().longValue() == 2);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testAccountStateConstructorWithNegativeNonceShouldThrowException(){
+        AccountState accountState = new AccountState(BigInteger.valueOf(-1), BigInteger.valueOf(2));
+        Assert.fail();
+    }
+
+    @Test
+    public void testAccountStateConstructorWithCorrectNonce(){
+        AccountState accountState = new AccountState(BigInteger.valueOf(1), BigInteger.valueOf(2));
+        Assert.assertTrue(accountState.getNonce().longValue() == 1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testAccountStateCopyConstructorWithNullShouldThrowException(){
+        AccountState copiedState = new AccountState(null);
+        Assert.fail();
+    }
+
+    @Test
+    public void testAccountStateCopyConstructorWithCorrectValues(){
+        AccountState accountState = new AccountState(BigInteger.valueOf(1), BigInteger.valueOf(2));
+        AccountState copiedState = new AccountState(accountState);
+
+        Assert.assertTrue(copiedState.getBalance().longValue() == 2);
+        Assert.assertTrue(copiedState.getNonce().longValue() == 1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testAccountStateSetNonceNegativeShouldThrowException(){
         AccountState accountState = new AccountState();
-        accountState.setBalance(BigInteger.valueOf(1));
-        accountState.setNonce(BigInteger.valueOf(3));
-
-
-        String strTest = serializationService.encodeJSON(accountState);
-        logger.info(strTest);
-
-        AccountState accountState1 = serializationService.decodeJSON(strTest, AccountState.class);
-        logger.info(serializationService.encodeJSON(accountState1));
-
-        TestCase.assertEquals(strTest, serializationService.encodeJSON(accountState1));
+        accountState.setNonce(BigInteger.valueOf(-1));
     }
 
-    @Test
-    public void testAccountStatesExecute1Tx() throws Exception {
-        //execute a single transaction
-
-        AccountsContext context = new AccountsContext();
-        context.setDatabasePath(null); //memory
-        Accounts accounts = new Accounts(context);
-
-
-        TestCase.assertFalse(transactionExecutionService.processTransaction(null, accounts).isOk());
-
-        PrivateKey pvKeySender = new PrivateKey();
-        PublicKey pbKeySender = new PublicKey(pvKeySender);
-
-        PrivateKey pvKeyRecv = new PrivateKey();
-        PublicKey pbKeyRecv = new PublicKey(pvKeyRecv);
-
-        Transaction tx = transactionService.generateTransaction(pbKeySender, pbKeyRecv, (long)Math.pow(10,8) * 2, 0);
-        tx.setPubKey(Util.byteArrayToHexString(pbKeySender.getValue()));
-
-        transactionService.signTransaction(tx, pvKeySender.getValue());
-
-        tx.setNonce(BigInteger.ONE);
-
-        //Test tampered tx
-
-        TestCase.assertFalse(transactionExecutionService.processTransaction(tx, accounts).isOk());
-
-
-        tx.setNonce(BigInteger.ZERO);
-        transactionService.signTransaction(tx, pvKeySender.getValue());
-        //test balance less than value
-        TestCase.assertFalse(transactionExecutionService.processTransaction(tx, accounts).isOk());
-
-
-        //Test tx nonce mismatch
-
-        AccountState acsSender = accountStateService.getOrCreateAccountState(AccountAddress.fromPublicKey(pbKeySender), accounts);
-
-        //mint 100 ERDs
-        acsSender.setBalance(BigInteger.TEN.pow(10));
-        accountStateService.setAccountState(tx.getSendAccountAddress(), acsSender, accounts); // PMS
-
-        tx.setNonce(BigInteger.ONE);
-        transactionService.signTransaction(tx, pvKeySender.getValue());
-        TestCase.assertFalse(transactionExecutionService.processTransaction(tx, accounts).isOk());
-
-
-        //output 2 accounts
-        tx.setNonce(BigInteger.ZERO);
-        transactionService.signTransaction(tx, pvKeySender.getValue());
-        try {
-
-            TestCase.assertTrue(transactionExecutionService.processTransaction(tx, accounts).isOk());
-
-            AccountState senderAccount = accountStateService.getAccountState(tx.getSendAccountAddress(), accounts);
-            AccountState reciverAccount = accountStateService.getAccountState(tx.getReceiverAccountAddress(), accounts);
-
-
-            logger.info(AppServiceProvider.getSerializationService().encodeJSON(senderAccount));
-
-            logger.info(AppServiceProvider.getSerializationService().encodeJSON(reciverAccount));
-
-            //sender
-            TestCase.assertEquals(BigInteger.TEN.pow(8).multiply(BigInteger.valueOf(98)), senderAccount.getBalance());
-            TestCase.assertEquals(BigInteger.ONE, senderAccount.getNonce());
-            //receiver
-            TestCase.assertEquals(BigInteger.TEN.pow(8).multiply(BigInteger.valueOf(2)), reciverAccount.getBalance());
-
-        } catch (Exception ex) {
-            TestCase.assertEquals("NOK", ex.getMessage());
-        }
+    @Test(expected = IllegalArgumentException.class)
+    public void testAccountStateSetNonceNullShouldThrowException(){
+        AccountState accountState = new AccountState();
+        accountState.setNonce(null);
     }
 
-    @Test
-    public void testMintingAccountState() throws Exception{
-
-        AccountStateService accountStateService = AppServiceProvider.getAccountStateService();
-
-        AccountsContext context = new AccountsContext();
-        context.setDatabasePath("testAccounts");
-        Accounts accounts = new Accounts(context);
-
-        AccountState asRecv = accountStateService.getAccountState(new AccountAddress(Util.PUBLIC_KEY_MINTING.getValue()), accounts);
-        assertNotEquals( "Not expected null ", null, asRecv);
-        assertEquals( "Expected balance " + Util.VALUE_MINTING.toString(10), Util.VALUE_MINTING, asRecv.getBalance());
+    @Test(expected = IllegalArgumentException.class)
+    public void testAccountStateSetBalanceNegativeShouldThrowException(){
+        AccountState accountState = new AccountState();
+        accountState.setBalance(BigInteger.valueOf(-1));
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testAccountStateSetBalanceNullShouldThrowException(){
+        AccountState accountState = new AccountState();
+        accountState.setBalance(null);
+    }
+
+
+
+//    @Test
+//    public void testAccountStatesSerDeser() {
+//        //AccountState->JSON->AccountState
+//
+//        AccountState accountState = new AccountState();
+//        accountState.setBalance(BigInteger.valueOf(1));
+//        accountState.setNonce(BigInteger.valueOf(3));
+//
+//
+//        String strTest = serializationService.encodeJSON(accountState);
+//        logger.info(strTest);
+//
+//        AccountState accountState1 = serializationService.decodeJSON(strTest, AccountState.class);
+//        logger.info(serializationService.encodeJSON(accountState1));
+//
+//        TestCase.assertEquals(strTest, serializationService.encodeJSON(accountState1));
+//    }
+//
+//    @Test
+//    public void testAccountStatesExecute1Tx() throws Exception {
+//        //execute a single transaction
+//
+//        AccountsContext context = new AccountsContext();
+//        context.setDatabasePath(null); //memory
+//        Accounts accounts = new Accounts(context);
+//
+//
+//        TestCase.assertFalse(transactionExecutionService.processTransaction(null, accounts).isOk());
+//
+//        PrivateKey pvKeySender = new PrivateKey();
+//        PublicKey pbKeySender = new PublicKey(pvKeySender);
+//
+//        PrivateKey pvKeyRecv = new PrivateKey();
+//        PublicKey pbKeyRecv = new PublicKey(pvKeyRecv);
+//
+//        Transaction tx = transactionService.generateTransaction(pbKeySender, pbKeyRecv, (long)Math.pow(10,8) * 2, 0);
+//        tx.setPubKey(Util.byteArrayToHexString(pbKeySender.getValue()));
+//
+//        transactionService.signTransaction(tx, pvKeySender.getValue());
+//
+//        tx.setNonce(BigInteger.ONE);
+//
+//        //Test tampered tx
+//
+//        TestCase.assertFalse(transactionExecutionService.processTransaction(tx, accounts).isOk());
+//
+//
+//        tx.setNonce(BigInteger.ZERO);
+//        transactionService.signTransaction(tx, pvKeySender.getValue());
+//        //test balance less than value
+//        TestCase.assertFalse(transactionExecutionService.processTransaction(tx, accounts).isOk());
+//
+//
+//        //Test tx nonce mismatch
+//
+//        AccountState acsSender = accountStateService.getOrCreateAccountState(AccountAddress.fromPublicKey(pbKeySender), accounts);
+//
+//        //mint 100 ERDs
+//        acsSender.setBalance(BigInteger.TEN.pow(10));
+//        accountStateService.setAccountState(tx.getSendAccountAddress(), acsSender, accounts); // PMS
+//
+//        tx.setNonce(BigInteger.ONE);
+//        transactionService.signTransaction(tx, pvKeySender.getValue());
+//        TestCase.assertFalse(transactionExecutionService.processTransaction(tx, accounts).isOk());
+//
+//
+//        //output 2 accounts
+//        tx.setNonce(BigInteger.ZERO);
+//        transactionService.signTransaction(tx, pvKeySender.getValue());
+//        try {
+//
+//            TestCase.assertTrue(transactionExecutionService.processTransaction(tx, accounts).isOk());
+//
+//            AccountState senderAccount = accountStateService.getAccountState(tx.getSendAccountAddress(), accounts);
+//            AccountState reciverAccount = accountStateService.getAccountState(tx.getReceiverAccountAddress(), accounts);
+//
+//
+//            logger.info(AppServiceProvider.getSerializationService().encodeJSON(senderAccount));
+//
+//            logger.info(AppServiceProvider.getSerializationService().encodeJSON(reciverAccount));
+//
+//            //sender
+//            TestCase.assertEquals(BigInteger.TEN.pow(8).multiply(BigInteger.valueOf(98)), senderAccount.getBalance());
+//            TestCase.assertEquals(BigInteger.ONE, senderAccount.getNonce());
+//            //receiver
+//            TestCase.assertEquals(BigInteger.TEN.pow(8).multiply(BigInteger.valueOf(2)), reciverAccount.getBalance());
+//
+//        } catch (Exception ex) {
+//            TestCase.assertEquals("NOK", ex.getMessage());
+//        }
+//    }
+//
+//    @Test
+//    public void testMintingAccountState() throws Exception{
+//
+//        AccountStateService accountStateService = AppServiceProvider.getAccountStateService();
+//
+//        AccountsContext context = new AccountsContext();
+//        context.setDatabasePath("testAccounts");
+//        Accounts accounts = new Accounts(context);
+//
+//        AccountState asRecv = accountStateService.getAccountState(new AccountAddress(Util.PUBLIC_KEY_MINTING.getValue()), accounts);
+//        assertNotEquals( "Not expected null ", null, asRecv);
+//        assertEquals( "Expected balance " + Util.VALUE_MINTING.toString(10), Util.VALUE_MINTING, asRecv.getBalance());
+//    }
 
 //    @Test
 //    public void testAccountStatesExecuteAccTxs() {
