@@ -80,6 +80,18 @@ public class TransactionTest {
         Assert.fail();
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testValueNullShouldThrowException(){
+        Transaction tx = new Transaction(sendAddress, recvAddress, null, nonce);
+        Assert.fail();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNonceNullZeroShouldThrowException(){
+        Transaction tx = new Transaction(sendAddress, recvAddress, value, null);
+        Assert.fail();
+    }
+
     @Test
     public void testTransactionSerialization(){
         Transaction tx = new Transaction(sendAddress, recvAddress, value, nonce);

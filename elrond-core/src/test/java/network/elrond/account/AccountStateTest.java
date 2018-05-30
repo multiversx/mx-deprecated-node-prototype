@@ -81,6 +81,19 @@ public class AccountStateTest {
         accountState.setBalance(null);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testAccountStateAddToBalanceNullShouldThrowException(){
+        AccountState accountState = new AccountState();
+        accountState.addToBalance(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testAccountStateAddToBalanceNegativeNumberBiggerThanBalanceShouldThrowException(){
+        AccountState accountState = new AccountState();
+        accountState.addToBalance(BigInteger.valueOf(-2));
+
+    }
+
 
 
 //    @Test

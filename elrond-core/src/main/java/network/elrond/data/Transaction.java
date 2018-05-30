@@ -69,11 +69,11 @@ public class Transaction{
             throw new IllegalArgumentException("RecvAddress cannot be null");
         }
 
-        if(value.compareTo(BigInteger.ZERO) < 0){
+        if(value == null || value.compareTo(BigInteger.ZERO) < 0){
             throw new IllegalArgumentException(("Value cannot be lower than zero"));
         }
 
-        if(nonce.compareTo(BigInteger.ZERO) < 0){
+        if(nonce == null || nonce.compareTo(BigInteger.ZERO) < 0){
             throw new IllegalArgumentException(("Nonce cannot be lower than zero"));
         }
 
