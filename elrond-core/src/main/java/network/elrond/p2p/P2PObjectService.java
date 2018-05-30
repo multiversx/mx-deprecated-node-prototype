@@ -10,7 +10,7 @@ public interface P2PObjectService {
 
     FuturePut put(P2PConnection connection, String key, Object value) throws IOException;
 
-    void putJSONencoded(Object object, String hash, P2PConnection connection) throws IOException;
+    void putJsonEncoded(Object object, String hash, P2PConnection connection) throws IOException;
 
-    <T> T getJSONdecoded(String hash, P2PConnection connection, Class<T> clazz) throws IOException, ClassNotFoundException;
+    <T> T getJsonDecoded(String hash, P2PConnection connection, Class<T> clazz) throws IOException, ClassNotFoundException;
 }

@@ -14,14 +14,11 @@ import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.*;
 import network.elrond.service.AppServiceProvider;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class BootstrappingProcessorTest {
     SerializationService serializationService = AppServiceProvider.getSerializationService();
@@ -92,14 +89,14 @@ public class BootstrappingProcessorTest {
         transactionService.signTransaction(trx1, pvk1.getValue());
 
         //put tx on wire
-        AppServiceProvider.getP2PObjectService().putJSONencoded(trx1, serializationService.getHashString(trx1), state.getConnection());
+        AppServiceProvider.getP2PObjectService().putJsonEncoded(trx1, serializationService.getHashString(trx1), state.getConnection());
 
         List<byte[]> listTxHash = new ArrayList<>();
         listTxHash.add(AppServiceProvider.getSerializationService().getHash(trx1));
         blk1.setListTXHashes(listTxHash);
 
         //put block on wire
-        AppServiceProvider.getP2PObjectService().putJSONencoded(blk1, serializationService.getHashString(blk1), state.getConnection());
+        AppServiceProvider.getP2PObjectService().putJsonEncoded(blk1, serializationService.getHashString(blk1), state.getConnection());
 
         //put block hash height and block height on wire
         bootstrapService.setBlockHashWithHeight(LocationType.NETWORK, blk1.getNonce(), serializationService.getHashString(blk1), state.getBlockchain());
