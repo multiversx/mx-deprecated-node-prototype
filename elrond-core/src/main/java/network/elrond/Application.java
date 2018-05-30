@@ -15,6 +15,9 @@ public class Application implements Serializable {
     private AppState state = new AppState();
 
     public Application(AppContext context) {
+        if(context == null){
+            throw new IllegalArgumentException("Context cannot be null");
+        }
         this.context = context;
     }
 
@@ -23,6 +26,9 @@ public class Application implements Serializable {
     }
 
     public void setContext(AppContext context) {
+        if(context == null){
+            throw new IllegalArgumentException("Context cannot be null");
+        }
         this.context = context;
     }
 
@@ -31,6 +37,9 @@ public class Application implements Serializable {
     }
 
     public void setState(AppState state) {
+        if(state == null){
+            throw new IllegalArgumentException("State cannot be null");
+        }
         this.state = state;
     }
 
