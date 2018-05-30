@@ -29,15 +29,15 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
     @Override
     protected void process(ArrayBlockingQueue<String> queue, Application application) {
 
-        if (!application.getContext().isSeedNode()) {
-            return;
-        }
-
-
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+
+
+        if (!application.getContext().isSeedNode()) {
+            return;
         }
 
         AppState state = application.getState();
@@ -45,6 +45,8 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
             // Bootstrap is running
             return;
         }
+
+
 
         List<String> hashes = new ArrayList<>(queue);
         queue.clear();
@@ -62,8 +64,11 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
             ExecutionReport result = executionService.processBlock(block, accounts, blockchain);
 
             if (result.isOk()) {
-                P2PBroadcastChanel channel = state.getChanel(P2PChannelName.BLOCK);
-                AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, block);
+                String hash = AppServiceProvider.getSerializationService().getHashString(block);
+                AppServiceProvider.getBlockchainService().put(hash, block, blockchain, BlockchainUnitType.BLOCK);
+
+                AppServiceProvider.getBootstrapService().setMaxBlockSizeNetwork(block.getNonce(), state.getConnection());
+                AppServiceProvider.getBootstrapService().setMaxBlockSizeLocal(state.getBlockchain(), block.getNonce());
             }
 
 

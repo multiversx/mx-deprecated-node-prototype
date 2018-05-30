@@ -42,7 +42,7 @@ public class BootstrapServiceImpl implements BootstrapService {
     //returns max block height from network (DHT)
     public BigInteger getMaxBlockSizeNetwork(P2PConnection connection) throws IOException, ClassNotFoundException {
 
-        BigInteger maxHeight = p2PObjectService.getJSONdecoded(SettingsType.MAX_BLOCK_HEIGHT.toString(),connection, BigInteger.class);
+        BigInteger maxHeight = p2PObjectService.getJsonDecoded(SettingsType.MAX_BLOCK_HEIGHT.toString(),connection, BigInteger.class);
 
         if (maxHeight == null){
             return(Util.BIG_INT_MIN_ONE);
@@ -54,7 +54,7 @@ public class BootstrapServiceImpl implements BootstrapService {
     //sets max block height on network (DHT)
     public void setMaxBlockSizeNetwork(BigInteger blockHeight, P2PConnection connection) throws IOException{
 
-        p2PObjectService.putJSONencoded(blockHeight, SettingsType.MAX_BLOCK_HEIGHT.toString(), connection);
+        p2PObjectService.putJsonEncoded(blockHeight, SettingsType.MAX_BLOCK_HEIGHT.toString(), connection);
     }
 
     //gets the hash for the block height from local data (disk)
@@ -70,13 +70,13 @@ public class BootstrapServiceImpl implements BootstrapService {
     //gets the hash for the block height from network (DHT)
     public String getBlockHashFromHeightNetwork(BigInteger blockHeight, P2PConnection connection) throws IOException, ClassNotFoundException {
 
-        return(p2PObjectService.getJSONdecoded(getHeightBlockHashString(blockHeight), connection, String.class));
+        return(p2PObjectService.getJsonDecoded(getHeightBlockHashString(blockHeight), connection, String.class));
     }
 
     //sets the hash for a block height on network (DHT)
     public void setBlockHashFromHeightNetwork(BigInteger blockHeight, String strHash, P2PConnection connection) throws IOException {
 
-        p2PObjectService.putJSONencoded(strHash, getHeightBlockHashString(blockHeight), connection);
+        p2PObjectService.putJsonEncoded(strHash, getHeightBlockHashString(blockHeight), connection);
     }
 
     //generate block height name to search the hash

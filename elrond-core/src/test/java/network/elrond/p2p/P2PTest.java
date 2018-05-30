@@ -4,12 +4,9 @@ import junit.framework.TestCase;
 import network.elrond.Application;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
-import network.elrond.data.Transaction;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.math.BigInteger;
 import java.util.Scanner;
 
 public class P2PTest {
@@ -30,13 +27,13 @@ public class P2PTest {
 
         P2PObjectService p2PObjectService = AppServiceProvider.getP2PObjectService();
 
-        p2PObjectService.putJSONencoded("string1", "AAAA", state.getConnection());
+        p2PObjectService.putJsonEncoded("string1", "AAAA", state.getConnection());
 
         String strGet1 = p2PObjectService.get(state.getConnection(), "AAAA").toString();
 
         TestCase.assertEquals("\"string1\"", strGet1);
 
-        p2PObjectService.putJSONencoded("string2", "AAAA", state.getConnection());
+        p2PObjectService.putJsonEncoded("string2", "AAAA", state.getConnection());
 
         String strGet2 = p2PObjectService.get(state.getConnection(), "AAAA").toString();
         TestCase.assertEquals("\"string2\"", strGet2);
@@ -64,11 +61,11 @@ public class P2PTest {
         Scanner input = new Scanner(System.in);
         while (state.isStillRunning()) {
 
-            p2PObjectService.putJSONencoded("string1", "AAAA", state.getConnection());
+            p2PObjectService.putJsonEncoded("string1", "AAAA", state.getConnection());
 
             Thread.sleep(1000);
 
-            p2PObjectService.putJSONencoded("string2", "AAAA", state.getConnection());
+            p2PObjectService.putJsonEncoded("string2", "AAAA", state.getConnection());
 
             Thread.sleep(1000);
         }

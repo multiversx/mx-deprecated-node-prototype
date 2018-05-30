@@ -6,6 +6,7 @@ import network.elrond.service.AppServiceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigInteger;
 import java.util.List;
 
 public class AppBlockManager {
@@ -26,7 +27,11 @@ public class AppBlockManager {
         Block block = new Block();
         Block currentBlock = state.getCurrentBlock();
         byte[] hash = AppServiceProvider.getSerializationService().getHash(currentBlock);
+
         block.setPrevBlockHash(hash);
+        BigInteger nonce = currentBlock.getNonce().add(BigInteger.ONE);
+        block.setNonce(nonce);
+
         for (Transaction transaction : transactions) {
             boolean valid = AppServiceProvider.getTransactionService().verifyTransaction(transaction);
             if (!valid) {

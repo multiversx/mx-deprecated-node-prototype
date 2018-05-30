@@ -6,11 +6,8 @@ import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
-import network.elrond.blockchain.SettingsType;
 import network.elrond.core.Util;
-import network.elrond.crypto.PublicKey;
 import network.elrond.data.*;
-import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PObjectService;
 import network.elrond.processor.AppTask;
 import network.elrond.processor.AppTasks;
@@ -57,13 +54,13 @@ public class BootstrappingProcessor implements AppTask {
                 try {
                     maxBlkHeightNetw = bootstrapService.getMaxBlockSizeNetwork(state.getConnection());
                 } catch (Exception ex) {
-                    //ex.printStackTrace();
+                    ex.printStackTrace();
                 }
 
                 try {
                     maxBlkHeightLocal = bootstrapService.getMaxBlockSizeLocal(state.getBlockchain());
                 } catch (Exception ex) {
-                    //ex.printStackTrace();
+                    ex.printStackTrace();
                 }
 
                 ExecutionReport exReport = new ExecutionReport();
@@ -120,7 +117,7 @@ public class BootstrappingProcessor implements AppTask {
             ExecutionReport exExecuteBlock = AppServiceProvider.getExecutionService().processBlock(genesisData.a, state.getAccounts(), state.getBlockchain());
             result.combine(exExecuteBlock);
 
-            if (result.isOk()){
+            if (result.isOk()) {
                 result.combine(new ExecutionReport().ok("Start from scratch...OK!"));
             }
 
@@ -153,11 +150,11 @@ public class BootstrappingProcessor implements AppTask {
 
             if (strHashBlock == null) {
                 result.ko("Can not bootstrap! Could not find block with nonce = " + counter.toString(10) + " on DTH!");
-                return(result);
+                return (result);
             }
 
             try {
-                blk = p2PObjectService.getJSONdecoded(strHashBlock, state.getConnection(), Block.class);
+                blk = p2PObjectService.getJsonDecoded(strHashBlock, state.getConnection(), Block.class);
             } catch (Exception ex) {
                 result.ko(ex);
                 return (result);
@@ -172,25 +169,24 @@ public class BootstrappingProcessor implements AppTask {
 
             result.combine(exExecuteBlock);
 
-            if (!result.isOk()){
+            if (!result.isOk()) {
                 return (result);
             }
 
             //block successfully processed, add it to blockchain structure
             result.combine(putBlockInBlockchain(blk, strHashBlock, state));
 
-            if (!result.isOk()){
+            if (!result.isOk()) {
                 return (result);
             }
         }
 
-        return(result);
+        return (result);
     }
 
     ExecutionReport rebuildFromDisk(Application application, BigInteger maxBlkHeightLocal) {
         ExecutionReport result = new ExecutionReport();
         AppState state = application.getState();
-
 
 
         result.combine(new ExecutionReport().ok("Start bootstrapping by loading from disk..."));
@@ -203,7 +199,7 @@ public class BootstrappingProcessor implements AppTask {
                 //put block
                 String strHashBlk = bootstrapService.getBlockHashFromHeightLocal(state.getBlockchain(), counter);
                 Block blk = blockchainService.get(strHashBlk, state.getBlockchain(), BlockchainUnitType.BLOCK);
-                p2PObjectService.putJSONencoded(blk, strHashBlk, state.getConnection());
+                p2PObjectService.putJsonEncoded(blk, strHashBlk, state.getConnection());
 
                 //put pair block_height - block hash
                 bootstrapService.setBlockHashFromHeightNetwork(counter, strHashBlk, state.getConnection());
@@ -214,7 +210,7 @@ public class BootstrappingProcessor implements AppTask {
 
                     Transaction tx = blockchainService.get(strHashTx, state.getBlockchain(), BlockchainUnitType.TRANSACTION);
 
-                    p2PObjectService.putJSONencoded(tx, strHashTx, state.getConnection());
+                    p2PObjectService.putJsonEncoded(tx, strHashTx, state.getConnection());
                 }
 
                 //put settings max_block_height
@@ -225,7 +221,7 @@ public class BootstrappingProcessor implements AppTask {
             }
         }
 
-        return(result);
+        return (result);
     }
 
     ExecutionReport putBlockInBlockchain(Block blk, String blockHash, AppState state) {
