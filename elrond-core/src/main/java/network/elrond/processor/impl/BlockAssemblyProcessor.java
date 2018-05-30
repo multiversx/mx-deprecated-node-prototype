@@ -35,11 +35,18 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
             e.printStackTrace();
         }
 
+
+        if (!application.getContext().isSeedNode()) {
+            return;
+        }
+
         AppState state = application.getState();
         if (state.isBootstrapping()) {
             // Bootstrap is running
             return;
         }
+
+
 
         List<String> hashes = new ArrayList<>(queue);
         queue.clear();
@@ -57,8 +64,12 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
             ExecutionReport result = executionService.processBlock(block, accounts, blockchain);
 
             if (result.isOk()) {
-                P2PBroadcastChanel channel = state.getChanel(P2PChannelName.BLOCK);
-                AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, block);
+                String hash = AppServiceProvider.getSerializationService().getHashString(block);
+                AppServiceProvider.getBlockchainService().put(hash, block, blockchain, BlockchainUnitType.BLOCK);
+
+                //TO DO JLS
+                //AppServiceProvider.getBootstrapService().setMaxBlockSizeNetwork(block.getNonce(), state.getConnection());
+                //AppServiceProvider.getBootstrapService().setMaxBlockSizeLocal(state.getBlockchain(), block.getNonce());
             }
 
 

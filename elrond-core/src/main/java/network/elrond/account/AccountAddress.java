@@ -13,6 +13,10 @@ public class AccountAddress implements Serializable {
         return bytes;
     }
 
+    public PublicKey getPublicKey(){
+        return  new PublicKey(bytes);
+    }
+
     public AccountAddress(byte[] bytes) {
         if(bytes == null){
             throw new IllegalArgumentException("Bytes cannot be null");
