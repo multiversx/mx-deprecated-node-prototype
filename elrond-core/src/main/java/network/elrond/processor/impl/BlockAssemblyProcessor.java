@@ -88,6 +88,7 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
 
             List<Transaction> transactions = blockchainService.getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
             Block block = AppBlockManager.instance().composeBlock(transactions, application);
+            AppBlockManager.instance().signBlock(block, application);
             ExecutionService executionService = AppServiceProvider.getExecutionService();
             ExecutionReport result = executionService.processBlock(block, accounts, blockchain);
 

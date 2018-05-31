@@ -70,10 +70,10 @@ public class ExecutionServiceImpl implements ExecutionService {
         String blockHash = serializationService.getHashString(block);
 
         // check that block is not already processed
-        if (blockchainService.contains(blockHash, blockchain, BlockchainUnitType.BLOCK)) {
-            blockExecutionReport.ko("Block already in blockchain");
-            return blockExecutionReport;
-        }
+//        if (blockchainService.contains(blockHash, blockchain, BlockchainUnitType.BLOCK)) {
+//            blockExecutionReport.ko("Block already in blockchain");
+//            return blockExecutionReport;
+//        }
 
         // check if previous block hash is in blockchain, otherwise can't add it yet
         // do the check only if nonce is not 0
