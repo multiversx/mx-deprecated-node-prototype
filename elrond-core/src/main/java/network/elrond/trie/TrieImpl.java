@@ -1,26 +1,20 @@
 package network.elrond.trie;
 
-import static java.util.Arrays.copyOfRange;
-import static network.elrond.core.ByteUtil.matchingNibbleLength;
-import static network.elrond.core.CompactEncoder.binToNibbles;
-import static network.elrond.core.CompactEncoder.packNibbles;
-import static network.elrond.core.CompactEncoder.unpackToNibbles;
-import static org.bouncycastle.util.Arrays.concatenate;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import network.elrond.crypto.HashUtil;
-import network.elrond.db.ByteArrayWrapper;
 import network.elrond.core.ByteUtil;
 import network.elrond.core.Value;
+import network.elrond.crypto.HashUtil;
+import network.elrond.db.ByteArrayWrapper;
+import org.bouncycastle.util.encoders.Hex;
 import org.iq80.leveldb.DB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.bouncycastle.util.encoders.Hex;
+
+import java.util.*;
+
+import static java.util.Arrays.copyOfRange;
+import static network.elrond.core.ByteUtil.matchingNibbleLength;
+import static network.elrond.core.CompactEncoder.*;
+import static org.bouncycastle.util.Arrays.concatenate;
 
 public class TrieImpl implements Trie {
 

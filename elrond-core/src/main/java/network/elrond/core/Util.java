@@ -1,5 +1,7 @@
 package network.elrond.core;
 
+import network.elrond.crypto.PrivateKey;
+import network.elrond.crypto.PublicKey;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.bouncycastle.jcajce.provider.digest.SHA3.DigestSHA3;
 import org.bouncycastle.util.encoders.Base64;
@@ -23,7 +25,7 @@ public class Util {
     public static final BigInteger MIN_STAKE = BigInteger.valueOf(10).pow(8);
     public static final float WEIGHT_STAKE_SPOS = 0.4f;
     public static final float WEIGHT_RATING_SPOS = 0.6f;
-    public static final int MAX_LEN_ADDR = 42; //20 bytes x 2 chars + 0x
+    public static final int MAX_LEN_ADDR = 33; //equals public key
     public static final int MAX_LEN_PUB_KEY = 33;
     public static DigestSHA3 SHA3 = new DigestSHA3(256);
     public static SHA256.Digest SHA256 = new SHA256.Digest();
@@ -32,9 +34,19 @@ public class Util {
     public static byte[] EMPTY_BYTE_ARRAY;
     public static byte[] EMPTY_DATA_HASH;
 
+    public static final PrivateKey PRIVATE_KEY_MINTING;
+    public static final PublicKey PUBLIC_KEY_MINTING;
+    public static final BigInteger VALUE_MINTING;
+
     static{
         EMPTY_BYTE_ARRAY = new byte[0];
         EMPTY_DATA_HASH = SHA3.digest(EMPTY_BYTE_ARRAY);
+
+        PRIVATE_KEY_MINTING = new PrivateKey("MINTING ADDRESS FOR INITIAL TRANSFER");
+        PUBLIC_KEY_MINTING = new PublicKey(PRIVATE_KEY_MINTING);
+
+        //21 milion ERDs
+        VALUE_MINTING = BigInteger.TEN.pow(14).multiply(BigInteger.valueOf(21));
     }
 
     public static byte[] hexStringToByteArray(String s) {
@@ -68,18 +80,20 @@ public class Util {
             return ("");
         }
 
-        //step 2. compute hash based on hexa form
-        byte[] hash = SHA3.digest(strHexa.getBytes());
+        return strHexa;
 
-        if (hash.length != 32) {
-            return ("");
-        }
-
-        //step 3. trim to last 20 bytes
-        byte[] addr = Arrays.copyOfRange(hash, 12, 32);
-
-        //step 4. convert to hexa form and add 0x
-        return ("0x" + byteArrayToHexString(addr));
+//        //step 2. compute hash based on hexa form
+//        byte[] hash = SHA3.digest(strHexa.getBytes());
+//
+//        if (hash.length != 32) {
+//            return ("");
+//        }
+//
+//        //step 3. trim to last 20 bytes
+//        byte[] addr = Arrays.copyOfRange(hash, 12, 32);
+//
+//        //step 4. convert to hexa form and add 0x
+//        return ("0x" + byteArrayToHexString(addr));
     }
 
     /**

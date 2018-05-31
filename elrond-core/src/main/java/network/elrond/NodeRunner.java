@@ -2,6 +2,7 @@ package network.elrond;
 
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
+import network.elrond.data.Transaction;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.service.AppServiceProvider;
@@ -18,7 +19,8 @@ public class NodeRunner {
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(4000);
         context.setPort(4001 /*+ new Random().nextInt(10000)*/);
-        context.setNodeName("0");
+        context.setStorageBasePath("./peer");
+        context.setNodeName("peer-node");
 
 
         Application app = new Application(context);
@@ -30,8 +32,7 @@ public class NodeRunner {
             AppState state = app.getState();
 
             do {
-                P2PBroadcastChanel chanel = state.getChanel(P2PChannelName.TRANSACTION);
-                AppServiceProvider.getP2PBroadcastService().publishToChannel(chanel, new Random().nextInt());
+
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {

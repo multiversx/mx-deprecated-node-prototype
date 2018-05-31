@@ -1,5 +1,6 @@
 package network.elrond.processor;
 
+import network.elrond.account.AccountState;
 import network.elrond.processor.impl.*;
 
 
@@ -33,6 +34,13 @@ public class AppTasks {
      */
     public static AppTask INTERCEPT_BLOCKS = (application) -> {
         new P2PBlocksInterceptorProcessor().process(application);
+    };
+
+    /**
+     * Init public and private keys
+     */
+    public static AppTask INITIALIZE_PUBLIC_PRIVATE_KEYS = (application) -> {
+        new AccountInitializerProcessor().process(application);
     };
 
     /**

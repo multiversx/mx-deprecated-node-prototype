@@ -2,10 +2,13 @@ package network.elrond;
 
 
 import junit.framework.TestCase;
+import network.elrond.account.AccountAddress;
+import network.elrond.account.AccountState;
+import network.elrond.account.Accounts;
 import network.elrond.consensus.Validator;
 import network.elrond.core.Util;
+import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
-import org.junit.runners.model.TestClass;
 
 import java.util.List;
 
@@ -33,11 +36,64 @@ public class UtilTest {
         TestCase.assertEquals("13d18bf84f5643", Util.byteArrayToHexString(Util.hexStringToByteArray("13d18bf84f5643")));
     }
 
-    @Test
+
     public void testUtilGetAddressFromPublicKey() {
         String strPubKeyHexa = "025f37d20e5b18909361e0ead7ed17c69b417bee70746c9e9c2bcb1394d921d4ae";
         String strAddr = "0xa87b8fa28a8476553363a9356aa02635e4a1b033";
 
         TestCase.assertEquals(strAddr, Util.getAddressFromPublicKey(Util.hexStringToByteArray(strPubKeyHexa)));
+    }
+
+    @Test
+    public void testUtilGetAddressFromPublicKeyTestVersion() {
+        String strPubKeyHexa = "025f37d20e5b18909361e0ead7ed17c69b417bee70746c9e9c2bcb1394d921d4ae";
+        String strAddr = "025f37d20e5b18909361e0ead7ed17c69b417bee70746c9e9c2bcb1394d921d4ae";
+
+        TestCase.assertEquals(strAddr, Util.getAddressFromPublicKey(Util.hexStringToByteArray(strPubKeyHexa)));
+    }
+
+    public static void printAccountsWithBalance(Accounts accounts){
+        System.out.println("Accounts: ");
+        System.out.println("================================================================");
+
+        if (accounts == null){
+            System.out.println(" * NULL accounts object!");
+            System.out.println("================================================================");
+            return;
+        }
+
+        if (accounts.getAddresses().size() == 0){
+            System.out.println(" * EMPTY set!");
+            System.out.println("================================================================");
+            return;
+        }
+
+        AccountState accountState;
+
+        for (AccountAddress accountAddress : accounts.getAddresses()){
+
+            try {
+                accountState = AppServiceProvider.getAccountStateService().getAccountState(accountAddress, accounts);
+            } catch(Exception ex) {
+                ex.printStackTrace();
+                continue;
+            }
+
+            if (accountState == null){
+                continue;
+            }
+
+            System.out.println(Util.byteArrayToHexString(accountAddress.getBytes()) + ": nonce " +
+                    accountState.getNonce().toString(10) + "; balance " +
+                    accountState.getBalance().toString(10));
+        }
+
+
+
+//        for ( entry: nodes.keySet()){
+//
+//        }
+        System.out.println("================================================================");
+
     }
 }

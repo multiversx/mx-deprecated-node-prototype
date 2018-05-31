@@ -1,5 +1,7 @@
 package network.elrond.data;
 
+import network.elrond.Application;
+import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.p2p.P2PConnection;
 
@@ -7,27 +9,29 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 public interface BootstrapService {
-    //returns max block height from local data (disk)
-    BigInteger getMaxBlockSizeLocal(Blockchain structure) throws IOException, ClassNotFoundException;
 
-    //sets max block height on local (disk)
-    void setMaxBlockSizeLocal(Blockchain structure, BigInteger height) throws IOException, ClassNotFoundException;
+    //returns max block height from location
+    BigInteger getMaxBlockSize(LocationType locationType, Blockchain structure) throws Exception;
 
-    //returns max block height from network (DHT)
-    BigInteger getMaxBlockSizeNetwork(P2PConnection connection) throws IOException, ClassNotFoundException;
+    //sets max block height in location
+    void setMaxBlockSize(LocationType locationType, BigInteger height, Blockchain structure) throws Exception;
 
-    //sets max block height on network (DHT)
-    void setMaxBlockSizeNetwork(BigInteger blockHeight, P2PConnection connection) throws IOException;
+    //gets the hash for the block height from location
+    String getBlockHashFromHeight(LocationType locationType, BigInteger blockHeight, Blockchain structure) throws Exception;
 
-    //gets the hash for the block height from local data (disk)
-    String getBlockHashFromHeightLocal(Blockchain structure, BigInteger blockHeight) throws IOException, ClassNotFoundException;
+    //sets the hash for a block height in location
+    void setBlockHashWithHeight(LocationType locationType, BigInteger blockHeight, String hash, Blockchain structure) throws Exception;
 
-    //sets the hash for a block height on local (disk)
-    void setBlockHashFromHeightLocal(Blockchain structure, BigInteger blockHeight, String strHash) throws IOException;
+    ExecutionReport startFromScratch(Application application);
 
-    //gets the hash for the block height from network (DHT)
-    String getBlockHashFromHeightNetwork(BigInteger blockHeight, P2PConnection connection) throws IOException, ClassNotFoundException;
+    ExecutionReport bootstrap(Application application, BigInteger maxBlkHeightLocal, BigInteger maxBlkHeightNetw);
 
-    //sets the hash for a block height on network (DHT)
-    void setBlockHashFromHeightNetwork(BigInteger blockHeight, String strHash, P2PConnection connection) throws IOException;
+    ExecutionReport rebuildFromDisk(Application application, BigInteger maxBlkHeightLocal);
+
+    ExecutionReport rebuildFromDiskDeltaNoExec(Application application, BigInteger maxBlkHeightLocal, BigInteger maxBlkHeightNetw);
+
+    ExecutionReport putBlockInBlockchain(Block blk, String blockHash, AppState state);
+
+    ExecutionReport putTransactionInBlockchain(Transaction transaction, String transactionHash, AppState state);
+
 }

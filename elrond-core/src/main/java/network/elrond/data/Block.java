@@ -1,30 +1,29 @@
 package network.elrond.data;
 
-import com.fasterxml.jackson.annotation.JsonFilter;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
  * The Block abstract class implements a block of data that contains hashes of transaction
  *
- * @author  Elrond Team - JLS
+ * @author Elrond Team - JLS
  * @version 1.0
- * @since   2018-05-14
+ * @since 2018-05-14
  */
-@JsonFilter("filterSigs")
-public class Block {
+public class Block implements Serializable {
     //block counter
     protected BigInteger nonce;
+    //plain message hash
+    protected byte[] hashNoSig;
+    //complete tx hash
+    protected byte[] hash;
     //blob of data containing first part of sig
-    private byte[] sig1;
+    private byte[] signature;
     //blob of data containing second part of sig
-    private byte[] sig2;
+    private byte[] commitment;
     //list of public keys used in signing. First is the leader that proposed the block
     protected List<String> listPubKeys;
     //previus block hash
@@ -36,15 +35,19 @@ public class Block {
     //app state hash
     protected byte[] appStateHash;
 
+    protected Date timestamp = new Date();
+
     public Block() {
         nonce = BigInteger.ZERO;
+        hashNoSig = new byte[0];
+        hash = new byte[0];
         listPubKeys = new ArrayList<String>();
         prevBlockHash = new byte[0];
         listTXHashes = new ArrayList<byte[]>();
         shard = 0;
         appStateHash = new byte[0];
-        sig1 = new byte[0];
-        sig2 = new byte[0];
+        signature = new byte[0];
+        commitment = new byte[0];
     }
 
     /**
@@ -67,84 +70,125 @@ public class Block {
 
     /**
      * Gets the list of transaction hashes
+     *
      * @return list of tx hashes
      */
-    public List<byte[]> getListTXHashes(){
-        return(listTXHashes);
+    public List<byte[]> getListTXHashes() {
+        return (listTXHashes);
     }
 
-    public void setListTXHashes(List<byte[]> listTXHashes) {this.listTXHashes = listTXHashes;}
+    public void setListTXHashes(List<byte[]> listTXHashes) {
+        this.listTXHashes = listTXHashes;
+    }
 
     /**
      * Gets te public keys used in signing process of the block
+     *
      * @return the list of public keys
      */
-    public List<String> getListPublicKeys() { return(listPubKeys);}
+    public List<String> getListPublicKeys() {
+        return (listPubKeys);
+    }
 
-    public void setListPubKeys(List<String> listPubKeys){this.listPubKeys = listPubKeys;}
+    public void setListPubKeys(List<String> listPubKeys) {
+        this.listPubKeys = listPubKeys;
+    }
 
     /**
      * Gets the first part of signature of the tx
+     *
      * @return sig as byte array
      */
-    public byte[] getSig1(){return(sig1);}
+    public byte[] getSignature() {
+        return (signature);
+    }
 
     /**
      * Sets the first part of signature of the tx
-     * @param sig1 as byte array
+     *
+     * @param signature as byte array
      */
-    public void setSig1(byte[] sig1){this.sig1 = sig1;}
+    public void setSignature(byte[] signature) {
+        this.signature = signature;
+    }
 
     /**
      * Gets the second part of signature of the tx
+     *
      * @return sig as byte array
      */
-    public byte[] getSig2(){return(sig2);}
+    public byte[] getCommitment() {
+        return (commitment);
+    }
 
     /**
      * Sets the second part of signature of the tx
-     * @param sig2 as byte array
+     *
+     * @param commitment as byte array
      */
-    public void setSig2(byte[] sig2){this.sig2 = sig2;}
+    public void setCommitment(byte[] commitment) {
+        this.commitment = commitment;
+    }
 
     /**
      * Gets the shard's number
+     *
      * @return shard as int
      */
-    public int getShard(){return (shard);}
+    public int getShard() {
+        return (shard);
+    }
 
     /**
      * Sets the shard's number
+     *
      * @param shard to be set
      */
-    public void setShard(int shard) { this.shard = shard;}
+    public void setShard(int shard) {
+        this.shard = shard;
+    }
 
     /**
      * Gets the previous block hash
+     *
      * @return the previous block hash as byte array
      */
-    public byte[] getPrevBlockHash() { return prevBlockHash;}
+    public byte[] getPrevBlockHash() {
+        return prevBlockHash;
+    }
 
     /**
      * Sets the previous block hash
+     *
      * @param prevBlockHash to be set
      */
-    public void setPrevBlockHash(byte[] prevBlockHash) {this.prevBlockHash = prevBlockHash;}
+    public void setPrevBlockHash(byte[] prevBlockHash) {
+        this.prevBlockHash = prevBlockHash;
+    }
 
     /**
      * Gets the app state hash
+     *
      * @return the app state hash as byte array
      */
-    public byte[] getAppStateHash() { return appStateHash;}
+    public byte[] getAppStateHash() {
+        return appStateHash;
+    }
 
     /**
      * Sets the app state hash
+     *
      * @param appStateHash to be set
      */
-    public void setAppStateHash(byte[] appStateHash) {this.appStateHash = appStateHash;}
+    public void setAppStateHash(byte[] appStateHash) {
+        this.appStateHash = appStateHash;
+    }
 
+    public Date getTimestamp() {
+        return timestamp;
+    }
 
-//    public static Block createInstance(String strDataJSON)
+    //    public static Block createInstance(String strDataJSON)
 //    {
 //        Block b = new DataBlock();
 //        b.decodeJSON(strDataJSON);

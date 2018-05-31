@@ -4,6 +4,7 @@ package network.elrond.p2p;
 import network.elrond.application.AppContext;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
 
 public interface P2PBroadcastService {
@@ -22,7 +23,7 @@ public interface P2PBroadcastService {
 
     boolean subscribeToChannel(P2PBroadcastChanel chanel);
 
-    boolean publishToChannel(P2PBroadcastChanel chanel, Object obj);
+    boolean publishToChannel(P2PBroadcastChanel chanel, Serializable obj);
 
     boolean unsubscribeFromChannel(P2PBroadcastChanel chanel);
 

@@ -36,7 +36,7 @@ public class AppP2PManager {
 
     public <T> ArrayBlockingQueue<T> subscribeToChannel(Application application, P2PChannelName channelName) {
 
-        ArrayBlockingQueue<T> queue = new ArrayBlockingQueue<>(10000);
+        ArrayBlockingQueue<T> queue = new ArrayBlockingQueue<>(50000, true);
 
         subscribeToChannel(application, channelName, (sender, request) -> {
             if (request == null) {

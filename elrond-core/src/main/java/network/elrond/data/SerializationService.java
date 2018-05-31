@@ -4,11 +4,9 @@ public interface SerializationService {
 
     <T> String encodeJSON(T object);
 
-    <T> String encodeJSON(T object, String filterName, String... ignoredFields);
-
     <T> T decodeJSON(String strJSONData, Class<T> clazz);
 
-    byte[] getHash(Object object, boolean withSig);
+    byte[] getHash(Object object);
 
-    String getHashString(Object object, boolean withSig);
+    String getHashString(Object object);
 }

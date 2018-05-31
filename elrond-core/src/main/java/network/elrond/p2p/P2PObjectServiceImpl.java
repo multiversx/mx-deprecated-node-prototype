@@ -44,7 +44,8 @@ public class P2PObjectServiceImpl implements P2PObjectService {
         return (fp);
     }
 
-    public void putJSONencoded(Object object, String hash, P2PConnection connection) throws IOException{
+    @Override
+    public void putJsonEncoded(Object object, String hash, P2PConnection connection) throws IOException{
         if (object == null || hash == null) {
             return;
         }
@@ -54,7 +55,8 @@ public class P2PObjectServiceImpl implements P2PObjectService {
         AppServiceProvider.getP2PObjectService().put(connection, hash.toString(), strJSONData);
     }
 
-    public <T> T getJSONdecoded(String hash, P2PConnection connection, Class<T> clazz) throws IOException, ClassNotFoundException{
+    @Override
+    public <T> T getJsonDecoded(String hash, P2PConnection connection, Class<T> clazz) throws IOException, ClassNotFoundException{
         if (hash == null) {
             return null;
         }
