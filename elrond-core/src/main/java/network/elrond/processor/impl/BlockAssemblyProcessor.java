@@ -3,7 +3,6 @@ package network.elrond.processor.impl;
 import network.elrond.Application;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
-import network.elrond.application.AppMode;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainService;
@@ -12,6 +11,8 @@ import network.elrond.core.ThreadUtil;
 import network.elrond.data.*;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.service.AppServiceProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,6 +23,8 @@ import java.util.concurrent.ArrayBlockingQueue;
  * Collect new transactions and put them into new block
  */
 public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
+
+    private Logger logger = LoggerFactory.getLogger(BlockAssemblyProcessor.class);
 
     @Override
     protected P2PChannelName getChannelName() {
@@ -34,21 +37,45 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
 
         ThreadUtil.sleep(5000);
 
-
         AppContext context = application.getContext();
-        AppState state = application.getState();
-
-        if (!state.isAllowed(AppMode.BLOCK_PROPOSING)) {
+        if (!context.isSeedNode()) {
+            logger.info("Not processing ...");
             return;
         }
 
-        state.setMode(AppMode.BLOCK_PROPOSING);
 
+        AppState state = application.getState();
+        if (state.isLock()) {
+            // If sync is running stop
+            logger.info("Can't execute, state locked");
+            return;
+        }
+
+        if (state.getCurrentBlock() == null) {
+            // Require bootstrap
+            logger.info("Can't execute, bootstrap required");
+            return;
+        }
+
+
+        state.setLock();
+
+        proposeBlock(queue, application);
+
+        state.clearLock();
+
+    }
+
+    private void proposeBlock(ArrayBlockingQueue<String> queue, Application application) {
+
+
+        AppState state = application.getState();
 
         List<String> hashes = new ArrayList<>(queue);
         queue.clear();
 
         if (hashes.isEmpty()) {
+            logger.info("Can't execute, no transaction");
             return;
         }
 
@@ -70,6 +97,8 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
 
                 String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
                 AppServiceProvider.getBootstrapService().putBlockInBlockchain(block, hashBlock, application.getState());
+
+                logger.info("New block proposed" + hashBlock);
             }
 
 
@@ -77,7 +106,6 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
             e.printStackTrace();
         }
 
-        state.setMode(null);
     }
 
     @Override

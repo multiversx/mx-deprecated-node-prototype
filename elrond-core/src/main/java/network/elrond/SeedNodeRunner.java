@@ -16,7 +16,7 @@ public class SeedNodeRunner {
 
 
         String nodeName = "elrond-node-1";
-        Integer port = 4001;
+        Integer port = 4000;
         Integer masterPeerPort = 4000;
         String masterPeerIpAddress = "127.0.0.1";
         String privateKey = "026c00d83e0dc47e6b626ed6c42f636b";

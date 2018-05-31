@@ -18,14 +18,14 @@ public class AppState implements Serializable {
 
     private boolean stillRunning = true;
 
-    private AppMode mode = null;
+    private boolean lock = false;
 
     private Accounts accounts;
     private Blockchain blockchain;
     private Block currentBlock;
 
-    private PrivateKey privateKey;
     private PublicKey publicKey;
+    private PrivateKey privateKey;
 
     private P2PConnection connection;
     private Map<P2PChannelName, P2PBroadcastChanel> channels = new HashMap<>();
@@ -90,18 +90,6 @@ public class AppState implements Serializable {
         this.accounts = accounts;
     }
 
-    public AppMode getMode() {
-        return mode;
-    }
-
-    public void setMode(AppMode mode) {
-        this.mode = mode;
-    }
-
-    public boolean isAllowed(AppMode mode) {
-        return this.mode == null || this.mode.equals(mode);
-    }
-
     public Block getCurrentBlock() {
         return currentBlock;
     }
@@ -138,5 +126,18 @@ public class AppState implements Serializable {
 
     public PublicKey getPublicKey() {
         return publicKey;
+    }
+
+
+    public synchronized boolean isLock() {
+        return lock;
+    }
+
+    public synchronized void setLock() {
+        this.lock = true;
+    }
+
+    public synchronized void clearLock() {
+        this.lock = false;
     }
 }
