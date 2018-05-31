@@ -104,6 +104,7 @@ public class AccountStateServiceImpl implements AccountStateService {
             accountState = getOrCreateAccountState(AccountAddress.fromPublicKey(Util.PUBLIC_KEY_MINTING), accounts);
             accountState.setBalance(Util.VALUE_MINTING);
             setAccountState(AccountAddress.fromPublicKey(Util.PUBLIC_KEY_MINTING), accountState, accounts);
+            accounts.getAccountsPersistenceUnit().commit();
         } catch (Exception ex){
             ex.printStackTrace();
         }

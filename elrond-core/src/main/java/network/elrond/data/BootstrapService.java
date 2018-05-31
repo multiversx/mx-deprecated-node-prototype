@@ -32,4 +32,6 @@ public interface BootstrapService {
 
     ExecutionReport putBlockInBlockchain(Block blk, String blockHash, AppState state);
 
+    ExecutionReport putTransactionInBlockchain(Transaction transaction, String transactionHash, AppState state);
+
 }
