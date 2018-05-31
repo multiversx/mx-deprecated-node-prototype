@@ -4,6 +4,9 @@ import network.elrond.Application;
 import network.elrond.account.AccountStateService;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
+import network.elrond.core.Util;
+import network.elrond.crypto.PrivateKey;
+import network.elrond.crypto.PublicKey;
 import network.elrond.data.BootstrapService;
 import network.elrond.data.LocationType;
 import network.elrond.data.SerializationService;
@@ -26,6 +29,9 @@ public class BootstrappingProcessorNodeConsumer {
         context.setPort(4001 /*+ new Random().nextInt(10000)*/);
         context.setNodeName("consumer");
         context.setStorageBasePath("consumer");
+
+        PrivateKey pvKeyInitial = new PrivateKey("CONSUMER");
+        context.setPrivateKey(pvKeyInitial);
 
         Application app = new Application(context);
         app.start();

@@ -28,6 +28,8 @@ public interface BootstrapService {
 
     ExecutionReport rebuildFromDisk(Application application, BigInteger maxBlkHeightLocal);
 
+    ExecutionReport rebuildFromDiskDeltaNoExec(Application application, BigInteger maxBlkHeightLocal, BigInteger maxBlkHeightNetw);
+
     ExecutionReport putBlockInBlockchain(Block blk, String blockHash, AppState state);
 
 }

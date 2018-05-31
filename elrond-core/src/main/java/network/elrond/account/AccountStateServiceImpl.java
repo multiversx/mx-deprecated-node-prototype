@@ -69,6 +69,7 @@ public class AccountStateServiceImpl implements AccountStateService {
 
         AccountsPersistenceUnit<AccountAddress, AccountState> unit = accounts.getAccountsPersistenceUnit();
         unit.put(address.getBytes(), convertAccountStateToRLP(state));
+        accounts.getAddresses().add(address);
 
     }
 

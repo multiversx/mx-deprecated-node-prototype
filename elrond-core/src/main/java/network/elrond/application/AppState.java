@@ -17,11 +17,13 @@ import java.util.Map;
 public class AppState implements Serializable {
 
     private boolean stillRunning = true;
-    private AppMode mode;
+
+    private AppMode mode = null;
 
     private Accounts accounts;
     private Blockchain blockchain;
     private Block currentBlock;
+
     private PrivateKey privateKey;
     private PublicKey publicKey;
 
@@ -94,6 +96,10 @@ public class AppState implements Serializable {
 
     public void setMode(AppMode mode) {
         this.mode = mode;
+    }
+
+    public boolean isAllowed(AppMode mode) {
+        return this.mode == null || this.mode.equals(mode);
     }
 
     public Block getCurrentBlock() {

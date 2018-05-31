@@ -1,6 +1,7 @@
 package network.elrond.data;
 
 import network.elrond.Application;
+import network.elrond.account.Accounts;
 import network.elrond.application.AppState;
 import network.elrond.service.AppServiceProvider;
 import org.slf4j.Logger;
@@ -24,18 +25,29 @@ public class AppBlockManager {
     public Block composeBlock(List<Transaction> transactions, Application application) {
 
         AppState state = application.getState();
+        Accounts accounts = state.getAccounts();
+
         Block block = new Block();
         Block currentBlock = state.getCurrentBlock();
         byte[] hash = AppServiceProvider.getSerializationService().getHash(currentBlock);
 
+
+        // Bind on prev block
         block.setPrevBlockHash(hash);
         BigInteger nonce = currentBlock.getNonce().add(BigInteger.ONE);
         block.setNonce(nonce);
 
+        // Add transactions
         for (Transaction transaction : transactions) {
             boolean valid = AppServiceProvider.getTransactionService().verifyTransaction(transaction);
             if (!valid) {
-                logger.info("Invalid transaction discarded " + transaction);
+                logger.info("Invalid transaction discarded [verify] " + transaction);
+                continue;
+            }
+
+            ExecutionReport executionReport = AppServiceProvider.getExecutionService().processTransaction(transaction, state.getAccounts());
+            if (!executionReport.isOk()) {
+                logger.info("Invalid transaction discarded [exec] " + transaction);
                 continue;
             }
 
@@ -43,6 +55,11 @@ public class AppBlockManager {
             block.getListTXHashes().add(txHash);
         }
 
+
+        byte[] rootHash = accounts.getAccountsPersistenceUnit().getRootHash();
+        block.setAppStateHash(rootHash);
+
+        AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
 
         return block;
     }

@@ -2,12 +2,14 @@ package network.elrond.processor.impl;
 
 import network.elrond.Application;
 import network.elrond.account.Accounts;
+import network.elrond.application.AppContext;
+import network.elrond.application.AppMode;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
+import network.elrond.core.ThreadUtil;
 import network.elrond.data.*;
-import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.service.AppServiceProvider;
 
@@ -29,22 +31,18 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
     @Override
     protected void process(ArrayBlockingQueue<String> queue, Application application) {
 
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        ThreadUtil.sleep(5000);
 
 
-        if (!application.getContext().isSeedNode()) {
-            //  return;
-        }
-
+        AppContext context = application.getContext();
         AppState state = application.getState();
-        if (state.isBootstrapping()) {
-            // Bootstrap is running
+
+        if (!state.isAllowed(AppMode.BLOCKPROPOSING)) {
             return;
         }
+
+        state.setMode(AppMode.BLOCKPROPOSING);
 
 
         List<String> hashes = new ArrayList<>(queue);
@@ -67,18 +65,19 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
             ExecutionReport result = executionService.processBlock(block, accounts, blockchain);
 
             if (result.isOk()) {
-                String hash = AppServiceProvider.getSerializationService().getHashString(block);
-                AppServiceProvider.getBlockchainService().put(hash, block, blockchain, BlockchainUnitType.BLOCK);
+                //String hash = AppServiceProvider.getSerializationService().getHashString(block);
+                //AppServiceProvider.getBlockchainService().put(hash, block, blockchain, BlockchainUnitType.BLOCK);
 
-                //TO DO JLS
-                //AppServiceProvider.getBootstrapService().setMaxBlockSizeNetwork(block.getNonce(), state.getConnection());
-                //AppServiceProvider.getBootstrapService().setMaxBlockSizeLocal(state.getBlockchain(), block.getNonce());
+                String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
+                AppServiceProvider.getBootstrapService().putBlockInBlockchain(block, hashBlock, application.getState());
             }
 
 
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
+
+        state.setMode(null);
     }
 
     @Override
