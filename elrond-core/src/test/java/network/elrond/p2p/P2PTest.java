@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import network.elrond.Application;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
+import network.elrond.crypto.PrivateKey;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
@@ -18,7 +19,7 @@ public class P2PTest {
         context.setMasterPeerPort(4000);
         context.setPort(4001 /*+ new Random().nextInt(10000)*/);
         context.setNodeName("AAA");
-
+        context.setPrivateKey(new PrivateKey("test"));
 
         Application app = new Application(context);
         app.start();
