@@ -1,5 +1,6 @@
 package network.elrond.data;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
  * @version 1.0
  * @since   2018-05-14
  */
-public class Block {
+public class Block implements Serializable {
     //block counter
     protected BigInteger nonce;
     //plain message hash
