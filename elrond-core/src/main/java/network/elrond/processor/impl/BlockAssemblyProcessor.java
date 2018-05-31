@@ -37,7 +37,7 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
 
 
         if (!application.getContext().isSeedNode()) {
-            return;
+            //  return;
         }
 
         AppState state = application.getState();
@@ -47,9 +47,12 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         }
 
 
-
         List<String> hashes = new ArrayList<>(queue);
         queue.clear();
+
+        if (hashes.isEmpty()) {
+            return;
+        }
 
 
         Accounts accounts = state.getAccounts();

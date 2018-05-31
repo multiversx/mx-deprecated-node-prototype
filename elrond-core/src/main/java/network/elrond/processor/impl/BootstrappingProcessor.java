@@ -83,6 +83,8 @@ public class BootstrappingProcessor implements AppTask {
                     }
                 }
 
+                state.setBootstrapping(false);
+
                 logger.info("Nothing else to bootstrap! Waiting 5 seconds...");
                 try {
                     Thread.sleep(5000);

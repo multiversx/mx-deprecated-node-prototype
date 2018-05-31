@@ -1,8 +1,11 @@
 package network.elrond.processor.impl;
 
+import net.tomp2p.peers.PeerAddress;
 import network.elrond.Application;
 import network.elrond.application.AppState;
 import network.elrond.p2p.AppP2PManager;
+import network.elrond.p2p.P2PBroadcastMessage;
+import network.elrond.p2p.P2PChannelListener;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.processor.AppTask;
 
@@ -13,6 +16,13 @@ public abstract class AbstractChannelTask<T> implements AppTask {
     @Override
     public void process(Application application) {
 
+
+        AppP2PManager.instance().subscribeToChannel(application, getChannelName(), new P2PChannelListener() {
+            @Override
+            public void onReciveMessage(PeerAddress sender, P2PBroadcastMessage request) throws InterruptedException {
+                System.out.println(sender);
+            }
+        });
 
         ArrayBlockingQueue<T> queue = AppP2PManager.instance().subscribeToChannel(application, getChannelName());
 

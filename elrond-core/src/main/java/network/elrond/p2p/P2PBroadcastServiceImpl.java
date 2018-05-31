@@ -10,6 +10,7 @@ import net.tomp2p.p2p.Peer;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
+import net.tomp2p.rpc.ObjectDataReply;
 import net.tomp2p.storage.Data;
 import network.elrond.application.AppContext;
 import network.elrond.service.AppServiceProvider;
@@ -71,7 +72,12 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
             P2PBroadcastChanel channel = new P2PBroadcastChanel(channelName, connection);
 
             Peer peer = connection.getPeer();
-            peer.objectDataReply(connection.registerChannel(channel));
+            peer.objectDataReply(new ObjectDataReply() {
+                @Override
+                public Object reply(PeerAddress sender, Object request) throws Exception {
+                    return connection.registerChannel(channel);
+                }
+            });
 
             return channel;
 
@@ -98,7 +104,9 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
                 HashSet<PeerAddress> peersOnChannel;
                 peersOnChannel = (HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object();
                 peersOnChannel.add(dht.peer().peerAddress());
-                dht.put(Number160.createHash(channelName.toString())).data(new Data(peersOnChannel)).start().awaitUninterruptibly();
+                dht.put(Number160.createHash(channelName.toString()))
+                        .data(new Data(peersOnChannel))
+                        .start().awaitUninterruptibly();
 
                 return true;
             }
