@@ -2,8 +2,12 @@ package network.elrond;
 
 
 import junit.framework.TestCase;
+import network.elrond.account.AccountAddress;
+import network.elrond.account.AccountState;
+import network.elrond.account.Accounts;
 import network.elrond.consensus.Validator;
 import network.elrond.core.Util;
+import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
 import java.util.List;
@@ -46,5 +50,50 @@ public class UtilTest {
         String strAddr = "025f37d20e5b18909361e0ead7ed17c69b417bee70746c9e9c2bcb1394d921d4ae";
 
         TestCase.assertEquals(strAddr, Util.getAddressFromPublicKey(Util.hexStringToByteArray(strPubKeyHexa)));
+    }
+
+    public static void printAccountsWithBalance(Accounts accounts){
+        System.out.println("Accounts: ");
+        System.out.println("================================================================");
+
+        if (accounts == null){
+            System.out.println(" * NULL accounts object!");
+            System.out.println("================================================================");
+            return;
+        }
+
+        if (accounts.getAddresses().size() == 0){
+            System.out.println(" * EMPTY set!");
+            System.out.println("================================================================");
+            return;
+        }
+
+        AccountState accountState;
+
+        for (AccountAddress accountAddress : accounts.getAddresses()){
+
+            try {
+                accountState = AppServiceProvider.getAccountStateService().getAccountState(accountAddress, accounts);
+            } catch(Exception ex) {
+                ex.printStackTrace();
+                continue;
+            }
+
+            if (accountState == null){
+                continue;
+            }
+
+            System.out.println(Util.byteArrayToHexString(accountAddress.getBytes()) + ": nonce " +
+                    accountState.getNonce().toString(10) + "; balance " +
+                    accountState.getBalance().toString(10));
+        }
+
+
+
+//        for ( entry: nodes.keySet()){
+//
+//        }
+        System.out.println("================================================================");
+
     }
 }

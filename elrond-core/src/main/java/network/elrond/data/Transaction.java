@@ -1,5 +1,10 @@
 package network.elrond.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import network.elrond.account.AccountAddress;
+
+import java.beans.Transient;
+import java.io.Serializable;
 import java.math.BigInteger;
 
 /**
@@ -9,7 +14,7 @@ import java.math.BigInteger;
  * @version 1.0
  * @since   2018-05-11
  */
-public class Transaction{
+public class Transaction implements Serializable {
     //tx counter
     private BigInteger nonce;
     //value used in transaction in sERDs see core.Util
