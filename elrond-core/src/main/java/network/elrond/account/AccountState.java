@@ -1,8 +1,5 @@
 package network.elrond.account;
 
-import network.elrond.core.RLP;
-import network.elrond.core.RLPList;
-
 import java.math.BigInteger;
 
 public class AccountState {
@@ -18,13 +15,25 @@ public class AccountState {
     }
 
     public AccountState(BigInteger nonce, BigInteger balance) {
+        if(nonce == null || nonce.compareTo(BigInteger.ZERO) < 0){
+            throw new IllegalArgumentException();
+        }
+
+        if(balance == null || balance.compareTo(BigInteger.ZERO) < 0){
+            throw new IllegalArgumentException();
+        }
+
         this.nonce = nonce;
         this.balance = balance;
     }
 
     public AccountState(AccountState source) {
-        this.nonce = source.getNonce();
-        this.balance = source.getBalance();
+        if(source == null){
+            throw new IllegalArgumentException();
+        }
+
+        setNonce(source.getNonce());
+        setBalance(source.getBalance());
     }
 
 //    public AccountState(byte[] rlpData) {
@@ -43,6 +52,10 @@ public class AccountState {
 
     public void setNonce(BigInteger nonce) {
         //rlpEncoded = null;
+        if(nonce == null || nonce.compareTo(BigInteger.ZERO) < 0){
+            throw new IllegalArgumentException();
+        }
+
         this.nonce = nonce;
     }
 
@@ -52,11 +65,23 @@ public class AccountState {
 
     public void setBalance(BigInteger balance) {
         //rlpEncoded = null;
+        if(balance == null || balance.compareTo(BigInteger.ZERO) < 0){
+            throw new IllegalArgumentException();
+        }
+
         this.balance = balance;
     }
 
     public BigInteger addToBalance(BigInteger value) {
         //if (value.signum() != 0) rlpEncoded = null;
+        if(value == null){
+            throw new IllegalArgumentException();
+        }
+
+        if(balance.add(value).compareTo(BigInteger.ZERO) < 0){
+            throw new IllegalArgumentException("Balance would be negative!!!");
+        }
+
         this.balance = balance.add(value);
         return this.balance;
     }
