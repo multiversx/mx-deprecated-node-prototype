@@ -38,11 +38,11 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         AppContext context = application.getContext();
         AppState state = application.getState();
 
-        if (!state.isAllowed(AppMode.BLOCKPROPOSING)) {
+        if (!state.isAllowed(AppMode.BLOCK_PROPOSING)) {
             return;
         }
 
-        state.setMode(AppMode.BLOCKPROPOSING);
+        state.setMode(AppMode.BLOCK_PROPOSING);
 
 
         List<String> hashes = new ArrayList<>(queue);
