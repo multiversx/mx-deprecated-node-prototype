@@ -86,7 +86,6 @@ public class BlockchainServiceImpl implements BlockchainService {
     @Override
     public synchronized <H extends Object, B> B get(H hash, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
 
-
         BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
         P2PConnection connection = blockchain.getConnection();
 
