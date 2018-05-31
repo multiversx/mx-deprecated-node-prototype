@@ -16,7 +16,6 @@ import java.math.BigInteger;
 public class TransactionTest {
 
     SerializationService serializationService = AppServiceProvider.getSerializationService();
-    TransactionService transactionService = AppServiceProvider.getTransactionService();
 
     private String sendAddress ;
     private String recvAddress ;
@@ -161,50 +160,4 @@ public class TransactionTest {
         TestCase.assertFalse(hashWithoutSignature == hashWithSignature);
 
     }
-
-    @Test
-    public void testSignTransactionSetsSignatureAndChallenge() {
-        PrivateKey pvKey = new PrivateKey();
-        PublicKey pbKey = new PublicKey(pvKey);
-
-        PrivateKey pvKey1 = new PrivateKey();
-        PublicKey pbKey1 = new PublicKey(pvKey1);
-
-        Transaction tx = transactionService.generateTransaction(pbKey, pbKey1, value.longValue(), nonce.longValue());
-
-        byte[] buff = new byte[5];
-        for (int i = 0; i < buff.length; i++) {
-            buff[i] = (byte) i;
-        }
-        tx.setData(buff);
-        //tx.setPubKey(Util.byteArrayToHexString(pbKey.getValue()));
-
-        transactionService.signTransaction(tx, pvKey.getValue());
-
-        Assert.assertTrue(tx.getSignature()!=null && tx.getSignature().length > 0);
-        Assert.assertTrue(tx.getChallenge()!=null && tx.getChallenge().length > 0);
-    }
-
-    @Test
-    public void testVerifyTransactionShouldComputeSameSignature() {
-        PrivateKey pvKey = new PrivateKey();
-        PublicKey pbKey = new PublicKey(pvKey);
-
-        PrivateKey pvKey1 = new PrivateKey();
-        PublicKey pbKey1 = new PublicKey(pvKey1);
-
-        Transaction tx = transactionService.generateTransaction(pbKey, pbKey1, value.longValue(), nonce.longValue());
-
-        byte[] buff = new byte[5];
-        for (int i = 0; i < buff.length; i++) {
-            buff[i] = (byte) i;
-        }
-        tx.setData(buff);
-        transactionService.signTransaction(tx, pvKey.getValue());
-
-        Assert.assertTrue(transactionService.verifyTransaction(tx));
-    }
-
-
-
 }
