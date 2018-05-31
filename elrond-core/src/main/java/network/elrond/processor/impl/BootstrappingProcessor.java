@@ -49,10 +49,14 @@ public class BootstrappingProcessor implements AppTask {
                 maxBlkHeightNetw = Util.BIG_INT_MIN_ONE;
                 maxBlkHeightLocal = Util.BIG_INT_MIN_ONE;
 
-                //rules:
-                //    when blockchain_local < 0 AND blockchain_network < 0 => start from scratch
-                //    when blockchain_network > 0 => bootstrapping
-                //    when blockchain_local >= 0 AND blockchain_network < 0 => start from scratch OR rebuild from disk
+                if (state.isCreatingBlock()){
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    continue;
+                }
 
                 try {
                     maxBlkHeightNetw = bootstrapService.getMaxBlockSize(LocationType.NETWORK, state.getBlockchain());
@@ -68,20 +72,39 @@ public class BootstrappingProcessor implements AppTask {
 
                 ExecutionReport exReport = new ExecutionReport();
 
-                if ((maxBlkHeightLocal.compareTo(BigInteger.ZERO) < 0) && (maxBlkHeightNetw.compareTo(BigInteger.ZERO) < 0)) {
-                    exReport.combine(bootstrapService.startFromScratch(application));
-                } else if (maxBlkHeightNetw.compareTo(BigInteger.ZERO) >= 0) {
-                    exReport.combine(bootstrapService.bootstrap(application, maxBlkHeightLocal, maxBlkHeightNetw));
-                } else if ((maxBlkHeightLocal.compareTo(BigInteger.ZERO) >= 0) && (maxBlkHeightNetw.compareTo(BigInteger.ZERO) < 0)) {
-                    if (context.getBootstrapType() == BootstrapType.START_FROM_SCRATCH) {
+                state.setBootstrapping(true);
+
+                if (context.isSeedNode() && (maxBlkHeightNetw.compareTo(BigInteger.ZERO) < 0)){
+                    //if node is seeder and is first run
+                    if (maxBlkHeightLocal.compareTo(BigInteger.ZERO) < 0) {
+                        //nothing defined, start from scratch
                         exReport.combine(bootstrapService.startFromScratch(application));
-                    } else if (context.getBootstrapType() == BootstrapType.REBUILD_FROM_DISK) {
-                        exReport.combine(bootstrapService.rebuildFromDisk(application, maxBlkHeightLocal));
                     } else {
-                        exReport.combine(new ExecutionReport().ko("Can not bootstrap! Unknown BootstrapType : " +
-                                context.getBootstrapType().toString() + "!"));
+                        //only seeder can rebuild from disk or start from scratch
+                        if (context.getBootstrapType() == BootstrapType.START_FROM_SCRATCH) {
+                            exReport.combine(bootstrapService.startFromScratch(application));
+                        } else if (context.getBootstrapType() == BootstrapType.REBUILD_FROM_DISK) {
+                            exReport.combine(bootstrapService.rebuildFromDisk(application, maxBlkHeightLocal));
+                        } else {
+                            exReport.combine(new ExecutionReport().ko("Can not bootstrap! Unknown BootstrapType : " +
+                                    context.getBootstrapType().toString() + "!"));
+                        }
                     }
+                } else {
+                    //node is slave
                 }
+
+                if ((maxBlkHeightNetw.compareTo(BigInteger.ZERO) >= 0) && (maxBlkHeightNetw.compareTo(maxBlkHeightLocal) > 0)){
+                    //bootstrap
+                    exReport.combine(bootstrapService.bootstrap(application, maxBlkHeightLocal, maxBlkHeightNetw));
+                }
+
+                if ((maxBlkHeightLocal.compareTo(BigInteger.ZERO) >= 0) && (maxBlkHeightLocal.compareTo(maxBlkHeightNetw) > 0)
+                        && (maxBlkHeightNetw.compareTo(Util.BIG_INT_MIN_ONE) > 0)){
+                    exReport.combine(bootstrapService.rebuildFromDiskDeltaNoExec(application, maxBlkHeightLocal, maxBlkHeightNetw));
+                }
+
+                state.setBootstrapping(false);
 
                 logger.info("Nothing else to bootstrap! Waiting 5 seconds...");
                 try {

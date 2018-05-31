@@ -35,14 +35,22 @@ public class AppBlockManager {
         for (Transaction transaction : transactions) {
             boolean valid = AppServiceProvider.getTransactionService().verifyTransaction(transaction);
             if (!valid) {
-                logger.info("Invalid transaction discarded " + transaction);
+                logger.info("Invalid transaction discarded [verify] " + transaction);
+                continue;
+            }
+
+            ExecutionReport executionReport = AppServiceProvider.getExecutionService().processTransaction(transaction, application.getState().getAccounts());
+            if (!executionReport.isOk()) {
+                logger.info("Invalid transaction discarded [exec] " + transaction);
                 continue;
             }
 
             byte[] txHash = AppServiceProvider.getSerializationService().getHash(transaction);
             block.getListTXHashes().add(txHash);
         }
+        block.setAppStateHash(application.getState().getAccounts().getAccountsPersistenceUnit().getRootHash());
 
+        AppServiceProvider.getAccountStateService().rollbackAccountStates(application.getState().getAccounts());
 
         return block;
     }

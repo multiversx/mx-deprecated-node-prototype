@@ -18,6 +18,7 @@ public class AppState implements Serializable {
 
     private boolean stillRunning = true;
     private boolean bootstrapping = false;
+    private boolean creatingBlock = false;
 
     private Accounts accounts;
     private Blockchain blockchain;
@@ -94,6 +95,14 @@ public class AppState implements Serializable {
 
     public void setBootstrapping(boolean bootstrapping) {
         this.bootstrapping = bootstrapping;
+    }
+
+    public boolean isCreatingBlock() {
+        return creatingBlock;
+    }
+
+    public void setCreatingBlock(boolean cratingBlock) {
+        this.creatingBlock = creatingBlock;
     }
 
     public Block getCurrentBlock() {

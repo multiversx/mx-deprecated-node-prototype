@@ -46,7 +46,7 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
             return;
         }
 
-
+        state.setCreatingBlock(true);
 
         List<String> hashes = new ArrayList<>(queue);
         queue.clear();
@@ -64,18 +64,19 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
             ExecutionReport result = executionService.processBlock(block, accounts, blockchain);
 
             if (result.isOk()) {
-                String hash = AppServiceProvider.getSerializationService().getHashString(block);
-                AppServiceProvider.getBlockchainService().put(hash, block, blockchain, BlockchainUnitType.BLOCK);
+                //String hash = AppServiceProvider.getSerializationService().getHashString(block);
+                //AppServiceProvider.getBlockchainService().put(hash, block, blockchain, BlockchainUnitType.BLOCK);
 
-                //TO DO JLS
-                //AppServiceProvider.getBootstrapService().setMaxBlockSizeNetwork(block.getNonce(), state.getConnection());
-                //AppServiceProvider.getBootstrapService().setMaxBlockSizeLocal(state.getBlockchain(), block.getNonce());
+                String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
+                AppServiceProvider.getBootstrapService().putBlockInBlockchain(block, hashBlock, application.getState());
             }
 
 
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
+
+        state.setCreatingBlock(false);
     }
 
     @Override
