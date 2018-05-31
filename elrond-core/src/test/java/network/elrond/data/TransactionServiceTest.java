@@ -1,21 +1,21 @@
 package network.elrond.data;
 
+import network.elrond.ExpectedExceptionTest;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainContext;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.service.AppServiceProvider;
-import org.junit.*;
-import org.junit.rules.ExpectedException;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 
-public class TransactionServiceTest {
-
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
+public class TransactionServiceTest extends ExpectedExceptionTest {
 
     TransactionService transactionService = AppServiceProvider.getTransactionService();
     private String sendAddress ;
@@ -129,8 +129,4 @@ public class TransactionServiceTest {
         Assert.assertTrue(transactionService.verifyTransaction(tx));
     }
 
-    protected <H> void expected(Class<? extends Exception> expectedExceptionClass, String expectedMessage) {
-        exception.expect(expectedExceptionClass);
-        exception.expectMessage(expectedMessage);
-    }
 }

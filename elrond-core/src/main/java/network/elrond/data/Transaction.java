@@ -122,12 +122,6 @@ public class Transaction implements Serializable {
      */
     public String getReceiverAddress(){ return (receiverAddress); }
 
-    @JsonIgnore
-    @Transient
-    public AccountAddress getReceiverAccountAddress() {
-        return AccountAddress.fromHexaString(receiverAddress);
-    }
-
     /**
      * Sets the receiving address
      * @param receiverAddress to be set
@@ -139,12 +133,6 @@ public class Transaction implements Serializable {
      * @return address as String
      */
     public String getSendAddress(){ return (sendAddress); }
-
-    @JsonIgnore
-    @Transient
-    public AccountAddress getSendAccountAddress() {
-        return AccountAddress.fromHexaString(sendAddress);
-    }
 
     /**
      * Sets the sender address

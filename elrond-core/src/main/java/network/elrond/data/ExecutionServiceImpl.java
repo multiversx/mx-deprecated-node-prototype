@@ -1,14 +1,12 @@
 package network.elrond.data;
 
-import network.elrond.account.AccountAddress;
-import network.elrond.account.AccountState;
 import network.elrond.account.Accounts;
+import network.elrond.account.AccountsManager;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.List;
 
 public class ExecutionServiceImpl implements ExecutionService {
@@ -68,11 +66,8 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
     private ExecutionReport _processTransaction(Accounts accounts, Transaction transaction) throws IOException, ClassNotFoundException {
-
-
         if (transaction == null) {
             return ExecutionReport.create().ko("Null transaction");
-
         }
 
         String strHash = new String(Base64.encode(serializationService.getHash(transaction)));
@@ -82,28 +77,17 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         //We have to copy-construct the objects for sandbox mode
-        AccountAddress receiverAddress = transaction.getReceiverAccountAddress();
-        AccountState receiverAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(receiverAddress, accounts);
-
-        AccountAddress sendAddress = transaction.getSendAccountAddress();
-        AccountState senderAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(sendAddress, accounts);
-
-        if (senderAccountState.getBalance().compareTo(transaction.getValue()) < 0) {
+        if (!AccountsManager.instance().HasFunds(accounts, transaction.getSendAddress(), transaction.getValue())) {
             return ExecutionReport.create().ko("Invalid transaction! Will result in negative balance! tx hash: " + strHash);
         }
 
-        if (!senderAccountState.getNonce().equals(transaction.getNonce())) {
+        if (!AccountsManager.instance().HasCorrectNonce(accounts, transaction.getSendAddress(), transaction.getNonce())) {
             return ExecutionReport.create().ko("Invalid transaction! Nonce mismatch! tx hash: " + strHash);
         }
 
-        //transfer asset
-        receiverAccountState.setBalance(receiverAccountState.getBalance().add(transaction.getValue()));
-        AppServiceProvider.getAccountStateService().setAccountState(receiverAddress, receiverAccountState, accounts); // PMS
-
-        senderAccountState.setBalance(senderAccountState.getBalance().subtract(transaction.getValue()));
-        //increase sender nonce
-        senderAccountState.setNonce(senderAccountState.getNonce().add(BigInteger.ONE));
-        AppServiceProvider.getAccountStateService().setAccountState(sendAddress, senderAccountState, accounts); // PMS
+        AccountsManager.instance().TransferFunds(accounts,
+                transaction.getSendAddress(), transaction.getReceiverAddress(),
+                transaction.getValue(), transaction.getNonce());
 
         return ExecutionReport.create().ok();
     }
