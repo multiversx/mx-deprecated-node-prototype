@@ -1,14 +1,20 @@
 package network.elrond.trie;
 
+import junit.framework.TestCase;
 import network.elrond.account.*;
 import network.elrond.db.MockDB;
 import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
+import org.iq80.leveldb.Options;
+import org.iq80.leveldb.impl.Iq80DBFactory;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
+import network.elrond.core.Value;
+import org.iq80.leveldb.DB;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
@@ -706,7 +712,7 @@ public class TrieTest {
 */
     @Test  //  tests saving keys to the file  //
     public void testMasiveUpdateFromDB(){
-        boolean massiveUpdateFromDBEnabled = false;
+        boolean massiveUpdateFromDBEnabled = true;
 
         if(massiveUpdateFromDBEnabled) {
             List<String> randomWords = Arrays.asList(randomDictionary.split(","));
@@ -810,17 +816,44 @@ public class TrieTest {
 
     }
 */
-
+/*
     @Test
-    public void testGetFromRootNode() {
-        TrieImpl trie1 = new TrieImpl(mockDb);
-        trie1.update(cat, LONG_STRING);
+    public void testGetFromRootNode() throws IOException {
+
+        DB database;
+
+        Options options = new Options();
+        options.createIfMissing(true);
+        Iq80DBFactory factory = new Iq80DBFactory();
+        database = factory.open(new File("C:\\test4"), options);
+
+        TrieImpl trie1 = new TrieImpl(database);
+        trie1.update(LONG_STRING, "1");
+        trie1.update(LONG_STRING, "2");
+        trie1.update(LONG_STRING, "3");
+        trie1.cleanCache();
         trie1.sync();
-        TrieImpl trie2 = new TrieImpl(mockDb, trie1.getRootHash());
-        assertEquals(LONG_STRING, new String(trie2.get(cat)));
+        TrieImpl trie2 = new TrieImpl(database, trie1.getRootHash());
+        assertEquals("3", new String(trie2.get(LONG_STRING)));
     }
+*/
+/*
+    @Test
+    public void testGetFromDB() throws IOException {
 
+        byte[] hashroot = new byte[] {44, -1, 41, 5, -76, -113, -88, -43, 29, -100, 85, 73, -16, -81, -73, -123, -73, 124, -8, 42, 68, -105, -94, -83, -77, 51, 37, -61, -116, -33, 28, -37};
 
+        DB database;
+
+        Options options = new Options();
+        options.createIfMissing(true);
+        Iq80DBFactory factory = new Iq80DBFactory();
+        database = factory.open(new File("C:\\test4"), options);
+
+        TrieImpl trie1 = new TrieImpl(database, hashroot);
+        assertEquals("3", new String(trie1.get(LONG_STRING)));
+    }
+*/
 /*
         0x7645b9fbf1b51e6b980801fafe6bbc22d2ebe218 0x517eaccda568f3fa24915fed8add49d3b743b3764c0bc495b19a47c54dbc3d62 0x 0x1
         0x0000000000000000000000000000000000000000000000000000000000000010 0x947e70f9460402290a3e487dae01f610a1a8218fda
