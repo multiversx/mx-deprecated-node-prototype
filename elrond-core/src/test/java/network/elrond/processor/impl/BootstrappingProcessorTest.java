@@ -107,7 +107,7 @@ public class BootstrappingProcessorTest {
         AccountState acsSender = accountStateService.getOrCreateAccountState(AccountAddress.fromPublicKey(pbk1), state.getAccounts());
         //mint 100 ERDs
         acsSender.setBalance(BigInteger.TEN.pow(10));
-        accountStateService.setAccountState(trx1.getSendAccountAddress(), acsSender, state.getAccounts()); // PMS
+        accountStateService.setAccountState(AccountAddress.fromHexaString(trx1.getSendAddress()), acsSender, state.getAccounts()); // PMS
 
         //Now network is loaded, try to bootstrap
         executionReport = bootstrapService.bootstrap(app, BigInteger.ZERO, bootstrapService.getMaxBlockSize(LocationType.NETWORK, state.getBlockchain()));
