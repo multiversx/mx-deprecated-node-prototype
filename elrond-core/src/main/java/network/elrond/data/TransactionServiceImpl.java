@@ -49,6 +49,16 @@ public class TransactionServiceImpl implements TransactionService {
      * @param privateKeysBytes private key as byte array
      */
     public void signTransaction(Transaction tx, byte[] privateKeysBytes) {
+
+        if(tx == null){
+            throw new IllegalArgumentException("Transaction cannot be null");
+        }
+
+        if(privateKeysBytes == null){
+            throw new IllegalArgumentException("PrivateKeysBytes cannot be null");
+        }
+
+
         //TODO: do not recreate PrivateKey
         PrivateKey pvkey = new PrivateKey(privateKeysBytes);
 
@@ -79,6 +89,10 @@ public class TransactionServiceImpl implements TransactionService {
      * @return true if tx passes all consistency tests
      */
     public boolean verifyTransaction(Transaction tx) {
+        if(tx == null){
+            throw new IllegalArgumentException("Transaction cannot be null");
+        }
+
         //test 1. consistency checks
         if ((tx.getNonce().compareTo(BigInteger.ZERO) < 0) ||
                 (tx.getValue().compareTo(BigInteger.ZERO) < 0) ||
@@ -118,6 +132,14 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public List<Transaction> getTransactions(Blockchain blockchain, Block block) throws IOException, ClassNotFoundException {
 
+        if(blockchain == null){
+            throw new IllegalArgumentException("Blockchain cannot be null");
+        }
+
+        if(block == null){
+            throw new IllegalArgumentException("Block cannot be null");
+        }
+
         List<Transaction> transactions = new ArrayList<>();
 
         //JLS 2018.05.29 - need to store fetched transaction!
@@ -146,6 +168,9 @@ public class TransactionServiceImpl implements TransactionService {
                 value,
                 nonce);
         t.setPubKey(Util.getAddressFromPublicKey(sender.getValue()));
+
+
+
         return t;
     }
 
