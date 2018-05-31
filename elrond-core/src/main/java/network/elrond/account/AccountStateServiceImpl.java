@@ -98,7 +98,7 @@ public class AccountStateServiceImpl implements AccountStateService {
         return (accountState);
     }
 
-    public void initialMintingToKnownAddress(Accounts accounts) {
+    public void initialMintingToKnownAddress(Accounts accounts){
 
         AccountState accountState = null;
 
@@ -106,14 +106,15 @@ public class AccountStateServiceImpl implements AccountStateService {
             accountState = getOrCreateAccountState(AccountAddress.fromPublicKey(Util.PUBLIC_KEY_MINTING), accounts);
             accountState.setBalance(Util.VALUE_MINTING);
             setAccountState(AccountAddress.fromPublicKey(Util.PUBLIC_KEY_MINTING), accountState, accounts);
-        } catch (Exception ex) {
+            accounts.getAccountsPersistenceUnit().commit();
+        } catch (Exception ex){
             ex.printStackTrace();
         }
     }
 
-    public Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue, AccountsContext accountsContextTemporary) {
+    public Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue, AccountsContext accountsContextTemporary){
 
-        if (initialValue.compareTo(Util.VALUE_MINTING) > 0) {
+        if (initialValue.compareTo(Util.VALUE_MINTING) > 0){
             initialValue = Util.VALUE_MINTING;
         }
 
@@ -131,17 +132,17 @@ public class AccountStateServiceImpl implements AccountStateService {
             Accounts accountsTemp = new Accounts(accountsContextTemporary);
             ExecutionService executionService = AppServiceProvider.getExecutionService();
             ExecutionReport executionReport = executionService.processTransaction(transactionMint, accountsTemp);
-            if (!executionReport.isOk()) {
-                return (null);
+            if (!executionReport.isOk()){
+                return(null);
             }
 
             genesisBlock.setAppStateHash(accountsTemp.getAccountsPersistenceUnit().getRootHash());
             accountsTemp.getAccountsPersistenceUnit().close();
-        } catch (Exception ex) {
+        } catch (Exception ex){
             ex.printStackTrace();
-            return (null);
+            return(null);
         }
 
-        return (new Fun.Tuple2<>(genesisBlock, transactionMint));
+        return (new Fun.Tuple2<>(genesisBlock, transactionMint ));
     }
 }
