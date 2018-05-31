@@ -51,7 +51,7 @@ public class SeedNodeRunner {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();x
+                    e.printStackTrace();
                 }
 
 
