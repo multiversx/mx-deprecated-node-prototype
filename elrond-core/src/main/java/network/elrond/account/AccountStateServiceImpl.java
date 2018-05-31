@@ -3,17 +3,14 @@ package network.elrond.account;
 import network.elrond.core.RLP;
 import network.elrond.core.RLPList;
 import network.elrond.core.Util;
+import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
-import network.elrond.data.Block;
-import network.elrond.data.ExecutionReport;
-import network.elrond.data.ExecutionService;
-import network.elrond.data.Transaction;
+import network.elrond.data.*;
 import network.elrond.service.AppServiceProvider;
 import org.mapdb.Fun;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
 
 public class AccountStateServiceImpl implements AccountStateService {
 
@@ -112,7 +109,8 @@ public class AccountStateServiceImpl implements AccountStateService {
         }
     }
 
-    public Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue, AccountsContext accountsContextTemporary){
+    public Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue,
+                                                               AccountsContext accountsContextTemporary, PrivateKey privateKey){
 
         if (initialValue.compareTo(Util.VALUE_MINTING) > 0){
             initialValue = Util.VALUE_MINTING;
@@ -130,13 +128,14 @@ public class AccountStateServiceImpl implements AccountStateService {
         //compute state root hash
         try {
             Accounts accountsTemp = new Accounts(accountsContextTemporary);
+
             ExecutionService executionService = AppServiceProvider.getExecutionService();
             ExecutionReport executionReport = executionService.processTransaction(transactionMint, accountsTemp);
             if (!executionReport.isOk()){
                 return(null);
             }
-
             genesisBlock.setAppStateHash(accountsTemp.getAccountsPersistenceUnit().getRootHash());
+            AppBlockManager.instance().signBlock(genesisBlock, privateKey);
             accountsTemp.getAccountsPersistenceUnit().close();
         } catch (Exception ex){
             ex.printStackTrace();
