@@ -2,12 +2,14 @@ package network.elrond.processor.impl;
 
 import network.elrond.Application;
 import network.elrond.account.Accounts;
+import network.elrond.application.AppContext;
+import network.elrond.application.AppMode;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
+import network.elrond.core.ThreadUtil;
 import network.elrond.data.*;
-import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.service.AppServiceProvider;
 
@@ -29,27 +31,26 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
     @Override
     protected void process(ArrayBlockingQueue<String> queue, Application application) {
 
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        ThreadUtil.sleep(5000);
 
 
-        if (!application.getContext().isSeedNode()) {
-            return;
-        }
-
+        AppContext context = application.getContext();
         AppState state = application.getState();
-        if (state.isBootstrapping()) {
-            // Bootstrap is running
+
+        if (!state.isAllowed(AppMode.BLOCK_PROPOSING)) {
             return;
         }
 
-        state.setCreatingBlock(true);
+        state.setMode(AppMode.BLOCK_PROPOSING);
+
 
         List<String> hashes = new ArrayList<>(queue);
         queue.clear();
+
+        if (hashes.isEmpty()) {
+            return;
+        }
 
 
         Accounts accounts = state.getAccounts();
@@ -76,7 +77,7 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
             e.printStackTrace();
         }
 
-        state.setCreatingBlock(false);
+        state.setMode(null);
     }
 
     @Override

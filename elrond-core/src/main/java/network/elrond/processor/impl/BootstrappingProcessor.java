@@ -1,22 +1,17 @@
 package network.elrond.processor.impl;
 
 import network.elrond.Application;
-import network.elrond.account.AccountsContext;
 import network.elrond.application.AppContext;
+import network.elrond.application.AppMode;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.BlockchainService;
-import network.elrond.blockchain.BlockchainUnitType;
-import network.elrond.blockchain.SettingsType;
+import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
-import network.elrond.crypto.PublicKey;
 import network.elrond.data.*;
-import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PObjectService;
 import network.elrond.processor.AppTask;
 import network.elrond.processor.AppTasks;
 import network.elrond.service.AppServiceProvider;
-import org.bouncycastle.util.encoders.Base64;
-import org.mapdb.Fun;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,11 +23,7 @@ public class BootstrappingProcessor implements AppTask {
     private Logger logger = LoggerFactory.getLogger(AppTasks.class);
 
     private BootstrapService bootstrapService = AppServiceProvider.getBootstrapService();
-    private BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
-    private BlockchainService appPersistanceService = AppServiceProvider.getAppPersistanceService();
-    private TransactionService transactionService = AppServiceProvider.getTransactionService();
-    private P2PObjectService p2PObjectService = AppServiceProvider.getP2PObjectService();
-    private SerializationService serializationService = AppServiceProvider.getSerializationService();
+
 
     @Override
     public void process(Application application) throws IOException {
@@ -49,12 +40,8 @@ public class BootstrappingProcessor implements AppTask {
                 maxBlkHeightNetw = Util.BIG_INT_MIN_ONE;
                 maxBlkHeightLocal = Util.BIG_INT_MIN_ONE;
 
-                if (state.isCreatingBlock()){
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                if (!state.isAllowed(AppMode.BOOTSTRAPPING)) {
+                    ThreadUtil.sleep(100);
                     continue;
                 }
 
@@ -72,9 +59,9 @@ public class BootstrappingProcessor implements AppTask {
 
                 ExecutionReport exReport = new ExecutionReport();
 
-                state.setBootstrapping(true);
+                state.setMode(AppMode.BOOTSTRAPPING);
 
-                if (context.isSeedNode() && (maxBlkHeightNetw.compareTo(BigInteger.ZERO) < 0)){
+                if (context.isSeedNode() && (maxBlkHeightNetw.compareTo(BigInteger.ZERO) < 0)) {
                     //if node is seeder and is first run
                     if (maxBlkHeightLocal.compareTo(BigInteger.ZERO) < 0) {
                         //nothing defined, start from scratch
@@ -94,17 +81,17 @@ public class BootstrappingProcessor implements AppTask {
                     //node is slave
                 }
 
-                if ((maxBlkHeightNetw.compareTo(BigInteger.ZERO) >= 0) && (maxBlkHeightNetw.compareTo(maxBlkHeightLocal) > 0)){
+                if ((maxBlkHeightNetw.compareTo(BigInteger.ZERO) >= 0) && (maxBlkHeightNetw.compareTo(maxBlkHeightLocal) > 0)) {
                     //bootstrap
                     exReport.combine(bootstrapService.bootstrap(application, maxBlkHeightLocal, maxBlkHeightNetw));
                 }
 
                 if ((maxBlkHeightLocal.compareTo(BigInteger.ZERO) >= 0) && (maxBlkHeightLocal.compareTo(maxBlkHeightNetw) > 0)
-                        && (maxBlkHeightNetw.compareTo(Util.BIG_INT_MIN_ONE) > 0)){
+                        && (maxBlkHeightNetw.compareTo(Util.BIG_INT_MIN_ONE) > 0)) {
                     exReport.combine(bootstrapService.rebuildFromDiskDeltaNoExec(application, maxBlkHeightLocal, maxBlkHeightNetw));
                 }
 
-                state.setBootstrapping(false);
+                state.setMode(null);
 
                 logger.info("Nothing else to bootstrap! Waiting 5 seconds...");
                 try {
@@ -117,13 +104,6 @@ public class BootstrappingProcessor implements AppTask {
         });
         threadProcess.start();
     }
-
-
-
-
-
-
-
 
 
 }

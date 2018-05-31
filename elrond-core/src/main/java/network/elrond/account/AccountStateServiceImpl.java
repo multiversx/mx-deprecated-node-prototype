@@ -26,7 +26,9 @@ public class AccountStateServiceImpl implements AccountStateService {
     public synchronized AccountState getOrCreateAccountState(AccountAddress address, Accounts accounts) throws IOException, ClassNotFoundException {
         AccountState state = getAccountState(address, accounts);
 
-        if (state != null) return state;
+        if (state != null) {
+            return state;
+        }
 
         setAccountState(address, new AccountState(), accounts);
         return getAccountState(address, accounts);
@@ -115,6 +117,7 @@ public class AccountStateServiceImpl implements AccountStateService {
         if (initialValue.compareTo(Util.VALUE_MINTING) > 0){
             initialValue = Util.VALUE_MINTING;
         }
+
 
         Transaction transactionMint = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING,
                 new PublicKey(Util.hexStringToByteArray(initialAddress)), initialValue, BigInteger.ZERO);

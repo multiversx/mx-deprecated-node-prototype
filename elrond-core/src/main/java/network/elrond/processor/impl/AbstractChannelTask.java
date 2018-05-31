@@ -22,6 +22,7 @@ public abstract class AbstractChannelTask<T> implements AppTask {
                 process(queue, application);
             }
         });
+        thread.setName(getChannelName() + "_" + getClass().getName());
         thread.start();
 
     }

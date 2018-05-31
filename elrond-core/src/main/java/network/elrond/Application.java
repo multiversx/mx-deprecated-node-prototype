@@ -15,7 +15,7 @@ public class Application implements Serializable {
     private AppState state = new AppState();
 
     public Application(AppContext context) {
-        if(context == null){
+        if (context == null) {
             throw new IllegalArgumentException("Context cannot be null");
         }
         this.context = context;
@@ -26,7 +26,7 @@ public class Application implements Serializable {
     }
 
     public void setContext(AppContext context) {
-        if(context == null){
+        if (context == null) {
             throw new IllegalArgumentException("Context cannot be null");
         }
         this.context = context;
@@ -37,7 +37,7 @@ public class Application implements Serializable {
     }
 
     public void setState(AppState state) {
-        if(state == null){
+        if (state == null) {
             throw new IllegalArgumentException("State cannot be null");
         }
         this.state = state;
@@ -61,7 +61,6 @@ public class Application implements Serializable {
 
         //  Start accounts
         AppTasks.INIT_ACCOUNTS.process(this);
-
 
         // Start bootstrapping process
         AppTasks.BOOTSTRAP_SYSTEM.process(this);

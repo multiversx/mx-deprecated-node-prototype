@@ -15,6 +15,7 @@ import network.elrond.application.AppContext;
 import network.elrond.service.AppServiceProvider;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.HashSet;
 import java.util.List;
@@ -109,7 +110,8 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
     }
 
     @SuppressWarnings("unchecked")
-    public boolean publishToChannel(P2PBroadcastChanel chanel, Object object) {
+    @Override
+    public boolean publishToChannel(P2PBroadcastChanel chanel, Serializable object) {
         try {
 
             P2PConnection connection = chanel.getConnection();

@@ -17,12 +17,13 @@ import java.util.Map;
 public class AppState implements Serializable {
 
     private boolean stillRunning = true;
-    private boolean bootstrapping = false;
-    private boolean creatingBlock = false;
+
+    private AppMode mode = null;
 
     private Accounts accounts;
     private Blockchain blockchain;
     private Block currentBlock;
+
     private PrivateKey privateKey;
     private PublicKey publicKey;
 
@@ -31,17 +32,17 @@ public class AppState implements Serializable {
 
 
     public P2PBroadcastChanel getChanel(P2PChannelName name) {
-        if(name == null){
+        if (name == null) {
             throw new IllegalArgumentException("Name cannot be null");
         }
         return channels.get(name);
     }
 
     public void addChanel(P2PChannelName name, P2PBroadcastChanel channel) {
-        if(name == null){
+        if (name == null) {
             throw new IllegalArgumentException("Name cannot be null");
         }
-        if(channel == null){
+        if (channel == null) {
             throw new IllegalArgumentException("Chanel cannot be null");
         }
 
@@ -53,7 +54,7 @@ public class AppState implements Serializable {
     }
 
     public void setConnection(P2PConnection connection) {
-        if(connection == null){
+        if (connection == null) {
             throw new IllegalArgumentException("Connection cannot be null");
         }
         this.connection = connection;
@@ -68,7 +69,7 @@ public class AppState implements Serializable {
     }
 
     public void setBlockchain(Blockchain blockchain) {
-        if(blockchain == null){
+        if (blockchain == null) {
             throw new IllegalArgumentException("Blockchain cannot be null");
         }
         this.blockchain = blockchain;
@@ -83,26 +84,22 @@ public class AppState implements Serializable {
     }
 
     public void setAccounts(Accounts accounts) {
-        if(accounts == null){
+        if (accounts == null) {
             throw new IllegalArgumentException("Accounts cannot be null");
         }
         this.accounts = accounts;
     }
 
-    public boolean isBootstrapping() {
-        return bootstrapping;
+    public AppMode getMode() {
+        return mode;
     }
 
-    public void setBootstrapping(boolean bootstrapping) {
-        this.bootstrapping = bootstrapping;
+    public void setMode(AppMode mode) {
+        this.mode = mode;
     }
 
-    public boolean isCreatingBlock() {
-        return creatingBlock;
-    }
-
-    public void setCreatingBlock(boolean cratingBlock) {
-        this.creatingBlock = creatingBlock;
+    public boolean isAllowed(AppMode mode) {
+        return this.mode == null || this.mode.equals(mode);
     }
 
     public Block getCurrentBlock() {
@@ -110,7 +107,7 @@ public class AppState implements Serializable {
     }
 
     public void setCurrentBlock(Block currentBlock) {
-        if(currentBlock == null){
+        if (currentBlock == null) {
             throw new IllegalArgumentException("CurrentBlock cannot be null");
         }
         this.currentBlock = currentBlock;
@@ -121,19 +118,19 @@ public class AppState implements Serializable {
         this.accounts.stopPersistenceUnit();
     }
 
-    public void setPrivateKey(PrivateKey privateKey){
-        if(privateKey == null){
+    public void setPrivateKey(PrivateKey privateKey) {
+        if (privateKey == null) {
             throw new IllegalArgumentException("PrivateKey cannot be null");
         }
         this.privateKey = privateKey;
     }
 
-    public PrivateKey getPrivateKey(){
+    public PrivateKey getPrivateKey() {
         return privateKey;
     }
 
     public void setPublicKey(PublicKey publicKey) {
-        if(publicKey == null){
+        if (publicKey == null) {
             throw new IllegalArgumentException("PublicKey cannot be null");
         }
         this.publicKey = publicKey;
