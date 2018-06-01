@@ -52,8 +52,9 @@ public class ElrondFacadeImpl implements ElrondFacade {
             AppState state = application.getState();
             Accounts accounts = state.getAccounts();
 
-            AccountState account = AppServiceProvider.getAccountStateService().getOrCreateAccountState(address, accounts);
-            return account.getBalance();
+            AccountState account = AppServiceProvider.getAccountStateService().getAccountState(address, accounts);
+
+            return (account == null)? BigInteger.ZERO: account.getBalance();
 
         } catch (Exception ex) {
             ex.printStackTrace();
