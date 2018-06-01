@@ -1,5 +1,7 @@
 package network.elrond.data;
 
+import network.elrond.core.Util;
+
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -16,10 +18,6 @@ import java.util.List;
 public class Block implements Serializable {
     //block counter
     protected BigInteger nonce;
-    //plain message hash
-    protected byte[] hashNoSig;
-    //complete tx hash
-    protected byte[] hash;
     //blob of data containing first part of sig
     private byte[] signature;
     //blob of data containing second part of sig
@@ -39,8 +37,8 @@ public class Block implements Serializable {
 
     public Block() {
         nonce = BigInteger.ZERO;
-        hashNoSig = new byte[0];
-        hash = new byte[0];
+//        hashNoSig = new byte[0];
+//        hash = new byte[0];
         listPubKeys = new ArrayList<String>();
         prevBlockHash = new byte[0];
         listTXHashes = new ArrayList<byte[]>();
@@ -188,16 +186,12 @@ public class Block implements Serializable {
         return timestamp;
     }
 
-    //    public static Block createInstance(String strDataJSON)
-//    {
-//        Block b = new DataBlock();
-//        b.decodeJSON(strDataJSON);
-//        if (Arrays.equals(b.prevBlockHash,("GENESIS").getBytes())){
-//            return (new GenesisBlock());
-//        }
-//
-//        return (b);
-//    }
 
-
+    @Override
+    public String toString() {
+        return "Block{" +
+                "nonce=" + nonce +
+                ", appStateHash=" + Util.byteArrayToHexString(appStateHash) +
+                '}';
+    }
 }

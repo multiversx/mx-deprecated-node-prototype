@@ -51,7 +51,7 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
             return;
         }
 
-        if (state.getCurrentBlock() == null) {
+        if (state.getBlockchain().getCurrentBlock() == null) {
             // Require bootstrap
             logger.info("Can't execute, bootstrap required");
             return;
@@ -93,8 +93,6 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
             ExecutionReport result = executionService.processBlock(block, accounts, blockchain);
 
             if (result.isOk()) {
-                //String hash = AppServiceProvider.getSerializationService().getHashString(block);
-                //AppServiceProvider.getBlockchainService().put(hash, block, blockchain, BlockchainUnitType.BLOCK);
 
                 String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
                 AppServiceProvider.getBootstrapService().putBlockInBlockchain(block, hashBlock, application.getState());

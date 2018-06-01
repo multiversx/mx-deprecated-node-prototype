@@ -28,6 +28,7 @@ public class SeedNodeRunner {
         context.setNodeName(nodeName);
         PrivateKey privateKey1 = new PrivateKey(privateKey);
         PublicKey publicKey = new PublicKey(privateKey1);
+
         context.setPrivateKey(privateKey1);
         String mintAddress = Util.getAddressFromPublicKey(publicKey.getValue());
         context.setStrAddressMint(mintAddress);
@@ -43,10 +44,10 @@ public class SeedNodeRunner {
 
             do {
 
-                AccountAddress address = AccountAddress.fromHexaString("0326e7875aadaba270ae93ec40ef4706934d070eb21c9acad4743e31289fa4ebc7");
+                AccountAddress address = AccountAddress.fromHexString("0326e7875aadaba270ae93ec40ef4706934d070eb21c9acad4743e31289fa4ebc7");
                 facade.send(address, BigInteger.TEN, application);
 
-                //System.out.println(facade.getBalance(address, application));
+                System.out.println(facade.getBalance(address, application));
 
                 try {
                     Thread.sleep(1000);
@@ -68,6 +69,5 @@ public class SeedNodeRunner {
                 facade.stop(application);
             }
         }
-
     }
 }

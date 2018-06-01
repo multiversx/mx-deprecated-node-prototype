@@ -12,7 +12,7 @@ public class AccountAddressTest {
 
         AccountAddress address = new AccountAddress(addrBytes);
         AccountAddress addressFromPublicKey = AccountAddress.fromPublicKey(Util.PUBLIC_KEY_MINTING);
-        AccountAddress addressFromHexString = AccountAddress.fromHexaString(Util.byteArrayToHexString(addrBytes));
+        AccountAddress addressFromHexString = AccountAddress.fromHexString(Util.byteArrayToHexString(addrBytes));
         AccountAddress addressFromBytes = AccountAddress.fromBytes(addrBytes);
 
         Assert.assertArrayEquals(address.getBytes(), addressFromPublicKey.getBytes());
@@ -52,13 +52,13 @@ public class AccountAddressTest {
 
     @Test
     public void testAccountAddressFromHexaString(){
-        AccountAddress accountAddress = AccountAddress.fromHexaString(Util.byteArrayToHexString(Util.PUBLIC_KEY_MINTING.getValue()));
+        AccountAddress accountAddress = AccountAddress.fromHexString(Util.byteArrayToHexString(Util.PUBLIC_KEY_MINTING.getValue()));
         Assert.assertTrue(accountAddress!=null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testAccountAddressFromNullHexaStringShouldThrowException(){
-        AccountAddress accountAddress = AccountAddress.fromHexaString(null);
+        AccountAddress accountAddress = AccountAddress.fromHexString(null);
         Assert.fail();
     }
 }

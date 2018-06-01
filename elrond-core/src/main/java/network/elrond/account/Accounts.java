@@ -29,7 +29,7 @@ public class Accounts implements Serializable, PersistenceUnitContainer {
     }
 
     public void flush() {
-        unit.getCache().clear();
+        unit.clear();
     }
 
     @Override
@@ -41,7 +41,7 @@ public class Accounts implements Serializable, PersistenceUnitContainer {
         }
     }
 
-    public Set<AccountAddress> getAddresses(){
-        return(Collections.synchronizedSet(addresses));
+    public Set<AccountAddress> getAddresses() {
+        return (Collections.synchronizedSet(addresses));
     }
 }

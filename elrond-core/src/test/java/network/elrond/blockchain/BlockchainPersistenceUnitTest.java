@@ -55,7 +55,7 @@ public class BlockchainPersistenceUnitTest {
 
         Assert.assertNotEquals(null, readValue);
 
-        blockchainPersistenceUnit.destroyAndReCreate();
+        blockchainPersistenceUnit.recreate();
 
         readValue = blockchainPersistenceUnit.get(key);
 
