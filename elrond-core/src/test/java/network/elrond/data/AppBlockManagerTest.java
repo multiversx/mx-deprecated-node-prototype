@@ -40,12 +40,16 @@ public class AppBlockManagerTest {
         application = new Application(context);
         state = application.getState();
         state.setStillRunning(false);
-        state.setCurrentBlock(new Block());
+        Block blk0 = new Block();
+        state.setCurrentBlock(blk0);
         application.start();
 
         //memory-only accounts
         accountsContext = new AccountsContext();
         state.setAccounts(new Accounts(accountsContext));
+
+        AppServiceProvider.getBootstrapService().putBlockInBlockchain(blk0,
+                AppServiceProvider.getSerializationService().getHashString(blk0), state);
 
         appBlockManager = new AppBlockManager();
     }
@@ -87,6 +91,7 @@ public class AppBlockManagerTest {
         AppServiceProvider.getBootstrapService().putTransactionInBlockchain(tx1, AppServiceProvider.getSerializationService().getHashString(tx1), state);
 
         Block blk = appBlockManager.composeBlock(transactions, application);
+        appBlockManager.signBlock(blk, pvkeyRecv);
 
         UtilTest.printAccountsWithBalance(state.getAccounts());
 
@@ -129,6 +134,7 @@ public class AppBlockManagerTest {
         AppServiceProvider.getBootstrapService().putTransactionInBlockchain(tx2, AppServiceProvider.getSerializationService().getHashString(tx2), state);
 
         Block blk = appBlockManager.composeBlock(transactions, application);
+        appBlockManager.signBlock(blk, pvkeyRecv);
 
         UtilTest.printAccountsWithBalance(state.getAccounts());
 
@@ -182,6 +188,7 @@ public class AppBlockManagerTest {
         }
 
         Block blk = appBlockManager.composeBlock(transactions, application);
+        appBlockManager.signBlock(blk, pvkeyRecv1);
 
         UtilTest.printAccountsWithBalance(state.getAccounts());
 
@@ -205,9 +212,72 @@ public class AppBlockManagerTest {
 
 
         UtilTest.printAccountsWithBalance(state.getAccounts());
-
     }
 
+    @Test
+    public void validateBlock() throws Exception{
+        state.setAccounts(new Accounts(accountsContext));
+
+        PrivateKey pvkeyRecv1 = new PrivateKey("RECV1");
+        PublicKey pbkeyRecv1 = new PublicKey(pvkeyRecv1);
+
+        PrivateKey pvkeyRecv2 = new PrivateKey("RECV2");
+        PublicKey pbkeyRecv2 = new PublicKey(pvkeyRecv2);
+
+        List<Transaction> transactions = new ArrayList<>();
+        //valid transaction to recv1
+        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv1, BigInteger.TEN, BigInteger.ZERO));
+        //not valid transaction to recv1 (nonce mismatch)
+        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv1, BigInteger.TEN, BigInteger.ZERO));
+        //not valid transaction to recv1 (not enough funds)
+        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv1, BigInteger.TEN.pow(100), BigInteger.ONE));
+        //valid transaction to recv2
+        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv2, BigInteger.TEN, BigInteger.ONE));
+        //not valid transaction to recv2 (nonce mismatch)
+        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv2, BigInteger.TEN, BigInteger.ZERO));
+        //not valid transaction to recv2 (not enough funds)
+        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv2, BigInteger.TEN.pow(100), BigInteger.ZERO));
+        //valid transaction to recv1
+        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv1, BigInteger.TEN, BigInteger.valueOf(2)));
+
+        for (Transaction transaction:transactions){
+            AppServiceProvider.getTransactionService().signTransaction(transaction, Util.PRIVATE_KEY_MINTING.getValue());
+
+            AppServiceProvider.getBootstrapService().putTransactionInBlockchain(transaction, AppServiceProvider.getSerializationService().getHashString(transaction), state);
+        }
+
+        Block block = appBlockManager.composeBlock(transactions, application);
+        appBlockManager.signBlock(block, pvkeyRecv1);
+
+        List<String> signersStringList = block.getListPublicKeys();
+
+        byte[] signature = block.getSignature();
+        byte[] commitment = block.getCommitment();
+        block.setSignature(null);
+        block.setCommitment(null);
+        byte[] message = AppServiceProvider.getSerializationService().getHash(block);
+        long bitmap = (1 << signersStringList.size()) - 1;
+
+        block.setSignature(signature);
+        block.setCommitment(commitment);
+
+        ArrayList<byte[]> signers = new ArrayList<>();
+        for (int i = 0; i < signersStringList.size(); i++){
+            signers.add(Util.hexStringToByteArray(signersStringList.get(i)));
+        }
+
+        TestCase.assertTrue(AppServiceProvider.getMultiSignatureService().verifyAggregatedSignature(signers, signature, commitment, message, bitmap));
+
+        //test tamper block
+        byte[] buff = block.getPrevBlockHash();
+        if (buff.length > 0){
+            buff[0] = 'J';
+        }
+        block.setPrevBlockHash(buff);
+        message = AppServiceProvider.getSerializationService().getHash(block);
+
+        TestCase.assertFalse(AppServiceProvider.getMultiSignatureService().verifyAggregatedSignature(signers, signature, commitment, message, bitmap));
+    }
 
     private int getValidAccounts(Accounts accounts) throws Exception{
         int counter = 0;
