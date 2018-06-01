@@ -91,7 +91,7 @@ public class AppBlockManagerTest {
         AppServiceProvider.getBootstrapService().putTransactionInBlockchain(tx1, AppServiceProvider.getSerializationService().getHashString(tx1), state);
 
         Block blk = appBlockManager.composeBlock(transactions, application);
-        appBlockManager.signBlock(blk, application);
+        appBlockManager.signBlock(blk, pvkeyRecv);
 
         UtilTest.printAccountsWithBalance(state.getAccounts());
 
@@ -134,7 +134,7 @@ public class AppBlockManagerTest {
         AppServiceProvider.getBootstrapService().putTransactionInBlockchain(tx2, AppServiceProvider.getSerializationService().getHashString(tx2), state);
 
         Block blk = appBlockManager.composeBlock(transactions, application);
-        appBlockManager.signBlock(blk, application);
+        appBlockManager.signBlock(blk, pvkeyRecv);
 
         UtilTest.printAccountsWithBalance(state.getAccounts());
 
@@ -188,7 +188,7 @@ public class AppBlockManagerTest {
         }
 
         Block blk = appBlockManager.composeBlock(transactions, application);
-        appBlockManager.signBlock(blk, application);
+        appBlockManager.signBlock(blk, pvkeyRecv1);
 
         UtilTest.printAccountsWithBalance(state.getAccounts());
 
@@ -247,7 +247,7 @@ public class AppBlockManagerTest {
         }
 
         Block block = appBlockManager.composeBlock(transactions, application);
-        appBlockManager.signBlock(block, application);
+        appBlockManager.signBlock(block, pvkeyRecv1);
 
         List<String> signersStringList = block.getListPublicKeys();
 

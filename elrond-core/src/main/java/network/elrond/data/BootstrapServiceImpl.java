@@ -9,7 +9,6 @@ import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.blockchain.SettingsType;
 import network.elrond.core.Util;
-import network.elrond.p2p.P2PConnection;
 import network.elrond.p2p.P2PObjectService;
 import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
@@ -17,7 +16,6 @@ import org.mapdb.Fun;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 public class BootstrapServiceImpl implements BootstrapService {
@@ -126,7 +124,7 @@ public class BootstrapServiceImpl implements BootstrapService {
         logger.info("START start from scratch!");
         //result.combine(new ExecutionReport().ok("Start from scratch..."));
         Fun.Tuple2<Block, Transaction> genesisData = AppServiceProvider.getAccountStateService().generateGenesisBlock(context.getStrAddressMint(), context.getValueMint(),
-                accountsContext);
+                accountsContext, context.getPrivateKey());
         String strHashGB = new String(Base64.encode(serializationService.getHash(genesisData.a)));
         String strHashTx = new String(Base64.encode(serializationService.getHash(genesisData.b)));
 

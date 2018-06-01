@@ -825,16 +825,19 @@ public class TrieTest {
         Options options = new Options();
         options.createIfMissing(true);
         Iq80DBFactory factory = new Iq80DBFactory();
-        database = factory.open(new File("C:\\test4"), options);
+        database = factory.open(new File("C:\\test"), options);
 
         TrieImpl trie1 = new TrieImpl(database);
-        trie1.update(LONG_STRING, "1");
-        trie1.update(LONG_STRING, "2");
-        trie1.update(LONG_STRING, "3");
+        trie1.update("A", "1");
+        trie1.update("B", "2");
+        trie1.update("C", "3");
+        trie1.update("D", "4");
+        trie1.update("E", "5");
+        trie1.update("F", "6");
         trie1.cleanCache();
         trie1.sync();
         TrieImpl trie2 = new TrieImpl(database, trie1.getRootHash());
-        assertEquals("3", new String(trie2.get(LONG_STRING)));
+        assertEquals("3", new String(trie2.get("C")));
     }
 */
 /*

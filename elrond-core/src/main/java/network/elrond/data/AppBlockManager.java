@@ -2,10 +2,10 @@ package network.elrond.data;
 
 import network.elrond.Application;
 import network.elrond.account.Accounts;
-import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.core.Util;
 import network.elrond.crypto.MultiSignatureService;
+import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.service.AppServiceProvider;
 import org.slf4j.Logger;
@@ -68,14 +68,14 @@ public class AppBlockManager {
         return block;
     }
 
-    public void signBlock(Block block, Application application){
+    public void signBlock(Block block, PrivateKey privateKey){
         Util.check(block != null, "block != null");
-        Util.check(application != null, "application != null");
+        Util.check(privateKey != null, "application != null");
 
-        AppContext context = application.getContext();
+        //AppContext context = application.getContext();
 
         block.listPubKeys.clear();
-        block.listPubKeys.add(Util.byteArrayToHexString(new PublicKey(context.getPrivateKey()).getValue()));
+        block.listPubKeys.add(Util.byteArrayToHexString(new PublicKey(privateKey).getValue()));
         block.setCommitment(null);
         block.setSignature(null);
 
@@ -92,7 +92,7 @@ public class AppBlockManager {
         byte[][] result = new byte[2][];
 
         for (int i = 0; i < sizeConsensusGroup; i++) {
-            signersPublicKeys.add(new PublicKey(context.getPrivateKey()).getValue());
+            signersPublicKeys.add(new PublicKey(privateKey).getValue());
             commitmentSecrets.add(multiSignatureService.computeCommitmentSecret());
             commitments.add(multiSignatureService.computeCommitment(commitmentSecrets.get(i)));
         }
@@ -119,7 +119,7 @@ public class AppBlockManager {
                 signatureShares.add(
                         multiSignatureService.computeSignatureShare(
                                 challenges.get(i),
-                                context.getPrivateKey().getValue(),
+                                privateKey.getValue(),
                                 commitmentSecrets.get(i)
                         )
                 );
@@ -130,6 +130,8 @@ public class AppBlockManager {
 
             aggregatedSignature = multiSignatureService.aggregateSignatures(signatureShares, 1);
         }
+
+        boolean sigOk = multiSignatureService.verifyAggregatedSignature(signersPublicKeys,aggregatedSignature, aggregatedCommitment, blockHashNoSig, 1 );
         block.setSignature(aggregatedSignature);
         block.setCommitment(aggregatedCommitment);
     }
