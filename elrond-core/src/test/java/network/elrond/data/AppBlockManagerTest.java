@@ -41,7 +41,7 @@ public class AppBlockManagerTest {
         state = application.getState();
         state.setStillRunning(false);
         Block blk0 = new Block();
-        state.setCurrentBlock(blk0);
+        state.getBlockchain().setCurrentBlock(blk0);
         application.start();
 
         //memory-only accounts

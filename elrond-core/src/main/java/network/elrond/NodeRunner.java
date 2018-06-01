@@ -6,7 +6,6 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 
-import java.math.BigInteger;
 import java.util.Scanner;
 
 public class NodeRunner {
@@ -46,7 +45,7 @@ public class NodeRunner {
             do {
 
                 AccountAddress address = AccountAddress.fromHexString("0326e7875aadaba270ae93ec40ef4706934d070eb21c9acad4743e31289fa4ebc7");
-                facade.send(address, BigInteger.TEN, application);
+                //facade.send(address, BigInteger.TEN, application);
 
                 System.out.println(facade.getBalance(address, application));
 

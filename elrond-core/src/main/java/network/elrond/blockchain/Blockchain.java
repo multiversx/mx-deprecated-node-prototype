@@ -1,6 +1,7 @@
 package network.elrond.blockchain;
 
 import network.elrond.account.AbstractPersistenceUnit;
+import network.elrond.data.Block;
 import network.elrond.data.DataBlock;
 import network.elrond.data.Transaction;
 import network.elrond.p2p.P2PConnection;
@@ -15,6 +16,9 @@ import java.util.Map;
 public class Blockchain implements Serializable, PersistenceUnitContainer {
 
     private final BlockchainContext context;
+
+    private Block currentBlock;
+    private BigInteger currentBlockIndex = BigInteger.valueOf(-1);
 
     private final Map<BlockchainUnitType, BlockchainPersistenceUnit<?, ?>> blockchain = new HashMap<>();
 
@@ -56,6 +60,25 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
         return context.getConnection();
     }
 
+    public Block getCurrentBlock() {
+        return currentBlock;
+    }
+
+    public void setCurrentBlock(Block currentBlock) {
+        if (currentBlock == null) {
+            throw new IllegalArgumentException("CurrentBlock cannot be null");
+        }
+        this.currentBlock = currentBlock;
+    }
+
+    public BigInteger getCurrentBlockIndex() {
+        return currentBlockIndex;
+    }
+
+    public void setCurrentBlockIndex(BigInteger currentBlockIndex) {
+        this.currentBlockIndex = currentBlockIndex;
+    }
+
     public void flush() {
         for (BlockchainUnitType key : blockchain.keySet()) {
             blockchain.get(key).clear();
@@ -71,5 +94,10 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Current block: " + ((currentBlock != null) ? currentBlock.toString() : "No block");
     }
 }

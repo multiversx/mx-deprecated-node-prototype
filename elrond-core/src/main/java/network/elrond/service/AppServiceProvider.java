@@ -104,9 +104,9 @@ public class AppServiceProvider {
         return getService(ExecutionService.class);
     }
 
-    public static BlockchainService getAppPersistanceService() {
-        return (BlockchainService) getService(AppPersistenceService.class);
-    }
+//    public static BlockchainService getAppPersistanceService() {
+//        return (BlockchainService) getService(AppPersistenceService.class);
+//    }
 
     public static BootstrapService getBootstrapService() {
         return getService(BootstrapService.class

@@ -32,7 +32,7 @@ public class AppBlockManager {
         Accounts accounts = state.getAccounts();
 
         Block block = new Block();
-        Block currentBlock = state.getCurrentBlock();
+        Block currentBlock = state.getBlockchain().getCurrentBlock();
         byte[] hash = AppServiceProvider.getSerializationService().getHash(currentBlock);
 
 

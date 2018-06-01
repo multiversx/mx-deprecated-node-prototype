@@ -3,9 +3,7 @@ package network.elrond.data;
 import network.elrond.Application;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
-import network.elrond.p2p.P2PConnection;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 public interface BootstrapService {
@@ -28,7 +26,7 @@ public interface BootstrapService {
 
     ExecutionReport rebuildFromDisk(Application application, BigInteger maxBlkHeightLocal);
 
-    ExecutionReport rebuildFromDiskDeltaNoExec(Application application, BigInteger maxBlkHeightLocal, BigInteger maxBlkHeightNetw);
+    //ExecutionReport rebuildFromDiskDeltaNoExec(Application application, BigInteger maxBlkHeightLocal, BigInteger maxBlkHeightNetw);
 
     ExecutionReport putBlockInBlockchain(Block blk, String blockHash, AppState state);
 
