@@ -14,15 +14,14 @@ import network.elrond.p2p.P2PObjectService;
 import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.mapdb.Fun;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigInteger;
 
 public class BootstrapServiceImpl implements BootstrapService {
-
-    private BlockchainService apsServ = AppServiceProvider.getAppPersistanceService();
-    private SerializationService serServ = AppServiceProvider.getSerializationService();
-    private P2PObjectService p2PObjectService = AppServiceProvider.getP2PObjectService();
+    private Logger logger = LoggerFactory.getLogger(BootstrapServiceImpl.class);
 
     //returns max block height from location
     public BigInteger getMaxBlockSize(LocationType locationType, Blockchain structure) throws Exception{
@@ -31,22 +30,26 @@ public class BootstrapServiceImpl implements BootstrapService {
         }
 
         if (locationType == LocationType.LOCAL){
-            String maxHeight = apsServ.get(SettingsType.MAX_BLOCK_HEIGHT.toString(), structure, BlockchainUnitType.SETTINGS);
+            String maxHeight = AppServiceProvider.getAppPersistanceService().get(SettingsType.MAX_BLOCK_HEIGHT.toString(), structure, BlockchainUnitType.SETTINGS);
 
             if (maxHeight == null) {
+                logger.info("getMaxBlockSize LOCAL: -1");
                 return(Util.BIG_INT_MIN_ONE);
             }
 
+            logger.info("getMaxBlockSize LOCAL: " + maxHeight);
             return (new BigInteger(maxHeight));
         }
 
         if (locationType == LocationType.NETWORK){
-            BigInteger maxHeight = p2PObjectService.getJsonDecoded(SettingsType.MAX_BLOCK_HEIGHT.toString(), structure.getConnection(), BigInteger.class);
+            BigInteger maxHeight = AppServiceProvider.getP2PObjectService().getJsonDecoded(SettingsType.MAX_BLOCK_HEIGHT.toString(), structure.getConnection(), BigInteger.class);
 
             if (maxHeight == null){
+                logger.info("getMaxBlockSize NETWORK: -1");
                 return(Util.BIG_INT_MIN_ONE);
             }
 
+            logger.info("getMaxBlockSize NETWORK: " + maxHeight);
             return (maxHeight);
         }
 
@@ -57,8 +60,9 @@ public class BootstrapServiceImpl implements BootstrapService {
     public void setMaxBlockSize(LocationType locationType, BigInteger height, Blockchain structure) throws Exception{
         if ((locationType.getIndex() & 2) != 0){
             //locally
-            String json = serServ.encodeJSON(height);
-            apsServ.put(SettingsType.MAX_BLOCK_HEIGHT.toString(), json, structure, BlockchainUnitType.SETTINGS);
+            String json = AppServiceProvider.getSerializationService().encodeJSON(height);
+            AppServiceProvider.getAppPersistanceService().put(SettingsType.MAX_BLOCK_HEIGHT.toString(), json, structure, BlockchainUnitType.SETTINGS);
+            logger.info("setMaxBlockSize LOCAL (" +height.toString(10) + ")");
         }
 
         if ((locationType.getIndex() & 1) != 0){
@@ -66,7 +70,8 @@ public class BootstrapServiceImpl implements BootstrapService {
             BigInteger maxHeight = getMaxBlockSize(LocationType.NETWORK, structure);
 
             if ((maxHeight == null) || (height.compareTo(maxHeight)) > 0) {
-                p2PObjectService.putJsonEncoded(height, SettingsType.MAX_BLOCK_HEIGHT.toString(), structure.getConnection());
+                logger.info("setMaxBlockSize NETWORK (" +height.toString(10) + ")");
+                AppServiceProvider.getP2PObjectService().putJsonEncoded(height, SettingsType.MAX_BLOCK_HEIGHT.toString(), structure.getConnection());
             }
         }
     }
@@ -78,11 +83,15 @@ public class BootstrapServiceImpl implements BootstrapService {
         }
 
         if (locationType == LocationType.LOCAL){
-            return ((String) apsServ.get(getHeightBlockHashString(blockHeight), structure, BlockchainUnitType.BLOCK_INDEX));
+            String data = (String) AppServiceProvider.getAppPersistanceService().get(getHeightBlockHashString(blockHeight), structure, BlockchainUnitType.BLOCK_INDEX);
+            logger.info("getBlockHashFromHeight LOCAL: " + getDataAsString(data));
+            return (data);
         }
 
         if (locationType == LocationType.NETWORK){
-            return(p2PObjectService.getJsonDecoded(getHeightBlockHashString(blockHeight), structure.getConnection(), String.class));
+            String data = AppServiceProvider.getP2PObjectService().getJsonDecoded(getHeightBlockHashString(blockHeight), structure.getConnection(), String.class);
+            logger.info("getBlockHashFromHeight NETWORK: " + getDataAsString(data));
+            return (data);
         }
 
         throw new Exception("Unimplemented location type: " + locationType.toString() + "!");
@@ -92,12 +101,14 @@ public class BootstrapServiceImpl implements BootstrapService {
     public void setBlockHashWithHeight(LocationType locationType, BigInteger blockHeight, String hash, Blockchain structure) throws Exception{
         if ((locationType.getIndex() & 2) != 0){
             //locally
-            apsServ.put(getHeightBlockHashString(blockHeight), hash, structure, BlockchainUnitType.BLOCK_INDEX);
+            AppServiceProvider.getAppPersistanceService().put(getHeightBlockHashString(blockHeight), hash, structure, BlockchainUnitType.BLOCK_INDEX);
+            logger.info("setBlockHashWithHeight LOCAL: ( blockHeight: " + getDataAsString(blockHeight) + ", hash: " + getDataAsString(hash) + ")");
         }
 
         if ((locationType.getIndex() & 1) != 0){
             //network
-            p2PObjectService.putJsonEncoded(hash, getHeightBlockHashString(blockHeight), structure.getConnection());
+            AppServiceProvider.getP2PObjectService().putJsonEncoded(hash, getHeightBlockHashString(blockHeight), structure.getConnection());
+            logger.info("setBlockHashWithHeight NETWORK: ( blockHeight: " + getDataAsString(blockHeight) + ", hash: " + getDataAsString(hash) + ")");
         }
     }
 
@@ -112,11 +123,15 @@ public class BootstrapServiceImpl implements BootstrapService {
         AccountsContext accountsContext = new AccountsContext();
 
 
-        result.combine(new ExecutionReport().ok("Start from scratch..."));
+        logger.info("START start from scratch!");
+        //result.combine(new ExecutionReport().ok("Start from scratch..."));
         Fun.Tuple2<Block, Transaction> genesisData = AppServiceProvider.getAccountStateService().generateGenesisBlock(context.getStrAddressMint(), context.getValueMint(),
                 accountsContext);
         String strHashGB = new String(Base64.encode(serializationService.getHash(genesisData.a)));
         String strHashTx = new String(Base64.encode(serializationService.getHash(genesisData.b)));
+
+        logger.info("Got genesis tx: " + getSerialized(genesisData.b) + " hash: " + strHashTx);
+        logger.info("Got genesis blk: " + getSerialized(genesisData.a) + " hash: " + strHashGB);
 
         //put locally and broadcasting it
         try {
@@ -140,6 +155,7 @@ public class BootstrapServiceImpl implements BootstrapService {
         //should broadcast generated block
         result.combine(rebuildFromDisk(application, BigInteger.ZERO));
 
+        logger.info("END of start from scratch called!");
         return (result);
     }
 
@@ -147,8 +163,11 @@ public class BootstrapServiceImpl implements BootstrapService {
         ExecutionReport result = new ExecutionReport();
         AppState state = application.getState();
 
-        result.combine(new ExecutionReport().ok("Bootstrapping... [local height: " + maxBlkHeightLocal.toString(10) + " > network height: " +
-                maxBlkHeightNetw.toString(10) + "..."));
+        logger.info("START start bootstrap!");
+
+        logger.info("Bootstrapping from local height: " + getDataAsString(maxBlkHeightLocal) + " > network height: " + getDataAsString(maxBlkHeightNetw));
+//        result.combine(new ExecutionReport().ok("Bootstrapping... [local height: " + maxBlkHeightLocal.toString(10) + " > network height: " +
+//                maxBlkHeightNetw.toString(10) + "..."));
         //state.setBootstrapping(true);
 
         String strHashBlock;
@@ -156,65 +175,79 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         //re-run stored blocks to update internal state
         for (BigInteger counter = BigInteger.ZERO; counter.compareTo(maxBlkHeightLocal) <= 0; counter = counter.add(BigInteger.ONE)){
+            logger.info("Re-run stored blocks, counter: " + getDataAsString(counter));
             try{
                 strHashBlock = getBlockHashFromHeight(LocationType.LOCAL, counter, state.getBlockchain());
 
                 if (strHashBlock == null) {
                     result.ko("Can not bootstrap! Could not find block with nonce = " + counter.toString(10) + " on LOCAL!");
+                    logger.info("END start bootstrap!");
                     return(result);
                 }
 
-                blk = apsServ.get(strHashBlock, state.getBlockchain(), BlockchainUnitType.BLOCK);
+                blk = AppServiceProvider.getAppPersistanceService().get(strHashBlock, state.getBlockchain(), BlockchainUnitType.BLOCK);
 
                 if (blk == null) {
                     result.ko("Can not find block hash " + strHashBlock + " on LOCAL!");
                     break;
                 }
 
+                logger.info("Got block " + getSerialized(blk) + " hash " + getDataAsString(strHashBlock) + ", trying to execute it!");
+
                 ExecutionReport exExecuteBlock = AppServiceProvider.getExecutionService().processBlock(blk, state.getAccounts(), state.getBlockchain());
 
                 result.combine(exExecuteBlock);
 
                 if (!result.isOk()){
+                    logger.info("END start bootstrap!");
                     return (result);
                 }
             } catch (Exception ex){
                 result.ko(ex);
+                logger.info("END start bootstrap!");
                 return (result);
             }
         }
 
         for (BigInteger counter = maxBlkHeightLocal.add(BigInteger.ONE); counter.compareTo(maxBlkHeightNetw) <= 0; counter = counter.add(BigInteger.ONE)) {
             //get the hash of the block from network
+            logger.info("Fetch new blocks, counter: " + getDataAsString(counter));
+
             try {
                 strHashBlock = getBlockHashFromHeight(LocationType.NETWORK, counter, state.getBlockchain());
             } catch (Exception ex) {
                 result.ko(ex);
+                logger.info("END start bootstrap!");
                 return (result);
             }
 
             if (strHashBlock == null) {
                 result.ko("Can not bootstrap! Could not find block with nonce = " + counter.toString(10) + " on DHT!");
+                logger.info("END start bootstrap!");
                 return(result);
             }
 
             try {
-                blk = p2PObjectService.getJsonDecoded(strHashBlock, state.getConnection(), Block.class);
+                blk = AppServiceProvider.getP2PObjectService().getJsonDecoded(strHashBlock, state.getConnection(), Block.class);
             } catch (Exception ex) {
                 result.ko(ex);
+                logger.info("END start bootstrap!");
                 return (result);
             }
 
             if (blk == null) {
                 result.ko("Can not find block hash " + strHashBlock + " on DHT!");
+                logger.info("END start bootstrap!");
                 break;
             }
 
+            logger.info("Got block " + getSerialized(blk) + " hash " + getDataAsString(strHashBlock) + ", trying to execute it!");
             ExecutionReport exExecuteBlock = AppServiceProvider.getExecutionService().processBlock(blk, state.getAccounts(), state.getBlockchain());
 
             result.combine(exExecuteBlock);
 
             if (!result.isOk()){
+                logger.info("END start bootstrap!");
                 return (result);
             }
 
@@ -222,10 +255,12 @@ public class BootstrapServiceImpl implements BootstrapService {
             result.combine(putBlockInBlockchain(blk, strHashBlock, state));
 
             if (!result.isOk()){
+                logger.info("END start bootstrap!");
                 return (result);
             }
         }
 
+        logger.info("END start bootstrap!");
         return(result);
     }
 
@@ -235,18 +270,22 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
 
+        logger.info("START rebuild from disk!");
 
-        result.combine(new ExecutionReport().ok("Start bootstrapping by loading from disk..."));
+        //result.combine(new ExecutionReport().ok("Start bootstrapping by loading from disk..."));
         //state.setBootstrapping(true);
         //start pushing blocks and transactions
         //block with nonce = 0 is genesis and should be broadcast
         for (BigInteger counter = BigInteger.valueOf(0); counter.compareTo(maxBlkHeightLocal) <= 0; counter = counter.add(BigInteger.ONE)) {
+            logger.info("Put block with height: " + getDataAsString(counter) + "...");
             try {
-                result.combine(new ExecutionReport().ok("Put block with height: " + counter.toString(10) + "..."));
+                //result.combine(new ExecutionReport().ok("Put block with height: " + counter.toString(10) + "..."));
                 //put block
                 String strHashBlk = getBlockHashFromHeight(LocationType.LOCAL, counter, state.getBlockchain());
                 Block blk = blockchainService.get(strHashBlk, state.getBlockchain(), BlockchainUnitType.BLOCK);
-                p2PObjectService.putJsonEncoded(blk, strHashBlk, state.getConnection());
+                AppServiceProvider.getP2PObjectService().putJsonEncoded(blk, strHashBlk, state.getConnection());
+
+                logger.info("Put block " + getSerialized(blk) + " hash: " + strHashBlk);
 
                 //re-run block to update internal state
                 ExecutionReport exExecuteBlock = AppServiceProvider.getExecutionService().processBlock(blk, state.getAccounts(), state.getBlockchain());
@@ -254,6 +293,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                 result.combine(exExecuteBlock);
 
                 if (!result.isOk()){
+                    logger.info("END rebuild from disk!");
                     return (result);
                 }
 
@@ -266,17 +306,21 @@ public class BootstrapServiceImpl implements BootstrapService {
 
                     Transaction tx = blockchainService.get(strHashTx, state.getBlockchain(), BlockchainUnitType.TRANSACTION);
 
-                    p2PObjectService.putJsonEncoded(tx, strHashTx, state.getConnection());
+                    AppServiceProvider.getP2PObjectService().putJsonEncoded(tx, strHashTx, state.getConnection());
+
+                    logger.info("Put tx " + getSerialized(tx) + " hash: " + strHashTx);
                 }
 
                 //put settings max_block_height
                 setMaxBlockSize(LocationType.NETWORK, counter, state.getBlockchain());
             } catch (Exception ex) {
                 result.ko(ex);
+                logger.info("END rebuild from disk!");
                 return (result);
             }
         }
 
+        logger.info("END rebuild from disk!");
         return(result);
     }
 
@@ -286,18 +330,22 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
 
+        logger.info("START rebuild from disk delta without exec!");
 
-        result.combine(new ExecutionReport().ok("Start bootstrapping by loading from disk..."));
+        //result.combine(new ExecutionReport().ok("Start bootstrapping by loading from disk..."));
         //state.setBootstrapping(true);
         //start pushing blocks and transactions
         //block with nonce = 0 is genesis and should be broadcast
         for (BigInteger counter = maxBlkHeightNetw.add(BigInteger.ONE); counter.compareTo(maxBlkHeightLocal) <= 0; counter = counter.add(BigInteger.ONE)) {
+            logger.info("Put block with height: " + getDataAsString(counter) + "...");
             try {
-                result.combine(new ExecutionReport().ok("Put block with height: " + counter.toString(10) + "..."));
+                //result.combine(new ExecutionReport().ok("Put block with height: " + counter.toString(10) + "..."));
                 //put block
                 String strHashBlk = getBlockHashFromHeight(LocationType.LOCAL, counter, state.getBlockchain());
                 Block blk = blockchainService.get(strHashBlk, state.getBlockchain(), BlockchainUnitType.BLOCK);
-                p2PObjectService.putJsonEncoded(blk, strHashBlk, state.getConnection());
+                AppServiceProvider.getP2PObjectService().putJsonEncoded(blk, strHashBlk, state.getConnection());
+
+                logger.info("Put block " + getSerialized(blk) + " hash: " + strHashBlk);
 
                 //put pair block_height - block hash
                 setBlockHashWithHeight(LocationType.NETWORK, counter, strHashBlk, state.getBlockchain());
@@ -308,22 +356,28 @@ public class BootstrapServiceImpl implements BootstrapService {
 
                     Transaction tx = blockchainService.get(strHashTx, state.getBlockchain(), BlockchainUnitType.TRANSACTION);
 
-                    p2PObjectService.putJsonEncoded(tx, strHashTx, state.getConnection());
+                    AppServiceProvider.getP2PObjectService().putJsonEncoded(tx, strHashTx, state.getConnection());
+
+                    logger.info("Put tx " + getSerialized(tx) + " hash: " + strHashTx);
                 }
 
                 //put settings max_block_height
                 setMaxBlockSize(LocationType.NETWORK, counter, state.getBlockchain());
             } catch (Exception ex) {
                 result.ko(ex);
+                logger.info("END rebuild from disk delta without exec!");
                 return (result);
             }
         }
 
+        logger.info("END rebuild from disk delta without exec!");
         return(result);
     }
 
     public ExecutionReport putBlockInBlockchain(Block blk, String blockHash, AppState state) {
         ExecutionReport result = new ExecutionReport();
+
+        logger.info("START put block on blockchain!");
 
         BlockchainService appPersistanceService = AppServiceProvider.getAppPersistanceService();
 
@@ -333,11 +387,13 @@ public class BootstrapServiceImpl implements BootstrapService {
             appPersistanceService.put(blk.getNonce(), blockHash, state.getBlockchain(), BlockchainUnitType.BLOCK_INDEX);
             setMaxBlockSize(LocationType.LOCAL, blk.getNonce(), state.getBlockchain());
             state.setCurrentBlock(blk);
-            result.combine(new ExecutionReport().ok("Put block in blockchain with hash: " + blockHash));
+            //result.combine(new ExecutionReport().ok("Put block in blockchain with hash: " + blockHash));
+            logger.info("Put block " + getSerialized(blk) + " hash: " + blockHash);
         } catch (Exception ex) {
             result.combine(new ExecutionReport().ko(ex));
         }
 
+        logger.info("END put block on blockchain!");
         return (result);
     }
 
@@ -346,9 +402,12 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         BlockchainService appPersistanceService = AppServiceProvider.getAppPersistanceService();
 
+        logger.info("START put tx on blockchain!");
+
         try {
             appPersistanceService.put(transactionHash, transaction, state.getBlockchain(), BlockchainUnitType.TRANSACTION);
-            result.combine(new ExecutionReport().ok("Put transaction in blockchain with hash: " + transactionHash));
+            //result.combine(new ExecutionReport().ok("Put transaction in blockchain with hash: " + transactionHash));
+            logger.info("Put tx " + getSerialized(transaction) + " hash: " + transactionHash);
         } catch (Exception ex) {
             result.combine(new ExecutionReport().ko(ex));
         }
@@ -359,5 +418,18 @@ public class BootstrapServiceImpl implements BootstrapService {
     //generate block height name to search the hash
     public String getHeightBlockHashString(BigInteger blockHeight){
         return(SettingsType.HEIGHT_BLOCK.toString() + "_" + blockHeight.toString(10));
+    }
+
+    private String getDataAsString(Object obj){
+        if (obj == null) {
+            return("NULL");
+        } else {
+            return(obj.toString());
+        }
+    }
+
+    private String getSerialized(Object data){
+        return (AppServiceProvider.getSerializationService().encodeJSON(data));
+
     }
 }
