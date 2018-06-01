@@ -25,9 +25,11 @@ public class NodeRunner {
         context.setMasterPeerIpAddress(masterPeerIpAddress);
         context.setMasterPeerPort(masterPeerPort);
         context.setPort(port);
+        context.setStorageBasePath(nodeName);
         context.setNodeName(nodeName);
         PrivateKey privateKey1 = new PrivateKey(privateKey);
         PublicKey publicKey = new PublicKey(privateKey1);
+
         context.setPrivateKey(privateKey1);
         String mintAddress = Util.getAddressFromPublicKey(publicKey.getValue());
         context.setStrAddressMint(mintAddress);

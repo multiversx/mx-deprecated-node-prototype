@@ -62,6 +62,7 @@ public class AccountStateServiceImpl implements AccountStateService {
 
         AccountsPersistenceUnit<AccountAddress, AccountState> unit = accounts.getAccountsPersistenceUnit();
         unit.put(address.getBytes(), convertAccountStateToRLP(state));
+        unit.getCache().put(address, state);
         accounts.getAddresses().add(address);
 
     }
@@ -91,7 +92,7 @@ public class AccountStateServiceImpl implements AccountStateService {
         return (accountState);
     }
 
-    public void initialMintingToKnownAddress(Accounts accounts){
+    public void initialMintingToKnownAddress(Accounts accounts) {
 
         AccountState accountState = null;
 
@@ -100,15 +101,15 @@ public class AccountStateServiceImpl implements AccountStateService {
             accountState.setBalance(Util.VALUE_MINTING);
             setAccountState(AccountAddress.fromPublicKey(Util.PUBLIC_KEY_MINTING), accountState, accounts);
             accounts.getAccountsPersistenceUnit().commit();
-        } catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
     public Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue,
-                                                               AccountsContext accountsContextTemporary, PrivateKey privateKey){
+                                                               AccountsContext accountsContextTemporary, PrivateKey privateKey) {
 
-        if (initialValue.compareTo(Util.VALUE_MINTING) > 0){
+        if (initialValue.compareTo(Util.VALUE_MINTING) > 0) {
             initialValue = Util.VALUE_MINTING;
         }
 
@@ -127,17 +128,17 @@ public class AccountStateServiceImpl implements AccountStateService {
 
             ExecutionService executionService = AppServiceProvider.getExecutionService();
             ExecutionReport executionReport = executionService.processTransaction(transactionMint, accountsTemp);
-            if (!executionReport.isOk()){
-                return(null);
+            if (!executionReport.isOk()) {
+                return (null);
             }
             genesisBlock.setAppStateHash(accountsTemp.getAccountsPersistenceUnit().getRootHash());
             AppBlockManager.instance().signBlock(genesisBlock, privateKey);
             accountsTemp.getAccountsPersistenceUnit().close();
-        } catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
-            return(null);
+            return (null);
         }
 
-        return (new Fun.Tuple2<>(genesisBlock, transactionMint ));
+        return (new Fun.Tuple2<>(genesisBlock, transactionMint));
     }
 }
