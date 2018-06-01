@@ -18,7 +18,7 @@ public class AccountsManager {
         return instance;
     }
 
-    public Boolean HasFunds(Accounts accounts, String addressString, BigInteger value) throws IOException, ClassNotFoundException {
+    public Boolean hasFunds(Accounts accounts, String addressString, BigInteger value) throws IOException, ClassNotFoundException {
         if(accounts == null){
             throw new IllegalArgumentException("Accounts cannot be null");
         }
@@ -31,20 +31,20 @@ public class AccountsManager {
         return senderAccountState.getBalance().compareTo(value) >= 0;
     }
 
-    public Boolean HasCorrectNonce(Accounts accounts, String addressString, BigInteger nonce) throws IOException, ClassNotFoundException {
+    public Boolean hasCorrectNonce(Accounts accounts, String addressString, BigInteger nonce) throws IOException, ClassNotFoundException {
         if(accounts == null){
             throw new IllegalArgumentException("Accounts cannot be null");
         }
         if(addressString == null || addressString.isEmpty()){
             throw new IllegalArgumentException("AddressString cannot be null");
         }
-return true;
+        return true;
 //        AccountAddress sendAddress = AccountAddress.fromHexaString(addressString);
 //        AccountState senderAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(sendAddress, accounts);
 //        return senderAccountState.getNonce().equals(nonce);
     }
 
-    public void TransferFunds(Accounts accounts, String senderAddressString, String receiverAddressString, BigInteger value, BigInteger nonce) throws IOException, ClassNotFoundException {
+    public void transferFunds(Accounts accounts, String senderAddressString, String receiverAddressString, BigInteger value, BigInteger nonce) throws IOException, ClassNotFoundException {
 
         if(accounts == null){
             throw new IllegalArgumentException("Accounts cannot be null");
@@ -62,7 +62,7 @@ return true;
             throw new IllegalArgumentException("Nonce cannot be negative");
         }
 
-        if(!(HasFunds(accounts, senderAddressString, value) && HasCorrectNonce(accounts, senderAddressString, nonce))){
+        if(!(hasFunds(accounts, senderAddressString, value) && hasCorrectNonce(accounts, senderAddressString, nonce))){
             throw new IllegalArgumentException("Validation of Sender Account failed!");
         }
 

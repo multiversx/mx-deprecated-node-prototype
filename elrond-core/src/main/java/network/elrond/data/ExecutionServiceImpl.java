@@ -155,15 +155,15 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         //We have to copy-construct the objects for sandbox mode
-        if (!AccountsManager.instance().HasFunds(accounts, transaction.getSendAddress(), transaction.getValue())) {
+        if (!AccountsManager.instance().hasFunds(accounts, transaction.getSendAddress(), transaction.getValue())) {
             return ExecutionReport.create().ko("Invalid transaction! Will result in negative balance! tx hash: " + strHash);
         }
 
-        if (!AccountsManager.instance().HasCorrectNonce(accounts, transaction.getSendAddress(), transaction.getNonce())) {
+        if (!AccountsManager.instance().hasCorrectNonce(accounts, transaction.getSendAddress(), transaction.getNonce())) {
             return ExecutionReport.create().ko("Invalid transaction! Nonce mismatch! tx hash: " + strHash);
         }
 
-        AccountsManager.instance().TransferFunds(accounts,
+        AccountsManager.instance().transferFunds(accounts,
                 transaction.getSendAddress(), transaction.getReceiverAddress(),
                 transaction.getValue(), transaction.getNonce());
 
