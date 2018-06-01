@@ -14,10 +14,6 @@ import java.math.BigInteger;
 
 public class AccountStateServiceImpl implements AccountStateService {
 
-//    public byte[] getHash(AccountState state) {
-//        String json = AppServiceProvider.getSerializationService().encodeJSON(state);
-//        return (Util.SHA3.digest(json.getBytes()));
-//    }
 
     @Override
     public synchronized AccountState getOrCreateAccountState(AccountAddress address, Accounts accounts) throws IOException, ClassNotFoundException {

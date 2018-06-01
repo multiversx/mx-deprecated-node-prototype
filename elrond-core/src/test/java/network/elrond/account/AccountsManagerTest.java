@@ -28,7 +28,7 @@ public class AccountsManagerTest extends ExpectedExceptionTest {
     @Test
     public void testHasFunds() throws IOException, ClassNotFoundException {
         Accounts accounts = new Accounts(new AccountsContext());
-        AccountAddress test = AccountAddress.fromHexaString("Test");
+        AccountAddress test = AccountAddress.fromHexString("Test");
         AccountState senderAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(test, accounts);
         senderAccountState.addToBalance(BigInteger.TEN);
         AppServiceProvider.getAccountStateService().setAccountState(test, senderAccountState, accounts);
@@ -53,7 +53,7 @@ public class AccountsManagerTest extends ExpectedExceptionTest {
     @Test
     public void testHasCorrectNonce() throws IOException, ClassNotFoundException {
         Accounts accounts = new Accounts(new AccountsContext());
-        AccountAddress test = AccountAddress.fromHexaString("Test");
+        AccountAddress test = AccountAddress.fromHexString("Test");
         AccountState senderAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(test, accounts);
         senderAccountState.setNonce(BigInteger.TEN);
         AppServiceProvider.getAccountStateService().setAccountState(test, senderAccountState, accounts);
@@ -99,9 +99,9 @@ public class AccountsManagerTest extends ExpectedExceptionTest {
     @Test
     public void testTransferFunds() throws IOException, ClassNotFoundException {
         Accounts accounts = new Accounts(new AccountsContext());
-        AccountAddress senderAddress = AccountAddress.fromHexaString("Sender");
+        AccountAddress senderAddress = AccountAddress.fromHexString("Sender");
         AccountState senderAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(senderAddress, accounts);
-        AccountAddress receiverAddress = AccountAddress.fromHexaString("Receiver");
+        AccountAddress receiverAddress = AccountAddress.fromHexString("Receiver");
         senderAccountState.setBalance(BigInteger.TEN);
         AppServiceProvider.getAccountStateService().setAccountState(senderAddress, senderAccountState, accounts);
         accountsManager.TransferFunds(accounts, "Sender", "Receiver", BigInteger.ONE, BigInteger.ZERO);

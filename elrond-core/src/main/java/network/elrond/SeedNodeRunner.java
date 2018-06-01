@@ -43,10 +43,10 @@ public class SeedNodeRunner {
 
             do {
 
-                AccountAddress address = AccountAddress.fromHexaString("0326e7875aadaba270ae93ec40ef4706934d070eb21c9acad4743e31289fa4ebc7");
+                AccountAddress address = AccountAddress.fromHexString("0326e7875aadaba270ae93ec40ef4706934d070eb21c9acad4743e31289fa4ebc7");
                 facade.send(address, BigInteger.TEN, application);
 
-                //System.out.println(facade.getBalance(address, application));
+                System.out.println(facade.getBalance(address, application));
 
                 try {
                     Thread.sleep(1000);

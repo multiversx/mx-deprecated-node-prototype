@@ -26,7 +26,7 @@ public class AccountsManager {
             throw new IllegalArgumentException("AddressString cannot be null");
         }
 
-        AccountAddress sendAddress = AccountAddress.fromHexaString(addressString);
+        AccountAddress sendAddress = AccountAddress.fromHexString(addressString);
         AccountState senderAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(sendAddress, accounts);
         return senderAccountState.getBalance().compareTo(value) >= 0;
     }
@@ -39,7 +39,7 @@ public class AccountsManager {
             throw new IllegalArgumentException("AddressString cannot be null");
         }
 return true;
-//        AccountAddress sendAddress = AccountAddress.fromHexaString(addressString);
+//        AccountAddress sendAddress = AccountAddress.fromHexString(addressString);
 //        AccountState senderAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(sendAddress, accounts);
 //        return senderAccountState.getNonce().equals(nonce);
     }
@@ -66,8 +66,8 @@ return true;
             throw new IllegalArgumentException("Validation of Sender Account failed!");
         }
 
-        AccountAddress senderAddress = AccountAddress.fromHexaString(senderAddressString);
-        AccountAddress receiverAddress = AccountAddress.fromHexaString(receiverAddressString);
+        AccountAddress senderAddress = AccountAddress.fromHexString(senderAddressString);
+        AccountAddress receiverAddress = AccountAddress.fromHexString(receiverAddressString);
         AccountState senderAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(senderAddress, accounts);
         AccountState receiverAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(receiverAddress, accounts);
 

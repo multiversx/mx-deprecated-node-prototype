@@ -1,15 +1,16 @@
 package network.elrond.api;
 
-import network.elrond.Application;
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigInteger;
@@ -24,12 +25,12 @@ public class ElrondNodeController {
 
     @RequestMapping(path = "/node/start", method = RequestMethod.GET)
     public @ResponseBody
-    void start(HttpServletResponse response,
-               @RequestParam(defaultValue = "elrond-node-1") String nodeName,
-               @RequestParam(defaultValue = "4001") Integer port,
-               @RequestParam(defaultValue = "4000", required = false) Integer masterPeerPort,
-               @RequestParam(defaultValue = "127.0.0.1", required = false) String masterPeerIpAddress,
-               @RequestParam(defaultValue = "026c00d83e0dc47e6b626ed6c42f636b", required = true) String privateKey
+    void startNode(HttpServletResponse response,
+                   @RequestParam(defaultValue = "elrond-node-1") String nodeName,
+                   @RequestParam(defaultValue = "4001") Integer port,
+                   @RequestParam(defaultValue = "4000", required = false) Integer masterPeerPort,
+                   @RequestParam(defaultValue = "127.0.0.1", required = false) String masterPeerIpAddress,
+                   @RequestParam(defaultValue = "026c00d83e0dc47e6b626ed6c42f636b", required = true) String privateKey
 
     ) {
 
@@ -60,17 +61,17 @@ public class ElrondNodeController {
                         String address,
                 @RequestParam(defaultValue = "1") BigInteger value) {
 
-        AccountAddress _add = AccountAddress.fromHexaString(address);
+        AccountAddress _add = AccountAddress.fromHexString(address);
         return elrondApiNode.send(_add, value);
 
     }
 
     @RequestMapping(path = "/node/balance", method = RequestMethod.GET)
     public @ResponseBody
-    Object send(HttpServletResponse response,
-                @RequestParam() String address) {
+    Object getBalance(HttpServletResponse response,
+                      @RequestParam() String address) {
 
-        AccountAddress _add = AccountAddress.fromHexaString(address);
+        AccountAddress _add = AccountAddress.fromHexString(address);
         return elrondApiNode.getBalance(_add);
 
     }

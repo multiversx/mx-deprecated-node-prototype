@@ -7,33 +7,29 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 public class AccountAddress implements Serializable {
+
     private byte[] bytes;
 
     public byte[] getBytes() {
         return bytes;
     }
 
-    public PublicKey getPublicKey(){
-        return  new PublicKey(bytes);
+    public PublicKey getPublicKey() {
+        return new PublicKey(bytes);
     }
 
     public AccountAddress(byte[] bytes) {
-        if(bytes == null){
+        if (bytes == null) {
             throw new IllegalArgumentException("Bytes cannot be null");
         }
         this.bytes = bytes;
     }
 
-    //JLS - NO!
-//    public static AccountAddress fromString(String value) {
-//        return new AccountAddress(value.getBytes());
-//    }
 
-    public static AccountAddress fromHexaString(String value) {
-        if(value == null || value.isEmpty()){
+    public static AccountAddress fromHexString(String value) {
+        if (value == null || value.isEmpty()) {
             throw new IllegalArgumentException("value is not a HexaString!!!");
         }
-        //String hexVal = value != null ? value.substring(2) : null;
         return new AccountAddress(Util.hexStringToByteArray(value));
     }
 
@@ -42,8 +38,7 @@ public class AccountAddress implements Serializable {
     }
 
     public static AccountAddress fromPublicKey(PublicKey key) {
-        //String address = Util.getAddressFromPublicKey(key.getQ().getEncoded(true));
-        if(key == null){
+        if (key == null) {
             throw new IllegalArgumentException("PublicKey cannot be null");
         }
         return fromBytes(key.getValue());
