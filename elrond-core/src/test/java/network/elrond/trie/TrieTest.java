@@ -816,7 +816,7 @@ public class TrieTest {
 
     }
 */
-
+/*
     @Test
     public void testGetFromRootNode() throws IOException {
 
@@ -839,7 +839,7 @@ public class TrieTest {
         TrieImpl trie2 = new TrieImpl(database, trie1.getRootHash());
         assertEquals("3", new String(trie2.get("C")));
     }
-
+*/
 /*
     @Test
     public void testGetFromDB() throws IOException {
