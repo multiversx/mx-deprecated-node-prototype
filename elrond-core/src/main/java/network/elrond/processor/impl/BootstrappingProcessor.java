@@ -64,13 +64,13 @@ public class BootstrappingProcessor implements AppTask {
         try {
             maxBlkHeightNetw = bootstrapService.getMaxBlockSize(LocationType.NETWORK, state.getBlockchain());
         } catch (Exception ex) {
-            //ex.printStackTrace();
+            ex.printStackTrace();
         }
 
         try {
             maxBlkHeightLocal = bootstrapService.getMaxBlockSize(LocationType.LOCAL, state.getBlockchain());
         } catch (Exception ex) {
-            //ex.printStackTrace();
+            ex.printStackTrace();
         }
 
         ExecutionReport exReport = new ExecutionReport();

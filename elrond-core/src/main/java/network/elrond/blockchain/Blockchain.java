@@ -58,9 +58,8 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
 
     public void flush() {
         for (BlockchainUnitType key : blockchain.keySet()) {
-            blockchain.get(key).getCache().clear();
+            blockchain.get(key).clear();
         }
-
     }
 
     @Override

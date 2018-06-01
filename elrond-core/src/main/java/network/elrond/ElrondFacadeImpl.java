@@ -12,10 +12,14 @@ import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.service.AppServiceProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 
 public class ElrondFacadeImpl implements ElrondFacade {
+
+    private static final Logger logger = LoggerFactory.getLogger("ElrondFacadeImpl");
 
 
     @Override
@@ -52,8 +56,9 @@ public class ElrondFacadeImpl implements ElrondFacade {
             AppState state = application.getState();
             Accounts accounts = state.getAccounts();
 
-            AccountState account = AppServiceProvider.getAccountStateService().getOrCreateAccountState(address, accounts);
-            return account.getBalance();
+            AccountState account = AppServiceProvider.getAccountStateService().getAccountState(address, accounts);
+
+            return (account == null)? BigInteger.ZERO: account.getBalance();
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -74,7 +79,15 @@ public class ElrondFacadeImpl implements ElrondFacade {
             PublicKey senderPublicKey = state.getPublicKey();
             PrivateKey senderPrivateKey = state.getPrivateKey();
             AccountAddress senderAddress = AccountAddress.fromPublicKey(senderPublicKey);
-            AccountState senderAccount = AppServiceProvider.getAccountStateService().getOrCreateAccountState(senderAddress, accounts);
+            AccountState senderAccount = AppServiceProvider.getAccountStateService().getAccountState(senderAddress, accounts);
+
+
+            if (senderAccount == null) {
+                // sender account is new, can't send
+                logger.info("Sender account is new, can't send");
+                return false;
+            }
+
 
             PublicKey receiverPublicKey = receiver.getPublicKey();
             AccountState receiverAccount = AppServiceProvider.getAccountStateService().getOrCreateAccountState(senderAddress, accounts);

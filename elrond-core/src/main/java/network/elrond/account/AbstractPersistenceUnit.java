@@ -4,28 +4,29 @@ import network.elrond.core.LRUMap;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.impl.Iq80DBFactory;
-import org.mapdb.Fun;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.ArrayBlockingQueue;
 
+/**
+ * Abstract implementation of key => value persistence unit
+ */
 public abstract class AbstractPersistenceUnit<K, V> {
 
-    private static final int MAX_ENTRIES = 10000;
+    protected static final int MAX_ENTRIES = 10000;
 
-    final protected LRUMap<K, V> cache = new LRUMap<>(0, MAX_ENTRIES);
+    protected final String databasePath;
     protected DB database;
-    final ArrayBlockingQueue<Fun.Tuple2<K, V>> queue = new ArrayBlockingQueue<>(10000);
 
-    private final String databasePath;
+    final private LRUMap<K, V> cache = new LRUMap<>(0, MAX_ENTRIES);
+
 
     public AbstractPersistenceUnit(String databasePath) throws IOException {
         this.databasePath = databasePath;
         if (databasePath == null || databasePath.isEmpty()) {
             this.database = new MockDB();
 
-        }else {
+        } else {
             this.database = initDatabase(databasePath);
         }
     }
@@ -41,17 +42,38 @@ public abstract class AbstractPersistenceUnit<K, V> {
         return cache;
     }
 
-    public abstract void put(byte[] key, byte[] val);
+    /**
+     * Put value on unit
+     *
+     * @param key
+     * @param val
+     */
+    protected abstract void put(byte[] key, byte[] val);
 
-    public abstract byte[] get(byte[] key);
+    /**
+     * Get value from unit
+     *
+     * @param key
+     * @return
+     */
+    protected abstract byte[] get(byte[] key);
 
-    public void destroyAndReCreate() throws IOException {
+    /**
+     * Delete everything and recreate unit
+     *
+     * @throws IOException
+     */
+    public void recreate() throws IOException {
         destroy();
-
         this.database = initDatabase(databasePath);
 
     }
 
+    /**
+     * Delete unit
+     *
+     * @throws IOException
+     */
     public void destroy() throws IOException {
         Iq80DBFactory factory = new Iq80DBFactory();
         this.database.close();
@@ -60,8 +82,20 @@ public abstract class AbstractPersistenceUnit<K, V> {
         factory.destroy(new File(databasePath), options);
     }
 
+    /**
+     * Close  unit
+     *
+     * @throws IOException
+     */
     public void close() throws IOException {
         this.database.close();
 
+    }
+
+    /**
+     * Clear memory cache
+     */
+    public void clear() {
+        cache.clear();
     }
 }

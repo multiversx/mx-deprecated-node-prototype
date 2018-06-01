@@ -58,7 +58,7 @@ public class BootstrappingProcessorTest {
                 continue;
             }
 
-            blockchainPersistenceUnit.destroyAndReCreate();
+            blockchainPersistenceUnit.recreate();
         }
 
         //test that initial values are minus one
@@ -107,7 +107,7 @@ public class BootstrappingProcessorTest {
         AccountState acsSender = accountStateService.getOrCreateAccountState(AccountAddress.fromPublicKey(pbk1), state.getAccounts());
         //mint 100 ERDs
         acsSender.setBalance(BigInteger.TEN.pow(10));
-        accountStateService.setAccountState(AccountAddress.fromHexaString(trx1.getSendAddress()), acsSender, state.getAccounts()); // PMS
+        accountStateService.setAccountState(AccountAddress.fromHexString(trx1.getSendAddress()), acsSender, state.getAccounts()); // PMS
 
         //Now network is loaded, try to bootstrap
         executionReport = bootstrapService.bootstrap(app, BigInteger.ZERO, bootstrapService.getMaxBlockSize(LocationType.NETWORK, state.getBlockchain()));
