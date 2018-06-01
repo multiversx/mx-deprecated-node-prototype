@@ -28,20 +28,21 @@ public class AppBlockManager {
 
     public Block composeBlock(List<Transaction> transactions, Application application) {
 
+        Util.check(transactions!=null, "transactions!=null");
+        Util.check(application!=null, "application!=null");
+
         AppState state = application.getState();
         Accounts accounts = state.getAccounts();
 
-        Block block = new Block();
-        Block currentBlock = state.getBlockchain().getCurrentBlock();
-        byte[] hash = AppServiceProvider.getSerializationService().getHash(currentBlock);
+        Block block = getNewBlockAndBindToPrevious(state.getBlockchain().getCurrentBlock());
+        addTransactions(transactions, accounts, block);
+        block.setAppStateHash(accounts.getAccountsPersistenceUnit().getRootHash());
+        AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
 
+        return block;
+    }
 
-        // Bind on prev block
-        block.setPrevBlockHash(hash);
-        BigInteger nonce = currentBlock.getNonce().add(BigInteger.ONE);
-        block.setNonce(nonce);
-
-        // Add transactions
+    private void addTransactions(List<Transaction> transactions, Accounts accounts, Block block) {
         for (Transaction transaction : transactions) {
             boolean valid = AppServiceProvider.getTransactionService().verifyTransaction(transaction);
             if (!valid) {
@@ -49,7 +50,7 @@ public class AppBlockManager {
                 continue;
             }
 
-            ExecutionReport executionReport = AppServiceProvider.getExecutionService().processTransaction(transaction, state.getAccounts());
+            ExecutionReport executionReport = AppServiceProvider.getExecutionService().processTransaction(transaction, accounts);
             if (!executionReport.isOk()) {
                 logger.info("Invalid transaction discarded [exec] " + transaction);
                 continue;
@@ -58,13 +59,16 @@ public class AppBlockManager {
             byte[] txHash = AppServiceProvider.getSerializationService().getHash(transaction);
             block.getListTXHashes().add(txHash);
         }
+    }
 
+    private Block getNewBlockAndBindToPrevious(Block currentBlock) {
+        Block block = new Block();
+        byte[] hash = AppServiceProvider.getSerializationService().getHash(currentBlock);
 
-        byte[] rootHash = accounts.getAccountsPersistenceUnit().getRootHash();
-        block.setAppStateHash(rootHash);
-
-        AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
-
+        // Bind on prev block
+        block.setPrevBlockHash(hash);
+        BigInteger nonce = currentBlock.getNonce().add(BigInteger.ONE);
+        block.setNonce(nonce);
         return block;
     }
 
