@@ -5,16 +5,13 @@ import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
-import network.elrond.blockchain.BlockchainService;
-import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.ThreadUtil;
-import network.elrond.data.*;
+import network.elrond.crypto.PrivateKey;
+import network.elrond.data.AppBlockManager;
 import network.elrond.p2p.P2PChannelName;
-import network.elrond.service.AppServiceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -52,8 +49,8 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         }
 
         if (state.getBlockchain().getCurrentBlock() == null) {
-            // Require bootstrap
-            logger.info("Can't execute, bootstrap required");
+            // Require synchronize
+            logger.info("Can't execute, synchronize required");
             return;
         }
 
@@ -82,30 +79,14 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
 
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();
-        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
+        AppContext context = application.getContext();
+        PrivateKey privateKey = context.getPrivateKey();
 
-        try {
-
-            List<Transaction> transactions = blockchainService.getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
-            Block block = AppBlockManager.instance().composeBlock(transactions, application);
-            AppBlockManager.instance().signBlock(block, application.getContext().getPrivateKey());
-            ExecutionService executionService = AppServiceProvider.getExecutionService();
-            ExecutionReport result = executionService.processBlock(block, accounts, blockchain);
-
-            if (result.isOk()) {
-
-                String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
-                AppServiceProvider.getBootstrapService().putBlockInBlockchain(block, hashBlock, application.getState());
-
-                logger.info("New block proposed" + hashBlock);
-            }
-
-
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+        AppBlockManager.instance().generateAndBroadcastBlock(hashes, accounts, blockchain, privateKey);
 
     }
+
+
 
     @Override
     protected void process(String hash, Application application) {

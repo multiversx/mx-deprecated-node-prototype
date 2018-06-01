@@ -74,7 +74,7 @@ public class BootstrappingProcessorTest {
         TestCase.assertEquals(BigInteger.ZERO, bootstrapService.getMaxBlockSize(LocationType.NETWORK, state.getBlockchain()));
 
         //test 2: test bootstrapping
-        //create a new block besides genesis and put it on DHT then try to bootstrap
+        //create a new block besides genesis and put it on DHT then try to synchronize
 
         PrivateKey pvk1 = new PrivateKey("random1");
         PublicKey pbk1 = new PublicKey(pvk1);
@@ -109,8 +109,8 @@ public class BootstrappingProcessorTest {
         acsSender.setBalance(BigInteger.TEN.pow(10));
         accountStateService.setAccountState(AccountAddress.fromHexString(trx1.getSendAddress()), acsSender, state.getAccounts()); // PMS
 
-        //Now network is loaded, try to bootstrap
-        executionReport = bootstrapService.bootstrap(app, BigInteger.ZERO, bootstrapService.getMaxBlockSize(LocationType.NETWORK, state.getBlockchain()));
+        //Now network is loaded, try to synchronize
+        executionReport = bootstrapService.synchronize(app, BigInteger.ZERO, bootstrapService.getMaxBlockSize(LocationType.NETWORK, state.getBlockchain()));
 
         TestCase.assertEquals(true, executionReport.isOk());
         TestCase.assertEquals(BigInteger.valueOf(1), bootstrapService.getMaxBlockSize(LocationType.LOCAL, state.getBlockchain()));

@@ -47,6 +47,7 @@ public class SerializationServiceImpl implements SerializationService {
         }
 
         String json = AppServiceProvider.getSerializationService().encodeJSON(object);
+        Util.check(json != null, "json is null");
 
         return (Util.SHA3.digest(json.getBytes()));
     }

@@ -19,7 +19,6 @@ import java.math.BigInteger;
 public class BootstrapServiceImpl implements BootstrapService {
 
     private BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
-    private SerializationService serializationService = AppServiceProvider.getSerializationService();
     private P2PObjectService p2PObjectService = AppServiceProvider.getP2PObjectService();
 
     //returns max block height from location
@@ -29,21 +28,12 @@ public class BootstrapServiceImpl implements BootstrapService {
         }
 
         if (locationType == LocationType.LOCAL) {
-
             return structure.getCurrentBlockIndex();
-
-//            String maxHeight = blockchainService.get(SettingsType.MAX_BLOCK_HEIGHT.toString(), structure, BlockchainUnitType.SETTINGS);
-//
-//            if (maxHeight == null) {
-//                return (Util.BIG_INT_MIN_ONE);
-//            }
-//
-//            return (new BigInteger(maxHeight));
         }
 
         if (locationType == LocationType.NETWORK) {
-            BigInteger maxHeight = p2PObjectService.getJsonDecoded(SettingsType.MAX_BLOCK_HEIGHT.toString(), structure.getConnection(), BigInteger.class);
 
+            BigInteger maxHeight = p2PObjectService.getJsonDecoded(SettingsType.MAX_BLOCK_HEIGHT.toString(), structure.getConnection(), BigInteger.class);
             if (maxHeight == null) {
                 return (Util.BIG_INT_MIN_ONE);
             }
@@ -119,7 +109,7 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         //put locally and broadcasting it
         try {
-            result.combine(putBlockInBlockchain(genesisData.a, strHashGB, state));
+            result.combine(putBlockInBlockchain(genesisData.a, strHashGB, state.getBlockchain()));
             result.combine(putTransactionInBlockchain(genesisData.b, strHashTx, state));
             setMaxBlockSize(LocationType.BOTH, BigInteger.ZERO, state.getBlockchain());
 
@@ -142,7 +132,9 @@ public class BootstrapServiceImpl implements BootstrapService {
         return (result);
     }
 
-    public ExecutionReport bootstrap(Application application, BigInteger localBlockIndex, BigInteger remoteBlockIndex) {
+    @Override
+    public ExecutionReport synchronize(Application application, BigInteger localBlockIndex, BigInteger remoteBlockIndex) {
+
         ExecutionReport result = new ExecutionReport();
         AppState state = application.getState();
 
@@ -159,7 +151,7 @@ public class BootstrapServiceImpl implements BootstrapService {
 
                 String blockHash = getBlockHashFromHeight(LocationType.NETWORK, blockIndex, state.getBlockchain());
                 if (blockHash == null) {
-                    result.ko("Can not bootstrap! Could not find block with nonce = " + blockIndex.toString(10) + " on LOCAL!");
+                    result.ko("Can not synchronize! Could not find block with nonce = " + blockIndex.toString(10) + " on LOCAL!");
                     return (result);
                 }
 
@@ -239,66 +231,25 @@ public class BootstrapServiceImpl implements BootstrapService {
         return (result);
     }
 
-    public ExecutionReport rebuildFromDiskDeltaNoExec(Application application, BigInteger maxBlkHeightLocal, BigInteger maxBlkHeightNetw) {
-        ExecutionReport result = new ExecutionReport();
-        AppState state = application.getState();
 
-        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
-
-
-        result.combine(new ExecutionReport().ok("Start bootstrapping by loading from disk..."));
-        //state.setBootstrapping(true);
-        //start pushing blocks and transactions
-        //block with nonce = 0 is genesis and should be broadcast
-        for (BigInteger counter = maxBlkHeightNetw.add(BigInteger.ONE); counter.compareTo(maxBlkHeightLocal) <= 0; counter = counter.add(BigInteger.ONE)) {
-            try {
-                result.combine(new ExecutionReport().ok("Put block with height: " + counter.toString(10) + "..."));
-                //put block
-                String strHashBlk = getBlockHashFromHeight(LocationType.LOCAL, counter, state.getBlockchain());
-                Block blk = blockchainService.get(strHashBlk, state.getBlockchain(), BlockchainUnitType.BLOCK);
-                p2PObjectService.putJsonEncoded(blk, strHashBlk, state.getConnection());
-
-                //put pair block_height - block hash
-                setBlockHashWithHeight(LocationType.NETWORK, counter, strHashBlk, state.getBlockchain());
-
-                //put transactions
-                for (int j = 0; j < blk.getListTXHashes().size(); j++) {
-                    String strHashTx = new String(Base64.encode(blk.getListTXHashes().get(j)));
-
-                    Transaction tx = blockchainService.get(strHashTx, state.getBlockchain(), BlockchainUnitType.TRANSACTION);
-
-                    p2PObjectService.putJsonEncoded(tx, strHashTx, state.getConnection());
-                }
-
-                //put settings max_block_height
-                setMaxBlockSize(LocationType.NETWORK, counter, state.getBlockchain());
-            } catch (Exception ex) {
-                result.ko(ex);
-                return (result);
-            }
-        }
-
-        return (result);
-    }
-
-    public ExecutionReport putBlockInBlockchain(Block blk, String blockHash, AppState state) {
+    @Override
+    public ExecutionReport putBlockInBlockchain(Block blk, String blockHash, Blockchain blockchain) {
         ExecutionReport result = new ExecutionReport();
 
-        //BlockchainService appPersistanceService = AppServiceProvider.getAppPersistanceService();
 
         try {
 
-            // Put block
-            AppServiceProvider.getBlockchainService().put(blockHash, blk, state.getBlockchain(), BlockchainUnitType.BLOCK);
-            setBlockHashWithHeight(LocationType.BOTH, blk.getNonce(), blockHash, state.getBlockchain());
+
+            AppServiceProvider.getBlockchainService().put(blockHash, blk, blockchain, BlockchainUnitType.BLOCK);
+            setBlockHashWithHeight(LocationType.BOTH, blk.getNonce(), blockHash, blockchain);
             // Put index <=> hash mapping
-            AppServiceProvider.getBlockchainService().put(blk.getNonce(), blockHash, state.getBlockchain(), BlockchainUnitType.BLOCK_INDEX);
+            AppServiceProvider.getBlockchainService().put(blk.getNonce(), blockHash, blockchain, BlockchainUnitType.BLOCK_INDEX);
 
             // Update max index
-            setMaxBlockSize(LocationType.BOTH, blk.getNonce(), state.getBlockchain());
+            setMaxBlockSize(LocationType.BOTH, blk.getNonce(), blockchain);
 
             // Update current block
-            state.getBlockchain().setCurrentBlock(blk);
+            blockchain.setCurrentBlock(blk);
 
             result.combine(new ExecutionReport().ok("Put block in blockchain : " + blockHash + " # " + blk));
         } catch (Exception ex) {
