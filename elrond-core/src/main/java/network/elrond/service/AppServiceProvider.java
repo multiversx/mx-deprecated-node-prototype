@@ -12,10 +12,7 @@ import network.elrond.consensus.ValidatorService;
 import network.elrond.consensus.ValidatorServiceImpl;
 import network.elrond.crypto.*;
 import network.elrond.data.*;
-import network.elrond.p2p.P2PBroadcastService;
-import network.elrond.p2p.P2PBroadcastServiceImpl;
-import network.elrond.p2p.P2PObjectService;
-import network.elrond.p2p.P2PObjectServiceImpl;
+import network.elrond.p2p.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,6 +51,7 @@ public class AppServiceProvider {
         putService(ExecutionService.class, new ExecutionServiceImpl());
         putService(AppPersistenceService.class, new AppPersistenceServiceImpl());
         putService(BootstrapService.class, new BootstrapServiceImpl());
+        putService(P2PCommunicationService.class, new P2PCommunicationServiceImpl());
     }
 
     public static P2PBroadcastService getP2PBroadcastService() {
@@ -111,5 +109,9 @@ public class AppServiceProvider {
     public static BootstrapService getBootstrapService() {
         return getService(BootstrapService.class
         );
+    }
+
+    public static P2PCommunicationService getP2PCommunicationService(){
+        return((P2PCommunicationService)getService(P2PCommunicationService.class));
     }
 }
