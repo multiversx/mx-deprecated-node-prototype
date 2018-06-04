@@ -67,7 +67,7 @@ public class BootstrappingProcessorTest {
 
 
         //test 1: test start from scratch
-        ExecutionReport executionReport = bootstrapService.startFromScratch(app);
+        ExecutionReport executionReport = bootstrapService.startFromScratch(app.getState(), app.getContext());
 
         TestCase.assertEquals(true, executionReport.isOk());
         TestCase.assertEquals(BigInteger.ZERO, bootstrapService.getMaxBlockSize(LocationType.LOCAL, state.getBlockchain()));
@@ -110,7 +110,7 @@ public class BootstrappingProcessorTest {
         accountStateService.setAccountState(AccountAddress.fromHexString(trx1.getSendAddress()), acsSender, state.getAccounts()); // PMS
 
         //Now network is loaded, try to synchronize
-        executionReport = bootstrapService.synchronize(app, BigInteger.ZERO, bootstrapService.getMaxBlockSize(LocationType.NETWORK, state.getBlockchain()));
+        executionReport = bootstrapService.synchronize(app.getState(), BigInteger.ZERO, bootstrapService.getMaxBlockSize(LocationType.NETWORK, state.getBlockchain()));
 
         TestCase.assertEquals(true, executionReport.isOk());
         TestCase.assertEquals(BigInteger.valueOf(1), bootstrapService.getMaxBlockSize(LocationType.LOCAL, state.getBlockchain()));

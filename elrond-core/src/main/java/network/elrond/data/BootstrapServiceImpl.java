@@ -1,6 +1,5 @@
 package network.elrond.data;
 
-import network.elrond.Application;
 import network.elrond.account.AccountsContext;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
@@ -90,16 +89,12 @@ public class BootstrapServiceImpl implements BootstrapService {
         }
     }
 
-    public ExecutionReport startFromScratch(Application application) {
+    public ExecutionReport startFromScratch(AppState state, AppContext context) {
         SerializationService serializationService = AppServiceProvider.getSerializationService();
 
         ExecutionReport result = new ExecutionReport();
-        AppState state = application.getState();
-
-        AppContext context = application.getContext();
 
         AccountsContext accountsContext = new AccountsContext();
-
 
         result.combine(new ExecutionReport().ok("Start from scratch..."));
         Fun.Tuple2<Block, Transaction> genesisData = AppServiceProvider.getAccountStateService().generateGenesisBlock(context.getStrAddressMint(), context.getValueMint(),
@@ -110,7 +105,7 @@ public class BootstrapServiceImpl implements BootstrapService {
         //put locally and broadcasting it
         try {
             result.combine(putBlockInBlockchain(genesisData.a, strHashGB, state.getBlockchain()));
-            result.combine(putTransactionInBlockchain(genesisData.b, strHashTx, state));
+            result.combine(putTransactionInBlockchain(genesisData.b, strHashTx, state.getBlockchain()));
             setMaxBlockSize(LocationType.BOTH, BigInteger.ZERO, state.getBlockchain());
 
             //block execution is handled inside rebuildFromDisk
@@ -127,16 +122,15 @@ public class BootstrapServiceImpl implements BootstrapService {
         }
 
         //should broadcast generated block
-        result.combine(rebuildFromDisk(application, BigInteger.ZERO));
+        result.combine(rebuildFromDisk(state, BigInteger.ZERO));
 
         return (result);
     }
 
     @Override
-    public ExecutionReport synchronize(Application application, BigInteger localBlockIndex, BigInteger remoteBlockIndex) {
+    public ExecutionReport synchronize(AppState state, BigInteger localBlockIndex, BigInteger remoteBlockIndex) {
 
         ExecutionReport result = new ExecutionReport();
-        AppState state = application.getState();
 
         result.combine(
                 new ExecutionReport().ok("Bootstrapping... [local height: " + localBlockIndex.toString(10) + " > network height: " +
@@ -180,9 +174,8 @@ public class BootstrapServiceImpl implements BootstrapService {
         return (result);
     }
 
-    public ExecutionReport rebuildFromDisk(Application application, BigInteger maxBlkHeightLocal) {
+    public ExecutionReport rebuildFromDisk(AppState state, BigInteger maxBlkHeightLocal) {
         ExecutionReport result = new ExecutionReport();
-        AppState state = application.getState();
 
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
 
@@ -259,13 +252,13 @@ public class BootstrapServiceImpl implements BootstrapService {
         return (result);
     }
 
-    public ExecutionReport putTransactionInBlockchain(Transaction transaction, String transactionHash, AppState state) {
+    public ExecutionReport putTransactionInBlockchain(Transaction transaction, String transactionHash, Blockchain blockchain) {
         ExecutionReport result = new ExecutionReport();
 
         //BlockchainService appPersistanceService = AppServiceProvider.getAppPersistanceService();
 
         try {
-            AppServiceProvider.getBlockchainService().put(transactionHash, transaction, state.getBlockchain(), BlockchainUnitType.TRANSACTION);
+            AppServiceProvider.getBlockchainService().put(transactionHash, transaction, blockchain, BlockchainUnitType.TRANSACTION);
             result.combine(new ExecutionReport().ok("Put transaction in blockchain with hash: " + transactionHash));
         } catch (Exception ex) {
             result.combine(new ExecutionReport().ko(ex));
