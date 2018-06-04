@@ -45,7 +45,7 @@ public class ExecutionReport {
 
     public ExecutionReport ok(String message) {
         entries.add(message);
-        logger.info(message);
+        //logger.info(message);
         valid = true;
         return this;
     }

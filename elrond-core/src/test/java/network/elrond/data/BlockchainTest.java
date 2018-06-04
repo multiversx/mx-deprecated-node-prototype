@@ -17,7 +17,7 @@ import java.util.Random;
 public class BlockchainTest extends BaseBlockchainTest{
     private SerializationService serializationService = AppServiceProvider.getSerializationService();
 
-    static Blockchain blockchain;
+    Blockchain blockchain;
 
     @Before
     public void setUp() throws IOException {

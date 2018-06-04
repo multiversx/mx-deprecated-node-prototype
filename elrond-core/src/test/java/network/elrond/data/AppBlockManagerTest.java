@@ -21,22 +21,20 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static network.elrond.data.BlockchainTest.blockchain;
-
 public class AppBlockManagerTest {
-    public AppBlockManager appBlockManager;
-    public static AppState state;
-    public static AppContext context;
-    public static Accounts accounts;
-    public static AccountsContext accountsContext;
-    public static PublicKey publicKey;
-    public static PrivateKey privateKey;
+    AppBlockManager appBlockManager;
+    AppState state;
+    AppContext context;
+    Accounts accounts;
+    AccountsContext accountsContext;
+    PublicKey publicKey;
+    PrivateKey privateKey;
+    Blockchain blockchain;
 
     @Before
     public void setupTest() throws Exception {
@@ -511,27 +509,6 @@ public class AppBlockManagerTest {
         return multiSignatureService.verifyAggregatedSignature(signersPublicKeys,aggregatedSignature, aggregatedCommitment, blockHashNoSig, 1 );
     }
 
-    @Test
-    public void testGenerateAndBroadcastBlockMaximumSpeed() throws IOException {
-        List<String> hashes = new ArrayList<String>();
-        Accounts accounts = new Accounts(new AccountsContext());
-        Transaction tx1 = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN, BigInteger.ZERO);
-        AppServiceProvider.getTransactionService().signTransaction(tx1, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
-        AppServiceProvider.getTransactionService().verifyTransaction(tx1);
 
-        long start = System.currentTimeMillis();
-
-        for(int i = 0;i<10000;i++){
-            Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN, BigInteger.ZERO);
-            AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
-            AppServiceProvider.getTransactionService().verifyTransaction(tx);
-            //AppServiceProvider.getBootstrapService().putTransactionInBlockchain(tx, AppServiceProvider.getSerializationService().getHashString(tx), blockchain);
-        }
-        long end = System.currentTimeMillis();
-        System.out.println((end - start));
-
-
-        AppBlockManager.instance().generateAndBroadcastBlock(hashes, accounts, blockchain, privateKey);
-    }
 
 }

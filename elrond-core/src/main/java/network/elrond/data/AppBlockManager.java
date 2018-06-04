@@ -165,7 +165,7 @@ public class AppBlockManager {
             aggregatedSignature = multiSignatureService.aggregateSignatures(signatureShares, 1);
         }
 
-        boolean sigOk = multiSignatureService.verifyAggregatedSignature(signersPublicKeys,aggregatedSignature, aggregatedCommitment, blockHashNoSig, 1 );
+        //boolean sigOk = multiSignatureService.verifyAggregatedSignature(signersPublicKeys,aggregatedSignature, aggregatedCommitment, blockHashNoSig, 1 );
         block.setSignature(aggregatedSignature);
         block.setCommitment(aggregatedCommitment);
     }
