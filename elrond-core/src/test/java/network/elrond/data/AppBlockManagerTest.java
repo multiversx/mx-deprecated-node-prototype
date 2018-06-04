@@ -419,4 +419,83 @@ public class AppBlockManagerTest {
         Assert.assertTrue("Signature cannot be null", block.getListPublicKeys() != null);
     }
 
+    @Test
+    public void testVerifySignatureEmptyBlock(){
+        Block block = appBlockManager.composeBlock(Arrays.asList(), null, null);
+
+        appBlockManager.signBlock(block, privateKey);
+
+        Assert.assertTrue("Signature is not ok!", VerifySignature(block));
+    }
+
+    @Test
+    public void testVerifySignatureBlock(){
+        Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN.pow(1), BigInteger.ONE);
+        Transaction tx2 = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN.pow(1), BigInteger.ONE);
+
+        AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue());
+        AppServiceProvider.getTransactionService().signTransaction(tx2, Util.PRIVATE_KEY_MINTING.getValue());
+
+        Block block = appBlockManager.composeBlock(Arrays.asList(tx, tx2), null, null);
+        appBlockManager.signBlock(block, privateKey);
+
+        Assert.assertTrue("Signature is not ok!", VerifySignature(block));
+    }
+
+    public boolean VerifySignature(Block block){
+        ArrayList<byte[]> signersPublicKeys = new ArrayList<>();
+        ArrayList<byte[]> commitmentSecrets = new ArrayList<>();
+        ArrayList<byte[]> commitments = new ArrayList<>();
+        ArrayList<byte[]> challenges = new ArrayList<>();
+        ArrayList<byte[]> signatureShares = new ArrayList<>();
+        byte[] aggregatedCommitment;
+        byte[] aggregatedSignature = new byte[0];
+        int sizeConsensusGroup = 1;
+        MultiSignatureService multiSignatureService = AppServiceProvider.getMultiSignatureService();
+
+        byte[][] result = new byte[2][];
+
+        for (int i = 0; i < sizeConsensusGroup; i++) {
+            signersPublicKeys.add(new PublicKey(privateKey).getValue());
+            commitmentSecrets.add(multiSignatureService.computeCommitmentSecret());
+            commitments.add(multiSignatureService.computeCommitment(commitmentSecrets.get(i)));
+        }
+
+        byte[] blockHashNoSig = AppServiceProvider.getSerializationService().getHash(block);
+
+        // aggregate the commitments
+        aggregatedCommitment = multiSignatureService.aggregateCommitments(commitments, 1);
+
+        // compute challenges and signatures for each signer
+        for (int i = 0; i < sizeConsensusGroup; i++) {
+            if (0 != ((1 << i) & 1)) {
+                challenges.add(
+                        multiSignatureService.computeChallenge(
+                                signersPublicKeys,
+                                signersPublicKeys.get(i),
+                                aggregatedCommitment,
+                                blockHashNoSig,
+                                1
+                        )
+                );
+
+                // compute signature shares
+                signatureShares.add(
+                        multiSignatureService.computeSignatureShare(
+                                challenges.get(i),
+                                privateKey.getValue(),
+                                commitmentSecrets.get(i)
+                        )
+                );
+            } else {
+                challenges.add(new byte[0]);
+                signatureShares.add(new byte[0]);
+            }
+
+            aggregatedSignature = multiSignatureService.aggregateSignatures(signatureShares, 1);
+        }
+
+        return multiSignatureService.verifyAggregatedSignature(signersPublicKeys,aggregatedSignature, aggregatedCommitment, blockHashNoSig, 1 );
+    }
+
 }
