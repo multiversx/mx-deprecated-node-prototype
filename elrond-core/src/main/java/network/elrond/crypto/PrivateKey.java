@@ -68,14 +68,14 @@ public class PrivateKey {
         BigInteger seedInt;
         ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
-        seedArray = Util.SHA3.digest(seedArray);
+        seedArray = Util.SHA3.get().digest(seedArray);
         seedInt = new BigInteger(1, seedArray);
 
         // to be a valid private key it needs to verify:
         // 0 < pk < n, where n is the order of the largest prime order subgroup
         while (1 != seedInt.compareTo(BigInteger.ZERO) ||
                 0 <= seedInt.compareTo(ecCryptoService.getN())) {
-            seedArray = Util.SHA3.digest(seedArray);
+            seedArray = Util.SHA3.get().digest(seedArray);
             seedInt = new BigInteger(1, seedArray);
         }
 

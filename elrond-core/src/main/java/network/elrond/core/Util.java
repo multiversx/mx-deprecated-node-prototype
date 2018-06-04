@@ -27,8 +27,12 @@ public class Util {
     public static final float WEIGHT_RATING_SPOS = 0.6f;
     public static final int MAX_LEN_ADDR = 33; //equals public key
     public static final int MAX_LEN_PUB_KEY = 33;
-    public static DigestSHA3 SHA3 = new DigestSHA3(256);
+
+    public static final ThreadLocal<DigestSHA3> SHA3 = ThreadLocal.withInitial(() -> new DigestSHA3(256));
+
+
     public static SHA256.Digest SHA256 = new SHA256.Digest();
+
     public static BigInteger BIG_INT_MIN_ONE = BigInteger.valueOf(-1);
 
     public static byte[] EMPTY_BYTE_ARRAY;
@@ -38,9 +42,9 @@ public class Util {
     public static final PublicKey PUBLIC_KEY_MINTING;
     public static final BigInteger VALUE_MINTING;
 
-    static{
+    static {
         EMPTY_BYTE_ARRAY = new byte[0];
-        EMPTY_DATA_HASH = SHA3.digest(EMPTY_BYTE_ARRAY);
+        EMPTY_DATA_HASH = SHA3.get().digest(EMPTY_BYTE_ARRAY);
 
         PRIVATE_KEY_MINTING = new PrivateKey("MINTING ADDRESS FOR INITIAL TRANSFER");
         PUBLIC_KEY_MINTING = new PublicKey(PRIVATE_KEY_MINTING);
@@ -83,7 +87,7 @@ public class Util {
         return strHexa;
 
 //        //step 2. compute hash based on hexa form
-//        byte[] hash = SHA3.digest(strHexa.getBytes());
+//        byte[] hash = SHA3.get().digest(strHexa.getBytes());
 //
 //        if (hash.length != 32) {
 //            return ("");
@@ -116,12 +120,12 @@ public class Util {
         }
         return result;
     }
-    
 
-    public static String getHashEncoded64(String data){
-        byte[] buff = SHA3.digest(data.getBytes());
 
-        return(new String(Base64.encode(buff)));
+    public static String getHashEncoded64(String data) {
+        byte[] buff = SHA3.get().digest(data.getBytes());
+
+        return (new String(Base64.encode(buff)));
     }
 
     public static String getDataEncoded64(byte[] data) {

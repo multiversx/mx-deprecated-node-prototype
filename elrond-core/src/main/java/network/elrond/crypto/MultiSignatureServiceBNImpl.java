@@ -44,7 +44,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
         // r below order of curve
         while (commitmentSecret.compareTo(BigInteger.ONE) < 0 ||
                 commitmentSecret.compareTo(ecCryptoService.getN()) >= 0) {
-            r = Util.SHA3.digest(r);
+            r = Util.SHA3.get().digest(r);
             commitmentSecret = new BigInteger(r);
         }
         return r;
@@ -219,7 +219,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
         // <L'> || public key || R || m
         challenge = Util.concatenateArrays(challenge, message);
         // compute hash
-        challenge = Util.SHA3.digest(challenge);
+        challenge = Util.SHA3.get().digest(challenge);
         challengeInt = new BigInteger(1, challenge);
 
         //reduce the challenge modulo curve order

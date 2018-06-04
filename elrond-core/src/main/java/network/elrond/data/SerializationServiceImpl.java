@@ -58,7 +58,7 @@ public class SerializationServiceImpl implements SerializationService {
             throw new RuntimeException(ex);
         }
         return instance.digest(json.getBytes());
-        //return (Util.SHA3.digest(json.getBytes()));
+        //return (Util.SHA3.get().digest(json.getBytes()));
     }
 
     @Override

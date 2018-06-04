@@ -38,7 +38,7 @@ public class TransactionServiceImpl implements TransactionService {
      */
 //    public byte[] getHash(Transaction tx, boolean withSig) {
 //        String json = AppServiceProvider.getSerializationService().encodeJSON(tx);
-//        return (Util.SHA3.digest(json.getBytes()));
+//        return (Util.SHA3.get().digest(json.getBytes()));
 //    }
 
     /**
