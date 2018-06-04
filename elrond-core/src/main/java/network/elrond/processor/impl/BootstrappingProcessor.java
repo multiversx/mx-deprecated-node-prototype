@@ -32,19 +32,22 @@ public class BootstrappingProcessor implements AppTask {
             while (state.isStillRunning()) {
 
 
-                if (state.isLock()) {
-                    ThreadUtil.sleep(100);
-                    continue;
+                try {
+                    if (state.isLock()) {
+                        ThreadUtil.sleep(100);
+                        continue;
+                    }
+
+                    state.setLock();
+                    synchronizeBlockchain(application);
+                    state.clearLock();
+
+                    logger.info("Nothing else to synchronize! Waiting 5 seconds...");
+                    ThreadUtil.sleep(5000);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    ;
                 }
-
-                state.setLock();
-
-                synchronizeBlockchain(application);
-
-                state.clearLock();
-
-                logger.info("Nothing else to synchronize! Waiting 5 seconds...");
-                ThreadUtil.sleep(5000);
 
             }
         });

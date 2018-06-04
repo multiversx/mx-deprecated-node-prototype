@@ -19,7 +19,11 @@ public abstract class AbstractChannelTask<T> implements AppTask {
         Thread thread = new Thread(() -> {
             AppState state = application.getState();
             while (state.isStillRunning()) {
-                process(queue, application);
+                try {
+                    process(queue, application);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         });
         thread.setName(getChannelName() + "_" + getClass().getName());

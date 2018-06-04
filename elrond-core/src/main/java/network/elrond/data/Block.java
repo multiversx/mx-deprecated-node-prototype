@@ -192,6 +192,7 @@ public class Block implements Serializable {
         return "Block{" +
                 "nonce=" + nonce +
                 ", appStateHash=" + Util.byteArrayToHexString(appStateHash) +
+                ", listTXHashes.size=" + listTXHashes.size() +
                 '}';
     }
 }

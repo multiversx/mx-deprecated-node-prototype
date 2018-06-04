@@ -1,6 +1,7 @@
 package network.elrond.processor.impl;
 
 import network.elrond.Application;
+import network.elrond.TimeWatch;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Collect new transactions and put them into new block
@@ -32,7 +34,7 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
     protected void process(ArrayBlockingQueue<String> queue, Application application) {
 
 
-        ThreadUtil.sleep(5000);
+        ThreadUtil.sleep(2000);
 
         AppContext context = application.getContext();
         if (!context.isSeedNode()) {
@@ -55,11 +57,15 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         }
 
 
+        int size = queue.size();
+        TimeWatch watch = TimeWatch.start();
+
         state.setLock();
-
         proposeBlock(queue, application);
-
         state.clearLock();
+
+
+        logger.info(" ###### Executed " + size + " transactions in " + watch.time(TimeUnit.SECONDS) + " s   ###### ");
 
     }
 

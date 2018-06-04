@@ -5,6 +5,8 @@ import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.math.ec.ECPoint;
 
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
@@ -158,7 +160,17 @@ public class SignatureServiceSchnorrImpl implements SignatureService {
         // if not at infinity calculate c2 = H(R, publicKey, message)
         c2 = Util.concatenateArrays(commitPointR.getEncoded(true), publicKey);
         c2 = Util.concatenateArrays(c2, message);
-        c2 = Util.SHA3.digest(c2);
+        //c2 = Util.SHA3.digest(c2);
+
+        MessageDigest instance = null;
+        try {
+            instance = MessageDigest.getInstance("SHA3-256");
+        } catch (NoSuchAlgorithmException ex) {
+            throw new RuntimeException(ex);
+        }
+        c2 = instance.digest(c2);
+
+
 
         return Arrays.equals(challenge, c2);
     }
