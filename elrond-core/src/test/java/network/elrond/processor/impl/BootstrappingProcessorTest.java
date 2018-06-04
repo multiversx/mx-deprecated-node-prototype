@@ -87,7 +87,7 @@ public class BootstrappingProcessorTest {
 
         Transaction trx1 = transactionService.generateTransaction(pbk1, pbk2, 1, 0);
         //trx1.setPubKey(Util.byteArrayToHexString(pbk1.getValue()));
-        transactionService.signTransaction(trx1, pvk1.getValue());
+        transactionService.signTransaction(trx1, pvk1.getValue(), pbk1.getValue());
 
         //put tx on wire
         AppServiceProvider.getP2PObjectService().putJsonEncoded(trx1, serializationService.getHashString(trx1), state.getConnection());

@@ -1,7 +1,6 @@
 package network.elrond.data;
 
 import junit.framework.TestCase;
-import network.elrond.Application;
 import network.elrond.UtilTest;
 import network.elrond.account.AccountAddress;
 import network.elrond.account.AccountState;
@@ -10,28 +9,37 @@ import network.elrond.account.AccountsContext;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
+import network.elrond.blockchain.BlockchainContext;
 import network.elrond.core.Util;
 import network.elrond.crypto.MultiSignatureService;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
+import network.elrond.p2p.P2PConnection;
 import network.elrond.service.AppServiceProvider;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class AppBlockManagerTest {
-    static AppBlockManager appBlockManager;
-    static Application application;
-    static AppState state;
-    static AccountsContext accountsContext;
-    static PublicKey publicKey;
-    static PrivateKey privateKey;
+import static network.elrond.data.BlockchainTest.blockchain;
 
-    @BeforeClass
-    public static void setupTest() throws Exception {
+public class AppBlockManagerTest {
+    public AppBlockManager appBlockManager;
+    public static AppState state;
+    public static AppContext context;
+    public static Accounts accounts;
+    public static AccountsContext accountsContext;
+    public static PublicKey publicKey;
+    public static PrivateKey privateKey;
+
+    @Before
+    public void setupTest() throws Exception {
         AppContext context = new AppContext();
         context.setMasterPeerIpAddress(null);
         context.setMasterPeerPort(4000);
@@ -41,13 +49,18 @@ public class AppBlockManagerTest {
         context.setBootstrapType(BootstrapType.START_FROM_SCRATCH);
         context.setPrivateKey(new PrivateKey("PRODUCER"));
 
-        application = new Application(context);
-        state = application.getState();
-        state.setStillRunning(false);
         Block blk0 = new Block();
-        Blockchain blockchain = state.getBlockchain();
+        state = new AppState();
+
+        P2PConnection connection = AppServiceProvider.getP2PBroadcastService().createConnection(context);
+        state.setConnection(connection);
+
+        BlockchainContext blockchainContext = new BlockchainContext();
+        blockchainContext.setConnection(state.getConnection());
+        blockchain = new Blockchain(blockchainContext);
         blockchain.setCurrentBlock(blk0);
-        application.start();
+        state.setBlockchain(blockchain);
+        state.setStillRunning(false);
 
         //memory-only accounts
         accountsContext = new AccountsContext();
@@ -62,9 +75,9 @@ public class AppBlockManagerTest {
         appBlockManager = new AppBlockManager();
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
-        application.stop();
+    @After
+    public void tearDown() throws Exception {
+
     }
 
     @Test
@@ -92,13 +105,13 @@ public class AppBlockManagerTest {
         PublicKey pbkeyRecv = new PublicKey(pvkeyRecv);
 
         Transaction tx1 = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv, BigInteger.TEN, BigInteger.ZERO);
-        AppServiceProvider.getTransactionService().signTransaction(tx1, Util.PRIVATE_KEY_MINTING.getValue());
+        AppServiceProvider.getTransactionService().signTransaction(tx1, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
 
         List<Transaction> transactions = new ArrayList<>();
         transactions.add(tx1);
         AppServiceProvider.getBootstrapService().putTransactionInBlockchain(tx1, AppServiceProvider.getSerializationService().getHashString(tx1), state.getBlockchain());
 
-        Block blk = appBlockManager.composeBlock(transactions, application.getState().getBlockchain(), application.getState().getAccounts());
+        Block blk = appBlockManager.composeBlock(transactions, state.getBlockchain(), state.getAccounts());
         appBlockManager.signBlock(blk, pvkeyRecv);
 
         UtilTest.printAccountsWithBalance(state.getAccounts());
@@ -130,10 +143,10 @@ public class AppBlockManagerTest {
         PublicKey pbkeyRecv = new PublicKey(pvkeyRecv);
 
         Transaction tx1 = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv, BigInteger.TEN, BigInteger.ZERO);
-        AppServiceProvider.getTransactionService().signTransaction(tx1, Util.PRIVATE_KEY_MINTING.getValue());
+        AppServiceProvider.getTransactionService().signTransaction(tx1, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
 
         Transaction tx2 = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv, BigInteger.TEN, BigInteger.ZERO);
-        AppServiceProvider.getTransactionService().signTransaction(tx1, Util.PRIVATE_KEY_MINTING.getValue());
+        AppServiceProvider.getTransactionService().signTransaction(tx1, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
 
         List<Transaction> transactions = new ArrayList<>();
         transactions.add(tx1);
@@ -141,7 +154,7 @@ public class AppBlockManagerTest {
         AppServiceProvider.getBootstrapService().putTransactionInBlockchain(tx1, AppServiceProvider.getSerializationService().getHashString(tx1), state.getBlockchain());
         AppServiceProvider.getBootstrapService().putTransactionInBlockchain(tx2, AppServiceProvider.getSerializationService().getHashString(tx2), state.getBlockchain());
 
-        Block blk = appBlockManager.composeBlock(transactions, application.getState().getBlockchain(), application.getState().getAccounts());
+        Block blk = appBlockManager.composeBlock(transactions, state.getBlockchain(), state.getAccounts());
         appBlockManager.signBlock(blk, pvkeyRecv);
 
         UtilTest.printAccountsWithBalance(state.getAccounts());
@@ -190,12 +203,12 @@ public class AppBlockManagerTest {
         transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv1, BigInteger.TEN, BigInteger.valueOf(2)));
 
         for (Transaction transaction : transactions) {
-            AppServiceProvider.getTransactionService().signTransaction(transaction, Util.PRIVATE_KEY_MINTING.getValue());
+            AppServiceProvider.getTransactionService().signTransaction(transaction, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
 
             AppServiceProvider.getBootstrapService().putTransactionInBlockchain(transaction, AppServiceProvider.getSerializationService().getHashString(transaction), state.getBlockchain());
         }
 
-        Block blk = appBlockManager.composeBlock(transactions, application.getState().getBlockchain(), application.getState().getAccounts());
+        Block blk = appBlockManager.composeBlock(transactions, state.getBlockchain(), state.getAccounts());
         appBlockManager.signBlock(blk, pvkeyRecv1);
 
         UtilTest.printAccountsWithBalance(state.getAccounts());
@@ -249,12 +262,12 @@ public class AppBlockManagerTest {
         transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv1, BigInteger.TEN, BigInteger.valueOf(2)));
 
         for (Transaction transaction : transactions) {
-            AppServiceProvider.getTransactionService().signTransaction(transaction, Util.PRIVATE_KEY_MINTING.getValue());
+            AppServiceProvider.getTransactionService().signTransaction(transaction, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
 
             AppServiceProvider.getBootstrapService().putTransactionInBlockchain(transaction, AppServiceProvider.getSerializationService().getHashString(transaction), state.getBlockchain());
         }
 
-        Block block = appBlockManager.composeBlock(transactions, application.getState().getBlockchain(), application.getState().getAccounts());
+        Block block = appBlockManager.composeBlock(transactions, state.getBlockchain(), state.getAccounts());
         appBlockManager.signBlock(block, pvkeyRecv1);
 
         List<String> signersStringList = block.getListPublicKeys();
@@ -329,7 +342,7 @@ public class AppBlockManagerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testComposeBlockWithNullTransactionListShouldThrowException() {
-        Block block = appBlockManager.composeBlock(null, application.getState().getBlockchain(), application.getState().getAccounts());
+        Block block = appBlockManager.composeBlock(null, state.getBlockchain(), state.getAccounts());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -339,7 +352,7 @@ public class AppBlockManagerTest {
 
     @Test
     public void testComposeBlockWithZeroTransaction() {
-        Block block = appBlockManager.composeBlock(Arrays.asList(), application.getState().getBlockchain(), application.getState().getAccounts());
+        Block block = appBlockManager.composeBlock(Arrays.asList(), state.getBlockchain(), state.getAccounts());
         Assert.assertTrue("Block cannot be null", block != null);
         Assert.assertTrue("PrevBlockHash cannot be null", block.prevBlockHash != null);
         Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", block.getListTXHashes().size() == 0);
@@ -348,8 +361,8 @@ public class AppBlockManagerTest {
     @Test
     public void testComposeBlockWithOneValidTransaction() {
         Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN, BigInteger.ZERO);
-        AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue());
-        Block block = appBlockManager.composeBlock(Arrays.asList(tx), application.getState().getBlockchain(), application.getState().getAccounts());
+        AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
+        Block block = appBlockManager.composeBlock(Arrays.asList(tx), state.getBlockchain(), state.getAccounts());
         Assert.assertTrue("ListOfTxHashes does not have exactly 1 hash", block.getListTXHashes().size() == 1);
     }
 
@@ -357,15 +370,15 @@ public class AppBlockManagerTest {
     public void testComposeBlockWithOneNotSignedTransaction() {
         Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN.pow(100), BigInteger.ZERO);
         //AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue());
-        Block block = appBlockManager.composeBlock(Arrays.asList(tx), application.getState().getBlockchain(), application.getState().getAccounts());
+        Block block = appBlockManager.composeBlock(Arrays.asList(tx), state.getBlockchain(), state.getAccounts());
         Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", block.getListTXHashes().size() == 0);
     }
 
     @Test
     public void testComposeBlockWithOneNotEnoughFundsTransaction() {
         Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN.pow(100), BigInteger.ZERO);
-        AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue());
-        Block block = appBlockManager.composeBlock(Arrays.asList(tx), application.getState().getBlockchain(), application.getState().getAccounts());
+        AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
+        Block block = appBlockManager.composeBlock(Arrays.asList(tx), state.getBlockchain(), state.getAccounts());
         Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", block.getListTXHashes().size() == 0);
     }
 
@@ -373,8 +386,8 @@ public class AppBlockManagerTest {
     //@Test
     public void testComposeBlockWithOneNonceMismatchTransaction() {
         Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN, BigInteger.TEN);
-        AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue());
-        Block block = appBlockManager.composeBlock(Arrays.asList(tx), application.getState().getBlockchain(), application.getState().getAccounts());
+        AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
+        Block block = appBlockManager.composeBlock(Arrays.asList(tx), state.getBlockchain(), state.getAccounts());
         Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", block.getListTXHashes().size() == 0);
     }
 
@@ -383,16 +396,16 @@ public class AppBlockManagerTest {
         Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN.pow(100), BigInteger.ZERO);
         Transaction tx2 = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN.pow(1), BigInteger.ZERO);
 
-        AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue());
-        AppServiceProvider.getTransactionService().signTransaction(tx2, Util.PRIVATE_KEY_MINTING.getValue());
+        AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
+        AppServiceProvider.getTransactionService().signTransaction(tx2, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
 
-        Block block = appBlockManager.composeBlock(Arrays.asList(tx, tx2), application.getState().getBlockchain(), application.getState().getAccounts());
+        Block block = appBlockManager.composeBlock(Arrays.asList(tx, tx2), state.getBlockchain(), state.getAccounts());
         Assert.assertTrue("ListOfTxHashes does not have exactly 1 hash", block.getListTXHashes().size() == 1);
     }
 
     @Test
     public void testComposeBlockWithNoCurrentBlockFoundTransaction() {
-        Block block = appBlockManager.composeBlock(Arrays.asList(), application.getState().getBlockchain(), application.getState().getAccounts());
+        Block block = appBlockManager.composeBlock(Arrays.asList(), state.getBlockchain(), state.getAccounts());
         Assert.assertTrue("Block cannot be null", block != null);
         Assert.assertTrue("PrevBlockHash cannot be null", block.prevBlockHash != null);
         Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", block.getListTXHashes().size() == 0);
@@ -400,7 +413,7 @@ public class AppBlockManagerTest {
 
     @Test
     public void testSignEmptyBlock() {
-        Block block = appBlockManager.composeBlock(Arrays.asList(), application.getState().getBlockchain(), application.getState().getAccounts());
+        Block block = appBlockManager.composeBlock(Arrays.asList(), state.getBlockchain(), state.getAccounts());
         appBlockManager.signBlock(block, privateKey);
 
         Assert.assertTrue("Commitment cannot be null", block.getCommitment() != null);
@@ -410,7 +423,7 @@ public class AppBlockManagerTest {
 
     @Test
     public void testVerifySignEmptyBlock() {
-        Block block = appBlockManager.composeBlock(Arrays.asList(), application.getState().getBlockchain(), application.getState().getAccounts());
+        Block block = appBlockManager.composeBlock(Arrays.asList(), state.getBlockchain(), state.getAccounts());
         appBlockManager.signBlock(block, privateKey);
         MultiSignatureService multiSignatureService = AppServiceProvider.getMultiSignatureService();
 
@@ -433,8 +446,8 @@ public class AppBlockManagerTest {
         Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN.pow(1), BigInteger.ONE);
         Transaction tx2 = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN.pow(1), BigInteger.ONE);
 
-        AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue());
-        AppServiceProvider.getTransactionService().signTransaction(tx2, Util.PRIVATE_KEY_MINTING.getValue());
+        AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
+        AppServiceProvider.getTransactionService().signTransaction(tx2, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
 
         Block block = appBlockManager.composeBlock(Arrays.asList(tx, tx2), null, null);
         appBlockManager.signBlock(block, privateKey);
@@ -496,6 +509,29 @@ public class AppBlockManagerTest {
         }
 
         return multiSignatureService.verifyAggregatedSignature(signersPublicKeys,aggregatedSignature, aggregatedCommitment, blockHashNoSig, 1 );
+    }
+
+    @Test
+    public void testGenerateAndBroadcastBlockMaximumSpeed() throws IOException {
+        List<String> hashes = new ArrayList<String>();
+        Accounts accounts = new Accounts(new AccountsContext());
+        Transaction tx1 = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN, BigInteger.ZERO);
+        AppServiceProvider.getTransactionService().signTransaction(tx1, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
+        AppServiceProvider.getTransactionService().verifyTransaction(tx1);
+
+        long start = System.currentTimeMillis();
+
+        for(int i = 0;i<10000;i++){
+            Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN, BigInteger.ZERO);
+            AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
+            AppServiceProvider.getTransactionService().verifyTransaction(tx);
+            //AppServiceProvider.getBootstrapService().putTransactionInBlockchain(tx, AppServiceProvider.getSerializationService().getHashString(tx), blockchain);
+        }
+        long end = System.currentTimeMillis();
+        System.out.println((end - start));
+
+
+        AppBlockManager.instance().generateAndBroadcastBlock(hashes, accounts, blockchain, privateKey);
     }
 
 }

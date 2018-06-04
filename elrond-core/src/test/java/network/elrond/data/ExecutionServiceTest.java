@@ -82,7 +82,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
             tx = new Transaction(addressSender, addressReceiver, BigInteger.valueOf(valuePerTransaction), BigInteger.valueOf(i));
             tx.setPubKey(Util.byteArrayToHexString(publicKeyMint.getValue()));
             tx.setData(new byte[0]);
-            transactionService.signTransaction(tx, privateKeyMint.getValue());
+            transactionService.signTransaction(tx, privateKeyMint.getValue(), publicKeyMint.getValue());
             hashStr = serializationService.getHashString(tx);
             hash = serializationService.getHash(tx);
             transactionHashes.add(hash);

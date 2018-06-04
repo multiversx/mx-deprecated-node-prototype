@@ -95,7 +95,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
             BigInteger nonce = senderAccount.getNonce();
             Transaction transaction = AppServiceProvider.getTransactionService().generateTransaction(senderPublicKey, receiverPublicKey, value, nonce);
-            AppServiceProvider.getTransactionService().signTransaction(transaction, senderPrivateKey.getValue());
+            AppServiceProvider.getTransactionService().signTransaction(transaction, senderPrivateKey.getValue(), senderPublicKey.getValue());
 
             String hash = AppServiceProvider.getSerializationService().getHashString(transaction);
             P2PConnection connection = state.getConnection();

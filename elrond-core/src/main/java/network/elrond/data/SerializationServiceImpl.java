@@ -9,8 +9,6 @@ import network.elrond.service.AppServiceProvider;
 import org.bouncycastle.util.encoders.Base64;
 
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 public class SerializationServiceImpl implements SerializationService {
 
@@ -51,14 +49,14 @@ public class SerializationServiceImpl implements SerializationService {
         String json = AppServiceProvider.getSerializationService().encodeJSON(object);
         Util.check(json != null, "json is null");
 
-        MessageDigest instance = null;
-        try {
-            instance = MessageDigest.getInstance("SHA3-256");
-        } catch (NoSuchAlgorithmException ex) {
-            throw new RuntimeException(ex);
-        }
-        return instance.digest(json.getBytes());
-        //return (Util.SHA3.get().digest(json.getBytes()));
+//        MessageDigest instance = null;
+////        try {
+////            instance = MessageDigest.getInstance("SHA3-256");
+////        } catch (NoSuchAlgorithmException ex) {
+////            throw new RuntimeException(ex);
+////        }
+////        return instance.digest(json.getBytes());
+        return (Util.SHA3.get().digest(json.getBytes()));
     }
 
     @Override

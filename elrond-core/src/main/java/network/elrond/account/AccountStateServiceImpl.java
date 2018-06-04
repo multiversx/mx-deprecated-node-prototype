@@ -116,7 +116,7 @@ public class AccountStateServiceImpl implements AccountStateService {
 
         Transaction transactionMint = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING,
                 new PublicKey(Util.hexStringToByteArray(initialAddress)), initialValue, BigInteger.ZERO);
-        AppServiceProvider.getTransactionService().signTransaction(transactionMint, Util.PRIVATE_KEY_MINTING.getValue());
+        AppServiceProvider.getTransactionService().signTransaction(transactionMint, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
 
         Block genesisBlock = new Block();
         genesisBlock.setNonce(BigInteger.ZERO);
