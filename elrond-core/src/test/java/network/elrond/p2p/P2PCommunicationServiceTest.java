@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import network.elrond.data.Transaction;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.net.ServerSocket;
@@ -79,5 +80,14 @@ public class P2PCommunicationServiceTest {
         TestCase.assertEquals(true, pingResponse.isReachablePort());
 
         serverSocket.close();
+    }
+
+    @Ignore
+    @Test
+    public void testPingIP() throws Exception{
+        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse("192.168.11.38", 4000);
+
+        System.out.println(pingResponse.toString());
+
     }
 }
