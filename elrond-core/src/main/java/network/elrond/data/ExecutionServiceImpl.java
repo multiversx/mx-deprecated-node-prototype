@@ -117,6 +117,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             // check state merkle patricia trie root is the same with what was stored in block
             if (!Arrays.equals(block.getAppStateHash(), accounts.getAccountsPersistenceUnit().getRootHash())) {
                 blockExecutionReport.ko("Application state root hash does not match");
+                AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
                 return blockExecutionReport;
             }
 

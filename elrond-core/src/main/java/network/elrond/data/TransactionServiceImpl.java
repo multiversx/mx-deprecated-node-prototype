@@ -148,6 +148,10 @@ public class TransactionServiceImpl implements TransactionService {
         for (byte[] hash : hashes) {
             String hashString = Util.getDataEncoded64(hash);
             Transaction transaction = AppServiceProvider.getBlockchainService().get(hashString, blockchain, BlockchainUnitType.TRANSACTION);
+            if(transaction==null){
+                logger.info("Fount null transaction for hash: " + hash);
+                continue;
+            }
             transactions.add(transaction);
             //appPersistenceService.put(hashString, transaction, blockchain, BlockchainUnitType.TRANSACTION);
         }

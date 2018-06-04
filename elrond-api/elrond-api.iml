@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" version="4">
+  <component name="FacetManager">
+    <facet type="Spring" name="Spring">
+      <configuration />
+    </facet>
+    <facet type="web" name="Web">
+      <configuration>
+        <webroots />
+        <sourceRoots>
+          <root url="file://$MODULE_DIR$/src/main/java" />
+          <root url="file://$MODULE_DIR$/src/main/resources" />
+        </sourceRoots>
+      </configuration>
+    </facet>
+  </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
@@ -13,6 +27,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="elrond-core" />
     <orderEntry type="library" name="Maven: org.bouncycastle:bcprov-jdk15on:1.59" level="project" />
+    <orderEntry type="library" name="Maven: com.madgag.spongycastle:core:1.50.0.0" level="project" />
     <orderEntry type="library" name="Maven: net.tomp2p:tomp2p-all:5.0-Beta8" level="project" />
     <orderEntry type="library" name="Maven: net.tomp2p:tomp2p-nat:5.0-Beta8" level="project" />
     <orderEntry type="library" name="Maven: org.bitlet:weupnp:0.1.2" level="project" />

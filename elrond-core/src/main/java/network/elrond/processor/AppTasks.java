@@ -59,7 +59,7 @@ public class AppTasks {
 
 
     /**
-     * Init system bootstrap
+     * Init system synchronize
      */
     public static AppTask BOOTSTRAP_SYSTEM = (application) -> {
         new BootstrappingProcessor().process(application);

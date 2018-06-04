@@ -43,7 +43,7 @@ public class BootstrappingProcessor implements AppTask {
 
                 state.clearLock();
 
-                logger.info("Nothing else to bootstrap! Waiting 5 seconds...");
+                logger.info("Nothing else to synchronize! Waiting 5 seconds...");
                 ThreadUtil.sleep(5000);
 
             }
@@ -81,7 +81,7 @@ public class BootstrappingProcessor implements AppTask {
 //                    } else if (context.getBootstrapType() == BootstrapType.REBUILD_FROM_DISK) {
 //                        exReport.combine(bootstrapService.rebuildFromDisk(application, localBlockIndex));
 //                    } else {
-//                        exReport.combine(new ExecutionReport().ko("Can not bootstrap! Unknown BootstrapType : " +
+//                        exReport.combine(new ExecutionReport().ko("Can not synchronize! Unknown BootstrapType : " +
 //                                context.getBootstrapType().toString() + "!"));
 //                    }
 //                }
@@ -94,8 +94,8 @@ public class BootstrappingProcessor implements AppTask {
             boolean isSyncRequired = isBlocAvailable && isNewBlockRemote;
 
             if (isSyncRequired) {
-                //bootstrap
-                ExecutionReport report = bootstrapService.bootstrap(application, localBlockIndex, remoteBlockIndex);
+                //synchronize
+                ExecutionReport report = bootstrapService.synchronize(application, localBlockIndex, remoteBlockIndex);
                 exReport.combine(report);
             }
 

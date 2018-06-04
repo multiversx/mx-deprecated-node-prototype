@@ -1,8 +1,9 @@
 package network.elrond.data;
 
-import network.elrond.Application;
 import network.elrond.account.Accounts;
-import network.elrond.application.AppState;
+import network.elrond.blockchain.Blockchain;
+import network.elrond.blockchain.BlockchainService;
+import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.Util;
 import network.elrond.crypto.MultiSignatureService;
 import network.elrond.crypto.PrivateKey;
@@ -11,6 +12,7 @@ import network.elrond.service.AppServiceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,15 +28,43 @@ public class AppBlockManager {
         return instance;
     }
 
-    public Block composeBlock(List<Transaction> transactions, Application application) {
+
+
+    public void generateAndBroadcastBlock(List<String> hashes, Accounts accounts, Blockchain blockchain, PrivateKey privateKey) {
+        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
+
+        try {
+
+            List<Transaction> transactions = blockchainService.getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
+            Block block = AppBlockManager.instance().composeBlock(transactions, blockchain, accounts);
+
+
+            AppBlockManager.instance().signBlock(block, privateKey);
+            ExecutionService executionService = AppServiceProvider.getExecutionService();
+            ExecutionReport result = executionService.processBlock(block, accounts, blockchain);
+
+            if (result.isOk()) {
+
+                String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
+                AppServiceProvider.getBootstrapService().putBlockInBlockchain(block, hashBlock, blockchain);
+
+                logger.info("New block proposed" + hashBlock);
+            }
+
+
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public Block composeBlock(List<Transaction> transactions, Blockchain blockchain, Accounts accounts) {
 
         Util.check(transactions!=null, "transactions!=null");
-        Util.check(application!=null, "application!=null");
+        Util.check(blockchain!=null, "blockchain!=null");
 
-        AppState state = application.getState();
-        Accounts accounts = state.getAccounts();
 
-        Block block = getNewBlockAndBindToPrevious(state.getBlockchain().getCurrentBlock());
+        Block block = getNewBlockAndBindToPrevious(blockchain.getCurrentBlock());
         addTransactions(transactions, accounts, block);
         block.setAppStateHash(accounts.getAccountsPersistenceUnit().getRootHash());
         AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);

@@ -22,13 +22,13 @@ public interface BootstrapService {
 
     ExecutionReport startFromScratch(Application application);
 
-    ExecutionReport bootstrap(Application application, BigInteger maxBlkHeightLocal, BigInteger maxBlkHeightNetw);
+    ExecutionReport synchronize(Application application, BigInteger maxBlkHeightLocal, BigInteger maxBlkHeightNetw);
 
     ExecutionReport rebuildFromDisk(Application application, BigInteger maxBlkHeightLocal);
 
     //ExecutionReport rebuildFromDiskDeltaNoExec(Application application, BigInteger maxBlkHeightLocal, BigInteger maxBlkHeightNetw);
 
-    ExecutionReport putBlockInBlockchain(Block blk, String blockHash, AppState state);
+    ExecutionReport putBlockInBlockchain(Block blk, String blockHash, Blockchain blockchain);
 
     ExecutionReport putTransactionInBlockchain(Transaction transaction, String transactionHash, AppState state);
 
