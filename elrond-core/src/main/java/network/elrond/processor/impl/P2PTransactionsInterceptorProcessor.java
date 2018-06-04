@@ -38,7 +38,7 @@ public class P2PTransactionsInterceptorProcessor extends AbstractChannelTask<Str
                 return;
             }
 
-            logger.info("Received new transaction " + hash);
+            //logger.info("Received new transaction " + hash);
 
         } catch (Exception ex) {
             ex.printStackTrace();

@@ -2,6 +2,7 @@ package network.elrond.processor.impl;
 
 import network.elrond.Application;
 import network.elrond.application.AppState;
+import network.elrond.core.ThreadUtil;
 import network.elrond.p2p.AppP2PManager;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.processor.AppTask;
@@ -21,6 +22,7 @@ public abstract class AbstractChannelTask<T> implements AppTask {
             while (state.isStillRunning()) {
                 try {
                     process(queue, application);
+                    ThreadUtil.sleep(500);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

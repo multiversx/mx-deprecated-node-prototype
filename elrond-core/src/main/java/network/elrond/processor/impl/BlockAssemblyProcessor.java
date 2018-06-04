@@ -65,7 +65,9 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         state.clearLock();
 
 
-        logger.info(" ###### Executed " + size + " transactions in " + watch.time(TimeUnit.SECONDS) + " s   ###### ");
+        long time = watch.time(TimeUnit.SECONDS);
+        long tps = (time > 0) ? (size / time) : 0;
+        logger.info(" ###### Executed " + size + " transactions in " + time + " s  TPS:" + tps + "   ###### ");
 
     }
 
