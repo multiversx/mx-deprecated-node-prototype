@@ -123,8 +123,10 @@ public class ElrondFacadeImpl implements ElrondFacade {
             return (AppServiceProvider.getP2PCommunicationService().getPingResponse(ipAddress, port));
         } catch (Exception ex) {
             ex.printStackTrace();
-            return(new PingResponse());
+            return (new PingResponse());
         }
+    }
+
     @Override
     public Fun.Tuple2<String, String> generatePublicKeyAndPrivateKey(Application application) {
         PrivateKey privateKey = new PrivateKey();
