@@ -3,6 +3,7 @@ package network.elrond;
 import network.elrond.Application;
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
+import org.mapdb.Fun;
 
 import java.math.BigInteger;
 
@@ -42,4 +43,17 @@ public interface ElrondFacade {
      * @return
      */
     boolean send(AccountAddress receiver, BigInteger value, Application application);
+
+    /**
+     * Generate private and public key
+     * @return
+     */
+    Fun.Tuple2<String, String> generatePublicAndPrivateKey();
+
+    /**
+     * Generate public key from a private key
+     * @param privateKey
+     * @return
+     */
+    Fun.Tuple2<String, String> generatePublicKeyFromPrivateKey(String privateKey);
 }

@@ -5,6 +5,7 @@ import network.elrond.account.AccountState;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
+import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.Transaction;
@@ -12,6 +13,7 @@ import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.service.AppServiceProvider;
+import org.mapdb.Fun;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,7 +114,16 @@ public class ElrondFacadeImpl implements ElrondFacade {
         }
 
         return false;
+    }
 
+    @Override
+    public Fun.Tuple2<String, String> generatePublicAndPrivateKey() {
+        PrivateKey privateKey = new PrivateKey();
+        return new Fun.Tuple2<>(Util.byteArrayToHexString(privateKey.getValue()), Util.byteArrayToHexString(new PublicKey(privateKey).getValue()));
+    }
 
+    @Override
+    public Fun.Tuple2<String, String> generatePublicKeyFromPrivateKey(String privateKey) {
+        return new Fun.Tuple2<>(privateKey, Util.byteArrayToHexString(new PublicKey(Util.hexStringToByteArray(privateKey)).getValue()));
     }
 }
