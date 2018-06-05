@@ -1,10 +1,11 @@
 package network.elrond.crypto;
 
-import org.bouncycastle.asn1.sec.SECNamedCurves;
-import org.bouncycastle.asn1.x9.X9ECParameters;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.math.ec.ECCurve;
-import org.bouncycastle.math.ec.ECPoint;
+import org.spongycastle.asn1.sec.SECNamedCurves;
+import org.spongycastle.asn1.x9.X9ECParameters;
+
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.math.ec.ECCurve;
+import org.spongycastle.math.ec.ECPoint;
 
 import java.math.BigInteger;
 import java.security.Security;
@@ -12,7 +13,7 @@ import java.security.Security;
 public class ECCryptoServiceSecp256k1Impl implements ECCryptoService {
     private static final X9ECParameters EC_PARAMETERS = SECNamedCurves.getByName("secp256k1");
     private static final String ALGORITHM = "EC";
-    private static final String PROVIDER = "BC";
+    private static final String PROVIDER = "SC";
 
     static {
         if (Security.getProvider(PROVIDER) == null) {

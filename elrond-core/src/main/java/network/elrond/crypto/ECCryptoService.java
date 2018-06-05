@@ -1,8 +1,8 @@
 package network.elrond.crypto;
 
-import org.bouncycastle.asn1.x9.X9ECParameters;
-import org.bouncycastle.math.ec.ECCurve;
-import org.bouncycastle.math.ec.ECPoint;
+import org.spongycastle.asn1.x9.X9ECParameters;
+import org.spongycastle.math.ec.ECCurve;
+import org.spongycastle.math.ec.ECPoint;
 
 import java.math.BigInteger;
 

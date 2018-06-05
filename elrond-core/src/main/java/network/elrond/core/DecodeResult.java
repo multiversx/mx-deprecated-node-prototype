@@ -2,7 +2,7 @@ package network.elrond.core;
 
 import java.io.Serializable;
 
-import org.bouncycastle.util.encoders.Hex;
+import org.spongycastle.util.encoders.Hex;
 
 @SuppressWarnings("serial")
 public class DecodeResult implements Serializable {

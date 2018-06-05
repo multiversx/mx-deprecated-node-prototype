@@ -107,7 +107,6 @@ public class BootstrappingProcessor implements AppTask {
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            ;
         }
     }
 

@@ -2,14 +2,13 @@ package network.elrond.core;
 
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
-import org.bouncycastle.jcajce.provider.digest.SHA256;
-import org.bouncycastle.jcajce.provider.digest.SHA3.DigestSHA3;
-import org.bouncycastle.util.encoders.Base64;
+import org.spongycastle.jcajce.provider.digest.SHA256;
+import org.spongycastle.jcajce.provider.digest.SHA3.DigestSHA3;
+import org.spongycastle.util.encoders.Base64;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Arrays;
 
 public class Util {
     public static final int VERIFIER_GROUP_SIZE = 21;

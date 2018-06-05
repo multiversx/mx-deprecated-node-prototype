@@ -4,8 +4,8 @@ import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
 
 import static network.elrond.core.ByteUtil.appendByte;
-import static org.bouncycastle.util.Arrays.concatenate;
-import static org.bouncycastle.util.encoders.Hex.encode;
+import static org.spongycastle.util.Arrays.concatenate;
+import static org.spongycastle.util.encoders.Hex.encode;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;

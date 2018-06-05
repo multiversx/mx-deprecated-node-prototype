@@ -1,11 +1,11 @@
 package network.elrond.crypto;
 
 import network.elrond.service.AppServiceProvider;
-import org.bouncycastle.crypto.params.ECDomainParameters;
-import org.bouncycastle.jce.interfaces.ECPublicKey;
-import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.jce.spec.ECPublicKeySpec;
-import org.bouncycastle.math.ec.ECPoint;
+import org.spongycastle.crypto.params.ECDomainParameters;
+import org.spongycastle.jce.interfaces.ECPublicKey;
+import org.spongycastle.jce.spec.ECParameterSpec;
+import org.spongycastle.jce.spec.ECPublicKeySpec;
+import org.spongycastle.math.ec.ECPoint;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;

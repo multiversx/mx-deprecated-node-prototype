@@ -2,7 +2,7 @@ package network.elrond.crypto;
 
 import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
-import org.bouncycastle.math.ec.ECPoint;
+import org.spongycastle.math.ec.ECPoint;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;

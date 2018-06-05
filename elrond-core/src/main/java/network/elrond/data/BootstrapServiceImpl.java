@@ -10,7 +10,7 @@ import network.elrond.blockchain.SettingsType;
 import network.elrond.core.Util;
 import network.elrond.p2p.P2PObjectService;
 import network.elrond.service.AppServiceProvider;
-import org.bouncycastle.util.encoders.Base64;
+import org.spongycastle.util.encoders.Base64;
 import org.mapdb.Fun;
 
 import java.math.BigInteger;
