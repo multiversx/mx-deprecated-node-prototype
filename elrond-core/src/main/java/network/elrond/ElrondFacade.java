@@ -3,6 +3,7 @@ package network.elrond;
 import network.elrond.Application;
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
+import network.elrond.crypto.PKSKPair;
 import org.mapdb.Fun;
 import network.elrond.p2p.PingResponse;
 
@@ -57,13 +58,13 @@ public interface ElrondFacade {
      * Generate public key and private key
      * @return
      */
-    Fun.Tuple2<String, String> generatePublicKeyAndPrivateKey();
+    PKSKPair generatePublicKeyAndPrivateKey();
 
     /**
      * Generate public key from a private key
      * @param privateKey
      * @return
      */
-    Fun.Tuple2<String, String> generatePublicKeyFromPrivateKey(String privateKey);
+    PKSKPair generatePublicKeyFromPrivateKey(String privateKey);
 
 }
