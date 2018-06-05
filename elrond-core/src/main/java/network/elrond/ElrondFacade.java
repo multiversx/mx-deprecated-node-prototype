@@ -52,5 +52,5 @@ public interface ElrondFacade {
      */
     PingResponse ping(String ipAddress, int port);
 
-
+    String
 }

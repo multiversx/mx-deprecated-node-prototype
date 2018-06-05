@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 
 import java.io.OutputStream;
+import java.util.List;
 
 public class LoggerServiceImpl implements LoggerService{
     public OutputStream getLoggerStream(String identifier) throws Exception{

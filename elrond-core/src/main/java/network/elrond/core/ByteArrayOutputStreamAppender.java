@@ -28,4 +28,12 @@ public class ByteArrayOutputStreamAppender<E> extends OutputStreamAppender<E> {
     public WindowedByteArrayOutputStream getMainOutputStream(){
         return (mainDataStream);
     }
+
+    public String toStringAndClear(String charsetName) throws Exception{
+        synchronized (lock){
+            String data = mainDataStream.toString(charsetName);
+            mainDataStream.reset();
+            return(data);
+        }
+    }
 }

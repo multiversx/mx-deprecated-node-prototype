@@ -1,10 +1,13 @@
 package network.elrond;
 
+import ch.qos.logback.core.Appender;
 import network.elrond.account.AccountAddress;
 import network.elrond.account.AccountState;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
+import network.elrond.core.ByteArrayOutputStreamAppender;
+import network.elrond.core.WindowedByteArrayOutputStream;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.Transaction;
@@ -122,6 +125,20 @@ public class ElrondFacadeImpl implements ElrondFacade {
         } catch (Exception ex) {
             ex.printStackTrace();
             return(new PingResponse());
+        }
+    }
+
+    public String getLoggerDataStreamAsStringAndClear(String appenderName){
+        try {
+            Appender appender = AppServiceProvider.getLoggerService().getLoggerAppender(appenderName);
+
+            String data = ((ByteArrayOutputStreamAppender)appender).toStringAndClear("UTF8");
+
+            return(data);
+
+        } catch (Exception ex){
+            ex.printStackTrace();
+            return(null);
         }
     }
 }
