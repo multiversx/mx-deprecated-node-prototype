@@ -65,4 +65,5 @@ public interface ElrondFacade {
      * @return
      */
     Fun.Tuple2<String, String> generatePublicKeyFromPrivateKey(String privateKey);
+
 }

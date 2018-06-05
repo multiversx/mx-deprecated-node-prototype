@@ -49,7 +49,7 @@ class ElrondApiNode {
 
     PingResponse ping(String ipAddress, int port) {return  getFacade().ping(ipAddress, port);}
 
-    Fun.Tuple2<String, String> generatePublicKeyAndPrivateKey() {return getFacade().generatePublicKeyAndPrivateKey();  }
+    Fun.Tuple2<String, String> generatePublicKeyAndPrivateKey() {return getFacade().generatePublicKeyAndPrivateKey(); }
 
-    Fun.Tuple2<String, String> generatePublicKeyFromPrivateKey(String privateKey) { return getFacade().generatePublicKeyFromPrivateKey(privateKey);  }
+    Fun.Tuple2<String, String> generatePublicKeyFromPrivateKey(String privateKey) { return getFacade().generatePublicKeyFromPrivateKey(privateKey); }
 }

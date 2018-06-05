@@ -126,12 +126,14 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
     @Override
     public Fun.Tuple2<String, String> generatePublicKeyAndPrivateKey() {
+
         PrivateKey privateKey = new PrivateKey();
         return new Fun.Tuple2<>(Util.byteArrayToHexString(privateKey.getValue()), Util.byteArrayToHexString(new PublicKey(privateKey).getValue()));
     }
 
     @Override
     public Fun.Tuple2<String, String> generatePublicKeyFromPrivateKey(String privateKey) {
+
         return new Fun.Tuple2<>(privateKey, Util.byteArrayToHexString(new PublicKey(Util.hexStringToByteArray(privateKey)).getValue()));
     }
 }
