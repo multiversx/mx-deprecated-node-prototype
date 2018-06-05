@@ -53,7 +53,7 @@ public class BlockchainProcessTest extends BaseBlockchainTest {
             block.getListTXHashes().add(hash);
 
             String hashString = AppServiceProvider.getSerializationService().getHashString(transaction);
-            AppServiceProvider.getTransactionService().signTransaction(transaction, privateKeySender.getValue());
+            AppServiceProvider.getTransactionService().signTransaction(transaction, privateKeySender.getValue(), publicKeySender.getValue());
             AppServiceProvider.getBlockchainService().put(hashString, transaction, blockchain, BlockchainUnitType.TRANSACTION);
 
             appBlockManager.signBlock(block, privateKeySender);

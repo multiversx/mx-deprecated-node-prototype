@@ -3,7 +3,6 @@ package network.elrond.data;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.Util;
-import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.crypto.Signature;
 import network.elrond.crypto.SignatureService;
@@ -38,7 +37,7 @@ public class TransactionServiceImpl implements TransactionService {
      */
 //    public byte[] getHash(Transaction tx, boolean withSig) {
 //        String json = AppServiceProvider.getSerializationService().encodeJSON(tx);
-//        return (Util.SHA3.digest(json.getBytes()));
+//        return (Util.SHA3.get().digest(json.getBytes()));
 //    }
 
     /**
@@ -47,7 +46,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @param tx               transaction
      * @param privateKeysBytes private key as byte array
      */
-    public void signTransaction(Transaction tx, byte[] privateKeysBytes) {
+    public void signTransaction(Transaction tx, byte[] privateKeysBytes, byte[] publicKeyBytes) {
 
         if(tx == null){
             throw new IllegalArgumentException("Transaction cannot be null");
@@ -58,8 +57,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
 
-        //TODO: do not recreate PrivateKey
-        PrivateKey pvkey = new PrivateKey(privateKeysBytes);
+
 
         tx.setSignature(null);
         tx.setChallenge(null);
@@ -69,16 +67,15 @@ public class TransactionServiceImpl implements TransactionService {
 //        tx.setSignature(signature);
 //        tx.setChallenge(challenge);
 
-        //TODO: do not recreate PublicKey
-        PublicKey pbkey = new PublicKey(pvkey);
+
         Signature sig;
 
         SignatureService schnorr = AppServiceProvider.getSignatureService();
-        sig = schnorr.signMessage(hashNoSigLocal, privateKeysBytes, pbkey.getValue());
+        sig = schnorr.signMessage(hashNoSigLocal, privateKeysBytes, publicKeyBytes);
 
         tx.setSignature(sig.getSignature());
         tx.setChallenge(sig.getChallenge());
-        tx.setPubKey(Util.byteArrayToHexString(pbkey.getValue()));
+        tx.setPubKey(Util.byteArrayToHexString(publicKeyBytes));
     }
 
     /**

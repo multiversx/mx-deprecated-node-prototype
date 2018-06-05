@@ -4,7 +4,7 @@ import network.elrond.core.ByteUtil;
 import network.elrond.core.Value;
 import network.elrond.crypto.HashUtil;
 import network.elrond.db.ByteArrayWrapper;
-import org.bouncycastle.util.encoders.Hex;
+import org.spongycastle.util.encoders.Hex;
 import org.iq80.leveldb.DB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +14,7 @@ import java.util.*;
 import static java.util.Arrays.copyOfRange;
 import static network.elrond.core.ByteUtil.matchingNibbleLength;
 import static network.elrond.core.CompactEncoder.*;
-import static org.bouncycastle.util.Arrays.concatenate;
+import static org.spongycastle.util.Arrays.concatenate;
 
 public class TrieImpl implements Trie {
 

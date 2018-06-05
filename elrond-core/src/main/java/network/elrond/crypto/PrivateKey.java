@@ -2,11 +2,11 @@ package network.elrond.crypto;
 
 import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
-import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
-import org.bouncycastle.crypto.params.ECDomainParameters;
-import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
-import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
+import org.spongycastle.crypto.AsymmetricCipherKeyPair;
+import org.spongycastle.crypto.generators.ECKeyPairGenerator;
+import org.spongycastle.crypto.params.ECDomainParameters;
+import org.spongycastle.crypto.params.ECKeyGenerationParameters;
+import org.spongycastle.crypto.params.ECPrivateKeyParameters;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -68,14 +68,14 @@ public class PrivateKey {
         BigInteger seedInt;
         ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
-        seedArray = Util.SHA3.digest(seedArray);
+        seedArray = Util.SHA3.get().digest(seedArray);
         seedInt = new BigInteger(1, seedArray);
 
         // to be a valid private key it needs to verify:
         // 0 < pk < n, where n is the order of the largest prime order subgroup
         while (1 != seedInt.compareTo(BigInteger.ZERO) ||
                 0 <= seedInt.compareTo(ecCryptoService.getN())) {
-            seedArray = Util.SHA3.digest(seedArray);
+            seedArray = Util.SHA3.get().digest(seedArray);
             seedInt = new BigInteger(1, seedArray);
         }
 

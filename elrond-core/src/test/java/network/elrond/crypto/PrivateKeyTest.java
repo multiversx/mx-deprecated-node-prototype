@@ -47,6 +47,8 @@ public class PrivateKeyTest {
     public void testGeneratePrivateKeyFromString() {
         String seed = "Lorem ipsum dolor sit amet, ei quo equidem perpetua efficiendi";
         PrivateKey privKey = new PrivateKey(seed);
+        System.out.println(Util.byteArrayToHexString(privKey.getValue()));
+        System.out.println(Util.byteArrayToHexString(new PublicKey(privKey).getValue()));
         ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
         // validate against checked pair

@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.service.AppServiceProvider;
-import org.bouncycastle.util.encoders.Base64;
+import org.spongycastle.util.encoders.Base64;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

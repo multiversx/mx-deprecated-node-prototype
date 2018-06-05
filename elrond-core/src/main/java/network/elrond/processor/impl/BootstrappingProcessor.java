@@ -64,14 +64,12 @@ public class BootstrappingProcessor implements AppTask {
             BigInteger remoteBlockIndex = bootstrapService.getMaxBlockSize(LocationType.NETWORK, state.getBlockchain());
             BigInteger localBlockIndex = bootstrapService.getMaxBlockSize(LocationType.LOCAL, state.getBlockchain());
 
-
             ExecutionReport exReport = new ExecutionReport();
-
 
             boolean shouldGenerateGenesis = context.isSeedNode() && (remoteBlockIndex.compareTo(BigInteger.ZERO) < 0);
             if (shouldGenerateGenesis) {
 
-                bootstrapService.startFromScratch(application);
+                bootstrapService.startFromScratch(state, context);
 //
 //                //if node is seeder and is first run
 //                if (localBlockIndex.compareTo(BigInteger.ZERO) < 0) {
@@ -98,7 +96,7 @@ public class BootstrappingProcessor implements AppTask {
 
             if (isSyncRequired) {
                 //synchronize
-                ExecutionReport report = bootstrapService.synchronize(application, localBlockIndex, remoteBlockIndex);
+                ExecutionReport report = bootstrapService.synchronize(state, localBlockIndex, remoteBlockIndex);
                 exReport.combine(report);
             }
 
@@ -109,7 +107,6 @@ public class BootstrappingProcessor implements AppTask {
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            ;
         }
     }
 

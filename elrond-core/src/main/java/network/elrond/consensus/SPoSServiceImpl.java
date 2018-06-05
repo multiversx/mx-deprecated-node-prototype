@@ -160,7 +160,7 @@ public class SPoSServiceImpl implements SPoSService {
         int size = weightedList.size();
         int startIdx = 0;
         while (tempList.size() < Util.VERIFIER_GROUP_SIZE) {
-            BigInteger bi = new BigInteger(Util.SHA3.digest((strRandomSource + Integer.toString(nonce)).getBytes()));
+            BigInteger bi = new BigInteger(Util.SHA3.get().digest((strRandomSource + Integer.toString(nonce)).getBytes()));
 
             startIdx = bi.mod(BigInteger.valueOf(size)).intValue();
 

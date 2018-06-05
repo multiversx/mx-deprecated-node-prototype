@@ -1,27 +1,22 @@
 package network.elrond.processor.impl;
 
 import network.elrond.Application;
-import network.elrond.account.*;
+import network.elrond.account.AccountAddress;
+import network.elrond.account.AccountState;
+import network.elrond.account.AccountStateService;
+import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
-import network.elrond.core.LRUMap;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.*;
-import network.elrond.db.ByteArrayWrapper;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.service.AppServiceProvider;
-import network.elrond.trie.Cache;
-import network.elrond.trie.Node;
-import network.elrond.trie.Trie;
-import network.elrond.trie.TrieImpl;
-import org.bouncycastle.util.encoders.Base64;
+import org.spongycastle.util.encoders.Base64;
 
 import java.math.BigInteger;
-import java.util.Map;
-import java.util.Set;
 
 public class BootstrappingProcessorNodeProducer {
     static SerializationService serializationService = AppServiceProvider.getSerializationService();
@@ -77,7 +72,7 @@ public class BootstrappingProcessorNodeProducer {
                     System.out.println("Run out of sERD's?");
                 } else {
                     Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(pbKeyInitial, pbKeyRecv, BigInteger.ONE, nonceTransaction);
-                    AppServiceProvider.getTransactionService().signTransaction(tx, pvKeyInitial.getValue());
+                    AppServiceProvider.getTransactionService().signTransaction(tx, pvKeyInitial.getValue(), pbKeyInitial.getValue());
 
                     P2PBroadcastChanel channel = state.getChanel(P2PChannelName.TRANSACTION);
 
