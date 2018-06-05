@@ -34,7 +34,7 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
     protected void process(ArrayBlockingQueue<String> queue, Application application) {
 
 
-        ThreadUtil.sleep(2000);
+        ThreadUtil.sleep(4000);
 
         AppContext context = application.getContext();
         if (!context.isSeedNode()) {
@@ -65,9 +65,9 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         state.clearLock();
 
 
-        long time = watch.time(TimeUnit.SECONDS);
-        long tps = (time > 0) ? (size / time) : 0;
-        logger.info(" ###### Executed " + size + " transactions in " + time + " s  TPS:" + tps + "   ###### ");
+        long time = watch.time(TimeUnit.MILLISECONDS);
+        long tps = (time > 0) ? ((size*1000) / time) : 0;
+        logger.info(" ###### Executed " + size + " transactions in " + time + "ms  TPS:" + tps + "   ###### ");
 
     }
 
