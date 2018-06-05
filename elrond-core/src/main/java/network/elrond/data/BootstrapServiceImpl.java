@@ -172,13 +172,30 @@ public class BootstrapServiceImpl implements BootstrapService {
 
 
     @Override
-    public ExecutionReport restoreFromDisk(BigInteger currentBlockIndex, Accounts accounts, Blockchain blockchain) {
+    public ExecutionReport restoreFromDisk(BigInteger currentBlockIndex, Accounts accounts, Blockchain blockchain, AppContext context) {
 
         ExecutionReport result = new ExecutionReport().ok("Start bootstrapping by loading from disk...");
+        BigInteger idx = BigInteger.valueOf(-1);
+        ;
+
+        try {
+            // get the last index from disk
+            while (getBlockHashFromIndex(idx.add(BigInteger.ONE), blockchain) != null) {
+                idx = idx.add(BigInteger.ONE);
+            }
+        } catch (Exception ex) {
+            result.ko(ex);
+            return (result);
+        }
+
+        // no index stored on disk so need to create genesis
+        if (idx.equals(BigInteger.valueOf(-1))) {
+            return startFromGenesis(accounts, blockchain, context);
+        }
 
 
         BigInteger genesisBlockIndex = BigInteger.valueOf(0);
-        for (BigInteger index = genesisBlockIndex; index.compareTo(currentBlockIndex) <= 0; index = index.add(BigInteger.ONE)) {
+        for (BigInteger index = genesisBlockIndex; index.compareTo(idx) <= 0; index = index.add(BigInteger.ONE)) {
             try {
                 result.combine(new ExecutionReport().ok("Put block with height: " + index.toString(10) + "..."));
 

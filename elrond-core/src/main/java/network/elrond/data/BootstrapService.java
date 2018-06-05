@@ -24,7 +24,7 @@ public interface BootstrapService {
 
     ExecutionReport synchronize(BigInteger localBlockIndex, BigInteger remoteBlockIndex, Blockchain blockchain, Accounts accounts);
 
-    ExecutionReport restoreFromDisk(BigInteger currentBlockIndex, Accounts accounts, Blockchain blockchain);
+    ExecutionReport restoreFromDisk(BigInteger currentBlockIndex, Accounts accounts, Blockchain blockchain, AppContext context);
 
     ExecutionReport commitBlock(Block blk, String blockHash, Blockchain blockchain);
 
