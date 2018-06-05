@@ -4,9 +4,7 @@ import network.elrond.Application;
 import network.elrond.account.AccountStateService;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
-import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
-import network.elrond.crypto.PublicKey;
 import network.elrond.data.BootstrapService;
 import network.elrond.data.LocationType;
 import network.elrond.data.SerializationService;
@@ -42,8 +40,8 @@ public class BootstrappingProcessorNodeConsumer {
 
             Thread.sleep(1000);
 
-            System.out.println("Local height: " + bootstrapService.getMaxBlockSize(LocationType.LOCAL, state.getBlockchain()).toString(10) +
-                    ", network height: " + bootstrapService.getMaxBlockSize(LocationType.NETWORK, state.getBlockchain()).toString(10) +
+            System.out.println("Local height: " + bootstrapService.getCurrentBlockIndex(LocationType.LOCAL, state.getBlockchain()).toString(10) +
+                    ", network height: " + bootstrapService.getCurrentBlockIndex(LocationType.NETWORK, state.getBlockchain()).toString(10) +
                     ", app state hash: " + new String(Base64.encode(state.getAccounts().getAccountsPersistenceUnit().getRootHash())));
         }
 

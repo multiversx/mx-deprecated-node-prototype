@@ -21,7 +21,7 @@ public class ExecutionReport {
 
     public ExecutionReport ko(String message) {
         entries.add(message);
-        logger.log(Level.INFO, message);
+        logger.log(Level.SEVERE, message);
         valid = false;
         return this;
     }
@@ -45,7 +45,7 @@ public class ExecutionReport {
 
     public ExecutionReport ok(String message) {
         entries.add(message);
-        logger.info(message);
+        logger.log(Level.INFO, message);
         valid = true;
         return this;
     }
