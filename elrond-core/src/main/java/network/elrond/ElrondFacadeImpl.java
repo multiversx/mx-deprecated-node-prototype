@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
+import java.util.List;
 
 public class ElrondFacadeImpl implements ElrondFacade {
 
@@ -128,7 +129,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
         }
     }
 
-    public String getLoggerDataStreamAsStringAndClear(String appenderName){
+    public String getLoggerStringAndClear(String appenderName){
         try {
             Appender appender = AppServiceProvider.getLoggerService().getLoggerAppender(appenderName);
 
@@ -140,5 +141,9 @@ public class ElrondFacadeImpl implements ElrondFacade {
             ex.printStackTrace();
             return(null);
         }
+    }
+
+    public List<Appender> getLoggerAppendersList(){
+        return (AppServiceProvider.getLoggerService().getLoggerAppenderList());
     }
 }

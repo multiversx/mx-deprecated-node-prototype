@@ -19,7 +19,29 @@
         </encoder>
     </appender>
 
+    <appender name="WEBSOCKET_ALL" class="network.elrond.core.ByteArrayOutputStreamAppender">
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator> <!-- defaults to type ch.qos.logback.classic.boolex.JaninoEventEvaluator -->
+                <expression>
+                    return logger.contains("elrond");
+                </expression>
+            </evaluator>
+            <OnMismatch>DENY</OnMismatch>
+            <OnMatch>NEUTRAL</OnMatch>
+        </filter>
+
+
+
+
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
     <root level="debug">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="WEBSOCKET_ALL" />
     </root>
 </configuration>

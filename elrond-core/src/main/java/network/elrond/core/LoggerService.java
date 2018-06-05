@@ -10,4 +10,5 @@ public interface LoggerService {
 
     Appender getLoggerAppender(String identifier) throws Exception;
 
+    List<Appender> getLoggerAppenderList();
 }

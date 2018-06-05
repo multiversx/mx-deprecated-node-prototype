@@ -19,15 +19,16 @@ public class ElrondWebsocketManager {
         this.template = template;
     }
 
-    public void announce(String entity, String message) {
-        switch (entity) {
-            case "log":
-                this.template.convertAndSend("log", message);
-
-                break;
-            default:
-                break;
-        }
+    public void announce(String destination, String message) {
+        this.template.convertAndSend(destination, message);
+//        switch (entity) {
+//            case "log":
+//                this.template.convertAndSend("log", message);
+//
+//                break;
+//            default:
+//                break;
+//        }
     }
 
 

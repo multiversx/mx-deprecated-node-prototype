@@ -2,11 +2,14 @@ package network.elrond.core;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import org.slf4j.LoggerFactory;
 
 
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class LoggerServiceImpl implements LoggerService{
@@ -34,6 +37,21 @@ public class LoggerServiceImpl implements LoggerService{
         }
 
         throw new IllegalArgumentException("Appender " + identifier + " not found (see logback.xml) or is not an ByteArrayOutputStreamAppender appender!");
+    }
+
+    public List<Appender> getLoggerAppenderList(){
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+        List<Appender> list = new ArrayList<>();
+
+        for (Logger logger : loggerContext.getLoggerList()){
+            for (Iterator<Appender<ILoggingEvent>> index = logger.iteratorForAppenders(); index.hasNext();){
+                Appender<ILoggingEvent> appender = index.next();
+                list.add(appender);
+            }
+        }
+
+        return (list);
     }
 
 }

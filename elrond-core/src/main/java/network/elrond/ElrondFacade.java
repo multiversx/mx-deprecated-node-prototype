@@ -1,11 +1,13 @@
 package network.elrond;
 
+import ch.qos.logback.core.Appender;
 import network.elrond.Application;
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
 import network.elrond.p2p.PingResponse;
 
 import java.math.BigInteger;
+import java.util.List;
 
 public interface ElrondFacade {
 
@@ -52,5 +54,12 @@ public interface ElrondFacade {
      */
     PingResponse ping(String ipAddress, int port);
 
-    String
+    /**
+     * Gets the data as string from logger's appender and then empties the stream from appender
+     * @param appenderName
+     * @return
+     */
+    String getLoggerStringAndClear(String appenderName);
+
+    List<Appender> getLoggerAppendersList();
 }
