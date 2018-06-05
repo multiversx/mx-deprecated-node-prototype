@@ -149,5 +149,4 @@ public class ElrondFacadeImpl implements ElrondFacade {
             return new PKSKPair("Error", "Error");
         }
     }
-
 }

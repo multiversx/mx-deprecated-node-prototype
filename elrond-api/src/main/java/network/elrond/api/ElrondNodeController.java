@@ -98,5 +98,4 @@ public class ElrondNodeController {
                                              @RequestParam() String privateKey) {
         return elrondApiNode.generatePublicKeyFromPrivateKey(privateKey);
     }
-
 }

@@ -53,5 +53,4 @@ class ElrondApiNode {
     PKSKPair generatePublicKeyAndPrivateKey() {return getFacade().generatePublicKeyAndPrivateKey(); }
 
     PKSKPair generatePublicKeyFromPrivateKey(String privateKey) { return getFacade().generatePublicKeyFromPrivateKey(privateKey); }
-    
 }
