@@ -6,8 +6,8 @@ import java.util.Arrays;
 
 import static java.util.Arrays.copyOfRange;
 import static network.elrond.core.ByteUtil.byteArrayToInt;
-import static org.bouncycastle.util.Arrays.concatenate;
-import static org.bouncycastle.util.BigIntegers.asUnsignedByteArray;
+import static org.spongycastle.util.Arrays.concatenate;
+import static org.spongycastle.util.BigIntegers.asUnsignedByteArray;
 
 import java.util.List;
 

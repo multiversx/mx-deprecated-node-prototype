@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
-import org.bouncycastle.util.encoders.Base64;
+import org.spongycastle.util.encoders.Base64;
 
 import java.io.IOException;
 

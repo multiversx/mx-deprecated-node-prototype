@@ -10,7 +10,7 @@ import network.elrond.data.LocationType;
 import network.elrond.data.SerializationService;
 import network.elrond.data.TransactionService;
 import network.elrond.service.AppServiceProvider;
-import org.bouncycastle.util.encoders.Base64;
+import org.spongycastle.util.encoders.Base64;
 
 public class BootstrappingProcessorNodeConsumer {
 

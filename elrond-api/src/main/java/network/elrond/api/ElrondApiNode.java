@@ -5,6 +5,7 @@ import network.elrond.ElrondFacade;
 import network.elrond.ElrondFacadeImpl;
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
+import network.elrond.p2p.PingResponse;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
 
@@ -45,5 +46,5 @@ class ElrondApiNode {
         return getFacade().send(receiver, value, application);
     }
 
-
+    PingResponse ping(String ipAddress, int port) {return  getFacade().ping(ipAddress, port);}
 }

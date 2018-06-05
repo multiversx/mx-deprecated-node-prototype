@@ -2,11 +2,11 @@ package network.elrond.crypto;
 
 import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
-import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
-import org.bouncycastle.crypto.params.ECDomainParameters;
-import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
-import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
+import org.spongycastle.crypto.AsymmetricCipherKeyPair;
+import org.spongycastle.crypto.generators.ECKeyPairGenerator;
+import org.spongycastle.crypto.params.ECDomainParameters;
+import org.spongycastle.crypto.params.ECKeyGenerationParameters;
+import org.spongycastle.crypto.params.ECPrivateKeyParameters;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;

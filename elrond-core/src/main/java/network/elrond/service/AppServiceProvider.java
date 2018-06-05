@@ -10,6 +10,8 @@ import network.elrond.consensus.SPoSService;
 import network.elrond.consensus.SPoSServiceImpl;
 import network.elrond.consensus.ValidatorService;
 import network.elrond.consensus.ValidatorServiceImpl;
+import network.elrond.core.LoggerService;
+import network.elrond.core.LoggerServiceImpl;
 import network.elrond.crypto.*;
 import network.elrond.data.*;
 import network.elrond.p2p.*;
@@ -52,6 +54,7 @@ public class AppServiceProvider {
         putService(AppPersistenceService.class, new AppPersistenceServiceImpl());
         putService(BootstrapService.class, new BootstrapServiceImpl());
         putService(P2PCommunicationService.class, new P2PCommunicationServiceImpl());
+        putService(LoggerService.class, new LoggerServiceImpl());
     }
 
     public static P2PBroadcastService getP2PBroadcastService() {
@@ -113,5 +116,9 @@ public class AppServiceProvider {
 
     public static P2PCommunicationService getP2PCommunicationService(){
         return((P2PCommunicationService)getService(P2PCommunicationService.class));
+    }
+
+    public static LoggerService getLoggerService(){
+        return getService(LoggerService.class);
     }
 }
