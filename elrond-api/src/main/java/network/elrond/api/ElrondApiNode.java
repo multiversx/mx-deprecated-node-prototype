@@ -25,7 +25,7 @@ import java.util.List;
 class ElrondApiNode {
 
     private Application application;
-    private ElrondWebsocketManager elrondWebsocketManager;
+    //private ElrondWebsocketManager elrondWebsocketManager;
 
 
     public Application getApplication() {
@@ -44,48 +44,48 @@ class ElrondApiNode {
     void start(AppContext context) {
         application = getFacade().start(context);
 
-        MessageChannel messageChannel = new ExecutorSubscribableChannel();
-        SimpMessagingTemplate simpMessagingTemplate = new SimpMessagingTemplate(messageChannel);
-        elrondWebsocketManager = new ElrondWebsocketManager(simpMessagingTemplate);
-
-        Thread threadPushWebSocket = new Thread(() -> {
-
-            long oldSeconds = -1;
-            long newSeconds;
-
-            do{
-                newSeconds = new Date().getTime() / 1000;
-
-                if (newSeconds != oldSeconds){
-                    oldSeconds = newSeconds;
-
-                    //current second has changed, do something
-                    //get list of appenders and iterate it
-
-                    List<Appender> list = getFacade().getLoggerAppendersList();
-
-                    for (int i = 0; i < list.size(); i++){
-                        Appender appender = list.get(i);
-
-                        if (appender.getClass().getName().compareToIgnoreCase(ByteArrayOutputStreamAppender.class.getName()) == 0) {
-                            try {
-                                elrondWebsocketManager.announce(appender.getName(), ((ByteArrayOutputStreamAppender) appender).toStringAndClear("UTF8"));
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
-                            }
-                        }
-                    }
-                }
-
-                try{
-                    Thread.sleep(1);
-                } catch (Exception ex){
-                    ex.printStackTrace();
-                }
-
-            } while (application.getState().isStillRunning());
-        });
-        threadPushWebSocket.start();
+//        MessageChannel messageChannel = new ExecutorSubscribableChannel();
+//        SimpMessagingTemplate simpMessagingTemplate = new SimpMessagingTemplate(messageChannel);
+//        elrondWebsocketManager = new ElrondWebsocketManager(simpMessagingTemplate);
+//
+//        Thread threadPushWebSocket = new Thread(() -> {
+//
+//            long oldSeconds = -1;
+//            long newSeconds;
+//
+//            do{
+//                newSeconds = new Date().getTime() / 1000;
+//
+//                if (newSeconds != oldSeconds){
+//                    oldSeconds = newSeconds;
+//
+//                    //current second has changed, do something
+//                    //get list of appenders and iterate it
+//
+//                    List<Appender> list = getFacade().getLoggerAppendersList();
+//
+//                    for (int i = 0; i < list.size(); i++){
+//                        Appender appender = list.get(i);
+//
+//                        if (appender.getClass().getName().compareToIgnoreCase(ByteArrayOutputStreamAppender.class.getName()) == 0) {
+//                            try {
+//                                elrondWebsocketManager.announce(appender.getName(), ((ByteArrayOutputStreamAppender) appender).toStringAndClear("UTF8"));
+//                            } catch (Exception ex) {
+//                                ex.printStackTrace();
+//                            }
+//                        }
+//                    }
+//                }
+//
+//                try{
+//                    Thread.sleep(1);
+//                } catch (Exception ex){
+//                    ex.printStackTrace();
+//                }
+//
+//            } while (application.getState().isStillRunning());
+//        });
+        //threadPushWebSocket.start();
 
     }
 
