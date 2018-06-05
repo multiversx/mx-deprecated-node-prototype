@@ -46,7 +46,7 @@ public class AppBlockManager {
             if (result.isOk()) {
 
                 String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
-                AppServiceProvider.getBootstrapService().putBlockInBlockchain(block, hashBlock, blockchain);
+                AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
 
                 logger.info("New block proposed" + hashBlock);
             }

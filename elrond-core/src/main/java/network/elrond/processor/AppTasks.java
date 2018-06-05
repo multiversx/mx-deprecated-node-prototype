@@ -1,6 +1,5 @@
 package network.elrond.processor;
 
-import network.elrond.account.AccountState;
 import network.elrond.processor.impl.*;
 
 
@@ -62,7 +61,7 @@ public class AppTasks {
      * Init system synchronize
      */
     public static AppTask BOOTSTRAP_SYSTEM = (application) -> {
-        new BootstrappingProcessor().process(application);
+        new SynchronizationProcessor().process(application);
     };
 
 }

@@ -1,13 +1,9 @@
 package network.elrond;
 
-import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
-import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
-
-import java.math.BigInteger;
 
 public class SeedNodeRunner {
 
@@ -39,22 +35,22 @@ public class SeedNodeRunner {
 
         Application application = facade.start(context);
 
-
-        Thread thread = new Thread(() -> {
-
-            do {
-
-                AccountAddress address = AccountAddress.fromHexString("0326e7875aadaba270ae93ec40ef4706934d070eb21c9acad4743e31289fa4ebc7");
-                facade.send(address, BigInteger.TEN, application);
-                //System.out.println(facade.getBalance(address, application));
-
-                ThreadUtil.sleep(10);
-
-
-            } while (true);
-
-        });
-        thread.start();
+//
+//        Thread thread = new Thread(() -> {
+//
+//            do {
+//
+//                AccountAddress address = AccountAddress.fromHexString("0326e7875aadaba270ae93ec40ef4706934d070eb21c9acad4743e31289fa4ebc7");
+//                //facade.send(address, BigInteger.TEN, application);
+//                //System.out.println(facade.getBalance(address, application));
+//
+//                ThreadUtil.sleep(10);
+//
+//
+//            } while (true);
+//
+//        });
+//        thread.start();
 
     }
 }

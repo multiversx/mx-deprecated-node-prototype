@@ -2,11 +2,12 @@ package network.elrond;
 
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
+import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 
-import java.util.Scanner;
+import java.math.BigInteger;
 
 public class NodeRunner {
 
@@ -18,7 +19,7 @@ public class NodeRunner {
         Integer port = 4001;
         Integer masterPeerPort = 4000;
         String masterPeerIpAddress = "127.0.0.1";
-        String privateKey = "ADMIN";
+        String privateKey = "026c00d83e0dc47e6b626ed6c42f636b";
 
         AppContext context = new AppContext();
         context.setMasterPeerIpAddress(masterPeerIpAddress);
@@ -45,15 +46,9 @@ public class NodeRunner {
             do {
 
                 AccountAddress address = AccountAddress.fromHexString("0326e7875aadaba270ae93ec40ef4706934d070eb21c9acad4743e31289fa4ebc7");
-                //facade.send(address, BigInteger.TEN, application);
-
+                facade.send(address, BigInteger.TEN, application);
                 System.out.println(facade.getBalance(address, application));
-
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                ThreadUtil.sleep(10);
 
 
             } while (true);
@@ -61,14 +56,6 @@ public class NodeRunner {
         });
         thread.start();
 
-
-        @SuppressWarnings("resource")
-        Scanner input = new Scanner(System.in);
-        while (input.hasNext()) {
-            if (input.nextLine().equals("exit")) {
-                facade.stop(application);
-            }
-        }
 
     }
 }

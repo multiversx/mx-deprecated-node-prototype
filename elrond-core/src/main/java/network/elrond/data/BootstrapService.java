@@ -1,7 +1,7 @@
 package network.elrond.data;
 
+import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
-import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 
 import java.math.BigInteger;
@@ -9,27 +9,25 @@ import java.math.BigInteger;
 public interface BootstrapService {
 
     //returns max block height from location
-    BigInteger getMaxBlockSize(LocationType locationType, Blockchain structure) throws Exception;
+    BigInteger getCurrentBlockIndex(LocationType locationType, Blockchain blockchain) throws Exception;
 
     //sets max block height in location
-    void setMaxBlockSize(LocationType locationType, BigInteger height, Blockchain structure) throws Exception;
+    void setCurrentBlockIndex(LocationType locationType, BigInteger height, Blockchain blockchain) throws Exception;
 
     //gets the hash for the block height from location
-    String getBlockHashFromHeight(LocationType locationType, BigInteger blockHeight, Blockchain structure) throws Exception;
+    String getBlockHashFromIndex(BigInteger blockIndex, Blockchain blockchain) throws Exception;
 
     //sets the hash for a block height in location
-    void setBlockHashWithHeight(LocationType locationType, BigInteger blockHeight, String hash, Blockchain structure) throws Exception;
+    void setBlockHashWithIndex(BigInteger blockIndex, String blockHash, Blockchain blockchain) throws Exception;
 
-    ExecutionReport startFromScratch(AppState state, AppContext context);
+    ExecutionReport startFromGenesis(Accounts accounts, Blockchain blockchain, AppContext context);
 
-    ExecutionReport synchronize(AppState state, BigInteger maxBlkHeightLocal, BigInteger maxBlkHeightNetw);
+    ExecutionReport synchronize(BigInteger localBlockIndex, BigInteger remoteBlockIndex, Blockchain blockchain, Accounts accounts);
 
-    ExecutionReport rebuildFromDisk(AppState state, BigInteger maxBlkHeightLocal);
+    ExecutionReport restoreFromDisk(BigInteger currentBlockIndex, Accounts accounts, Blockchain blockchain);
 
-    //ExecutionReport rebuildFromDiskDeltaNoExec(Application application, BigInteger maxBlkHeightLocal, BigInteger maxBlkHeightNetw);
+    ExecutionReport commitBlock(Block blk, String blockHash, Blockchain blockchain);
 
-    ExecutionReport putBlockInBlockchain(Block blk, String blockHash, Blockchain blockchain);
-
-    ExecutionReport putTransactionInBlockchain(Transaction transaction, String transactionHash, Blockchain blockchain);
+    ExecutionReport commitTransaction(Transaction transaction, String transactionHash, Blockchain blockchain);
 
 }

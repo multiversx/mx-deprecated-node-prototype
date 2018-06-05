@@ -26,8 +26,9 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="elrond-core" />
-    <orderEntry type="library" name="Maven: org.bouncycastle:bcprov-jdk15on:1.59" level="project" />
-    <orderEntry type="library" name="Maven: com.madgag.spongycastle:core:1.50.0.0" level="project" />
+    <orderEntry type="library" name="Maven: com.madgag.spongycastle:core:1.58.0.0" level="project" />
+    <orderEntry type="library" name="Maven: com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0" level="project" />
+    <orderEntry type="library" name="Maven: com.madgag.spongycastle:prov:1.58.0.0" level="project" />
     <orderEntry type="library" name="Maven: net.tomp2p:tomp2p-all:5.0-Beta8" level="project" />
     <orderEntry type="library" name="Maven: net.tomp2p:tomp2p-nat:5.0-Beta8" level="project" />
     <orderEntry type="library" name="Maven: org.bitlet:weupnp:0.1.2" level="project" />

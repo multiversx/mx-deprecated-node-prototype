@@ -27,7 +27,7 @@ public class BootstrappingProcessorTest {
     AccountStateService accountStateService = AppServiceProvider.getAccountStateService();
 
     @Test
-    public void bootstrapMethodsTest() throws Exception{
+    public void bootstrapMethodsTest() throws Exception {
         AppContext context = new AppContext();
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(4000);
@@ -41,20 +41,20 @@ public class BootstrappingProcessorTest {
         context.setStrAddressMint(Util.getAddressFromPublicKey(new PublicKey(pvKeyRandom).getValue()));
         context.setValueMint(BigInteger.TEN);
 
-        Application app  = new Application(context);
+        Application app = new Application(context);
         AppState state = app.getState();
         state.setStillRunning(false);
         app.start();
 
 
-        BootstrappingProcessor bootstrappingProcessor = new BootstrappingProcessor();
+        SynchronizationProcessor bootstrappingProcessor = new SynchronizationProcessor();
         bootstrappingProcessor.process(app);
 
         //delete stored data
         for (BlockchainUnitType blockchainUnitType : BlockchainUnitType.values()) {
             BlockchainPersistenceUnit<Object, Object> blockchainPersistenceUnit = state.getBlockchain().getUnit(blockchainUnitType);
 
-            if (blockchainPersistenceUnit == null){
+            if (blockchainPersistenceUnit == null) {
                 continue;
             }
 
@@ -62,16 +62,16 @@ public class BootstrappingProcessorTest {
         }
 
         //test that initial values are minus one
-        TestCase.assertEquals(Util.BIG_INT_MIN_ONE, bootstrapService.getMaxBlockSize(LocationType.LOCAL, state.getBlockchain()));
-        TestCase.assertEquals(Util.BIG_INT_MIN_ONE, bootstrapService.getMaxBlockSize(LocationType.NETWORK, state.getBlockchain()));
+        TestCase.assertEquals(Util.BIG_INT_MIN_ONE, bootstrapService.getCurrentBlockIndex(LocationType.LOCAL, state.getBlockchain()));
+        TestCase.assertEquals(Util.BIG_INT_MIN_ONE, bootstrapService.getCurrentBlockIndex(LocationType.NETWORK, state.getBlockchain()));
 
 
         //test 1: test start from scratch
-        ExecutionReport executionReport = bootstrapService.startFromScratch(app.getState(), app.getContext());
+        ExecutionReport executionReport = bootstrapService.startFromGenesis(app.getState().getAccounts(), app.getState().getBlockchain(), app.getContext());
 
         TestCase.assertEquals(true, executionReport.isOk());
-        TestCase.assertEquals(BigInteger.ZERO, bootstrapService.getMaxBlockSize(LocationType.LOCAL, state.getBlockchain()));
-        TestCase.assertEquals(BigInteger.ZERO, bootstrapService.getMaxBlockSize(LocationType.NETWORK, state.getBlockchain()));
+        TestCase.assertEquals(BigInteger.ZERO, bootstrapService.getCurrentBlockIndex(LocationType.LOCAL, state.getBlockchain()));
+        TestCase.assertEquals(BigInteger.ZERO, bootstrapService.getCurrentBlockIndex(LocationType.NETWORK, state.getBlockchain()));
 
         //test 2: test bootstrapping
         //create a new block besides genesis and put it on DHT then try to synchronize
@@ -100,8 +100,8 @@ public class BootstrappingProcessorTest {
         AppServiceProvider.getP2PObjectService().putJsonEncoded(blk1, serializationService.getHashString(blk1), state.getConnection());
 
         //put block hash height and block height on wire
-        bootstrapService.setBlockHashWithHeight(LocationType.NETWORK, blk1.getNonce(), serializationService.getHashString(blk1), state.getBlockchain());
-        bootstrapService.setMaxBlockSize(LocationType.NETWORK, blk1.getNonce(), state.getBlockchain());
+        bootstrapService.setBlockHashWithIndex(blk1.getNonce(), serializationService.getHashString(blk1), state.getBlockchain());
+        bootstrapService.setCurrentBlockIndex(LocationType.NETWORK, blk1.getNonce(), state.getBlockchain());
 
         //mint
         AccountState acsSender = accountStateService.getOrCreateAccountState(AccountAddress.fromPublicKey(pbk1), state.getAccounts());
@@ -110,10 +110,10 @@ public class BootstrappingProcessorTest {
         accountStateService.setAccountState(AccountAddress.fromHexString(trx1.getSendAddress()), acsSender, state.getAccounts()); // PMS
 
         //Now network is loaded, try to synchronize
-        executionReport = bootstrapService.synchronize(app.getState(), BigInteger.ZERO, bootstrapService.getMaxBlockSize(LocationType.NETWORK, state.getBlockchain()));
+        executionReport = bootstrapService.synchronize(BigInteger.ZERO, bootstrapService.getCurrentBlockIndex(LocationType.NETWORK, state.getBlockchain()), app.getState().getBlockchain(), app.getState().getAccounts());
 
         TestCase.assertEquals(true, executionReport.isOk());
-        TestCase.assertEquals(BigInteger.valueOf(1), bootstrapService.getMaxBlockSize(LocationType.LOCAL, state.getBlockchain()));
+        TestCase.assertEquals(BigInteger.valueOf(1), bootstrapService.getCurrentBlockIndex(LocationType.LOCAL, state.getBlockchain()));
 
 
         app.stop();
@@ -124,11 +124,11 @@ public class BootstrappingProcessorTest {
 //    public void bootstrapMethods2() throws Exception{
 //        AppState state = app.getState();
 //
-//        BootstrappingProcessor bootstrappingProcessor = new BootstrappingProcessor();
+//        SynchronizationProcessor bootstrappingProcessor = new SynchronizationProcessor();
 //        bootstrappingProcessor.process(app);
 //
 //
-//        ExecutionReport executionReport = bootstrappingProcessor.rebuildFromDisk(app, bootstrapService.getMaxBlockSizeLocal(state.getBlockchain()));
+//        ExecutionReport executionReport = bootstrappingProcessor.restoreFromDisk(app, bootstrapService.getMaxBlockSizeLocal(state.getBlockchain()));
 //
 //        TestCase.assertEquals(BigInteger.valueOf(1), bootstrapService.getMaxBlockSizeNetwork(state.getConnection()));
 //    }
