@@ -62,8 +62,12 @@ public class Application implements Serializable {
         //  Start accounts
         AppTasks.INIT_ACCOUNTS.process(this);
 
+
         // Start bootstrapping process
-        AppTasks.BOOTSTRAP_SYSTEM.process(this);
+        AppTasks.BLOCKCHAIN_BOOTSTRAP.process(this);
+
+        // Start synchronization process
+        AppTasks.BLOCKCHAIN_SYNCRONIZATION.process(this);
 
 
         // Intercept P2P transactions
