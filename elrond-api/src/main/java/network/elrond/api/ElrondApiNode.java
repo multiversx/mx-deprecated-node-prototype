@@ -46,7 +46,7 @@ class ElrondApiNode {
         return getFacade().send(receiver, value, application);
     }
 
-    Fun.Tuple2<String, String> generatePublicKeyAndPrivateKey() {return getFacade().generatePublicKeyAndPrivateKey(application); }
-    Fun.Tuple2<String, String> generatePublicKeyFromPrivateKey(String privateKey) { return getFacade().generatePublicKeyFromPrivateKey(privateKey, application); };
+    Fun.Tuple2<String, String> generatePublicKeyAndPrivateKey() {return getFacade().generatePublicKeyAndPrivateKey(application);  }
+    Fun.Tuple2<String, String> generatePublicKeyFromPrivateKey(String privateKey) { return getFacade().generatePublicKeyFromPrivateKey(privateKey, application);  };
 
     }

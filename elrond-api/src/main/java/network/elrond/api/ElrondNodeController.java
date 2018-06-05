@@ -80,6 +80,7 @@ public class ElrondNodeController {
     public @ResponseBody
     Object generatePublicAndPrivateKey(HttpServletResponse response)
     {
+
         return elrondApiNode.generatePublicKeyAndPrivateKey();
     }
 
@@ -87,6 +88,7 @@ public class ElrondNodeController {
     public @ResponseBody
     Object generatePublicKeyFromPrivateKey(HttpServletResponse response,
                       @RequestParam() String privateKey) {
+
 
         return elrondApiNode.generatePublicKeyFromPrivateKey(privateKey);
     }
