@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
-import org.bouncycastle.util.encoders.Base64;
+import org.spongycastle.util.encoders.Base64;
 
 import java.io.IOException;
 
@@ -23,7 +23,7 @@ public class SerializationServiceImpl implements SerializationService {
         mapper.setFilterProvider(filter);
 
         try {
-            return(mapper.writeValueAsString(object));
+            return (mapper.writeValueAsString(object));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return null;
@@ -42,13 +42,21 @@ public class SerializationServiceImpl implements SerializationService {
     }
 
     public byte[] getHash(Object object) {
-        if(object == null){
+        if (object == null) {
             throw new IllegalArgumentException();
         }
 
         String json = AppServiceProvider.getSerializationService().encodeJSON(object);
+        Util.check(json != null, "json is null");
 
-        return (Util.SHA3.digest(json.getBytes()));
+//        MessageDigest instance = null;
+////        try {
+////            instance = MessageDigest.getInstance("SHA3-256");
+////        } catch (NoSuchAlgorithmException ex) {
+////            throw new RuntimeException(ex);
+////        }
+////        return instance.digest(json.getBytes());
+        return (Util.SHA3.get().digest(json.getBytes()));
     }
 
     @Override

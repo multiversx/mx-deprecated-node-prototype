@@ -4,9 +4,7 @@ import network.elrond.Application;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.core.ThreadUtil;
-import network.elrond.core.Util;
 import network.elrond.data.BootstrapService;
-import network.elrond.data.BootstrapType;
 import network.elrond.data.ExecutionReport;
 import network.elrond.data.LocationType;
 import network.elrond.processor.AppTask;
@@ -34,19 +32,22 @@ public class BootstrappingProcessor implements AppTask {
             while (state.isStillRunning()) {
 
 
-                if (state.isLock()) {
-                    ThreadUtil.sleep(100);
-                    continue;
+                try {
+                    if (state.isLock()) {
+                        ThreadUtil.sleep(100);
+                        continue;
+                    }
+
+                    state.setLock();
+                    synchronizeBlockchain(application);
+                    state.clearLock();
+
+                    logger.info("Nothing else to synchronize! Waiting 5 seconds...");
+                    ThreadUtil.sleep(5000);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    ;
                 }
-
-                state.setLock();
-
-                synchronizeBlockchain(application);
-
-                state.clearLock();
-
-                logger.info("Nothing else to bootstrap! Waiting 5 seconds...");
-                ThreadUtil.sleep(5000);
 
             }
         });
@@ -58,52 +59,54 @@ public class BootstrappingProcessor implements AppTask {
         AppState state = application.getState();
         AppContext context = application.getContext();
 
-        BigInteger maxBlkHeightNetw = Util.BIG_INT_MIN_ONE;
-        BigInteger maxBlkHeightLocal = Util.BIG_INT_MIN_ONE;
 
         try {
-            maxBlkHeightNetw = bootstrapService.getMaxBlockSize(LocationType.NETWORK, state.getBlockchain());
-        } catch (Exception ex) {
-            //ex.printStackTrace();
-        }
+            BigInteger remoteBlockIndex = bootstrapService.getMaxBlockSize(LocationType.NETWORK, state.getBlockchain());
+            BigInteger localBlockIndex = bootstrapService.getMaxBlockSize(LocationType.LOCAL, state.getBlockchain());
 
-        try {
-            maxBlkHeightLocal = bootstrapService.getMaxBlockSize(LocationType.LOCAL, state.getBlockchain());
-        } catch (Exception ex) {
-            //ex.printStackTrace();
-        }
+            ExecutionReport exReport = new ExecutionReport();
 
-        ExecutionReport exReport = new ExecutionReport();
+            boolean shouldGenerateGenesis = context.isSeedNode() && (remoteBlockIndex.compareTo(BigInteger.ZERO) < 0);
+            if (shouldGenerateGenesis) {
 
-
-        if (context.isSeedNode() && (maxBlkHeightNetw.compareTo(BigInteger.ZERO) < 0)) {
-            //if node is seeder and is first run
-            if (maxBlkHeightLocal.compareTo(BigInteger.ZERO) < 0) {
-                //nothing defined, start from scratch
-                exReport.combine(bootstrapService.startFromScratch(application));
-            } else {
-                //only seeder can rebuild from disk or start from scratch
-                if (context.getBootstrapType() == BootstrapType.START_FROM_SCRATCH) {
-                    exReport.combine(bootstrapService.startFromScratch(application));
-                } else if (context.getBootstrapType() == BootstrapType.REBUILD_FROM_DISK) {
-                    exReport.combine(bootstrapService.rebuildFromDisk(application, maxBlkHeightLocal));
-                } else {
-                    exReport.combine(new ExecutionReport().ko("Can not bootstrap! Unknown BootstrapType : " +
-                            context.getBootstrapType().toString() + "!"));
-                }
+                bootstrapService.startFromScratch(state, context);
+//
+//                //if node is seeder and is first run
+//                if (localBlockIndex.compareTo(BigInteger.ZERO) < 0) {
+//                    //nothing defined, start from scratch
+//                    exReport.combine(bootstrapService.startFromScratch(application));
+//                } else {
+//                    //only seeder can rebuild from disk or start from scratch
+//                    if (context.getBootstrapType() == BootstrapType.START_FROM_SCRATCH) {
+//                        exReport.combine(bootstrapService.startFromScratch(application));
+//                    } else if (context.getBootstrapType() == BootstrapType.REBUILD_FROM_DISK) {
+//                        exReport.combine(bootstrapService.rebuildFromDisk(application, localBlockIndex));
+//                    } else {
+//                        exReport.combine(new ExecutionReport().ko("Can not synchronize! Unknown BootstrapType : " +
+//                                context.getBootstrapType().toString() + "!"));
+//                    }
+//                }
+//            } else {
+//                //node is slave
             }
-        } else {
-            //node is slave
-        }
 
-        if ((maxBlkHeightNetw.compareTo(BigInteger.ZERO) >= 0) && (maxBlkHeightNetw.compareTo(maxBlkHeightLocal) > 0)) {
-            //bootstrap
-            exReport.combine(bootstrapService.bootstrap(application, maxBlkHeightLocal, maxBlkHeightNetw));
-        }
+            boolean isBlocAvailable = remoteBlockIndex.compareTo(BigInteger.ZERO) >= 0;
+            boolean isNewBlockRemote = remoteBlockIndex.compareTo(localBlockIndex) > 0;
+            boolean isSyncRequired = isBlocAvailable && isNewBlockRemote;
 
-        if ((maxBlkHeightLocal.compareTo(BigInteger.ZERO) >= 0) && (maxBlkHeightLocal.compareTo(maxBlkHeightNetw) > 0)
-                && (maxBlkHeightNetw.compareTo(Util.BIG_INT_MIN_ONE) > 0)) {
-            exReport.combine(bootstrapService.rebuildFromDiskDeltaNoExec(application, maxBlkHeightLocal, maxBlkHeightNetw));
+            if (isSyncRequired) {
+                //synchronize
+                ExecutionReport report = bootstrapService.synchronize(state, localBlockIndex, remoteBlockIndex);
+                exReport.combine(report);
+            }
+
+//            if ((localBlockIndex.compareTo(BigInteger.ZERO) >= 0) && (localBlockIndex.compareTo(remoteBlockIndex) > 0)
+//                    && (remoteBlockIndex.compareTo(Util.BIG_INT_MIN_ONE) > 0)) {
+//                exReport.combine(bootstrapService.rebuildFromDiskDeltaNoExec(application, localBlockIndex, remoteBlockIndex));
+//            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 

@@ -53,7 +53,7 @@ public class TransactionServiceTest extends ExpectedExceptionTest {
     public void testSignTransactionWithNullTransactionShouldThrowException() {
         expected(IllegalArgumentException.class, "Transaction cannot be null");
 
-        transactionService.signTransaction(null, new byte[]{});
+        transactionService.signTransaction(null, new byte[]{}, new byte[]{});
         Assert.fail();
     }
 
@@ -62,7 +62,7 @@ public class TransactionServiceTest extends ExpectedExceptionTest {
         expected(IllegalArgumentException.class, "PrivateKeysBytes cannot be null");
 
         Transaction tx = transactionService.generateTransaction(publicKeySender, publicKeyReceiver, value.longValue(), nonce.longValue());
-        transactionService.signTransaction(tx, null);
+        transactionService.signTransaction(tx, null, new byte[]{});
         Assert.fail();
     }
 
@@ -109,7 +109,7 @@ public class TransactionServiceTest extends ExpectedExceptionTest {
         tx.setData(buff);
         //tx.setPubKey(Util.byteArrayToHexString(pbKey.getValue()));
 
-        transactionService.signTransaction(tx, privateKeySender.getValue());
+        transactionService.signTransaction(tx, privateKeySender.getValue(), publicKeySender.getValue());
 
         Assert.assertTrue(tx.getSignature()!=null && tx.getSignature().length > 0);
         Assert.assertTrue(tx.getChallenge()!=null && tx.getChallenge().length > 0);
@@ -124,7 +124,7 @@ public class TransactionServiceTest extends ExpectedExceptionTest {
             buff[i] = (byte) i;
         }
         tx.setData(buff);
-        transactionService.signTransaction(tx, privateKeySender.getValue());
+        transactionService.signTransaction(tx, privateKeySender.getValue(), publicKeySender.getValue());
 
         Assert.assertTrue(transactionService.verifyTransaction(tx));
     }

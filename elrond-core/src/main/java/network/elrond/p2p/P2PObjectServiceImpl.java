@@ -19,7 +19,7 @@ public class P2PObjectServiceImpl implements P2PObjectService {
 
         PeerDHT peer = connection.getDht();
         FutureGet futureGet = peer.get(Number160.createHash(key)).start();
-        futureGet.awaitUninterruptibly(500);
+        futureGet.awaitUninterruptibly();
         if (futureGet.isSuccess()) {
             Iterator<Data> iterator = futureGet.dataMap().values().iterator();
             if (!iterator.hasNext()) {
@@ -28,7 +28,7 @@ public class P2PObjectServiceImpl implements P2PObjectService {
             Data data = iterator.next();
             return data.object();
         } else {
-            LoggerFactory.getLogger(P2PBroadcastServiceImpl.class).warn("Timeout getting! hash: " + key);
+            LoggerFactory.getLogger(P2PBroadcastServiceImpl.class).info("Timeout getting! hash: " + key);
         }
         return null;
     }

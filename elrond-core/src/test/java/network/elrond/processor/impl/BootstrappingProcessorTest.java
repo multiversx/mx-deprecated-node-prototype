@@ -58,7 +58,7 @@ public class BootstrappingProcessorTest {
                 continue;
             }
 
-            blockchainPersistenceUnit.destroyAndReCreate();
+            blockchainPersistenceUnit.recreate();
         }
 
         //test that initial values are minus one
@@ -67,14 +67,14 @@ public class BootstrappingProcessorTest {
 
 
         //test 1: test start from scratch
-        ExecutionReport executionReport = bootstrapService.startFromScratch(app);
+        ExecutionReport executionReport = bootstrapService.startFromScratch(app.getState(), app.getContext());
 
         TestCase.assertEquals(true, executionReport.isOk());
         TestCase.assertEquals(BigInteger.ZERO, bootstrapService.getMaxBlockSize(LocationType.LOCAL, state.getBlockchain()));
         TestCase.assertEquals(BigInteger.ZERO, bootstrapService.getMaxBlockSize(LocationType.NETWORK, state.getBlockchain()));
 
         //test 2: test bootstrapping
-        //create a new block besides genesis and put it on DHT then try to bootstrap
+        //create a new block besides genesis and put it on DHT then try to synchronize
 
         PrivateKey pvk1 = new PrivateKey("random1");
         PublicKey pbk1 = new PublicKey(pvk1);
@@ -87,7 +87,7 @@ public class BootstrappingProcessorTest {
 
         Transaction trx1 = transactionService.generateTransaction(pbk1, pbk2, 1, 0);
         //trx1.setPubKey(Util.byteArrayToHexString(pbk1.getValue()));
-        transactionService.signTransaction(trx1, pvk1.getValue());
+        transactionService.signTransaction(trx1, pvk1.getValue(), pbk1.getValue());
 
         //put tx on wire
         AppServiceProvider.getP2PObjectService().putJsonEncoded(trx1, serializationService.getHashString(trx1), state.getConnection());
@@ -107,10 +107,10 @@ public class BootstrappingProcessorTest {
         AccountState acsSender = accountStateService.getOrCreateAccountState(AccountAddress.fromPublicKey(pbk1), state.getAccounts());
         //mint 100 ERDs
         acsSender.setBalance(BigInteger.TEN.pow(10));
-        accountStateService.setAccountState(AccountAddress.fromHexaString(trx1.getSendAddress()), acsSender, state.getAccounts()); // PMS
+        accountStateService.setAccountState(AccountAddress.fromHexString(trx1.getSendAddress()), acsSender, state.getAccounts()); // PMS
 
-        //Now network is loaded, try to bootstrap
-        executionReport = bootstrapService.bootstrap(app, BigInteger.ZERO, bootstrapService.getMaxBlockSize(LocationType.NETWORK, state.getBlockchain()));
+        //Now network is loaded, try to synchronize
+        executionReport = bootstrapService.synchronize(app.getState(), BigInteger.ZERO, bootstrapService.getMaxBlockSize(LocationType.NETWORK, state.getBlockchain()));
 
         TestCase.assertEquals(true, executionReport.isOk());
         TestCase.assertEquals(BigInteger.valueOf(1), bootstrapService.getMaxBlockSize(LocationType.LOCAL, state.getBlockchain()));

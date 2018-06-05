@@ -8,10 +8,7 @@ import network.elrond.account.AccountsContext;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
-import network.elrond.data.BaseBlockchainTest;
-import network.elrond.data.Block;
-import network.elrond.data.DataBlock;
-import network.elrond.data.Transaction;
+import network.elrond.data.*;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
@@ -38,10 +35,10 @@ public class BlockchainProcessTest extends BaseBlockchainTest {
 
         String senderAddress = Util.getAddressFromPublicKey(publicKeySender.getValue());
         String receiverAddress = Util.getAddressFromPublicKey(publicKeyReceiver.getValue());
-
+        AppBlockManager appBlockManager = new AppBlockManager();
         for (int i = 0; i < 10; i++) {
             Block block = new DataBlock();
-            BigInteger nonce = BigInteger.ONE.add(BigInteger.valueOf(i));
+            BigInteger nonce = BigInteger.ZERO.add(BigInteger.valueOf(i));
             block.setNonce(nonce);
 
             if (prevBlockHash != null) {
@@ -56,9 +53,10 @@ public class BlockchainProcessTest extends BaseBlockchainTest {
             block.getListTXHashes().add(hash);
 
             String hashString = AppServiceProvider.getSerializationService().getHashString(transaction);
-            AppServiceProvider.getTransactionService().signTransaction(transaction, privateKeySender.getValue());
+            AppServiceProvider.getTransactionService().signTransaction(transaction, privateKeySender.getValue(), publicKeySender.getValue());
             AppServiceProvider.getBlockchainService().put(hashString, transaction, blockchain, BlockchainUnitType.TRANSACTION);
 
+            appBlockManager.signBlock(block, privateKeySender);
 
             byte[] blockHash = AppServiceProvider.getSerializationService().getHash(block);
             String blockHashString = AppServiceProvider.getSerializationService().getHashString(block);

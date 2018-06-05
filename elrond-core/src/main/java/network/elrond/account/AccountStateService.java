@@ -26,6 +26,7 @@ public interface AccountStateService {
 
     void initialMintingToKnownAddress(Accounts accounts);
 
-    Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue,
-                                                        AccountsContext accountsContextTemporary, PrivateKey privateKey);
+    Fun.Tuple2<Block, Transaction> generateGenesisBlock(
+            String initialAddress, BigInteger initialValue,
+            AccountsContext accountsContextTemporary, PrivateKey privateKey);
 }

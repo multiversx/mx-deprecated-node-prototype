@@ -65,11 +65,33 @@
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
+        <!--<dependency>-->
+            <!--<groupId>org.bouncycastle</groupId>-->
+            <!--<artifactId>bcprov-jdk15on</artifactId>-->
+            <!--<version>1.59</version>-->
+        <!--</dependency>-->
+
+        <!-- https://mvnrepository.com/artifact/com.madgag.spongycastle/core -->
         <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.59</version>
+            <groupId>com.madgag.spongycastle</groupId>
+            <artifactId>core</artifactId>
+            <version>1.58.0.0</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.madgag.spongycastle/bcpkix-jdk15on -->
+        <dependency>
+            <groupId>com.madgag.spongycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>1.58.0.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.madgag.spongycastle/prov -->
+        <dependency>
+            <groupId>com.madgag.spongycastle</groupId>
+            <artifactId>prov</artifactId>
+            <version>1.58.0.0</version>
+        </dependency>
+
 
         <dependency>
             <groupId>net.tomp2p</groupId>

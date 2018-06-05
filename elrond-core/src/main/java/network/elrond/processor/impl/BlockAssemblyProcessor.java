@@ -1,23 +1,22 @@
 package network.elrond.processor.impl;
 
 import network.elrond.Application;
+import network.elrond.TimeWatch;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
-import network.elrond.blockchain.BlockchainService;
-import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.ThreadUtil;
-import network.elrond.data.*;
+import network.elrond.crypto.PrivateKey;
+import network.elrond.data.AppBlockManager;
 import network.elrond.p2p.P2PChannelName;
-import network.elrond.service.AppServiceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Collect new transactions and put them into new block
@@ -35,7 +34,7 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
     protected void process(ArrayBlockingQueue<String> queue, Application application) {
 
 
-        ThreadUtil.sleep(5000);
+        ThreadUtil.sleep(2000);
 
         AppContext context = application.getContext();
         if (!context.isSeedNode()) {
@@ -51,18 +50,24 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
             return;
         }
 
-        if (state.getCurrentBlock() == null) {
-            // Require bootstrap
-            logger.info("Can't execute, bootstrap required");
+        if (state.getBlockchain().getCurrentBlock() == null) {
+            // Require synchronize
+            logger.info("Can't execute, synchronize required");
             return;
         }
 
 
+        int size = queue.size();
+        TimeWatch watch = TimeWatch.start();
+
         state.setLock();
-
         proposeBlock(queue, application);
-
         state.clearLock();
+
+
+        long time = watch.time(TimeUnit.SECONDS);
+        long tps = (time > 0) ? (size / time) : 0;
+        logger.info(" ###### Executed " + size + " transactions in " + time + " s  TPS:" + tps + "   ###### ");
 
     }
 
@@ -82,32 +87,14 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
 
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();
-        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
+        AppContext context = application.getContext();
+        PrivateKey privateKey = context.getPrivateKey();
 
-        try {
-
-            List<Transaction> transactions = blockchainService.getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
-            Block block = AppBlockManager.instance().composeBlock(transactions, application);
-            AppBlockManager.instance().signBlock(block, application.getContext().getPrivateKey());
-            ExecutionService executionService = AppServiceProvider.getExecutionService();
-            ExecutionReport result = executionService.processBlock(block, accounts, blockchain);
-
-            if (result.isOk()) {
-                //String hash = AppServiceProvider.getSerializationService().getHashString(block);
-                //AppServiceProvider.getBlockchainService().put(hash, block, blockchain, BlockchainUnitType.BLOCK);
-
-                String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
-                AppServiceProvider.getBootstrapService().putBlockInBlockchain(block, hashBlock, application.getState());
-
-                logger.info("New block proposed" + hashBlock);
-            }
-
-
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+        AppBlockManager.instance().generateAndBroadcastBlock(hashes, accounts, blockchain, privateKey);
 
     }
+
+
 
     @Override
     protected void process(String hash, Application application) {

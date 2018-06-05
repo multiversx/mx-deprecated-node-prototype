@@ -3,7 +3,6 @@ package network.elrond.application;
 
 import network.elrond.account.Accounts;
 import network.elrond.blockchain.Blockchain;
-import network.elrond.data.Block;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.p2p.P2PBroadcastChanel;
@@ -22,7 +21,7 @@ public class AppState implements Serializable {
 
     private Accounts accounts;
     private Blockchain blockchain;
-    private Block currentBlock;
+
 
     private PublicKey publicKey;
     private PrivateKey privateKey;
@@ -90,16 +89,6 @@ public class AppState implements Serializable {
         this.accounts = accounts;
     }
 
-    public Block getCurrentBlock() {
-        return currentBlock;
-    }
-
-    public void setCurrentBlock(Block currentBlock) {
-        if (currentBlock == null) {
-            throw new IllegalArgumentException("CurrentBlock cannot be null");
-        }
-        this.currentBlock = currentBlock;
-    }
 
     public void shutdown() {
         this.blockchain.stopPersistenceUnit();
@@ -140,4 +129,6 @@ public class AppState implements Serializable {
     public synchronized void clearLock() {
         this.lock = false;
     }
+
+
 }

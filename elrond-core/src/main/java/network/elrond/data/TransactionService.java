@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface TransactionService {
 
-    void signTransaction(Transaction tx, byte[] privateKeysBytes);
+    void signTransaction(Transaction tx, byte[] privateKeysBytes, byte[] publicKeysBytes);
 
     boolean verifyTransaction(Transaction tx);
 

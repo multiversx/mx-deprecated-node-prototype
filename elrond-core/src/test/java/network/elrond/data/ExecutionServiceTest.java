@@ -32,7 +32,6 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
     @Before
     public void setUp() throws IOException {
         AccountsContext accountsContext = new AccountsContext();
-        accountsContext.setDatabasePath("blockchain.account.data-test");
 
         if (blockchain != null) {
             blockchain.flush();
@@ -67,7 +66,6 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         byte[] hash;
         byte[] appStateHash = new byte[0];
         AccountsContext accountsContext = new AccountsContext();
-        accountsContext.setDatabasePath("blockchain.account.data-test-tmp");
         Accounts accountsSandbox = new Accounts(accountsContext);
 
         for (PublicKey pkWallet : publicKeysWallets) {
@@ -84,7 +82,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
             tx = new Transaction(addressSender, addressReceiver, BigInteger.valueOf(valuePerTransaction), BigInteger.valueOf(i));
             tx.setPubKey(Util.byteArrayToHexString(publicKeyMint.getValue()));
             tx.setData(new byte[0]);
-            transactionService.signTransaction(tx, privateKeyMint.getValue());
+            transactionService.signTransaction(tx, privateKeyMint.getValue(), publicKeyMint.getValue());
             hashStr = serializationService.getHashString(tx);
             hash = serializationService.getHash(tx);
             transactionHashes.add(hash);

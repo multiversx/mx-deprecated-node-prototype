@@ -1,8 +1,9 @@
 package network.elrond.data;
 
-import network.elrond.Application;
 import network.elrond.account.Accounts;
-import network.elrond.application.AppState;
+import network.elrond.blockchain.Blockchain;
+import network.elrond.blockchain.BlockchainService;
+import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.Util;
 import network.elrond.crypto.MultiSignatureService;
 import network.elrond.crypto.PrivateKey;
@@ -11,6 +12,7 @@ import network.elrond.service.AppServiceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,22 +28,51 @@ public class AppBlockManager {
         return instance;
     }
 
-    public Block composeBlock(List<Transaction> transactions, Application application) {
-
-        AppState state = application.getState();
-        Accounts accounts = state.getAccounts();
-
-        Block block = new Block();
-        Block currentBlock = state.getCurrentBlock();
-        byte[] hash = AppServiceProvider.getSerializationService().getHash(currentBlock);
 
 
-        // Bind on prev block
-        block.setPrevBlockHash(hash);
-        BigInteger nonce = currentBlock.getNonce().add(BigInteger.ONE);
-        block.setNonce(nonce);
+    public void generateAndBroadcastBlock(List<String> hashes, Accounts accounts, Blockchain blockchain, PrivateKey privateKey) {
+        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
 
-        // Add transactions
+        try {
+
+            List<Transaction> transactions = blockchainService.getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
+            Block block = AppBlockManager.instance().composeBlock(transactions, blockchain, accounts);
+
+
+            AppBlockManager.instance().signBlock(block, privateKey);
+            ExecutionService executionService = AppServiceProvider.getExecutionService();
+            ExecutionReport result = executionService.processBlock(block, accounts, blockchain);
+
+            if (result.isOk()) {
+
+                String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
+                AppServiceProvider.getBootstrapService().putBlockInBlockchain(block, hashBlock, blockchain);
+
+                logger.info("New block proposed" + hashBlock);
+            }
+
+
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public Block composeBlock(List<Transaction> transactions, Blockchain blockchain, Accounts accounts) {
+
+        Util.check(transactions!=null, "transactions!=null");
+        Util.check(blockchain!=null, "blockchain!=null");
+
+
+        Block block = getNewBlockAndBindToPrevious(blockchain.getCurrentBlock());
+        addTransactions(transactions, accounts, block);
+        block.setAppStateHash(accounts.getAccountsPersistenceUnit().getRootHash());
+        AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
+
+        return block;
+    }
+
+    private void addTransactions(List<Transaction> transactions, Accounts accounts, Block block) {
         for (Transaction transaction : transactions) {
             boolean valid = AppServiceProvider.getTransactionService().verifyTransaction(transaction);
             if (!valid) {
@@ -49,7 +80,7 @@ public class AppBlockManager {
                 continue;
             }
 
-            ExecutionReport executionReport = AppServiceProvider.getExecutionService().processTransaction(transaction, state.getAccounts());
+            ExecutionReport executionReport = AppServiceProvider.getExecutionService().processTransaction(transaction, accounts);
             if (!executionReport.isOk()) {
                 logger.info("Invalid transaction discarded [exec] " + transaction);
                 continue;
@@ -58,13 +89,16 @@ public class AppBlockManager {
             byte[] txHash = AppServiceProvider.getSerializationService().getHash(transaction);
             block.getListTXHashes().add(txHash);
         }
+    }
 
+    private Block getNewBlockAndBindToPrevious(Block currentBlock) {
+        Block block = new Block();
+        byte[] hash = AppServiceProvider.getSerializationService().getHash(currentBlock);
 
-        byte[] rootHash = accounts.getAccountsPersistenceUnit().getRootHash();
-        block.setAppStateHash(rootHash);
-
-        AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
-
+        // Bind on prev block
+        block.setPrevBlockHash(hash);
+        BigInteger nonce = currentBlock.getNonce().add(BigInteger.ONE);
+        block.setNonce(nonce);
         return block;
     }
 
@@ -131,7 +165,7 @@ public class AppBlockManager {
             aggregatedSignature = multiSignatureService.aggregateSignatures(signatureShares, 1);
         }
 
-        boolean sigOk = multiSignatureService.verifyAggregatedSignature(signersPublicKeys,aggregatedSignature, aggregatedCommitment, blockHashNoSig, 1 );
+        //boolean sigOk = multiSignatureService.verifyAggregatedSignature(signersPublicKeys,aggregatedSignature, aggregatedCommitment, blockHashNoSig, 1 );
         block.setSignature(aggregatedSignature);
         block.setCommitment(aggregatedCommitment);
     }

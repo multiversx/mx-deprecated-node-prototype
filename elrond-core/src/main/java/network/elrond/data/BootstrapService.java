@@ -1,11 +1,9 @@
 package network.elrond.data;
 
-import network.elrond.Application;
+import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
-import network.elrond.p2p.P2PConnection;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 public interface BootstrapService {
@@ -22,16 +20,16 @@ public interface BootstrapService {
     //sets the hash for a block height in location
     void setBlockHashWithHeight(LocationType locationType, BigInteger blockHeight, String hash, Blockchain structure) throws Exception;
 
-    ExecutionReport startFromScratch(Application application);
+    ExecutionReport startFromScratch(AppState state, AppContext context);
 
-    ExecutionReport bootstrap(Application application, BigInteger maxBlkHeightLocal, BigInteger maxBlkHeightNetw);
+    ExecutionReport synchronize(AppState state, BigInteger maxBlkHeightLocal, BigInteger maxBlkHeightNetw);
 
-    ExecutionReport rebuildFromDisk(Application application, BigInteger maxBlkHeightLocal);
+    ExecutionReport rebuildFromDisk(AppState state, BigInteger maxBlkHeightLocal);
 
-    ExecutionReport rebuildFromDiskDeltaNoExec(Application application, BigInteger maxBlkHeightLocal, BigInteger maxBlkHeightNetw);
+    //ExecutionReport rebuildFromDiskDeltaNoExec(Application application, BigInteger maxBlkHeightLocal, BigInteger maxBlkHeightNetw);
 
-    ExecutionReport putBlockInBlockchain(Block blk, String blockHash, AppState state);
+    ExecutionReport putBlockInBlockchain(Block blk, String blockHash, Blockchain blockchain);
 
-    ExecutionReport putTransactionInBlockchain(Transaction transaction, String transactionHash, AppState state);
+    ExecutionReport putTransactionInBlockchain(Transaction transaction, String transactionHash, Blockchain blockchain);
 
 }

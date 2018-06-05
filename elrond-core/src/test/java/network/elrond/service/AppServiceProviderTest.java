@@ -1,11 +1,11 @@
 package network.elrond.service;
 
 import network.elrond.account.AccountStateServiceImpl;
-import network.elrond.blockchain.AppPersistenceServiceImpl;
 import network.elrond.blockchain.BlockchainServiceImpl;
 import network.elrond.consensus.SPoSServiceImpl;
 import network.elrond.consensus.ValidatorServiceImpl;
-import network.elrond.crypto.*;
+import network.elrond.crypto.MultiSignatureServiceBNImpl;
+import network.elrond.crypto.SignatureServiceSchnorrImpl;
 import network.elrond.data.*;
 import network.elrond.p2p.P2PBroadcastServiceImpl;
 import network.elrond.p2p.P2PObjectServiceImpl;
@@ -80,11 +80,11 @@ public class AppServiceProviderTest {
         Assert.assertEquals(ExecutionServiceImpl.class, AppServiceProvider.getExecutionService().getClass());
     }
 
-    @Test
-    public void TestDefaultAppPersistenceService (){
-        AppServiceProvider.InjectDefaultServices();
-        Assert.assertEquals(AppPersistenceServiceImpl.class, AppServiceProvider.getAppPersistanceService().getClass());
-    }
+//    @Test
+//    public void TestDefaultAppPersistenceService (){
+//        AppServiceProvider.InjectDefaultServices();
+//        Assert.assertEquals(AppPersistenceServiceImpl.class, AppServiceProvider.getAppPersistanceService().getClass());
+//    }
 
     @Test
     public void TestDefaultBootstrapService(){

@@ -8,7 +8,7 @@ import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.Util;
 import network.elrond.crypto.MultiSignatureService;
 import network.elrond.service.AppServiceProvider;
-import org.bouncycastle.util.encoders.Base64;
+import org.spongycastle.util.encoders.Base64;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -117,6 +117,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             // check state merkle patricia trie root is the same with what was stored in block
             if (!Arrays.equals(block.getAppStateHash(), accounts.getAccountsPersistenceUnit().getRootHash())) {
                 blockExecutionReport.ko("Application state root hash does not match");
+                AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
                 return blockExecutionReport;
             }
 
@@ -155,15 +156,15 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         //We have to copy-construct the objects for sandbox mode
-        if (!AccountsManager.instance().HasFunds(accounts, transaction.getSendAddress(), transaction.getValue())) {
+        if (!AccountsManager.instance().hasFunds(accounts, transaction.getSendAddress(), transaction.getValue())) {
             return ExecutionReport.create().ko("Invalid transaction! Will result in negative balance! tx hash: " + strHash);
         }
 
-        if (!AccountsManager.instance().HasCorrectNonce(accounts, transaction.getSendAddress(), transaction.getNonce())) {
+        if (!AccountsManager.instance().hasCorrectNonce(accounts, transaction.getSendAddress(), transaction.getNonce())) {
             return ExecutionReport.create().ko("Invalid transaction! Nonce mismatch! tx hash: " + strHash);
         }
 
-        AccountsManager.instance().TransferFunds(accounts,
+        AccountsManager.instance().transferFunds(accounts,
                 transaction.getSendAddress(), transaction.getReceiverAddress(),
                 transaction.getValue(), transaction.getNonce());
 
