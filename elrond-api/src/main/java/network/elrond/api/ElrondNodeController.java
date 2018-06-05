@@ -7,6 +7,7 @@ import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.p2p.PingResponse;
 import network.elrond.service.AppServiceProvider;
+import org.mapdb.Fun;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,10 +21,8 @@ import java.math.BigInteger;
 @Controller
 public class ElrondNodeController {
 
-
     @Autowired
     ElrondApiNode elrondApiNode;
-
 
     @RequestMapping(path = "/node/start", method = RequestMethod.GET)
     public @ResponseBody
@@ -54,7 +53,6 @@ public class ElrondNodeController {
         elrondApiNode.start(context);
 
     }
-
 
     @RequestMapping(path = "/node/send", method = RequestMethod.GET)
     public @ResponseBody
@@ -89,15 +87,15 @@ public class ElrondNodeController {
 
     @RequestMapping(path = "/node/publickeyandprivatekey", method = RequestMethod.GET)
     public @ResponseBody
-    Object generatePublicAndPrivateKey(HttpServletResponse response)
+    Fun.Tuple2<String, String> generatePublicAndPrivateKey(HttpServletResponse response)
     {
         return elrondApiNode.generatePublicKeyAndPrivateKey();
     }
 
     @RequestMapping(path = "/node/publickeyfromprivatekey", method = RequestMethod.GET)
     public @ResponseBody
-    Object generatePublicKeyFromPrivateKey(HttpServletResponse response,
-                      @RequestParam() String privateKey) {
+    Fun.Tuple2<String, String> generatePublicKeyFromPrivateKey(HttpServletResponse response,
+                                               @RequestParam() String privateKey) {
 
         return elrondApiNode.generatePublicKeyFromPrivateKey(privateKey);
     }

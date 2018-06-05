@@ -24,7 +24,6 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
     private static final Logger logger = LoggerFactory.getLogger("ElrondFacadeImpl");
 
-
     @Override
     public Application start(AppContext context) {
 
@@ -50,7 +49,6 @@ public class ElrondFacadeImpl implements ElrondFacade {
         }
     }
 
-
     @Override
     public BigInteger getBalance(AccountAddress address, Application application) {
 
@@ -68,7 +66,6 @@ public class ElrondFacadeImpl implements ElrondFacade {
             return null;
         }
     }
-
 
     @Override
     public boolean send(AccountAddress receiver, BigInteger value, Application application) {
@@ -128,13 +125,13 @@ public class ElrondFacadeImpl implements ElrondFacade {
     }
 
     @Override
-    public Fun.Tuple2<String, String> generatePublicKeyAndPrivateKey(Application application) {
+    public Fun.Tuple2<String, String> generatePublicKeyAndPrivateKey() {
         PrivateKey privateKey = new PrivateKey();
         return new Fun.Tuple2<>(Util.byteArrayToHexString(privateKey.getValue()), Util.byteArrayToHexString(new PublicKey(privateKey).getValue()));
     }
 
     @Override
-    public Fun.Tuple2<String, String> generatePublicKeyFromPrivateKey(String privateKey, Application application) {
+    public Fun.Tuple2<String, String> generatePublicKeyFromPrivateKey(String privateKey) {
         return new Fun.Tuple2<>(privateKey, Util.byteArrayToHexString(new PublicKey(Util.hexStringToByteArray(privateKey)).getValue()));
     }
 }
