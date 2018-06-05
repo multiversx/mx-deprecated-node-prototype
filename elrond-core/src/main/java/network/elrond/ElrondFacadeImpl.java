@@ -8,6 +8,7 @@ import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.core.ByteArrayOutputStreamAppender;
 import network.elrond.core.WindowedByteArrayOutputStream;
+import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.Transaction;
@@ -16,6 +17,7 @@ import network.elrond.p2p.P2PChannelName;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.p2p.PingResponse;
 import network.elrond.service.AppServiceProvider;
+import org.mapdb.Fun;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +27,6 @@ import java.util.List;
 public class ElrondFacadeImpl implements ElrondFacade {
 
     private static final Logger logger = LoggerFactory.getLogger("ElrondFacadeImpl");
-
 
     @Override
     public Application start(AppContext context) {
@@ -52,7 +53,6 @@ public class ElrondFacadeImpl implements ElrondFacade {
         }
     }
 
-
     @Override
     public BigInteger getBalance(AccountAddress address, Application application) {
 
@@ -70,7 +70,6 @@ public class ElrondFacadeImpl implements ElrondFacade {
             return null;
         }
     }
-
 
     @Override
     public boolean send(AccountAddress receiver, BigInteger value, Application application) {
@@ -125,7 +124,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
             return (AppServiceProvider.getP2PCommunicationService().getPingResponse(ipAddress, port));
         } catch (Exception ex) {
             ex.printStackTrace();
-            return(new PingResponse());
+            return (new PingResponse());
         }
     }
 
@@ -145,5 +144,18 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
     public List<Appender> getLoggerAppendersList(){
         return (AppServiceProvider.getLoggerService().getLoggerAppenderList());
+    }
+
+    @Override
+    public Fun.Tuple2<String, String> generatePublicKeyAndPrivateKey() {
+
+        PrivateKey privateKey = new PrivateKey();
+        return new Fun.Tuple2<>(Util.byteArrayToHexString(privateKey.getValue()), Util.byteArrayToHexString(new PublicKey(privateKey).getValue()));
+    }
+
+    @Override
+    public Fun.Tuple2<String, String> generatePublicKeyFromPrivateKey(String privateKey) {
+
+        return new Fun.Tuple2<>(privateKey, Util.byteArrayToHexString(new PublicKey(Util.hexStringToByteArray(privateKey)).getValue()));
     }
 }
