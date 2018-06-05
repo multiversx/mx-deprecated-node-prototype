@@ -87,8 +87,8 @@ public class ElrondNodeController {
 
     @RequestMapping(path = "/node/publickeyandprivatekey", method = RequestMethod.GET)
     public @ResponseBody
-    Fun.Tuple2<String, String> generatePublicAndPrivateKey(HttpServletResponse response)
-    {
+    Fun.Tuple2<String, String> generatePublicAndPrivateKey(HttpServletResponse response) {
+
         return elrondApiNode.generatePublicKeyAndPrivateKey();
     }
 
