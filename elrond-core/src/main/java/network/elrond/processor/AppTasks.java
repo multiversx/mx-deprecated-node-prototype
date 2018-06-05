@@ -60,8 +60,16 @@ public class AppTasks {
     /**
      * Init system synchronize
      */
-    public static AppTask BOOTSTRAP_SYSTEM = (application) -> {
-        new SynchronizationProcessor().process(application);
+    public static AppTask BLOCKCHAIN_SYNCRONIZATION = (application) -> {
+        new SynchronizationBlockTask().process(application);
+    };
+
+
+    /**
+     * Init system bootstrap
+     */
+    public static AppTask BLOCKCHAIN_BOOTSTRAP = (application) -> {
+        new BootstrapBlockTask().process(application);
     };
 
 }
