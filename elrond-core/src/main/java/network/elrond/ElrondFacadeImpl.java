@@ -128,19 +128,25 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
     @Override
     public PKSKPair generatePublicKeyAndPrivateKey() {
-        PrivateKey privateKey = new PrivateKey();
-        PublicKey publicKey = new PublicKey(privateKey);
-        return new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue()));
+        try {
+            PrivateKey privateKey = new PrivateKey();
+            PublicKey publicKey = new PublicKey(privateKey);
+            return new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue()));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new PKSKPair("Error", "Error");
+        }
     }
 
     @Override
     public PKSKPair generatePublicKeyFromPrivateKey(String strPrivateKey) {
         try {
-            PublicKey publicKey = new PublicKey(strPrivateKey.getBytes());
-            return new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), strPrivateKey);
+            PrivateKey privateKey = new PrivateKey(Util.hexStringToByteArray(strPrivateKey));
+            PublicKey publicKey = new PublicKey(privateKey);
+            return new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue()));
         } catch (Exception ex) {
             ex.printStackTrace();
-            return new PKSKPair("Error", strPrivateKey);
+            return new PKSKPair("Error", "Error");
         }
     }
 }
