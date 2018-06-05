@@ -76,4 +76,18 @@ public class ElrondNodeController {
 
     }
 
+    @RequestMapping(path = "/node/publickeyandprivatekey", method = RequestMethod.GET)
+    public @ResponseBody
+    Object generatePublicAndPrivateKey(HttpServletResponse response)
+    {
+        return elrondApiNode.generatePublicKeyAndPrivateKey();
+    }
+
+    @RequestMapping(path = "/node/publickeyfromprivatekey", method = RequestMethod.GET)
+    public @ResponseBody
+    Object generatePublicKeyFromPrivateKey(HttpServletResponse response,
+                      @RequestParam() String privateKey) {
+
+        return elrondApiNode.generatePublicKeyFromPrivateKey(privateKey);
+    }
 }
