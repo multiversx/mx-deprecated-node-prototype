@@ -66,5 +66,4 @@ public interface ElrondFacade {
      * @return
      */
     PKSKPair generatePublicKeyFromPrivateKey(String privateKey);
-
 }
