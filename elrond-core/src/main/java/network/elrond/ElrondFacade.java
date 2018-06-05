@@ -4,6 +4,7 @@ import network.elrond.Application;
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
 import org.mapdb.Fun;
+import network.elrond.p2p.PingResponse;
 
 import java.math.BigInteger;
 
@@ -43,6 +44,16 @@ public interface ElrondFacade {
      * @return
      */
     boolean send(AccountAddress receiver, BigInteger value, Application application);
+
+    /**
+     * Pings an IP address and checks if port is open
+     * @param ipAddress
+     * @param port
+     * @return
+     */
+    PingResponse ping(String ipAddress, int port);
+
+
 
     /**
      * Generate private and public key

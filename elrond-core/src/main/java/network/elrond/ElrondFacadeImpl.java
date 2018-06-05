@@ -12,6 +12,7 @@ import network.elrond.data.Transaction;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.p2p.P2PConnection;
+import network.elrond.p2p.PingResponse;
 import network.elrond.service.AppServiceProvider;
 import org.mapdb.Fun;
 import org.slf4j.Logger;
@@ -116,6 +117,14 @@ public class ElrondFacadeImpl implements ElrondFacade {
         return false;
     }
 
+    @Override
+    public PingResponse ping(String ipAddress, int port) {
+        try {
+            return (AppServiceProvider.getP2PCommunicationService().getPingResponse(ipAddress, port));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return(new PingResponse());
+        }
     @Override
     public Fun.Tuple2<String, String> generatePublicKeyAndPrivateKey(Application application) {
         PrivateKey privateKey = new PrivateKey();

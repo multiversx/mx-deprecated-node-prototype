@@ -71,7 +71,7 @@ public class AppBlockManagerSlowTest {
         publicKey = new PublicKey(privateKey);
 
         String hashString = AppServiceProvider.getSerializationService().getHashString(blk0);
-        AppServiceProvider.getBootstrapService().putBlockInBlockchain(blk0, hashString, blockchain);
+        AppServiceProvider.getBootstrapService().commitBlock(blk0, hashString, blockchain);
 
         appBlockManager = new AppBlockManager();
 
@@ -103,7 +103,7 @@ public class AppBlockManagerSlowTest {
             Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN, BigInteger.ZERO);
             AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
            // AppServiceProvider.getTransactionService().verifyTransaction(tx);
-            //AppServiceProvider.getBootstrapService().putTransactionInBlockchain(tx, AppServiceProvider.getSerializationService().getHashString(tx), blockchain);
+            //AppServiceProvider.getBootstrapService().commitTransaction(tx, AppServiceProvider.getSerializationService().getHashString(tx), blockchain);
         }
         long end = System.currentTimeMillis();
 
@@ -120,7 +120,7 @@ public class AppBlockManagerSlowTest {
             Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN, BigInteger.ZERO);
             AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
             AppServiceProvider.getTransactionService().verifyTransaction(tx);
-            //AppServiceProvider.getBootstrapService().putTransactionInBlockchain(tx, AppServiceProvider.getSerializationService().getHashString(tx), blockchain);
+            //AppServiceProvider.getBootstrapService().commitTransaction(tx, AppServiceProvider.getSerializationService().getHashString(tx), blockchain);
         }
         long end = System.currentTimeMillis();
         System.out.println((end - start));
@@ -188,7 +188,7 @@ public class AppBlockManagerSlowTest {
             String hash = AppServiceProvider.getSerializationService().getHashString(tx);
             hashes.add(hash);
             //AppServiceProvider.getTransactionService().verifyTransaction(tx);
-            AppServiceProvider.getBootstrapService().putTransactionInBlockchain(tx, hash, blockchain);
+            AppServiceProvider.getBootstrapService().commitTransaction(tx, hash, blockchain);
         }
         return hashes;
     }

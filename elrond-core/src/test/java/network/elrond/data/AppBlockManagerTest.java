@@ -68,7 +68,7 @@ public class AppBlockManagerTest {
         publicKey = new PublicKey(privateKey);
 
         String hashString = AppServiceProvider.getSerializationService().getHashString(blk0);
-        AppServiceProvider.getBootstrapService().putBlockInBlockchain(blk0, hashString, blockchain);
+        AppServiceProvider.getBootstrapService().commitBlock(blk0, hashString, blockchain);
 
         appBlockManager = new AppBlockManager();
     }
@@ -107,7 +107,7 @@ public class AppBlockManagerTest {
 
         List<Transaction> transactions = new ArrayList<>();
         transactions.add(tx1);
-        AppServiceProvider.getBootstrapService().putTransactionInBlockchain(tx1, AppServiceProvider.getSerializationService().getHashString(tx1), state.getBlockchain());
+        AppServiceProvider.getBootstrapService().commitTransaction(tx1, AppServiceProvider.getSerializationService().getHashString(tx1), state.getBlockchain());
 
         Block blk = appBlockManager.composeBlock(transactions, state.getBlockchain(), state.getAccounts());
         appBlockManager.signBlock(blk, pvkeyRecv);
@@ -149,8 +149,8 @@ public class AppBlockManagerTest {
         List<Transaction> transactions = new ArrayList<>();
         transactions.add(tx1);
         transactions.add(tx2);
-        AppServiceProvider.getBootstrapService().putTransactionInBlockchain(tx1, AppServiceProvider.getSerializationService().getHashString(tx1), state.getBlockchain());
-        AppServiceProvider.getBootstrapService().putTransactionInBlockchain(tx2, AppServiceProvider.getSerializationService().getHashString(tx2), state.getBlockchain());
+        AppServiceProvider.getBootstrapService().commitTransaction(tx1, AppServiceProvider.getSerializationService().getHashString(tx1), state.getBlockchain());
+        AppServiceProvider.getBootstrapService().commitTransaction(tx2, AppServiceProvider.getSerializationService().getHashString(tx2), state.getBlockchain());
 
         Block blk = appBlockManager.composeBlock(transactions, state.getBlockchain(), state.getAccounts());
         appBlockManager.signBlock(blk, pvkeyRecv);
@@ -203,7 +203,7 @@ public class AppBlockManagerTest {
         for (Transaction transaction : transactions) {
             AppServiceProvider.getTransactionService().signTransaction(transaction, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
 
-            AppServiceProvider.getBootstrapService().putTransactionInBlockchain(transaction, AppServiceProvider.getSerializationService().getHashString(transaction), state.getBlockchain());
+            AppServiceProvider.getBootstrapService().commitTransaction(transaction, AppServiceProvider.getSerializationService().getHashString(transaction), state.getBlockchain());
         }
 
         Block blk = appBlockManager.composeBlock(transactions, state.getBlockchain(), state.getAccounts());
@@ -262,7 +262,7 @@ public class AppBlockManagerTest {
         for (Transaction transaction : transactions) {
             AppServiceProvider.getTransactionService().signTransaction(transaction, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
 
-            AppServiceProvider.getBootstrapService().putTransactionInBlockchain(transaction, AppServiceProvider.getSerializationService().getHashString(transaction), state.getBlockchain());
+            AppServiceProvider.getBootstrapService().commitTransaction(transaction, AppServiceProvider.getSerializationService().getHashString(transaction), state.getBlockchain());
         }
 
         Block block = appBlockManager.composeBlock(transactions, state.getBlockchain(), state.getAccounts());

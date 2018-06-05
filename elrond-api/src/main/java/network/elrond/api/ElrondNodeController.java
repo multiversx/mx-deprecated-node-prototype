@@ -5,6 +5,8 @@ import network.elrond.application.AppContext;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
+import network.elrond.p2p.PingResponse;
+import network.elrond.service.AppServiceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -74,6 +76,15 @@ public class ElrondNodeController {
         AccountAddress _add = AccountAddress.fromHexString(address);
         return elrondApiNode.getBalance(_add);
 
+    }
+
+    @RequestMapping(path = "/node/ping", method = RequestMethod.GET)
+    public @ResponseBody
+    PingResponse ping(HttpServletResponse response,
+                      @RequestParam() String ipAddress,
+                      @RequestParam() int port
+    ) {
+        return (elrondApiNode.ping(ipAddress, port));
     }
 
     @RequestMapping(path = "/node/publickeyandprivatekey", method = RequestMethod.GET)
