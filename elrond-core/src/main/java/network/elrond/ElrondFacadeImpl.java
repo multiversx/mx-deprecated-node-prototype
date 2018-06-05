@@ -6,8 +6,6 @@ import network.elrond.account.AccountState;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
-import network.elrond.core.ByteArrayOutputStreamAppender;
-import network.elrond.core.WindowedByteArrayOutputStream;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
@@ -126,24 +124,6 @@ public class ElrondFacadeImpl implements ElrondFacade {
             ex.printStackTrace();
             return (new PingResponse());
         }
-    }
-
-    public String getLoggerStringAndClear(String appenderName){
-        try {
-            Appender appender = AppServiceProvider.getLoggerService().getLoggerAppender(appenderName);
-
-            String data = ((ByteArrayOutputStreamAppender)appender).toStringAndClear("UTF8");
-
-            return(data);
-
-        } catch (Exception ex){
-            ex.printStackTrace();
-            return(null);
-        }
-    }
-
-    public List<Appender> getLoggerAppendersList(){
-        return (AppServiceProvider.getLoggerService().getLoggerAppenderList());
     }
 
     @Override

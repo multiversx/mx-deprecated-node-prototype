@@ -7,9 +7,9 @@ import network.elrond.ElrondFacadeImpl;
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
 import org.mapdb.Fun;
-import network.elrond.core.ByteArrayOutputStreamAppender;
 import network.elrond.p2p.PingResponse;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
@@ -25,7 +25,8 @@ import java.util.List;
 class ElrondApiNode {
 
     private Application application;
-    //private ElrondWebsocketManager elrondWebsocketManager;
+    @Autowired
+    private ElrondWebsocketManager elrondWebsocketManager;
 
 
     public Application getApplication() {
@@ -36,57 +37,12 @@ class ElrondApiNode {
         this.application = application;
     }
 
-
     private ElrondFacade getFacade() {
         return new ElrondFacadeImpl();
     }
 
     void start(AppContext context) {
         application = getFacade().start(context);
-
-//        MessageChannel messageChannel = new ExecutorSubscribableChannel();
-//        SimpMessagingTemplate simpMessagingTemplate = new SimpMessagingTemplate(messageChannel);
-//        elrondWebsocketManager = new ElrondWebsocketManager(simpMessagingTemplate);
-//
-//        Thread threadPushWebSocket = new Thread(() -> {
-//
-//            long oldSeconds = -1;
-//            long newSeconds;
-//
-//            do{
-//                newSeconds = new Date().getTime() / 1000;
-//
-//                if (newSeconds != oldSeconds){
-//                    oldSeconds = newSeconds;
-//
-//                    //current second has changed, do something
-//                    //get list of appenders and iterate it
-//
-//                    List<Appender> list = getFacade().getLoggerAppendersList();
-//
-//                    for (int i = 0; i < list.size(); i++){
-//                        Appender appender = list.get(i);
-//
-//                        if (appender.getClass().getName().compareToIgnoreCase(ByteArrayOutputStreamAppender.class.getName()) == 0) {
-//                            try {
-//                                elrondWebsocketManager.announce(appender.getName(), ((ByteArrayOutputStreamAppender) appender).toStringAndClear("UTF8"));
-//                            } catch (Exception ex) {
-//                                ex.printStackTrace();
-//                            }
-//                        }
-//                    }
-//                }
-//
-//                try{
-//                    Thread.sleep(1);
-//                } catch (Exception ex){
-//                    ex.printStackTrace();
-//                }
-//
-//            } while (application.getState().isStillRunning());
-//        });
-        //threadPushWebSocket.start();
-
     }
 
     boolean stop() {
@@ -106,4 +62,8 @@ class ElrondApiNode {
     Fun.Tuple2<String, String> generatePublicKeyAndPrivateKey() {return getFacade().generatePublicKeyAndPrivateKey(); }
 
     Fun.Tuple2<String, String> generatePublicKeyFromPrivateKey(String privateKey) { return getFacade().generatePublicKeyFromPrivateKey(privateKey); }
+
+    ElrondWebsocketManager getElrondWebsocketManager(){
+        return(elrondWebsocketManager);
+    }
 }

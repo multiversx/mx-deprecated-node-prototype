@@ -67,12 +67,5 @@ public interface ElrondFacade {
      * @return
      */
     Fun.Tuple2<String, String> generatePublicKeyFromPrivateKey(String privateKey);
-    /**
-     * Gets the data as string from logger's appender and then empties the stream from appender
-     * @param appenderName
-     * @return
-     */
-    String getLoggerStringAndClear(String appenderName);
 
-    List<Appender> getLoggerAppendersList();
 }

@@ -1,5 +1,11 @@
 package network.elrond.api;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.FileAppender;
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
 import network.elrond.core.Util;
@@ -7,7 +13,9 @@ import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.p2p.PingResponse;
 import network.elrond.service.AppServiceProvider;
+import org.apache.logging.log4j.LogManager;
 import org.mapdb.Fun;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,7 +58,36 @@ public class ElrondNodeController {
 
         context.setValueMint(Util.VALUE_MINTING);
 
+        //log appender
+
+
+        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+        PatternLayoutEncoder ple = new PatternLayoutEncoder();
+        ple.setPattern("%date %level [%thread] %logger{10} [%file:%line] %msg%n");
+        ple.setContext(lc);
+        ple.start();
+
+
+
+        WebSocketAppender webSocketAppender = new WebSocketAppender();
+        webSocketAppender.setEncoder(ple);
+        webSocketAppender.setContext(lc);
+        webSocketAppender.setElrondWebsocketManager(elrondApiNode.getElrondWebsocketManager());
+        webSocketAppender.setName("logger");
+        webSocketAppender.start();
+
+        ch.qos.logback.classic.Logger logbackLogger =
+                (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        logbackLogger.addAppender(webSocketAppender);
+        logbackLogger.setLevel(Level.DEBUG);
+        logbackLogger.setAdditive(false);
+
         elrondApiNode.start(context);
+
+
+
+
+
 
     }
 
