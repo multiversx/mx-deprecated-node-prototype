@@ -48,12 +48,12 @@ public interface ElrondFacade {
      * Generate private and public key
      * @return
      */
-    Fun.Tuple2<String, String> generatePublicAndPrivateKey();
+    Fun.Tuple2<String, String> generatePublicKeyAndPrivateKey(Application application);
 
     /**
      * Generate public key from a private key
      * @param privateKey
      * @return
      */
-    Fun.Tuple2<String, String> generatePublicKeyFromPrivateKey(String privateKey);
+    Fun.Tuple2<String, String> generatePublicKeyFromPrivateKey(String privateKey, Application application);
 }
