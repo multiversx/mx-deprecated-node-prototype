@@ -54,13 +54,13 @@ public interface ElrondFacade {
     PingResponse ping(String ipAddress, int port);
 
     /**
-     * Generates public key and private key
+     * Generate public key and private key
      * @return
      */
     Fun.Tuple2<String, String> generatePublicKeyAndPrivateKey();
 
     /**
-     * Generates public key from a private key
+     * Generate public key from a private key
      * @param privateKey
      * @return
      */
