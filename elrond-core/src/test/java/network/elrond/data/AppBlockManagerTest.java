@@ -21,6 +21,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +36,7 @@ public class AppBlockManagerTest {
     PublicKey publicKey;
     PrivateKey privateKey;
     Blockchain blockchain;
-
+    static P2PConnection connection = null;
     @Before
     public void setupTest() throws Exception {
         AppContext context = new AppContext();
@@ -50,7 +51,9 @@ public class AppBlockManagerTest {
         Block blk0 = new Block();
         state = new AppState();
 
-        P2PConnection connection = AppServiceProvider.getP2PBroadcastService().createConnection(context);
+        if(connection == null) {
+            connection = AppServiceProvider.getP2PBroadcastService().createConnection(context);
+        }
         state.setConnection(connection);
 
         BlockchainContext blockchainContext = new BlockchainContext();
@@ -431,8 +434,10 @@ public class AppBlockManagerTest {
     }
 
     @Test
-    public void testVerifySignatureEmptyBlock(){
-        Block block = appBlockManager.composeBlock(Arrays.asList(), null, null);
+    public void testVerifySignatureEmptyBlock() throws IOException {
+        accounts = new Accounts(accountsContext);
+        state.setAccounts(accounts);
+        Block block = appBlockManager.composeBlock(Arrays.asList(), blockchain, accounts);
 
         appBlockManager.signBlock(block, privateKey);
 

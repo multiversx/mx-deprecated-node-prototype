@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import java.util.Scanner;
 
-public class P2PTest {
+public class P2PIT {
 
     @Test
     public void testOverride1() throws Exception {

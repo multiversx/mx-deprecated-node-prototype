@@ -24,4 +24,6 @@ public abstract class BaseBlockchainTest {
         context.setDatabasePath(BlockchainUnitType.BLOCK_INDEX, BLOCKCHAIN_BLOCKIDX_DATA_TEST_PATH+ currentDir);
         return context;
     }
+
+
 }

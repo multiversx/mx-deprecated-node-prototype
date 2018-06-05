@@ -62,7 +62,7 @@ public class AppBlockManager {
 
         Util.check(transactions!=null, "transactions!=null");
         Util.check(blockchain!=null, "blockchain!=null");
-
+        Util.check(accounts!=null, "accounts!=null");
 
         Block block = getNewBlockAndBindToPrevious(blockchain.getCurrentBlock());
         addTransactions(transactions, accounts, block);
