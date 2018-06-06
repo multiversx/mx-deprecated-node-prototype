@@ -5,7 +5,11 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.LoggingEvent;
+import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.FileAppender;
+import ch.qos.logback.core.filter.Filter;
+import ch.qos.logback.core.spi.FilterReply;
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
 import network.elrond.core.Util;
@@ -26,6 +30,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigInteger;
+import java.util.Iterator;
 
 @Controller
 public class ElrondNodeController {
@@ -61,12 +66,19 @@ public class ElrondNodeController {
 
         //log appender
 
+        String filterDataAccept = "elrond|tom";
+        String filterDataDeny = "tom";
+
+
 
         LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
         PatternLayoutEncoder ple = new PatternLayoutEncoder();
-        ple.setPattern("%date %level [%thread] %logger{10} [%file:%line] %msg%n");
+        //ple.setPattern("%date %level [%thread] %logger{10} [%file:%line] %msg%n");
+        ple.setPattern("%d{HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n");
         ple.setContext(lc);
         ple.start();
+
+
 
         WebSocketAppender webSocketAppender = new WebSocketAppender();
         webSocketAppender.setEncoder(ple);
@@ -82,13 +94,88 @@ public class ElrondNodeController {
         logbackLogger.setLevel(Level.DEBUG);
         logbackLogger.setAdditive(false);
 
+        Filter filterAccept = getFilterAccept(filterDataAccept);
+        Filter filterDeny = getFilterDeny(filterDataDeny);
+
+        for (Logger logger : lc.getLoggerList()) {
+            for (Iterator<Appender<ILoggingEvent>> index = logger.iteratorForAppenders(); index.hasNext();) {
+                Appender<ILoggingEvent> appender = index.next();
+
+                appender.addFilter(filterAccept);
+                appender.addFilter(filterDeny);
+            }
+        }
+
+
         elrondApiNode.start(context);
+    }
 
+    private Filter getFilterAccept(String filterAccept){
+        String[] dataToAccept = filterAccept.split("\\|");
+        Filter filter = new Filter() {
 
+            @Override
+            public FilterReply decide(Object event) {
+                if (filterAccept.equals("*")){
+                    return (FilterReply.NEUTRAL);
+                }
 
+                if (event.getClass().getName() == LoggingEvent.class.getName()){
+                    LoggingEvent loggingEvent = (LoggingEvent)event;
 
+                    for (int i = 0; i < dataToAccept.length; i++){
+                        if (loggingEvent.getLoggerName().contains(dataToAccept[i])){
+                            return (FilterReply.NEUTRAL);
+                        }
+                    }
+                }
 
+                for (int i = 0; i < dataToAccept.length; i++){
+                    if (event.toString().contains(dataToAccept[i])){
+                        return (FilterReply.NEUTRAL);
+                    }
+                }
 
+                return(FilterReply.DENY);
+            }
+        };
+        filter.start();
+
+        return(filter);
+    }
+
+    private Filter getFilterDeny(String filterDeny){
+        String[] dataToAccept = filterDeny.split("\\|");
+        Filter filter = new Filter() {
+
+            @Override
+            public FilterReply decide(Object event) {
+                if (filterDeny.equals("")){
+                    return (FilterReply.NEUTRAL);
+                }
+
+                if (event.getClass().getName() == LoggingEvent.class.getName()){
+                    LoggingEvent loggingEvent = (LoggingEvent)event;
+
+                    for (int i = 0; i < dataToAccept.length; i++){
+                        if (loggingEvent.getLoggerName().contains(dataToAccept[i])){
+                            return (FilterReply.DENY);
+                        }
+                    }
+                }
+
+                for (int i = 0; i < dataToAccept.length; i++){
+                    if (event.toString().contains(dataToAccept[i])){
+                        return (FilterReply.DENY);
+                    }
+                }
+
+                return(FilterReply.NEUTRAL);
+            }
+        };
+        filter.start();
+
+        return(filter);
     }
 
     @RequestMapping(path = "/node/send", method = RequestMethod.GET)
