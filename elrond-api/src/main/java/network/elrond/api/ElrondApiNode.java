@@ -1,6 +1,5 @@
 package network.elrond.api;
 
-import ch.qos.logback.core.Appender;
 import network.elrond.Application;
 import network.elrond.ElrondFacade;
 import network.elrond.ElrondFacadeImpl;
@@ -8,20 +7,11 @@ import network.elrond.account.AccountAddress;
 import network.elrond.api.config.EchoWebSocketServer;
 import network.elrond.application.AppContext;
 import network.elrond.crypto.PKSKPair;
-import org.mapdb.Fun;
 import network.elrond.p2p.PingResponse;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.support.AbstractSubscribableChannel;
-import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Date;
-import java.util.List;
 
 @Component
 class ElrondApiNode {
@@ -45,8 +35,9 @@ class ElrondApiNode {
         return new ElrondFacadeImpl();
     }
 
-    void start(AppContext context) {
+    boolean start(AppContext context) {
         application = getFacade().start(context);
+        return application != null;
     }
 
     boolean stop() {

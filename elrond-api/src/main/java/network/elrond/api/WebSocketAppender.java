@@ -14,8 +14,8 @@ public class WebSocketAppender<E> extends OutputStreamAppender<E> {
     //private ElrondWebsocketManager elrondWebsocketManager;
     private EchoWebSocketServer echoWebSocketServer;
 
-    public WebSocketAppender(){
-    //    elrondWebsocketManager = null;
+    public WebSocketAppender() {
+        //    elrondWebsocketManager = null;
         echoWebSocketServer = null;
     }
 
@@ -26,10 +26,10 @@ public class WebSocketAppender<E> extends OutputStreamAppender<E> {
     }
 
     @Override
-    protected void append(E event){
+    protected void append(E event) {
         String data = event + CoreConstants.LINE_SEPARATOR;
 
-        if (echoWebSocketServer != null){
+        if (echoWebSocketServer != null) {
             echoWebSocketServer.sendToAll(data);
         }
 //        if (elrondWebsocketManager != null) {
@@ -37,7 +37,7 @@ public class WebSocketAppender<E> extends OutputStreamAppender<E> {
 //        }
     }
 
-    public void setEchoWebSocketServer(EchoWebSocketServer echoWebSocketServer){
+    public void setEchoWebSocketServer(EchoWebSocketServer echoWebSocketServer) {
         this.echoWebSocketServer = echoWebSocketServer;
     }
 

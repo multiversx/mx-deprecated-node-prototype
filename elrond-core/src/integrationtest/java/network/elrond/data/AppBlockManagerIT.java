@@ -27,7 +27,7 @@ import java.util.List;
 @Category(SlowTests.class)
 public class AppBlockManagerIT {
 
-    double N = 10000;
+    double N = 100;
     AppBlockManager appBlockManager;
     AppState state;
     AppContext context;
@@ -95,7 +95,7 @@ public class AppBlockManagerIT {
     public void testGenerateAndSignNTransactions() throws IOException {
         long start = System.currentTimeMillis();
 
-        for(int i = 0;i<10000;i++){
+        for(int i = 0;i<N;i++){
             Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN, BigInteger.ZERO);
             AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
            // AppServiceProvider.getTransactionService().verifyTransaction(tx);
@@ -112,7 +112,7 @@ public class AppBlockManagerIT {
     public void testGenerateSignAndVerifyNTransactions() throws IOException {
         long start = System.currentTimeMillis();
 
-        for(int i = 0;i<10000;i++){
+        for(int i = 0;i<N;i++){
             Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN, BigInteger.ZERO);
             AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
             AppServiceProvider.getTransactionService().verifyTransaction(tx);

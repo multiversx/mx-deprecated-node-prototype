@@ -445,14 +445,16 @@ public class AppBlockManagerTest {
     }
 
     @Test
-    public void testVerifySignatureBlock(){
+    public void testVerifySignatureBlock() throws IOException {
         Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN.pow(1), BigInteger.ONE);
         Transaction tx2 = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN.pow(1), BigInteger.ONE);
 
         AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
         AppServiceProvider.getTransactionService().signTransaction(tx2, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
 
-        Block block = appBlockManager.composeBlock(Arrays.asList(tx, tx2), null, null);
+        accounts = new Accounts(accountsContext);
+
+        Block block = appBlockManager.composeBlock(Arrays.asList(tx, tx2), blockchain, accounts);
         appBlockManager.signBlock(block, privateKey);
 
         Assert.assertTrue("Signature is not ok!", VerifySignature(block));

@@ -40,7 +40,7 @@ public class ElrondNodeController {
 
     @RequestMapping(path = "/node/start", method = RequestMethod.GET)
     public @ResponseBody
-    void startNode(HttpServletResponse response,
+    boolean startNode(HttpServletResponse response,
                    @RequestParam(defaultValue = "elrond-node-1") String nodeName,
                    @RequestParam(defaultValue = "4001") Integer port,
                    @RequestParam(defaultValue = "4000", required = false) Integer masterPeerPort,
@@ -107,7 +107,7 @@ public class ElrondNodeController {
         }
 
 
-        elrondApiNode.start(context);
+        return elrondApiNode.start(context);
     }
 
     private Filter getFilterAccept(String filterAccept){
