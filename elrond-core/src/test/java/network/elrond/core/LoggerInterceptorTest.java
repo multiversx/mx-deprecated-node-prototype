@@ -1,11 +1,9 @@
 package network.elrond.core;
 
-import ch.qos.logback.classic.selector.servlet.LoggerContextFilter;
 import ch.qos.logback.core.Appender;
 import junit.framework.TestCase;
-import network.elrond.p2p.PingResponse;
 import network.elrond.service.AppServiceProvider;
-import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +22,7 @@ public class LoggerInterceptorTest {
         Appender appender = AppServiceProvider.getLoggerService().getLoggerAppender("NON EXISTENT");
     }
 
+    @Ignore
     @Test
     public void InterceptLogger() throws Exception{
         //Logger logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);

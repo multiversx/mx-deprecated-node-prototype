@@ -5,7 +5,7 @@ import network.elrond.blockchain.BlockchainServiceImpl;
 import network.elrond.consensus.SPoSServiceImpl;
 import network.elrond.consensus.ValidatorServiceImpl;
 import network.elrond.crypto.MultiSignatureServiceBNImpl;
-import network.elrond.crypto.SignatureServiceSchnorrImpl;
+import network.elrond.crypto.SignatureServiceECDSAImpl;
 import network.elrond.data.*;
 import network.elrond.p2p.P2PBroadcastServiceImpl;
 import network.elrond.p2p.P2PObjectServiceImpl;
@@ -59,7 +59,7 @@ public class AppServiceProviderTest {
     @Test
     public void TestDefaultSignatureService (){
         AppServiceProvider.InjectDefaultServices();
-        Assert.assertEquals(SignatureServiceSchnorrImpl.class, AppServiceProvider.getSignatureService().getClass());
+        Assert.assertEquals(SignatureServiceECDSAImpl.class, AppServiceProvider.getSignatureService().getClass());
     }
 
     @Test

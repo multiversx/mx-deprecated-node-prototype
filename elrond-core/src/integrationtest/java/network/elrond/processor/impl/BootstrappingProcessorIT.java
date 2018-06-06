@@ -14,6 +14,7 @@ import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.*;
 import network.elrond.service.AppServiceProvider;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -26,6 +27,7 @@ public class BootstrappingProcessorIT {
     BootstrapService bootstrapService = AppServiceProvider.getBootstrapService();
     AccountStateService accountStateService = AppServiceProvider.getAccountStateService();
 
+    @Ignore
     @Test
     public void bootstrapMethodsTest() throws Exception {
         AppContext context = new AppContext();
