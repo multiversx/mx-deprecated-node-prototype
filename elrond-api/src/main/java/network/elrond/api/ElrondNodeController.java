@@ -9,6 +9,7 @@ import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.spi.FilterReply;
+import network.elrond.Application;
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
 import network.elrond.core.Util;
@@ -42,7 +43,10 @@ public class ElrondNodeController {
     @RequestMapping(path = "/node/stop", method = RequestMethod.GET)
     public @ResponseBody
     void startNode(HttpServletResponse response) {
-        elrondApiNode.getApplication().stop();
+        Application application = elrondApiNode.getApplication();
+        if (application != null) {
+            application.stop();
+        }
     }
 
 
