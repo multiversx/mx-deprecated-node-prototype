@@ -20,7 +20,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BootstrappingProcessorTest {
+public class BootstrappingProcessorIT {
     SerializationService serializationService = AppServiceProvider.getSerializationService();
     TransactionService transactionService = AppServiceProvider.getTransactionService();
     BootstrapService bootstrapService = AppServiceProvider.getBootstrapService();

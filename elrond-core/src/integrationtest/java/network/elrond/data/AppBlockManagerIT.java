@@ -1,5 +1,6 @@
-package network.elrond.slowtests;
+package network.elrond.data;
 
+import network.elrond.SlowTests;
 import network.elrond.account.Accounts;
 import network.elrond.account.AccountsContext;
 import network.elrond.application.AppContext;
@@ -11,7 +12,6 @@ import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
-import network.elrond.data.*;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.service.AppServiceProvider;
 import org.junit.After;
@@ -23,11 +23,9 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @Category(SlowTests.class)
-public class AppBlockManagerSlowTest {
+public class AppBlockManagerIT {
 
     double N = 10000;
     AppBlockManager appBlockManager;
@@ -74,8 +72,6 @@ public class AppBlockManagerSlowTest {
         AppServiceProvider.getBootstrapService().commitBlock(blk0, hashString, blockchain);
 
         appBlockManager = new AppBlockManager();
-
-        Logger.getLogger(AppBlockManagerSlowTest.class.getName()).setLevel(Level.OFF);
     }
 
     @After
