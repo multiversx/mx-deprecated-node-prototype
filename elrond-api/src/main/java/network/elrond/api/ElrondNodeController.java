@@ -71,7 +71,8 @@ public class ElrondNodeController {
         WebSocketAppender webSocketAppender = new WebSocketAppender();
         webSocketAppender.setEncoder(ple);
         webSocketAppender.setContext(lc);
-        webSocketAppender.setElrondWebsocketManager(elrondApiNode.getElrondWebsocketManager());
+        webSocketAppender.setEchoWebSocketServer(elrondApiNode.getEchoWebSocketServer());
+        //webSocketAppender.setElrondWebsocketManager(elrondApiNode.getElrondWebsocketManager());
         webSocketAppender.setName("logger");
         webSocketAppender.start();
 

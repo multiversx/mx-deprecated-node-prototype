@@ -8,28 +8,28 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Map;
 
-@Component
-public class ElrondWebsocketManager {
-
-
-    private final SimpMessagingTemplate template;
-
-    @Autowired
-    public ElrondWebsocketManager(SimpMessagingTemplate template) {
-        this.template = template;
-    }
-
-    public void announce(String destination, String message) {
-        this.template.convertAndSend(destination, message);
-//        switch (entity) {
-//            case "log":
-//                this.template.convertAndSend("log", message);
+//@Component
+//public class ElrondWebsocketManager {
 //
-//                break;
-//            default:
-//                break;
-//        }
-    }
-
-
-}
+//
+//    private final SimpMessagingTemplate template;
+//
+//    @Autowired
+//    public ElrondWebsocketManager(SimpMessagingTemplate template) {
+//        this.template = template;
+//    }
+//
+//    public void announce(String destination, String message) {
+//        this.template.convertAndSend(destination, message);
+////        switch (entity) {
+////            case "log":
+////                this.template.convertAndSend("log", message);
+////
+////                break;
+////            default:
+////                break;
+////        }
+//    }
+//
+//
+//}

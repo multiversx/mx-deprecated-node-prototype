@@ -2,6 +2,7 @@ package network.elrond.api;
 
 import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.OutputStreamAppender;
+import network.elrond.api.config.EchoWebSocketServer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -10,10 +11,12 @@ import java.io.OutputStream;
 public class WebSocketAppender<E> extends OutputStreamAppender<E> {
     //dummy output stream
     private OutputStream outputStream = new ByteArrayOutputStream();
-    private ElrondWebsocketManager elrondWebsocketManager;
+    //private ElrondWebsocketManager elrondWebsocketManager;
+    private EchoWebSocketServer echoWebSocketServer;
 
     public WebSocketAppender(){
-        elrondWebsocketManager = null;
+    //    elrondWebsocketManager = null;
+        echoWebSocketServer = null;
     }
 
     @Override
@@ -26,17 +29,24 @@ public class WebSocketAppender<E> extends OutputStreamAppender<E> {
     protected void append(E event){
         String data = event + CoreConstants.LINE_SEPARATOR;
 
-        if (elrondWebsocketManager != null) {
-            elrondWebsocketManager.announce(this.getName(), data);
+        if (echoWebSocketServer != null){
+            echoWebSocketServer.sendToAll(data);
         }
+//        if (elrondWebsocketManager != null) {
+//            elrondWebsocketManager.announce(this.getName(), data);
+//        }
     }
 
-    public ElrondWebsocketManager getElrondWebsocketManager(){
-        return (elrondWebsocketManager);
+    public void setEchoWebSocketServer(EchoWebSocketServer echoWebSocketServer){
+        this.echoWebSocketServer = echoWebSocketServer;
     }
 
-    public void setElrondWebsocketManager(ElrondWebsocketManager elrondWebsocketManager){
-        this.elrondWebsocketManager = elrondWebsocketManager;
-    }
+//    public ElrondWebsocketManager getElrondWebsocketManager(){
+//        return (elrondWebsocketManager);
+//    }
+//
+//    public void setElrondWebsocketManager(ElrondWebsocketManager elrondWebsocketManager){
+//        this.elrondWebsocketManager = elrondWebsocketManager;
+//    }
 
 }

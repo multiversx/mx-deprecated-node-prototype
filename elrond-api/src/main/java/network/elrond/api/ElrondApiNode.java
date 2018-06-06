@@ -5,6 +5,7 @@ import network.elrond.Application;
 import network.elrond.ElrondFacade;
 import network.elrond.ElrondFacadeImpl;
 import network.elrond.account.AccountAddress;
+import network.elrond.api.config.EchoWebSocketServer;
 import network.elrond.application.AppContext;
 import network.elrond.crypto.PKSKPair;
 import org.mapdb.Fun;
@@ -26,9 +27,11 @@ import java.util.List;
 class ElrondApiNode {
 
     private Application application;
-    @Autowired
-    private ElrondWebsocketManager elrondWebsocketManager;
+    //@Autowired
+    //private ElrondWebsocketManager elrondWebsocketManager;
 
+    @Autowired
+    private EchoWebSocketServer echoWebSocketServer;
 
     public Application getApplication() {
         return application;
@@ -64,7 +67,10 @@ class ElrondApiNode {
 
     PKSKPair generatePublicKeyFromPrivateKey(String privateKey) { return getFacade().generatePublicKeyFromPrivateKey(privateKey); }
 
-    ElrondWebsocketManager getElrondWebsocketManager(){
-        return(elrondWebsocketManager);
+    EchoWebSocketServer getEchoWebSocketServer(){
+        return(echoWebSocketServer);
     }
+    //ElrondWebsocketManager getElrondWebsocketManager(){
+    //    return(elrondWebsocketManager);
+    //}
 }
