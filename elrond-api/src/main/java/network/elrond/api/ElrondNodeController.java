@@ -42,11 +42,13 @@ public class ElrondNodeController {
 
     @RequestMapping(path = "/node/stop", method = RequestMethod.GET)
     public @ResponseBody
-    void startNode(HttpServletResponse response) {
+    boolean startNode(HttpServletResponse response) {
         Application application = elrondApiNode.getApplication();
         if (application != null) {
             application.stop();
         }
+
+        return true;
     }
 
 
@@ -81,14 +83,13 @@ public class ElrondNodeController {
         }
 
 
-        PrivateKey privateKey1 = new PrivateKey(privateKey);
+        PrivateKey privateKey1 = new PrivateKey(Util.hexStringToByteArray(privateKey));
         PublicKey publicKey = new PublicKey(privateKey1);
-
         context.setPrivateKey(privateKey1);
         String mintAddress = Util.getAddressFromPublicKey(publicKey.getValue());
         context.setStrAddressMint(mintAddress);
 
-        context.setValueMint(Util.VALUE_MINTING);
+
 
         //log appender
         String filterDataAccept = "elrond|tom";

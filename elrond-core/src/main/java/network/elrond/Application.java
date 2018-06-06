@@ -86,6 +86,8 @@ public class Application implements Serializable {
      */
     public void stop() {
         this.state.setStillRunning(false);
+        this.state.getConnection().getDht().shutdown();
+        this.state.getConnection().getPeer().shutdown();
     }
 
 
