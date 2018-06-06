@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class P2PBroadcastTest {
+public class P2PBroadcastIT {
 
 
     @Test

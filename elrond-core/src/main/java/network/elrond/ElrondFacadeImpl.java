@@ -1,12 +1,12 @@
 package network.elrond;
 
-import ch.qos.logback.core.Appender;
 import network.elrond.account.AccountAddress;
 import network.elrond.account.AccountState;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.core.Util;
+import network.elrond.crypto.PKSKPair;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.Transaction;
@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
-import java.util.List;
+import java.security.spec.InvalidKeySpecException;
 
 public class ElrondFacadeImpl implements ElrondFacade {
 
@@ -127,15 +127,26 @@ public class ElrondFacadeImpl implements ElrondFacade {
     }
 
     @Override
-    public Fun.Tuple2<String, String> generatePublicKeyAndPrivateKey() {
-
-        PrivateKey privateKey = new PrivateKey();
-        return new Fun.Tuple2<>(Util.byteArrayToHexString(privateKey.getValue()), Util.byteArrayToHexString(new PublicKey(privateKey).getValue()));
+    public PKSKPair generatePublicKeyAndPrivateKey() {
+        try {
+            PrivateKey privateKey = new PrivateKey();
+            PublicKey publicKey = new PublicKey(privateKey);
+            return new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue()));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new PKSKPair("Error", "Error");
+        }
     }
 
     @Override
-    public Fun.Tuple2<String, String> generatePublicKeyFromPrivateKey(String privateKey) {
-
-        return new Fun.Tuple2<>(privateKey, Util.byteArrayToHexString(new PublicKey(Util.hexStringToByteArray(privateKey)).getValue()));
+    public PKSKPair generatePublicKeyFromPrivateKey(String strPrivateKey) {
+        try {
+            PrivateKey privateKey = new PrivateKey(Util.hexStringToByteArray(strPrivateKey));
+            PublicKey publicKey = new PublicKey(privateKey);
+            return new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue()));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new PKSKPair("Error", "Error");
+        }
     }
 }

@@ -88,6 +88,7 @@ public class BlockchainServiceImpl implements BlockchainService {
 
         BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
         P2PConnection connection = blockchain.getConnection();
+        String strJSONData;
 
         LRUMap<H, B> cache = unit.getCache();
 
@@ -100,6 +101,8 @@ public class BlockchainServiceImpl implements BlockchainService {
 
             if (object != null) {
                 cache.put(hash, object);
+                strJSONData = AppServiceProvider.getSerializationService().encodeJSON(object);
+                unit.put(bytes(hash.toString()), bytes(strJSONData));
             }
         }
 

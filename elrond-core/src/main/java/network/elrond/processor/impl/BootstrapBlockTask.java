@@ -45,7 +45,7 @@ public class BootstrapBlockTask extends AbstractBlockTask {
                     AppServiceProvider.getBootstrapService().startFromGenesis(accounts, blockchain, context);
                     break;
                 case REBUILD_FROM_DISK:
-                    AppServiceProvider.getBootstrapService().restoreFromDisk(localBlockIndex, accounts, blockchain);
+                    AppServiceProvider.getBootstrapService().restoreFromDisk(localBlockIndex, accounts, blockchain, context);
                     break;
                 default:
                     throw new RuntimeException("Not supported type" + bootstrapType);

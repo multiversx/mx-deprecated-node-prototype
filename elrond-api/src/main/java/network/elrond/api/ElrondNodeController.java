@@ -9,6 +9,7 @@ import ch.qos.logback.core.FileAppender;
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
 import network.elrond.core.Util;
+import network.elrond.crypto.PKSKPair;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.p2p.PingResponse;
@@ -122,14 +123,14 @@ public class ElrondNodeController {
 
     @RequestMapping(path = "/node/publickeyandprivatekey", method = RequestMethod.GET)
     public @ResponseBody
-    Fun.Tuple2<String, String> generatePublicAndPrivateKey(HttpServletResponse response) {
+    PKSKPair generatePublicAndPrivateKey(HttpServletResponse response) {
         return elrondApiNode.generatePublicKeyAndPrivateKey();
     }
 
     @RequestMapping(path = "/node/publickeyfromprivatekey", method = RequestMethod.GET)
     public @ResponseBody
-    Fun.Tuple2<String, String> generatePublicKeyFromPrivateKey(HttpServletResponse response,
-                                               @RequestParam() String privateKey) {
+    PKSKPair generatePublicKeyFromPrivateKey(HttpServletResponse response,
+                                             @RequestParam() String privateKey) {
         return elrondApiNode.generatePublicKeyFromPrivateKey(privateKey);
     }
 }

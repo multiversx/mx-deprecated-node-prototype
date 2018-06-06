@@ -1,3 +1,3 @@
-package network.elrond.slowtests;
+package network.elrond;
 
 public interface SlowTests {/* category marker */ }

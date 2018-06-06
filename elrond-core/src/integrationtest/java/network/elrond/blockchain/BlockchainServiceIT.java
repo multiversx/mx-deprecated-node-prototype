@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Random;
 
-public class BlockchainServiceTest extends BaseBlockchainTest {
+public class BlockchainServiceIT extends BaseBlockchainTest {
     private Random rdm = new Random(1000);
 
     @Test
