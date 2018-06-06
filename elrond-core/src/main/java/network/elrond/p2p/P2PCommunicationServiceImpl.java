@@ -10,21 +10,40 @@ import java.util.Date;
 
 public class P2PCommunicationServiceImpl implements P2PCommunicationService {
     public PingResponse getPingResponse(String address, int port) throws Exception {
-        Util.check(address != null, "address is null");
+        PingResponse pingResponse = new PingResponse();
+
+//        Util.check(address != null, "address is null");
+        if (!(address != null)) {
+            pingResponse.setErrorMessage("address is null");
+            return(pingResponse);
+        }
+
 //        Util.check((port > 1) && (port < 65535), "port not valid");
 
         String[] addr = address.split("\\.");
-        Util.check(addr.length == 4, "addess is not valid");
+//        Util.check(addr.length == 4, "addess is not valid");
+        if (!(addr.length == 4)) {
+            pingResponse.setErrorMessage("addess is not valid");
+            return(pingResponse);
+        }
 
         for (int i = 0; i < 4; i++) {
             try {
                 int val = Integer.decode(addr[i]);
 
                 if ((val < 0) || (val > 254)) {
-                    Util.check(false, "addess is not valid");
+//                    Util.check(false, "addess is not valid");
+                    if (!(false)) {
+                        pingResponse.setErrorMessage("addess is not valid");
+                        return(pingResponse);
+                    }
                 }
             } catch (Exception ex) {
-                Util.check(false, "addess is not valid");
+//                Util.check(false, "addess is not valid");
+                if (!(false)) {
+                    pingResponse.setErrorMessage(ex.getLocalizedMessage());
+                    return(pingResponse);
+                }
             }
         }
 
@@ -32,13 +51,13 @@ public class P2PCommunicationServiceImpl implements P2PCommunicationService {
         InetAddress inet = InetAddress.getByName(address);
         Date dStart = new Date();
 
-        PingResponse pingResponse = new PingResponse();
+//        PingResponse pingResponse = new PingResponse();
 
         if (!inet.isReachable(5000)) {
-            pingResponse.setReachablePing(false);
-            pingResponse.setReachablePort(false);
-            pingResponse.setResponseTimeMs(0);
-
+//            pingResponse.setReachablePing(false);
+//            pingResponse.setReachablePort(false);
+//            pingResponse.setResponseTimeMs(0);
+            pingResponse.setErrorMessage("timeout");
             return (pingResponse);
         }
 
@@ -46,15 +65,10 @@ public class P2PCommunicationServiceImpl implements P2PCommunicationService {
         pingResponse.setResponseTimeMs(dEnd.getTime() - dStart.getTime());
         pingResponse.setReachablePing(true);
 
-        // PMS START: 2018.06.06
-
-        if (!((port > 1) && (port < 65535)))
-        {
-            pingResponse.setReachablePort(false);
+        if (!((port > 1) && (port < 65535))) {
+            pingResponse.setErrorMessage("port not valid");
             return(pingResponse);
         }
-
-        // PMS END: 2018.06.06
 
         //set 2. try to open socket on port
         try{
@@ -65,7 +79,8 @@ public class P2PCommunicationServiceImpl implements P2PCommunicationService {
             socket.close();
             pingResponse.setReachablePort(true);
         } catch (Exception ex){
-            pingResponse.setReachablePort(false);
+//            pingResponse.setReachablePort(false);
+            pingResponse.setErrorMessage(ex.getLocalizedMessage());
         }
 
         return(pingResponse);

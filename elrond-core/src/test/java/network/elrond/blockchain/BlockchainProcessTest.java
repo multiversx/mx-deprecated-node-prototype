@@ -10,6 +10,7 @@ import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.*;
 import network.elrond.service.AppServiceProvider;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -19,7 +20,7 @@ import java.util.List;
 
 public class BlockchainProcessTest extends BaseBlockchainTest {
 
-
+    @Ignore
     @Test
     public void testProcessBlock() throws Exception {
         PrivateKey privateKeySender = new PrivateKey("PRIVATE KEY".getBytes());

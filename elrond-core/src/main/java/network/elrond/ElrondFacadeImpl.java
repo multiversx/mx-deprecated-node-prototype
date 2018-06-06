@@ -129,7 +129,10 @@ public class ElrondFacadeImpl implements ElrondFacade {
             return (AppServiceProvider.getP2PCommunicationService().getPingResponse(ipAddress, port));
         } catch (Exception ex) {
             ex.printStackTrace();
-            return (new PingResponse());
+//            return (new PingResponse());
+            PingResponse pingResponse = new PingResponse();
+            pingResponse.setErrorMessage(ex.getLocalizedMessage());
+            return (pingResponse);
         }
     }
 
