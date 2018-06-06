@@ -45,7 +45,7 @@ public class AppServiceProvider {
         putService(SPoSService.class, new SPoSServiceImpl());
         putService(BlockchainService.class, new BlockchainServiceImpl());
         putService(ECCryptoService.class, new ECCryptoServiceSecp256k1Impl());
-        putService(SignatureService.class, new SignatureServiceECDSAImpl());
+        putService(SignatureService.class, new SignatureServiceSchnorrImpl());
         putService(MultiSignatureService.class, new MultiSignatureServiceBNImpl());
         putService(AccountStateService.class, new AccountStateServiceImpl());
         putService(ExecutionService.class, new ExecutionServiceImpl());

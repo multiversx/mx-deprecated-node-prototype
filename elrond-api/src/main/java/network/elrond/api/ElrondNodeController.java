@@ -16,10 +16,9 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PKSKPair;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
+import network.elrond.data.BootstrapType;
 import network.elrond.p2p.PingResponse;
-import network.elrond.service.AppServiceProvider;
-import org.apache.logging.log4j.LogManager;
-import org.mapdb.Fun;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -29,6 +28,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Iterator;
 
@@ -45,15 +46,29 @@ public class ElrondNodeController {
                    @RequestParam(defaultValue = "4001") Integer port,
                    @RequestParam(defaultValue = "4000", required = false) Integer masterPeerPort,
                    @RequestParam(defaultValue = "127.0.0.1", required = false) String masterPeerIpAddress,
-                   @RequestParam(defaultValue = "026c00d83e0dc47e6b626ed6c42f636b", required = true) String privateKey
+                   @RequestParam(defaultValue = "026c00d83e0dc47e6b626ed6c42f636b", required = true) String privateKey,
+                   @RequestParam(defaultValue = "21000000", required = false) String mintValue,
+                   @RequestParam(defaultValue = "START_FROM_SCRATCH", required = true) BootstrapType bootstrapType,
+                   @RequestParam(defaultValue = "elrond-node-1", required = false) String blockchainPath,
+                   @RequestParam(defaultValue = "elrond-node-1", required = false) String blockchainRestorePath
 
     ) {
 
         AppContext context = new AppContext();
+
         context.setMasterPeerIpAddress(masterPeerIpAddress);
         context.setMasterPeerPort(masterPeerPort);
         context.setPort(port);
         context.setNodeName(nodeName);
+        context.setValueMint(BigInteger.valueOf(Long.valueOf(mintValue)));
+        context.setStorageBasePath(blockchainPath);
+
+        context.setBootstrapType(bootstrapType);
+
+        if (bootstrapType.equals(BootstrapType.REBUILD_FROM_DISK)) {
+            setupRestoreDir(new File(blockchainRestorePath), new File(blockchainPath));
+        }
+
 
         PrivateKey privateKey1 = new PrivateKey(privateKey);
         PublicKey publicKey = new PublicKey(privateKey1);
@@ -65,10 +80,8 @@ public class ElrondNodeController {
         context.setValueMint(Util.VALUE_MINTING);
 
         //log appender
-
         String filterDataAccept = "elrond|tom";
         String filterDataDeny = "tom";
-
 
 
         LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -78,8 +91,6 @@ public class ElrondNodeController {
         ple.setContext(lc);
         ple.start();
 
-
-
         WebSocketAppender webSocketAppender = new WebSocketAppender();
         webSocketAppender.setEncoder(ple);
         webSocketAppender.setContext(lc);
@@ -88,8 +99,8 @@ public class ElrondNodeController {
         webSocketAppender.setName("logger");
         webSocketAppender.start();
 
-        ch.qos.logback.classic.Logger logbackLogger =
-                (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        Logger logbackLogger =
+                (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         logbackLogger.addAppender(webSocketAppender);
         logbackLogger.setLevel(Level.DEBUG);
         logbackLogger.setAdditive(false);
@@ -176,6 +187,31 @@ public class ElrondNodeController {
         filter.start();
 
         return(filter);
+    }
+
+    private void setupRestoreDir(File sourceDir, File destinationDir) {
+        if (!sourceDir.getAbsolutePath().equals(destinationDir.getAbsolutePath())) {
+            deleteDirectory(destinationDir);
+            copyDirectory(sourceDir, destinationDir);
+        }
+    }
+
+    private void copyDirectory(File src, File dest) {
+        try {
+            FileUtils.copyDirectory(src, dest);
+        } catch (IOException ex) {
+            System.out.println("Copy directory exception");
+            ex.printStackTrace();
+        }
+    }
+
+    private void deleteDirectory(File dir) {
+        try {
+            FileUtils.deleteDirectory(dir);
+        } catch (IOException ex) {
+            System.out.println("Delete directory exception");
+            ex.printStackTrace();
+        }
     }
 
     @RequestMapping(path = "/node/send", method = RequestMethod.GET)
