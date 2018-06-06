@@ -18,20 +18,39 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 
-    private static final String[] AUTH_WHITELIST = {
-            "/swagger-resources/**",
-            "/node/**",
-            "/swagger-ui.html",
-            "/v2/api-docs",
-            "/webjars/**"
-    };
+//    private static final String[] AUTH_WHITELIST = {
+//            "/swagger-resources/**",
+//            "/node/**",
+//            "/swagger-ui.html",
+//            "/v2/api-docs",
+//            "/webjars/**"
+//    };
+//
+//    @Override
+//    protected void configure(HttpSecurity http) throws Exception {
+//        http.authorizeRequests()
+//                .antMatchers(AUTH_WHITELIST).permitAll()
+//                .antMatchers("/**/*").denyAll();
+//    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .antMatchers(AUTH_WHITELIST).permitAll()
-                .antMatchers("/**/*").denyAll();
+        http
+                .cors()
+                .and()
+                .csrf().disable().authorizeRequests()
+                .antMatchers("/").permitAll()
+
+                // Allow access without login
+                .antMatchers(HttpMethod.POST, "/*/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/*/**").permitAll();
     }
 
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring().antMatchers(
+                "/*/**"
+        );
+    }
 
 }

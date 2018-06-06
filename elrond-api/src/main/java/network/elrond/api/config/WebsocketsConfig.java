@@ -23,4 +23,6 @@ public class WebsocketsConfig extends AbstractWebSocketMessageBrokerConfigurer {
                 .enableSimpleBroker("/log");
     }
 
+
 }
+

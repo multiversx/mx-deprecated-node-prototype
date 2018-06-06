@@ -1,5 +1,6 @@
 package network.elrond;
 
+import ch.qos.logback.core.Appender;
 import network.elrond.Application;
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
@@ -8,6 +9,7 @@ import org.mapdb.Fun;
 import network.elrond.p2p.PingResponse;
 
 import java.math.BigInteger;
+import java.util.List;
 
 public interface ElrondFacade {
 
