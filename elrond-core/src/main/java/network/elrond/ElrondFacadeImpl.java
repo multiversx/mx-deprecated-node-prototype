@@ -15,12 +15,10 @@ import network.elrond.p2p.P2PChannelName;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.p2p.PingResponse;
 import network.elrond.service.AppServiceProvider;
-import org.mapdb.Fun;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
-import java.security.spec.InvalidKeySpecException;
 
 public class ElrondFacadeImpl implements ElrondFacade {
 
@@ -54,6 +52,10 @@ public class ElrondFacadeImpl implements ElrondFacade {
     @Override
     public BigInteger getBalance(AccountAddress address, Application application) {
 
+        if (application == null) {
+            return BigInteger.ZERO;
+        }
+
         try {
 
             AppState state = application.getState();
@@ -61,7 +63,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
             AccountState account = AppServiceProvider.getAccountStateService().getAccountState(address, accounts);
 
-            return (account == null)? BigInteger.ZERO: account.getBalance();
+            return (account == null) ? BigInteger.ZERO : account.getBalance();
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -71,6 +73,11 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
     @Override
     public boolean send(AccountAddress receiver, BigInteger value, Application application) {
+
+        if (application == null) {
+            return false;
+        }
+
 
         try {
 
