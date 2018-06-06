@@ -176,7 +176,6 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         ExecutionReport result = new ExecutionReport().ok("Start bootstrapping by loading from disk...");
         BigInteger idx = BigInteger.valueOf(-1);
-        ;
 
         try {
             // get the last index from disk

@@ -5,7 +5,7 @@ import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
-public class SignatureServiceSchnorrTest {
+public class SignatureServiceTest {
     @Test(expected = IllegalArgumentException.class)
     public void testSignNullMessage() {
         SignatureService signatureService = AppServiceProvider.getSignatureService();
