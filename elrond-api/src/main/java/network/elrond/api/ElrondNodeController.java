@@ -39,7 +39,7 @@ public class ElrondNodeController {
     ElrondApiNode elrondApiNode;
 
 
-    @RequestMapping(path = "/node/stopx§", method = RequestMethod.GET)
+    @RequestMapping(path = "/node/stop", method = RequestMethod.GET)
     public @ResponseBody
     void startNode(HttpServletResponse response) {
         elrondApiNode.getApplication().stop();
