@@ -4,8 +4,6 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.FileAppender;
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
 import network.elrond.core.Util;
@@ -13,9 +11,6 @@ import network.elrond.crypto.PKSKPair;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.p2p.PingResponse;
-import network.elrond.service.AppServiceProvider;
-import org.apache.logging.log4j.LogManager;
-import org.mapdb.Fun;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -35,58 +30,60 @@ public class ElrondNodeController {
 
     @RequestMapping(path = "/node/start", method = RequestMethod.GET)
     public @ResponseBody
-    void startNode(HttpServletResponse response,
-                   @RequestParam(defaultValue = "elrond-node-1") String nodeName,
-                   @RequestParam(defaultValue = "4001") Integer port,
-                   @RequestParam(defaultValue = "4000", required = false) Integer masterPeerPort,
-                   @RequestParam(defaultValue = "127.0.0.1", required = false) String masterPeerIpAddress,
-                   @RequestParam(defaultValue = "026c00d83e0dc47e6b626ed6c42f636b", required = true) String privateKey
+    boolean startNode(HttpServletResponse response,
+                      @RequestParam(defaultValue = "elrond-node-1") String nodeName,
+                      @RequestParam(defaultValue = "4001") Integer port,
+                      @RequestParam(defaultValue = "4000", required = false) Integer masterPeerPort,
+                      @RequestParam(defaultValue = "127.0.0.1", required = false) String masterPeerIpAddress,
+                      @RequestParam(defaultValue = "026c00d83e0dc47e6b626ed6c42f636b", required = true) String privateKey
 
     ) {
 
-        AppContext context = new AppContext();
-        context.setMasterPeerIpAddress(masterPeerIpAddress);
-        context.setMasterPeerPort(masterPeerPort);
-        context.setPort(port);
-        context.setNodeName(nodeName);
+        try {
 
-        PrivateKey privateKey1 = new PrivateKey(privateKey);
-        PublicKey publicKey = new PublicKey(privateKey1);
+            AppContext context = new AppContext();
+            context.setMasterPeerIpAddress(masterPeerIpAddress);
+            context.setMasterPeerPort(masterPeerPort);
+            context.setPort(port);
+            context.setNodeName(nodeName);
 
-        context.setPrivateKey(privateKey1);
-        String mintAddress = Util.getAddressFromPublicKey(publicKey.getValue());
-        context.setStrAddressMint(mintAddress);
+            PrivateKey privateKey1 = new PrivateKey(privateKey);
+            PublicKey publicKey = new PublicKey(privateKey1);
 
-        context.setValueMint(Util.VALUE_MINTING);
+            context.setPrivateKey(privateKey1);
+            String mintAddress = Util.getAddressFromPublicKey(publicKey.getValue());
+            context.setStrAddressMint(mintAddress);
 
-        //log appender
+            context.setValueMint(Util.VALUE_MINTING);
 
-
-        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-        PatternLayoutEncoder ple = new PatternLayoutEncoder();
-        ple.setPattern("%date %level [%thread] %logger{10} [%file:%line] %msg%n");
-        ple.setContext(lc);
-        ple.start();
-
-        WebSocketAppender webSocketAppender = new WebSocketAppender();
-        webSocketAppender.setEncoder(ple);
-        webSocketAppender.setContext(lc);
-        webSocketAppender.setEchoWebSocketServer(elrondApiNode.getEchoWebSocketServer());
-        //webSocketAppender.setElrondWebsocketManager(elrondApiNode.getElrondWebsocketManager());
-        webSocketAppender.setName("logger");
-        webSocketAppender.start();
-
-        ch.qos.logback.classic.Logger logbackLogger =
-                (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        logbackLogger.addAppender(webSocketAppender);
-        logbackLogger.setLevel(Level.DEBUG);
-        logbackLogger.setAdditive(false);
-
-        elrondApiNode.start(context);
+            //log appender
 
 
+            LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+            PatternLayoutEncoder ple = new PatternLayoutEncoder();
+            ple.setPattern("%date %level [%thread] %logger{10} [%file:%line] %msg%n");
+            ple.setContext(lc);
+            ple.start();
 
+            WebSocketAppender webSocketAppender = new WebSocketAppender();
+            webSocketAppender.setEncoder(ple);
+            webSocketAppender.setContext(lc);
+            webSocketAppender.setEchoWebSocketServer(elrondApiNode.getEchoWebSocketServer());
+            //webSocketAppender.setElrondWebsocketManager(elrondApiNode.getElrondWebsocketManager());
+            webSocketAppender.setName("logger");
+            webSocketAppender.start();
 
+            ch.qos.logback.classic.Logger logbackLogger =
+                    (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+            logbackLogger.addAppender(webSocketAppender);
+            logbackLogger.setLevel(Level.DEBUG);
+            logbackLogger.setAdditive(false);
+
+            return elrondApiNode.start(context);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
 
 
     }
