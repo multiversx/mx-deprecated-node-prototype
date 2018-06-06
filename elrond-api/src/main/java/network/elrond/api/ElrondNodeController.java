@@ -4,6 +4,12 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.LoggingEvent;
+import ch.qos.logback.core.Appender;
+import ch.qos.logback.core.FileAppender;
+import ch.qos.logback.core.filter.Filter;
+import ch.qos.logback.core.spi.FilterReply;
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
 import network.elrond.core.Util;
@@ -11,6 +17,9 @@ import network.elrond.crypto.PKSKPair;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.p2p.PingResponse;
+import network.elrond.service.AppServiceProvider;
+import org.apache.logging.log4j.LogManager;
+import org.mapdb.Fun;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -21,6 +30,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigInteger;
+import java.util.Iterator;
 
 @Controller
 public class ElrondNodeController {
@@ -31,61 +41,141 @@ public class ElrondNodeController {
     @RequestMapping(path = "/node/start", method = RequestMethod.GET)
     public @ResponseBody
     boolean startNode(HttpServletResponse response,
-                      @RequestParam(defaultValue = "elrond-node-1") String nodeName,
-                      @RequestParam(defaultValue = "4001") Integer port,
-                      @RequestParam(defaultValue = "4000", required = false) Integer masterPeerPort,
-                      @RequestParam(defaultValue = "127.0.0.1", required = false) String masterPeerIpAddress,
-                      @RequestParam(defaultValue = "026c00d83e0dc47e6b626ed6c42f636b", required = true) String privateKey
+                   @RequestParam(defaultValue = "elrond-node-1") String nodeName,
+                   @RequestParam(defaultValue = "4001") Integer port,
+                   @RequestParam(defaultValue = "4000", required = false) Integer masterPeerPort,
+                   @RequestParam(defaultValue = "127.0.0.1", required = false) String masterPeerIpAddress,
+                   @RequestParam(defaultValue = "026c00d83e0dc47e6b626ed6c42f636b", required = true) String privateKey
 
     ) {
 
-        try {
+        AppContext context = new AppContext();
+        context.setMasterPeerIpAddress(masterPeerIpAddress);
+        context.setMasterPeerPort(masterPeerPort);
+        context.setPort(port);
+        context.setNodeName(nodeName);
 
-            AppContext context = new AppContext();
-            context.setMasterPeerIpAddress(masterPeerIpAddress);
-            context.setMasterPeerPort(masterPeerPort);
-            context.setPort(port);
-            context.setNodeName(nodeName);
+        PrivateKey privateKey1 = new PrivateKey(privateKey);
+        PublicKey publicKey = new PublicKey(privateKey1);
 
-            PrivateKey privateKey1 = new PrivateKey(privateKey);
-            PublicKey publicKey = new PublicKey(privateKey1);
+        context.setPrivateKey(privateKey1);
+        String mintAddress = Util.getAddressFromPublicKey(publicKey.getValue());
+        context.setStrAddressMint(mintAddress);
 
-            context.setPrivateKey(privateKey1);
-            String mintAddress = Util.getAddressFromPublicKey(publicKey.getValue());
-            context.setStrAddressMint(mintAddress);
+        context.setValueMint(Util.VALUE_MINTING);
 
-            context.setValueMint(Util.VALUE_MINTING);
+        //log appender
 
-            //log appender
+        String filterDataAccept = "elrond|tom";
+        String filterDataDeny = "tom";
 
 
-            LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-            PatternLayoutEncoder ple = new PatternLayoutEncoder();
-            ple.setPattern("%date %level [%thread] %logger{10} [%file:%line] %msg%n");
-            ple.setContext(lc);
-            ple.start();
 
-            WebSocketAppender webSocketAppender = new WebSocketAppender();
-            webSocketAppender.setEncoder(ple);
-            webSocketAppender.setContext(lc);
-            webSocketAppender.setEchoWebSocketServer(elrondApiNode.getEchoWebSocketServer());
-            //webSocketAppender.setElrondWebsocketManager(elrondApiNode.getElrondWebsocketManager());
-            webSocketAppender.setName("logger");
-            webSocketAppender.start();
+        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+        PatternLayoutEncoder ple = new PatternLayoutEncoder();
+        //ple.setPattern("%date %level [%thread] %logger{10} [%file:%line] %msg%n");
+        ple.setPattern("%d{HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n");
+        ple.setContext(lc);
+        ple.start();
 
-            ch.qos.logback.classic.Logger logbackLogger =
-                    (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-            logbackLogger.addAppender(webSocketAppender);
-            logbackLogger.setLevel(Level.DEBUG);
-            logbackLogger.setAdditive(false);
 
-            return elrondApiNode.start(context);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return false;
+
+        WebSocketAppender webSocketAppender = new WebSocketAppender();
+        webSocketAppender.setEncoder(ple);
+        webSocketAppender.setContext(lc);
+        webSocketAppender.setEchoWebSocketServer(elrondApiNode.getEchoWebSocketServer());
+        //webSocketAppender.setElrondWebsocketManager(elrondApiNode.getElrondWebsocketManager());
+        webSocketAppender.setName("logger");
+        webSocketAppender.start();
+
+        ch.qos.logback.classic.Logger logbackLogger =
+                (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        logbackLogger.addAppender(webSocketAppender);
+        logbackLogger.setLevel(Level.DEBUG);
+        logbackLogger.setAdditive(false);
+
+        Filter filterAccept = getFilterAccept(filterDataAccept);
+        Filter filterDeny = getFilterDeny(filterDataDeny);
+
+        for (Logger logger : lc.getLoggerList()) {
+            for (Iterator<Appender<ILoggingEvent>> index = logger.iteratorForAppenders(); index.hasNext();) {
+                Appender<ILoggingEvent> appender = index.next();
+
+                appender.addFilter(filterAccept);
+                appender.addFilter(filterDeny);
+            }
         }
 
 
+        return elrondApiNode.start(context);
+    }
+
+    private Filter getFilterAccept(String filterAccept){
+        String[] dataToAccept = filterAccept.split("\\|");
+        Filter filter = new Filter() {
+
+            @Override
+            public FilterReply decide(Object event) {
+                if (filterAccept.equals("*")){
+                    return (FilterReply.NEUTRAL);
+                }
+
+                if (event.getClass().getName() == LoggingEvent.class.getName()){
+                    LoggingEvent loggingEvent = (LoggingEvent)event;
+
+                    for (int i = 0; i < dataToAccept.length; i++){
+                        if (loggingEvent.getLoggerName().contains(dataToAccept[i])){
+                            return (FilterReply.NEUTRAL);
+                        }
+                    }
+                }
+
+                for (int i = 0; i < dataToAccept.length; i++){
+                    if (event.toString().contains(dataToAccept[i])){
+                        return (FilterReply.NEUTRAL);
+                    }
+                }
+
+                return(FilterReply.DENY);
+            }
+        };
+        filter.start();
+
+        return(filter);
+    }
+
+    private Filter getFilterDeny(String filterDeny){
+        String[] dataToAccept = filterDeny.split("\\|");
+        Filter filter = new Filter() {
+
+            @Override
+            public FilterReply decide(Object event) {
+                if (filterDeny.equals("")){
+                    return (FilterReply.NEUTRAL);
+                }
+
+                if (event.getClass().getName() == LoggingEvent.class.getName()){
+                    LoggingEvent loggingEvent = (LoggingEvent)event;
+
+                    for (int i = 0; i < dataToAccept.length; i++){
+                        if (loggingEvent.getLoggerName().contains(dataToAccept[i])){
+                            return (FilterReply.DENY);
+                        }
+                    }
+                }
+
+                for (int i = 0; i < dataToAccept.length; i++){
+                    if (event.toString().contains(dataToAccept[i])){
+                        return (FilterReply.DENY);
+                    }
+                }
+
+                return(FilterReply.NEUTRAL);
+            }
+        };
+        filter.start();
+
+        return(filter);
     }
 
     @RequestMapping(path = "/node/send", method = RequestMethod.GET)
