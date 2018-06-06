@@ -67,8 +67,6 @@ public class ElrondNodeController {
         ple.setContext(lc);
         ple.start();
 
-
-
         WebSocketAppender webSocketAppender = new WebSocketAppender();
         webSocketAppender.setEncoder(ple);
         webSocketAppender.setContext(lc);

@@ -23,7 +23,7 @@ public class WebSocketAppender<E> extends OutputStreamAppender<E> {
     }
 
     @Override
-    protected void writeOut(E event) throws IOException {
+    protected void append(E event){
         String data = event + CoreConstants.LINE_SEPARATOR;
 
         if (elrondWebsocketManager != null) {
