@@ -9,21 +9,21 @@ import java.net.Socket;
 import java.util.Date;
 
 public class P2PCommunicationServiceImpl implements P2PCommunicationService {
-    public PingResponse getPingResponse(String address, int port) throws Exception{
+    public PingResponse getPingResponse(String address, int port) throws Exception {
         Util.check(address != null, "address is null");
-        Util.check((port > 1) && (port < 65535), "port not valid");
+//        Util.check((port > 1) && (port < 65535), "port not valid");
 
         String[] addr = address.split("\\.");
         Util.check(addr.length == 4, "addess is not valid");
 
-        for (int i = 0; i < 4; i++){
+        for (int i = 0; i < 4; i++) {
             try {
                 int val = Integer.decode(addr[i]);
 
-                if ((val < 0) || (val > 254)){
+                if ((val < 0) || (val > 254)) {
                     Util.check(false, "addess is not valid");
                 }
-            } catch (Exception ex){
+            } catch (Exception ex) {
                 Util.check(false, "addess is not valid");
             }
         }
@@ -34,7 +34,7 @@ public class P2PCommunicationServiceImpl implements P2PCommunicationService {
 
         PingResponse pingResponse = new PingResponse();
 
-        if (!inet.isReachable(5000)){
+        if (!inet.isReachable(5000)) {
             pingResponse.setReachablePing(false);
             pingResponse.setReachablePort(false);
             pingResponse.setResponseTimeMs(0);
@@ -45,6 +45,16 @@ public class P2PCommunicationServiceImpl implements P2PCommunicationService {
         Date dEnd = new Date();
         pingResponse.setResponseTimeMs(dEnd.getTime() - dStart.getTime());
         pingResponse.setReachablePing(true);
+
+        // PMS START: 2018.06.06
+
+        if (!((port > 1) && (port < 65535)))
+        {
+            pingResponse.setReachablePort(false);
+            return(pingResponse);
+        }
+
+        // PMS END: 2018.06.06
 
         //set 2. try to open socket on port
         try{
