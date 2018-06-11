@@ -4,11 +4,9 @@ import network.elrond.Application;
 import network.elrond.ElrondFacade;
 import network.elrond.ElrondFacadeImpl;
 import network.elrond.account.AccountAddress;
-import network.elrond.api.config.EchoWebSocketServer;
 import network.elrond.application.AppContext;
 import network.elrond.crypto.PKSKPair;
 import network.elrond.p2p.PingResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
@@ -17,11 +15,6 @@ import java.math.BigInteger;
 class ElrondApiNode {
 
     private Application application;
-    //@Autowired
-    //private ElrondWebsocketManager elrondWebsocketManager;
-
-    @Autowired
-    private EchoWebSocketServer echoWebSocketServer;
 
     public Application getApplication() {
         return application;
@@ -52,16 +45,16 @@ class ElrondApiNode {
         return getFacade().send(receiver, value, application);
     }
 
-    PingResponse ping(String ipAddress, int port) {return  getFacade().ping(ipAddress, port);}
-
-    PKSKPair generatePublicKeyAndPrivateKey() {return getFacade().generatePublicKeyAndPrivateKey(); }
-
-    PKSKPair generatePublicKeyFromPrivateKey(String privateKey) { return getFacade().generatePublicKeyFromPrivateKey(privateKey); }
-
-    EchoWebSocketServer getEchoWebSocketServer(){
-        return(echoWebSocketServer);
+    PingResponse ping(String ipAddress, int port) {
+        return getFacade().ping(ipAddress, port);
     }
-    //ElrondWebsocketManager getElrondWebsocketManager(){
-    //    return(elrondWebsocketManager);
-    //}
+
+    PKSKPair generatePublicKeyAndPrivateKey() {
+        return getFacade().generatePublicKeyAndPrivateKey();
+    }
+
+    PKSKPair generatePublicKeyFromPrivateKey(String privateKey) {
+        return getFacade().generatePublicKeyFromPrivateKey(privateKey);
+    }
+
 }

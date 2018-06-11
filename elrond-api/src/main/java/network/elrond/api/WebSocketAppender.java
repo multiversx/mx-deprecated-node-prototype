@@ -2,21 +2,19 @@ package network.elrond.api;
 
 import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.OutputStreamAppender;
-import network.elrond.api.config.EchoWebSocketServer;
+import network.elrond.api.manager.ElrondWebSocketManager;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 
 public class WebSocketAppender<E> extends OutputStreamAppender<E> {
-    //dummy output stream
+
     private OutputStream outputStream = new ByteArrayOutputStream();
-    //private ElrondWebsocketManager elrondWebsocketManager;
-    private EchoWebSocketServer echoWebSocketServer;
+
+    private ElrondWebSocketManager elrondWebSocketManager;
 
     public WebSocketAppender() {
-        //    elrondWebsocketManager = null;
-        echoWebSocketServer = null;
+
     }
 
     @Override
@@ -28,25 +26,15 @@ public class WebSocketAppender<E> extends OutputStreamAppender<E> {
     @Override
     protected void append(E event) {
         String data = event + CoreConstants.LINE_SEPARATOR;
+        elrondWebSocketManager.announce("/topic/public", data);
 
-        if (echoWebSocketServer != null) {
-            echoWebSocketServer.sendToAll(data);
-        }
-//        if (elrondWebsocketManager != null) {
-//            elrondWebsocketManager.announce(this.getName(), data);
-//        }
     }
 
-    public void setEchoWebSocketServer(EchoWebSocketServer echoWebSocketServer) {
-        this.echoWebSocketServer = echoWebSocketServer;
+    public ElrondWebSocketManager getElrondWebSocketManager() {
+        return elrondWebSocketManager;
     }
 
-//    public ElrondWebsocketManager getElrondWebsocketManager(){
-//        return (elrondWebsocketManager);
-//    }
-//
-//    public void setElrondWebsocketManager(ElrondWebsocketManager elrondWebsocketManager){
-//        this.elrondWebsocketManager = elrondWebsocketManager;
-//    }
-
+    public void setElrondWebSocketManager(ElrondWebSocketManager elrondWebSocketManager) {
+        this.elrondWebSocketManager = elrondWebSocketManager;
+    }
 }

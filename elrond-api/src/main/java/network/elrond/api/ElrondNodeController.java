@@ -11,6 +11,7 @@ import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.spi.FilterReply;
 import network.elrond.Application;
 import network.elrond.account.AccountAddress;
+import network.elrond.api.manager.ElrondWebSocketManager;
 import network.elrond.application.AppContext;
 import network.elrond.core.Util;
 import network.elrond.crypto.PKSKPair;
@@ -38,6 +39,9 @@ public class ElrondNodeController {
 
     @Autowired
     ElrondApiNode elrondApiNode;
+
+    @Autowired
+    ElrondWebSocketManager elrondWebSocketManager;
 
 
     @RequestMapping(path = "/node/stop", method = RequestMethod.GET)
@@ -106,8 +110,8 @@ public class ElrondNodeController {
         WebSocketAppender webSocketAppender = new WebSocketAppender();
         webSocketAppender.setEncoder(ple);
         webSocketAppender.setContext(lc);
-        webSocketAppender.setEchoWebSocketServer(elrondApiNode.getEchoWebSocketServer());
-        //webSocketAppender.setElrondWebsocketManager(elrondApiNode.getElrondWebsocketManager());
+        webSocketAppender.setElrondWebSocketManager(elrondWebSocketManager);
+
         webSocketAppender.setName("logger");
         webSocketAppender.start();
 
@@ -269,4 +273,13 @@ public class ElrondNodeController {
                                              @RequestParam() String privateKey) {
         return elrondApiNode.generatePublicKeyFromPrivateKey(privateKey);
     }
+
+
+//    @MessageMapping("/chat.sendMessage")
+//    @SendTo("/topic/public")
+//    public String sendMessage(@Payload String message) {
+//
+//        elrondWebSocketManager.announce("/topic/public", message);
+//        return "asdas";
+//    }
 }

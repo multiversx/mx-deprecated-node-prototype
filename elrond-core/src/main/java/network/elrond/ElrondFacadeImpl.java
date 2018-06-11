@@ -75,6 +75,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
     public boolean send(AccountAddress receiver, BigInteger value, Application application) {
 
         if (application == null) {
+            logger.info("Invalid application state, application is null");
             return false;
         }
 

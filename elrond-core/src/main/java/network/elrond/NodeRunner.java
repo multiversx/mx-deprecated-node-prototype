@@ -17,9 +17,9 @@ public class NodeRunner {
 
         String nodeName = "elrond-node-2";
         Integer port = 4001;
-        Integer masterPeerPort = 4000;
-        String masterPeerIpAddress = "192.168.11.121";
-        String privateKey = "026c00d83e0dc47e6b626ed6c42f636b";
+        Integer masterPeerPort = 31201;
+        String masterPeerIpAddress = "192.168.11.131";
+        String privateKey = "1df1e9456051e43cfa612ecafcfd145cc06c1fb64d7499ef34696ff16b82cbc2";
 
         AppContext context = new AppContext();
         context.setMasterPeerIpAddress(masterPeerIpAddress);
@@ -33,7 +33,7 @@ public class NodeRunner {
         context.setPrivateKey(privateKey1);
         String mintAddress = Util.getAddressFromPublicKey(publicKey.getValue());
         context.setStrAddressMint(mintAddress);
-        context.setValueMint(Util.VALUE_MINTING);
+        context.setValueMint(BigInteger.valueOf(21000000));
 
 
         ElrondFacade facade = new ElrondFacadeImpl();
@@ -45,10 +45,10 @@ public class NodeRunner {
 
             do {
 
-                AccountAddress address = AccountAddress.fromHexString("0326e7875aadaba270ae93ec40ef4706934d070eb21c9acad4743e31289fa4ebc7");
-                facade.send(address, BigInteger.TEN, application);
-                //System.out.println(facade.getBalance(address, application));
-                //ThreadUtil.sleep(10);
+                AccountAddress address = AccountAddress.fromHexString("03d880b1194236b1af84da37dae2bb207762a40cfc98576cb722025c945644ac7e");
+                //facade.send(address, BigInteger.TEN, application);
+                System.out.println(facade.getBalance(address, application));
+                ThreadUtil.sleep(2000);
 
 
             } while (true);
