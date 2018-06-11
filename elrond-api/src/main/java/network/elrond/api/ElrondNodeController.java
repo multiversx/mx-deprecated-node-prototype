@@ -143,7 +143,7 @@ public class ElrondNodeController {
                     return (FilterReply.NEUTRAL);
                 }
 
-                if (event.getClass().getName() == LoggingEvent.class.getName()) {
+                if (event.getClass().getName().equals(LoggingEvent.class.getName())) {
                     LoggingEvent loggingEvent = (LoggingEvent) event;
 
                     for (int i = 0; i < dataToAccept.length; i++) {
@@ -177,7 +177,7 @@ public class ElrondNodeController {
                     return (FilterReply.NEUTRAL);
                 }
 
-                if (event.getClass().getName() == LoggingEvent.class.getName()) {
+                if (event.getClass().getName().equals(LoggingEvent.class.getName())) {
                     LoggingEvent loggingEvent = (LoggingEvent) event;
 
                     for (int i = 0; i < dataToAccept.length; i++) {
