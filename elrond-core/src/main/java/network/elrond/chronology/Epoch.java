@@ -1,65 +1,60 @@
 package network.elrond.chronology;
 
-import java.util.ArrayList;
-import java.util.List;
 import network.elrond.consensus.Validator;
 
-/**
- * The Epoch class implements the epoch time frame in which Rounds are being created
- *
- * @author  Elrond Team - JLS
- * @version 1.0
- * @since   2018-05-11
- */
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Epoch {
-    //waiting validators
-    private List<Validator> listWaiting;
-    //eligible validators (ready to be elected)
-    private List<Validator> listEligible;
-    //the list of Rounds
-    private List<Round> listRounds;
+    private long dateMsEpochStarts;
+    private long epochHeight;
+    List<Validator> listWaiting;
+    List<Validator> listEligible;
 
-    /**
-     * Default constructor
-     */
-    public Epoch()
-    {
-        listWaiting = new ArrayList<Validator>();
-        listEligible = new ArrayList<Validator>();
-        listRounds = new ArrayList<Round>();
+    public Epoch() {
+        dateMsEpochStarts = new Date().getTime();
+        epochHeight = 0;
+        listWaiting = new ArrayList<>();
+        listEligible = new ArrayList<>();
     }
 
-    /**
-     * Method used to create a new Round object. Note the double referencing
-     * @return the newly created Round
-     */
-    public Round createRound(){
-        Round r = new Round(this);
-        listRounds.add(r);
-
-        return(r);
+    public long getDateMsEpochStarts(){
+        return(dateMsEpochStarts);
     }
 
-    /**
-     * Gets the last Round from the list
-     * @return the last round as Round
-     */
-    public Round getLastRound()
-    {
-        if (listRounds.size() == 0) {
-            return (null);
+    public void setDateMsEpochStarts(long dateMsEpochStarts) throws IllegalArgumentException{
+        if (dateMsEpochStarts <= 0){
+            throw new IllegalArgumentException("dateMsEpochStarts should be a positive number!");
         }
 
-        return (listRounds.get(listRounds.size() - 1));
+        this.dateMsEpochStarts = dateMsEpochStarts;
     }
 
-    /**
-     * Gets the eligible validators list
-     * @return the eligible validators as List
-     */
-    public List<Validator> getEligibleList()
-    {
-        return (listEligible);
+    public long getEpochHeight(){
+        return (epochHeight);
+    }
+
+    public void setEpochHeight(long epochHeight) throws IllegalArgumentException{
+        if (epochHeight < 0){
+            throw new IllegalArgumentException("epochHeight should not be a negative number!");
+        }
+
+        this.epochHeight = epochHeight;
+    }
+
+    public List<Validator> getListWaiting(){
+        synchronized (listWaiting) {
+            return (listWaiting);
+        }
+    }
+
+    public List<Validator> getListEligible(){
+        synchronized (listEligible) {
+            return (listEligible);
+        }
     }
 }
