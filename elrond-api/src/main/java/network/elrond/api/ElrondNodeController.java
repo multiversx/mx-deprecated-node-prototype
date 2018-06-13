@@ -99,111 +99,17 @@ public class ElrondNodeController {
         String filterDataAccept = "elrond|tom";
         String filterDataDeny = "tom";
 
+        LoggerUtils loggerUtils = new LoggerUtils();
+        loggerUtils.AddLogAppenderWebSockets(this.elrondWebSocketManager, Level.DEBUG);
+        loggerUtils.AddLogAppenderRollingFile(Level.DEBUG);
 
-        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-        PatternLayoutEncoder ple = new PatternLayoutEncoder();
-        //ple.setPattern("%date %level [%thread] %logger{10} [%file:%line] %msg%n");
-        ple.setPattern("%d{HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n");
-        ple.setContext(lc);
-        ple.start();
-
-        WebSocketAppender webSocketAppender = new WebSocketAppender();
-        webSocketAppender.setEncoder(ple);
-        webSocketAppender.setContext(lc);
-        webSocketAppender.setElrondWebSocketManager(elrondWebSocketManager);
-
-        webSocketAppender.setName("logger");
-        webSocketAppender.start();
-
-        Logger logbackLogger =
-                (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        logbackLogger.addAppender(webSocketAppender);
-        logbackLogger.setLevel(Level.DEBUG);
-        logbackLogger.setAdditive(false);
-
-        Filter filterAccept = getFilterAccept(filterDataAccept);
-        Filter filterDeny = getFilterDeny(filterDataDeny);
-
-        for (Logger logger : lc.getLoggerList()) {
-            for (Iterator<Appender<ILoggingEvent>> index = logger.iteratorForAppenders(); index.hasNext(); ) {
-                Appender<ILoggingEvent> appender = index.next();
-
-                appender.addFilter(filterAccept);
-                appender.addFilter(filterDeny);
-            }
-        }
-
+        loggerUtils.AddLogFilterAccept(filterDataAccept);
+        loggerUtils.AddLogFilterDeny(filterDataDeny);
 
         return elrondApiNode.start(context);
     }
 
-    private Filter getFilterAccept(String filterAccept) {
-        String[] dataToAccept = filterAccept.split("\\|");
-        Filter filter = new Filter() {
 
-            @Override
-            public FilterReply decide(Object event) {
-                if (filterAccept.equals("*")) {
-                    return (FilterReply.NEUTRAL);
-                }
-
-                if (event.getClass().getName().equals(LoggingEvent.class.getName())) {
-                    LoggingEvent loggingEvent = (LoggingEvent) event;
-
-                    for (int i = 0; i < dataToAccept.length; i++) {
-                        if (loggingEvent.getLoggerName().contains(dataToAccept[i])) {
-                            return (FilterReply.NEUTRAL);
-                        }
-                    }
-                }
-
-                for (int i = 0; i < dataToAccept.length; i++) {
-                    if (event.toString().contains(dataToAccept[i])) {
-                        return (FilterReply.NEUTRAL);
-                    }
-                }
-
-                return (FilterReply.DENY);
-            }
-        };
-        filter.start();
-
-        return (filter);
-    }
-
-    private Filter getFilterDeny(String filterDeny) {
-        String[] dataToAccept = filterDeny.split("\\|");
-        Filter filter = new Filter() {
-
-            @Override
-            public FilterReply decide(Object event) {
-                if (filterDeny.equals("")) {
-                    return (FilterReply.NEUTRAL);
-                }
-
-                if (event.getClass().getName().equals(LoggingEvent.class.getName())) {
-                    LoggingEvent loggingEvent = (LoggingEvent) event;
-
-                    for (int i = 0; i < dataToAccept.length; i++) {
-                        if (loggingEvent.getLoggerName().contains(dataToAccept[i])) {
-                            return (FilterReply.DENY);
-                        }
-                    }
-                }
-
-                for (int i = 0; i < dataToAccept.length; i++) {
-                    if (event.toString().contains(dataToAccept[i])) {
-                        return (FilterReply.DENY);
-                    }
-                }
-
-                return (FilterReply.NEUTRAL);
-            }
-        };
-        filter.start();
-
-        return (filter);
-    }
 
     private void setupRestoreDir(File sourceDir, File destinationDir) {
         if (!sourceDir.getAbsolutePath().equals(destinationDir.getAbsolutePath())) {
