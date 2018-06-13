@@ -10,13 +10,11 @@ import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.spi.FilterReply;
 import network.elrond.Application;
+import network.elrond.ContextCreator;
 import network.elrond.account.AccountAddress;
 import network.elrond.api.manager.ElrondWebSocketManager;
 import network.elrond.application.AppContext;
-import network.elrond.core.Util;
 import network.elrond.crypto.PKSKPair;
-import network.elrond.crypto.PrivateKey;
-import network.elrond.crypto.PublicKey;
 import network.elrond.data.BootstrapType;
 import network.elrond.p2p.PingResponse;
 import org.apache.commons.io.FileUtils;
@@ -71,29 +69,12 @@ public class ElrondNodeController {
 
     ) {
 
-        AppContext context = new AppContext();
-
-        context.setMasterPeerIpAddress(masterPeerIpAddress);
-        context.setMasterPeerPort(masterPeerPort);
-        context.setPort(port);
-        context.setNodeName(nodeName);
-        context.setValueMint(BigInteger.valueOf(Long.valueOf(mintValue)));
-        context.setStorageBasePath(blockchainPath);
-
-        context.setBootstrapType(bootstrapType);
+        AppContext context = ContextCreator.createAppContext(nodeName, privateKey, masterPeerIpAddress,
+                masterPeerPort, port, bootstrapType, blockchainPath, new BigInteger(mintValue));
 
         if (bootstrapType.equals(BootstrapType.REBUILD_FROM_DISK)) {
             setupRestoreDir(new File(blockchainRestorePath), new File(blockchainPath));
         }
-
-
-        PrivateKey privateKey1 = new PrivateKey(Util.hexStringToByteArray(privateKey));
-        PublicKey publicKey = new PublicKey(privateKey1);
-        context.setPrivateKey(privateKey1);
-        String mintAddress = Util.getAddressFromPublicKey(publicKey.getValue());
-        context.setStrAddressMint(mintAddress);
-
-
 
         //log appender
         String filterDataAccept = "elrond|tom";
