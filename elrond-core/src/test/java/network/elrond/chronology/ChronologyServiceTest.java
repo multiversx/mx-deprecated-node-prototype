@@ -2,11 +2,13 @@ package network.elrond.chronology;
 
 import junit.framework.TestCase;
 import network.elrond.consensus.Validator;
+import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
 import java.math.BigInteger;
+import java.util.Date;
 
-public class ChrnonologyServiceTest {
+public class ChronologyServiceTest {
     @Test(expected = NullPointerException.class)
     public void testIsDateTimeInEpochWithNullShouldThrowException() {
         ChronologyService chronologyService = new ChronologyServiceImpl();
@@ -39,7 +41,7 @@ public class ChrnonologyServiceTest {
     public void testGetSecondsInEpoch(){
         ChronologyService chronologyService = new ChronologyServiceImpl(10, 5);
 
-        TestCase.assertEquals(chronologyService.getMilisecondsInEpoch(), 10 * 5 * 100);
+        TestCase.assertEquals(chronologyService.getMillisecondsInEpoch(), 10 * 5 * 100);
     }
 
     @Test
@@ -91,6 +93,28 @@ public class ChrnonologyServiceTest {
         TestCase.assertEquals(0, epochNext.getListWaiting().size());
         TestCase.assertEquals(2, epochNext.getListEligible().size());
         TestCase.assertEquals(epoch.getEpochHeight() + 1, epochNext.getEpochHeight());
+    }
+
+    @Test
+    public void testGetNtpTime() throws Exception{
+        ChronologyService chronologyService = AppServiceProvider.getChronologyService();
+
+        TestCase.assertNotNull(chronologyService.getNtpClient());
+
+        chronologyService.getNtpClient().setPollMs(100);
+
+        Thread.sleep(2000);
+
+        long currentDateNTP = chronologyService.getSynchronizedTime();
+        long currentDateLocal = System.currentTimeMillis();
+
+        System.out.println(String.format("NTP time: %d", currentDateNTP));
+        System.out.println(String.format("Local time: %d", currentDateLocal));
+        System.out.println(String.format("Difference: %d ms", currentDateNTP - currentDateLocal));
+
+        TestCase.assertFalse(chronologyService.getNtpClient().isOffline());
+
+        System.out.println("Host: " + chronologyService.getNtpClient().getCurrentHostName());
     }
 
 }

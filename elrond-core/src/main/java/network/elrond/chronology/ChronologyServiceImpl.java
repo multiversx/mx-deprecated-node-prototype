@@ -1,22 +1,45 @@
 package network.elrond.chronology;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class ChronologyServiceImpl implements ChronologyService {
     private final long roundsInEpochs;
     private final long roundTimeSeconds;
 
+    private final List<String> listNTPServers = Arrays.asList("time.windows.com","time-a.nist.gov");
+    private NTPClient ntpClient = null;
+
     public ChronologyServiceImpl(){
         roundsInEpochs = 28800;
         roundTimeSeconds = 4;
+        try {
+            ntpClient = new NTPClient(listNTPServers, 1000);
+        } catch (Exception ex) {
+            System.out.println("Error while instantiating ntpClient!");
+            ex.printStackTrace();
+        }
     }
 
     public ChronologyServiceImpl(long roundsInEpochs, long roundTimeSeconds){
         this.roundsInEpochs = roundsInEpochs;
         this.roundTimeSeconds = roundTimeSeconds;
+        try {
+            ntpClient = new NTPClient(listNTPServers, 1000);
+        } catch (Exception ex) {
+            System.out.println("Error while instantiating ntpClient!");
+            ex.printStackTrace();
+        }
     }
 
-    public long getMilisecondsInEpoch(){
+    public List<String> getListNTPServers(){
+        return (listNTPServers);
+    }
+
+    public long getMillisecondsInEpoch(){
         return(roundsInEpochs * roundTimeSeconds * 100);
     }
 
@@ -25,7 +48,7 @@ public class ChronologyServiceImpl implements ChronologyService {
             throw new NullPointerException("epoch should not be null!");
         }
 
-        return((epoch.getDateMsEpochStarts() <= dateMs) && (dateMs < epoch.getDateMsEpochStarts() + getMilisecondsInEpoch()));
+        return((epoch.getDateMsEpochStarts() <= dateMs) && (dateMs < epoch.getDateMsEpochStarts() + getMillisecondsInEpoch()));
     }
 
     public Round getRoundFromDateTime(Epoch epoch, long dateMs) throws NullPointerException, IllegalArgumentException{
@@ -35,7 +58,7 @@ public class ChronologyServiceImpl implements ChronologyService {
 
         if (!isDateTimeInEpoch(epoch, dateMs)){
             throw new IllegalArgumentException(String.format("Parameter supplied %d does not belong to the supplied epoch [%d - %d)", dateMs,
-                    epoch.getDateMsEpochStarts(), epoch.getDateMsEpochStarts() + getMilisecondsInEpoch()));
+                    epoch.getDateMsEpochStarts(), epoch.getDateMsEpochStarts() + getMillisecondsInEpoch()));
         }
 
         Round r = new Round();
@@ -51,7 +74,7 @@ public class ChronologyServiceImpl implements ChronologyService {
         }
 
         Epoch newEpoch = new Epoch();
-        newEpoch.setDateMsEpochStarts(previousEpoch.getDateMsEpochStarts() + getMilisecondsInEpoch());
+        newEpoch.setDateMsEpochStarts(previousEpoch.getDateMsEpochStarts() + getMillisecondsInEpoch());
         newEpoch.setEpochHeight(previousEpoch.getEpochHeight() + 1);
         //copy previous eligible list into the new epoch's eligible list
         synchronized (previousEpoch.listEligible){
@@ -68,4 +91,17 @@ public class ChronologyServiceImpl implements ChronologyService {
 
         return(newEpoch);
     }
+
+    public long getSynchronizedTime(){
+        if (ntpClient != null){
+            return(ntpClient.currentTimeMillis());
+        }
+
+        return(System.currentTimeMillis());
+    }
+
+    public NTPClient getNtpClient(){
+        return(ntpClient);
+    }
+
 }
