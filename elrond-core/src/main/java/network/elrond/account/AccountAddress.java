@@ -59,9 +59,6 @@ public class AccountAddress implements Serializable {
 
     @Override
     public String toString() {
-        return "AccountAddress{" +
-                "bytes=" + Arrays.toString(bytes) +
-                "hex=" + Util.byteArrayToHexString(bytes) +
-                '}';
+        return "AccountAddress{" + Util.byteArrayToHexString(bytes) + '}';
     }
 }

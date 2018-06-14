@@ -3,15 +3,15 @@
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <!-- encoders are assigned the type
              ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
-        <!--<filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator>
                 <expression>
-                        return logger.contains("elrond");
+                    return logger.contains("elrond");
                 </expression>
             </evaluator>
             <OnMismatch>DENY</OnMismatch>
             <OnMatch>NEUTRAL</OnMatch>
-        </filter>-->
+        </filter>
 
 
         <encoder>
@@ -20,6 +20,6 @@
     </appender>
 
     <root level="debug">
-        <appender-ref ref="STDOUT" />
+        <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

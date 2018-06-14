@@ -100,8 +100,6 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
 
             PublicKey receiverPublicKey = receiver.getPublicKey();
-            AccountState receiverAccount = AppServiceProvider.getAccountStateService().getOrCreateAccountState(senderAddress, accounts);
-
 
             BigInteger nonce = senderAccount.getNonce();
             Transaction transaction = AppServiceProvider.getTransactionService().generateTransaction(senderPublicKey, receiverPublicKey, value, nonce);
