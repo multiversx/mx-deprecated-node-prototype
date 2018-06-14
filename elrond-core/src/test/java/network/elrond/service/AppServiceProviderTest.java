@@ -2,10 +2,12 @@ package network.elrond.service;
 
 import network.elrond.account.AccountStateServiceImpl;
 import network.elrond.blockchain.BlockchainServiceImpl;
+import network.elrond.chronology.ChronologyService;
+import network.elrond.chronology.ChronologyServiceImpl;
 import network.elrond.consensus.SPoSServiceImpl;
 import network.elrond.consensus.ValidatorServiceImpl;
 import network.elrond.crypto.MultiSignatureServiceBNImpl;
-import network.elrond.crypto.SignatureServiceECDSAImpl;
+import network.elrond.crypto.SignatureServiceSchnorrImpl;
 import network.elrond.data.*;
 import network.elrond.p2p.P2PBroadcastServiceImpl;
 import network.elrond.p2p.P2PObjectServiceImpl;
@@ -59,7 +61,7 @@ public class AppServiceProviderTest {
     @Test
     public void TestDefaultSignatureService (){
         AppServiceProvider.InjectDefaultServices();
-        Assert.assertEquals(SignatureServiceECDSAImpl.class, AppServiceProvider.getSignatureService().getClass());
+        Assert.assertEquals(SignatureServiceSchnorrImpl.class, AppServiceProvider.getSignatureService().getClass());
     }
 
     @Test
@@ -96,5 +98,11 @@ public class AppServiceProviderTest {
     public void TestPutNullServiceShouldThrowException(){
         AppServiceProvider.InjectDefaultServices();
         AppServiceProvider.putService(TransactionService.class, null);
+    }
+
+    @Test
+    public void TestDefaultChronologyService (){
+        AppServiceProvider.InjectDefaultServices();
+        Assert.assertEquals(ChronologyServiceImpl.class, AppServiceProvider.getChronologyService().getClass());
     }
 }

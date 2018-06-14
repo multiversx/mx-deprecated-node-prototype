@@ -41,6 +41,9 @@ public class Util {
     public static final PublicKey PUBLIC_KEY_MINTING;
     public static final BigInteger VALUE_MINTING;
 
+    public static final String TEST_ADDRESS = "0326e7875aadaba270ae93ec40ef4706934d070eb21c9acad4743e31289fa4ebc7";
+
+
     static {
         EMPTY_BYTE_ARRAY = new byte[0];
         EMPTY_DATA_HASH = SHA3.get().digest(EMPTY_BYTE_ARRAY);

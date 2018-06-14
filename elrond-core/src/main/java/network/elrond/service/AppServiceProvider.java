@@ -6,6 +6,8 @@ import network.elrond.blockchain.AppPersistenceService;
 import network.elrond.blockchain.AppPersistenceServiceImpl;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainServiceImpl;
+import network.elrond.chronology.ChronologyService;
+import network.elrond.chronology.ChronologyServiceImpl;
 import network.elrond.consensus.SPoSService;
 import network.elrond.consensus.SPoSServiceImpl;
 import network.elrond.consensus.ValidatorService;
@@ -52,6 +54,7 @@ public class AppServiceProvider {
         putService(AppPersistenceService.class, new AppPersistenceServiceImpl());
         putService(BootstrapService.class, new BootstrapServiceImpl());
         putService(P2PCommunicationService.class, new P2PCommunicationServiceImpl());
+        putService(ChronologyService.class, new ChronologyServiceImpl());
     }
 
     public static P2PBroadcastService getP2PBroadcastService() {
@@ -113,5 +116,9 @@ public class AppServiceProvider {
 
     public static P2PCommunicationService getP2PCommunicationService(){
         return((P2PCommunicationService)getService(P2PCommunicationService.class));
+    }
+
+    public static ChronologyService getChronologyService(){
+        return ((ChronologyService)getService(ChronologyService.class));
     }
 }
