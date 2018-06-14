@@ -2,10 +2,7 @@ package network.elrond.data;
 
 import junit.framework.TestCase;
 import network.elrond.UtilTest;
-import network.elrond.account.AccountAddress;
-import network.elrond.account.AccountState;
-import network.elrond.account.Accounts;
-import network.elrond.account.AccountsContext;
+import network.elrond.account.*;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
@@ -65,13 +62,15 @@ public class AppBlockManagerTest {
 
         //memory-only accounts
         accountsContext = new AccountsContext();
-        state.setAccounts(new Accounts(accountsContext));
+        state.setAccounts(new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath())));
 
         privateKey = new PrivateKey("Receiver");
         publicKey = new PublicKey(privateKey);
 
         String hashString = AppServiceProvider.getSerializationService().getHashString(blk0);
         AppServiceProvider.getBootstrapService().commitBlock(blk0, hashString, blockchain);
+
+        accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
 
         appBlockManager = new AppBlockManager();
     }
@@ -83,7 +82,7 @@ public class AppBlockManagerTest {
 
     @Test
     public void testInitialAccounts() throws Exception {
-        state.setAccounts(new Accounts(accountsContext));
+        state.setAccounts(accounts);
 
         //size should be 1
         TestCase.assertEquals("Accounts size should have been 1: ", 1, state.getAccounts().getAddresses().size());
@@ -100,7 +99,7 @@ public class AppBlockManagerTest {
 
     @Test
     public void testProposeAndExecuteBlock() throws Exception {
-        state.setAccounts(new Accounts(accountsContext));
+        state.setAccounts(accounts);
 
         PrivateKey pvkeyRecv = new PrivateKey("RECV");
         PublicKey pbkeyRecv = new PublicKey(pvkeyRecv);
@@ -138,7 +137,7 @@ public class AppBlockManagerTest {
 
     @Test
     public void testProposeAndExecuteBlock1BadTx() throws Exception {
-        state.setAccounts(new Accounts(accountsContext));
+        state.setAccounts(accounts);
 
         PrivateKey pvkeyRecv = new PrivateKey("RECV");
         PublicKey pbkeyRecv = new PublicKey(pvkeyRecv);
@@ -179,7 +178,7 @@ public class AppBlockManagerTest {
 
     @Test
     public void testProposeAndExecuteBlock2BadTx3OK() throws Exception {
-        state.setAccounts(new Accounts(accountsContext));
+        state.setAccounts(accounts);
 
         PrivateKey pvkeyRecv1 = new PrivateKey("RECV1");
         PublicKey pbkeyRecv1 = new PublicKey(pvkeyRecv1);
@@ -238,7 +237,7 @@ public class AppBlockManagerTest {
 
     @Test
     public void validateBlock() throws Exception {
-        state.setAccounts(new Accounts(accountsContext));
+        state.setAccounts(accounts);
 
         PrivateKey pvkeyRecv1 = new PrivateKey("RECV1");
         PublicKey pbkeyRecv1 = new PublicKey(pvkeyRecv1);
@@ -318,7 +317,7 @@ public class AppBlockManagerTest {
             return (Util.BIG_INT_MIN_ONE);
         }
 
-        AccountState accountState = AppServiceProvider.getAccountStateService().getAccountState(new AccountAddress(pbKey.getValue()), state.getAccounts());
+        AccountState accountState = AppServiceProvider.getAccountStateService().getAccountState(AccountAddress.fromBytes(pbKey.getValue()), state.getAccounts());
 
         if (accountState == null) {
             return (Util.BIG_INT_MIN_ONE);
@@ -332,7 +331,7 @@ public class AppBlockManagerTest {
             return (Util.BIG_INT_MIN_ONE);
         }
 
-        AccountState accountState = AppServiceProvider.getAccountStateService().getAccountState(new AccountAddress(pbKey.getValue()), state.getAccounts());
+        AccountState accountState = AppServiceProvider.getAccountStateService().getAccountState(AccountAddress.fromBytes(pbKey.getValue()), state.getAccounts());
 
         if (accountState == null) {
             return (Util.BIG_INT_MIN_ONE);
@@ -435,7 +434,7 @@ public class AppBlockManagerTest {
 
     @Test
     public void testVerifySignatureEmptyBlock() throws IOException {
-        accounts = new Accounts(accountsContext);
+        accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
         state.setAccounts(accounts);
         Block block = appBlockManager.composeBlock(Arrays.asList(), blockchain, accounts);
 
@@ -452,7 +451,7 @@ public class AppBlockManagerTest {
         AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
         AppServiceProvider.getTransactionService().signTransaction(tx2, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
 
-        accounts = new Accounts(accountsContext);
+        accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
 
         Block block = appBlockManager.composeBlock(Arrays.asList(tx, tx2), blockchain, accounts);
         appBlockManager.signBlock(block, privateKey);

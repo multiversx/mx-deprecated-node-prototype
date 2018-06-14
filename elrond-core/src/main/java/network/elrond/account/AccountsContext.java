@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 public class AccountsContext implements Serializable {
 
-
     private String databasePath;
 
     public String getDatabasePath() {

@@ -1,5 +1,6 @@
 package network.elrond.account;
 
+import network.elrond.core.Util;
 import network.elrond.data.AppBlockManager;
 import network.elrond.service.AppServiceProvider;
 import org.slf4j.Logger;
@@ -19,12 +20,8 @@ public class AccountsManager {
     }
 
     public Boolean hasFunds(Accounts accounts, String addressString, BigInteger value) throws IOException, ClassNotFoundException {
-        if(accounts == null){
-            throw new IllegalArgumentException("Accounts cannot be null");
-        }
-        if(addressString == null || addressString.isEmpty()){
-            throw new IllegalArgumentException("AddressString cannot be null");
-        }
+        Util.check(accounts != null, "accounts!=null");
+        Util.check(!(addressString == null || addressString.isEmpty()), "addressString!=null");
 
         AccountAddress sendAddress = AccountAddress.fromHexString(addressString);
         AccountState senderAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(sendAddress, accounts);
@@ -32,35 +29,22 @@ public class AccountsManager {
     }
 
     public Boolean hasCorrectNonce(Accounts accounts, String addressString, BigInteger nonce) throws IOException, ClassNotFoundException {
-        if(accounts == null){
-            throw new IllegalArgumentException("Accounts cannot be null");
-        }
-        if(addressString == null || addressString.isEmpty()){
-            throw new IllegalArgumentException("AddressString cannot be null");
-        }
+        Util.check(accounts != null, "accounts!=null");
+        Util.check(!(addressString == null || addressString.isEmpty()), "addressString!=null");
+
         return true;
+        //TODO: uncomment in the future
 //        AccountAddress sendAddress = AccountAddress.fromHexaString(addressString);
 //        AccountState senderAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(sendAddress, accounts);
 //        return senderAccountState.getNonce().equals(nonce);
     }
 
     public void transferFunds(Accounts accounts, String senderAddressString, String receiverAddressString, BigInteger value, BigInteger nonce) throws IOException, ClassNotFoundException {
-
-        if(accounts == null){
-            throw new IllegalArgumentException("Accounts cannot be null");
-        }
-        if(senderAddressString == null || senderAddressString.isEmpty()){
-            throw new IllegalArgumentException("SenderAddressString cannot be null");
-        }
-        if(receiverAddressString == null || receiverAddressString.isEmpty()){
-            throw new IllegalArgumentException("ReceiverAddressString cannot be null");
-        }
-        if(value.compareTo(BigInteger.ZERO) < 0) {
-            throw new IllegalArgumentException("Value cannot be negative");
-        }
-        if(nonce.compareTo(BigInteger.ZERO) < 0) {
-            throw new IllegalArgumentException("Nonce cannot be negative");
-        }
+        Util.check(accounts!=null, "accounts!=null");
+        Util.check(!(senderAddressString == null || senderAddressString.isEmpty()), "senderAddressString!=null");
+        Util.check(!(receiverAddressString == null || receiverAddressString.isEmpty()), "receiverAddressString!=null");
+        Util.check(value.compareTo(BigInteger.ZERO) >= 0, "value>=0");
+        Util.check(nonce.compareTo(BigInteger.ZERO) >= 0, "nonce>=0");
 
         if(!(hasFunds(accounts, senderAddressString, value) && hasCorrectNonce(accounts, senderAddressString, nonce))){
             throw new IllegalArgumentException("Validation of Sender Account failed!");

@@ -1,10 +1,7 @@
 package network.elrond.blockchain;
 
 import junit.framework.TestCase;
-import network.elrond.account.AccountAddress;
-import network.elrond.account.AccountState;
-import network.elrond.account.Accounts;
-import network.elrond.account.AccountsContext;
+import network.elrond.account.*;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
@@ -78,12 +75,12 @@ public class BlockchainProcessTest extends BaseBlockchainTest {
             TestCase.assertTrue(AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain).isOk());
         }
 
-        System.out.println("SenderAccountState Account state" + AccountAddress.fromPublicKey(publicKeySender));
-        AccountState senderAccountState = AppServiceProvider.getAccountStateService().getAccountState(AccountAddress.fromPublicKey(publicKeySender), accounts);
+        System.out.println("SenderAccountState Account state" + AccountAddress.fromBytes(publicKeySender.getValue()));
+        AccountState senderAccountState = AppServiceProvider.getAccountStateService().getAccountState(AccountAddress.fromBytes(publicKeySender.getValue()), accounts);
         TestCase.assertEquals(senderAccountState.getBalance(), BigInteger.valueOf(123456689));
 
-        System.out.println("ReceiverAccountState AccountAddress" + AccountAddress.fromPublicKey(publicKeyReceiver));
-        AccountState receiverAccountState = AppServiceProvider.getAccountStateService().getAccountState(AccountAddress.fromPublicKey(publicKeyReceiver), accounts);
+        System.out.println("ReceiverAccountState AccountAddress" + AccountAddress.fromBytes(publicKeyReceiver.getValue()));
+        AccountState receiverAccountState = AppServiceProvider.getAccountStateService().getAccountState(AccountAddress.fromBytes(publicKeyReceiver.getValue()), accounts);
         TestCase.assertEquals(receiverAccountState.getBalance(),BigInteger.valueOf(100));
 
 
@@ -94,9 +91,9 @@ public class BlockchainProcessTest extends BaseBlockchainTest {
     private Accounts initAccounts(PublicKey publicKey) throws IOException, ClassNotFoundException {
         AccountsContext accountContext = new AccountsContext();
         accountContext.setDatabasePath("blockchain.account.data-test");
-        Accounts accounts = new Accounts(accountContext);
+        Accounts accounts = new Accounts(accountContext, new AccountsPersistenceUnit<>(accountContext.getDatabasePath()));
 
-        AccountAddress address = AccountAddress.fromPublicKey(publicKey);
+        AccountAddress address = AccountAddress.fromBytes(publicKey.getValue());
         AccountState accountState = AppServiceProvider.getAccountStateService()
                 .getOrCreateAccountState(address, accounts);
         accountState.setBalance(BigInteger.valueOf(123456789));

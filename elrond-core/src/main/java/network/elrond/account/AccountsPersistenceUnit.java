@@ -9,7 +9,7 @@ public class AccountsPersistenceUnit<K extends AccountAddress, S extends Account
 
     final Trie trie;
 
-    AccountsPersistenceUnit(String databasePath) throws IOException {
+    public AccountsPersistenceUnit(String databasePath) throws IOException {
         super(databasePath);
         trie = new TrieImpl(database);
     }

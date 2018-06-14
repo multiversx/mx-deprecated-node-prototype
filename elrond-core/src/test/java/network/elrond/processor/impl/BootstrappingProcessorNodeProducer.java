@@ -60,7 +60,7 @@ public class BootstrappingProcessorNodeProducer {
 
             //generate one transaction to execute
             //step 1. get nonce for sender account
-            AccountState accountState = AppServiceProvider.getAccountStateService().getAccountState(AccountAddress.fromPublicKey(pbKeyInitial), state.getAccounts());
+            AccountState accountState = AppServiceProvider.getAccountStateService().getAccountState(AccountAddress.fromBytes(pbKeyInitial.getValue()), state.getAccounts());
 
             if (accountState == null){
                 System.out.println("NULL account?");

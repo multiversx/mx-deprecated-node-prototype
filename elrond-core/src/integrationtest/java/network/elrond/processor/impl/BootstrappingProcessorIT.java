@@ -106,7 +106,7 @@ public class BootstrappingProcessorIT {
         bootstrapService.setCurrentBlockIndex(LocationType.NETWORK, blk1.getNonce(), state.getBlockchain());
 
         //mint
-        AccountState acsSender = accountStateService.getOrCreateAccountState(AccountAddress.fromPublicKey(pbk1), state.getAccounts());
+        AccountState acsSender = accountStateService.getOrCreateAccountState(AccountAddress.fromBytes(pbk1.getValue()), state.getAccounts());
         //mint 100 ERDs
         acsSender.setBalance(BigInteger.TEN.pow(10));
         accountStateService.setAccountState(AccountAddress.fromHexString(trx1.getSendAddress()), acsSender, state.getAccounts()); // PMS

@@ -3,6 +3,7 @@ package network.elrond.data;
 import network.elrond.SlowTests;
 import network.elrond.account.Accounts;
 import network.elrond.account.AccountsContext;
+import network.elrond.account.AccountsPersistenceUnit;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
@@ -63,7 +64,7 @@ public class AppBlockManagerIT {
 
         //memory-only accounts
         accountsContext = new AccountsContext();
-        state.setAccounts(new Accounts(accountsContext));
+        state.setAccounts(new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath())));
 
         privateKey = new PrivateKey("Receiver");
         publicKey = new PublicKey(privateKey);
@@ -145,7 +146,7 @@ public class AppBlockManagerIT {
 
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
 
-        accounts = new Accounts(new AccountsContext());
+        accounts = new Accounts(new AccountsContext(), new AccountsPersistenceUnit<>(""));
 
         long start = System.currentTimeMillis();
         List<Transaction> transactions = blockchainService.getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
@@ -164,7 +165,7 @@ public class AppBlockManagerIT {
 
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
 
-        accounts = new Accounts(new AccountsContext());
+        accounts = new Accounts(new AccountsContext(), new AccountsPersistenceUnit<>(""));
 
         long start = System.currentTimeMillis();
 
