@@ -111,11 +111,6 @@
             <version>5.0-Beta8</version>
         </dependency>
 
-        <dependency>
-            <groupId>net.tomp2p</groupId>
-            <artifactId>tomp2p-core</artifactId>
-            <version>5.0-Beta8</version>
-        </dependency>
 
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -152,7 +147,6 @@
             <version>0.10</version>
         </dependency>
 
-
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -164,30 +158,7 @@
             <artifactId>commons-io</artifactId>
             <version>2.5</version>
         </dependency>
-        <dependency>
-            <groupId>com.madgag.spongycastle</groupId>
-            <artifactId>core</artifactId>
-            <version>RELEASE</version>
-            <scope>compile</scope>
-        </dependency>
 
-        <!--<dependency>-->
-            <!--<groupId>org.apache.maven.plugins</groupId>-->
-            <!--<artifactId>maven-surefire-plugin</artifactId>-->
-            <!--<version>2.21.0</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.mockito</groupId>-->
-            <!--<artifactId>mockito-core</artifactId>-->
-            <!--<version>RELEASE</version>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.mockito</groupId>-->
-            <!--<artifactId>mockito-core</artifactId>-->
-            <!--<version>RELEASE</version>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
 
         <!-- https://mvnrepository.com/artifact/commons-net/commons-net -->
         <dependency>
