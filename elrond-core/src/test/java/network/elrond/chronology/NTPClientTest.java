@@ -5,10 +5,11 @@ import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Date;
 
 public class NTPClientTest {
 
-    @Test (expected = NullPointerException.class)
+    @Test (expected = IllegalArgumentException.class)
     public void ntpClientShouldResultinExceptionWhenListNull() throws Exception{
         NTPClient ntp = new NTPClient(null, 100);
     }
@@ -37,6 +38,7 @@ public class NTPClientTest {
         long time = ntp.currentTimeMillis();
 
         System.out.println(time);
+        System.out.println(new Date(time));
 
         TestCase.assertFalse(ntp.isOffline());
         TestCase.assertEquals("time.windows.com", ntp.getCurrentHostName());

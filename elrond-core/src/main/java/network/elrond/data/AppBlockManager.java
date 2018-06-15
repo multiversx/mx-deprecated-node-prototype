@@ -4,6 +4,9 @@ import network.elrond.account.Accounts;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
+import network.elrond.chronology.ChronologyService;
+import network.elrond.chronology.NTPClient;
+import network.elrond.chronology.Round;
 import network.elrond.core.Util;
 import network.elrond.crypto.MultiSignatureService;
 import network.elrond.crypto.PrivateKey;
@@ -30,13 +33,13 @@ public class AppBlockManager {
 
 
 
-    public void generateAndBroadcastBlock(List<String> hashes, Accounts accounts, Blockchain blockchain, PrivateKey privateKey) {
+    public void generateAndBroadcastBlock(List<String> hashes, Accounts accounts, Blockchain blockchain, PrivateKey privateKey, NTPClient ntpClient) {
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
 
         try {
 
             List<Transaction> transactions = blockchainService.getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
-            Block block = AppBlockManager.instance().composeBlock(transactions, blockchain, accounts);
+            Block block = AppBlockManager.instance().composeBlock(transactions, blockchain, accounts, ntpClient);
 
 
             AppBlockManager.instance().signBlock(block, privateKey);
@@ -58,13 +61,21 @@ public class AppBlockManager {
     }
 
 
-    public Block composeBlock(List<Transaction> transactions, Blockchain blockchain, Accounts accounts) {
+    public Block composeBlock(List<Transaction> transactions, Blockchain blockchain, Accounts accounts, NTPClient ntpClient) {
 
         Util.check(transactions!=null, "transactions!=null");
         Util.check(blockchain!=null, "blockchain!=null");
         Util.check(accounts!=null, "accounts!=null");
+        Util.check(blockchain.getGenesisBlock()!=null, "genesisBlock!=null");
 
         Block block = getNewBlockAndBindToPrevious(blockchain.getCurrentBlock());
+        //compute round and round start millis = calculated round start millis
+        ChronologyService chronologyService = AppServiceProvider.getChronologyService();
+        Round round = chronologyService.getRoundFromDateTime(blockchain.getGenesisBlock().getTimestamp(),
+                chronologyService.getSynchronizedTime(ntpClient));
+        block.setRoundHeight(round.getIndex());
+        block.setTimestamp(round.getStartRoundMillis());
+
         addTransactions(transactions, accounts, block);
         block.setAppStateHash(accounts.getAccountsPersistenceUnit().getRootHash());
         AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);

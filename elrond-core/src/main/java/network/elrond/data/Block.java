@@ -33,7 +33,9 @@ public class Block implements Serializable {
     //app state hash
     protected byte[] appStateHash;
 
-    protected Date timestamp = new Date();
+    protected long timestamp = 0;
+
+    protected long roundHeight = 0;
 
     public Block() {
         nonce = BigInteger.ZERO;
@@ -182,17 +184,25 @@ public class Block implements Serializable {
         this.appStateHash = appStateHash;
     }
 
-    public Date getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
+    public void setTimestamp(long timestamp){
+        this.timestamp = timestamp;
+    }
+
+    public long getRoundHeight(){
+        return (roundHeight);
+    }
+
+    public void setRoundHeight(long roundHeight){
+        this.roundHeight = roundHeight;
+    }
 
     @Override
     public String toString() {
-        return "Block{" +
-                "nonce=" + nonce +
-                ", appStateHash=" + Util.byteArrayToHexString(appStateHash) +
-                ", listTXHashes.size=" + listTXHashes.size() +
-                '}';
+        return (String.format("Block{nonce=%d, appStateHash=%s, listTXHashes.size=%d, roundHeight=%d, timestamp=%d}",
+                nonce, Util.byteArrayToHexString(appStateHash), listTXHashes.size(), roundHeight, timestamp));
     }
 }

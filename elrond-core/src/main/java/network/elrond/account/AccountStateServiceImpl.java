@@ -1,5 +1,6 @@
 package network.elrond.account;
 
+import network.elrond.chronology.NTPClient;
 import network.elrond.core.RLP;
 import network.elrond.core.RLPList;
 import network.elrond.core.Util;
@@ -107,7 +108,8 @@ public class AccountStateServiceImpl implements AccountStateService {
     }
 
     public Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue,
-                                                               AccountsContext accountsContextTemporary, PrivateKey privateKey) {
+                                                               AccountsContext accountsContextTemporary, PrivateKey privateKey,
+                                                               NTPClient ntpClient) {
 
         if (initialValue.compareTo(Util.VALUE_MINTING) > 0) {
             initialValue = Util.VALUE_MINTING;
@@ -121,6 +123,9 @@ public class AccountStateServiceImpl implements AccountStateService {
         Block genesisBlock = new Block();
         genesisBlock.setNonce(BigInteger.ZERO);
         genesisBlock.getListTXHashes().add(AppServiceProvider.getSerializationService().getHash(transactionMint));
+        //set the timestamp & round
+        genesisBlock.setTimestamp(AppServiceProvider.getChronologyService().getSynchronizedTime(ntpClient));
+        genesisBlock.setRoundHeight(0);
 
         //compute state root hash
         try {

@@ -6,6 +6,7 @@ import network.elrond.application.AppContext;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.blockchain.SettingsType;
+import network.elrond.chronology.NTPClient;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.service.AppServiceProvider;
@@ -126,7 +127,7 @@ public class BootstrapServiceImpl implements BootstrapService {
 
 
     @Override
-    public ExecutionReport startFromGenesis(Accounts accounts, Blockchain blockchain, AppContext context) {
+    public ExecutionReport startFromGenesis(Accounts accounts, Blockchain blockchain, AppContext context, NTPClient ntpClient) {
 
         ExecutionReport result = new ExecutionReport().ok("Start from scratch...");
 
@@ -137,7 +138,7 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         AccountsContext accountsContext = new AccountsContext();
         Fun.Tuple2<Block, Transaction> genesisData = AppServiceProvider.getAccountStateService()
-                .generateGenesisBlock(addressMint, valueMint, accountsContext, privateKey);
+                .generateGenesisBlock(addressMint, valueMint, accountsContext, privateKey, ntpClient);
 
         Block genesisBlock = genesisData.a;
         String genesisBlockHash = AppServiceProvider.getSerializationService().getHashString(genesisBlock);
@@ -172,7 +173,7 @@ public class BootstrapServiceImpl implements BootstrapService {
 
 
     @Override
-    public ExecutionReport restoreFromDisk(BigInteger currentBlockIndex, Accounts accounts, Blockchain blockchain, AppContext context) {
+    public ExecutionReport restoreFromDisk(BigInteger currentBlockIndex, Accounts accounts, Blockchain blockchain, AppContext context, NTPClient ntpClient) {
 
         ExecutionReport result = new ExecutionReport().ok("Start bootstrapping by loading from disk...");
         BigInteger idx = BigInteger.valueOf(-1);
@@ -189,7 +190,7 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         // no index stored on disk so need to create genesis
         if (idx.equals(BigInteger.valueOf(-1))) {
-            return startFromGenesis(accounts, blockchain, context);
+            return startFromGenesis(accounts, blockchain, context, ntpClient);
         }
 
 
@@ -263,6 +264,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                     return (result);
                 }
 
+                result.ok("Added block in blockchain : " + blockHash + " # " + block);
                 blockchain.setCurrentBlockIndex(blockIndex);
 
 

@@ -3,6 +3,7 @@ package network.elrond.application;
 
 import network.elrond.account.Accounts;
 import network.elrond.blockchain.Blockchain;
+import network.elrond.chronology.NTPClient;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.p2p.P2PBroadcastChanel;
@@ -29,6 +30,7 @@ public class AppState implements Serializable {
     private P2PConnection connection;
     private Map<P2PChannelName, P2PBroadcastChanel> channels = new HashMap<>();
 
+    private NTPClient ntpClient = null;
 
     public P2PBroadcastChanel getChanel(P2PChannelName name) {
         if (name == null) {
@@ -130,5 +132,12 @@ public class AppState implements Serializable {
         this.lock = false;
     }
 
+    public NTPClient getNtpClient(){
+        return(ntpClient);
+    }
+
+    public void setNtpClient(NTPClient ntpClient){
+        this.ntpClient = ntpClient;
+    }
 
 }

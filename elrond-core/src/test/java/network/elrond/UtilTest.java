@@ -5,11 +5,14 @@ import junit.framework.TestCase;
 import network.elrond.account.AccountAddress;
 import network.elrond.account.AccountState;
 import network.elrond.account.Accounts;
+import network.elrond.blockchain.Blockchain;
 import network.elrond.consensus.Validator;
 import network.elrond.core.Util;
+import network.elrond.data.Block;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
+import java.util.Date;
 import java.util.List;
 
 public class UtilTest {
@@ -20,6 +23,14 @@ public class UtilTest {
             System.out.println(v.getPubKey() + ", S: " + v.getStake().toString(10) + ", R: " + v.getRating());
         }
         System.out.println();
+    }
+
+    @Test
+    public void testDisplayStuff1(){
+        long currentMillis = System.currentTimeMillis();
+        System.out.println(String.format("Event from , time: %1$tY.%1$tm.%1$td %1$tT.%2$03d", new Date(currentMillis), currentMillis % 1000));
+
+        //System.out.println(String.format("%1$03d", 1));
     }
 
     @Test
@@ -50,6 +61,13 @@ public class UtilTest {
         String strAddr = "025f37d20e5b18909361e0ead7ed17c69b417bee70746c9e9c2bcb1394d921d4ae";
 
         TestCase.assertEquals(strAddr, Util.getAddressFromPublicKey(Util.hexStringToByteArray(strPubKeyHexa)));
+    }
+
+    public static void createDummyGenesisBlock(Blockchain blockchain){
+        Block blockGenesis = new Block();
+        blockGenesis.setTimestamp(System.currentTimeMillis() - 1000);
+
+        blockchain.setGenesisBlock(blockGenesis);
     }
 
     public static void printAccountsWithBalance(Accounts accounts){

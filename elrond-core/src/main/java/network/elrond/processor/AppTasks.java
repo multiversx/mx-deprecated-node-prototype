@@ -72,4 +72,15 @@ public class AppTasks {
         new BootstrapBlockTask().process(application);
     };
 
+    /**
+     * Init NTP client
+     */
+    public static AppTask NTP_CLIENT_INITIALIZER = (application) ->{
+        new NtpClientInitializerProcessor().process(application);
+    };
+
+    public static AppTask CHRONOLOGY = (application) -> {
+        new ChronologyBlockTask().process(application);
+    };
+
 }

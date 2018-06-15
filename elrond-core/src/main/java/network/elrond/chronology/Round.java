@@ -3,27 +3,37 @@ package network.elrond.chronology;
 import java.math.BigInteger;
 
 public class Round {
-    private long roundHeight;
-    private boolean lastRoundInEpoch;
+    private long index;
+    private long startRoundMillis;
 
-    public Round(){
-        roundHeight = 0;
-        lastRoundInEpoch = false;
+    public Round() {
+        index = 0;
+        startRoundMillis = 0;
     }
 
-    public long getRoundHeight(){
-        return (roundHeight);
+    public Round(long index, long startRoundMillis) {
+        this.index = index;
+        this.startRoundMillis = startRoundMillis;
     }
 
-    public void setRoundHeight(long roundHeight){
-        this.roundHeight = roundHeight;
+    public long getIndex() {
+        return (index);
     }
 
-    public boolean isLastRoundInEpoch(){
-        return(lastRoundInEpoch);
+    public void setIndex(long index) {
+        this.index = index;
     }
 
-    public void setLastRoundInEpoch(boolean lastRoundInEpoch){
-        this.lastRoundInEpoch = lastRoundInEpoch;
+    public long getStartRoundMillis() {
+        return(startRoundMillis);
+    }
+
+    public void setStartRoundMillis(long startRoundMillis){
+        this.startRoundMillis = startRoundMillis;
+    }
+
+    @Override
+    public String toString(){
+        return(String.format("Round{index=%d, start timestamp=%d}", index, startRoundMillis));
     }
 }

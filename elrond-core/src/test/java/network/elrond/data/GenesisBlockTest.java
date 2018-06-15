@@ -32,7 +32,7 @@ public class GenesisBlockTest {
         AccountState acsMintTest = accountStateService.getAccountState(acMint, accounts);
         TestCase.assertEquals("Expected " + Util.VALUE_MINTING, Util.VALUE_MINTING, acsMintTest.getBalance());
 
-        Fun.Tuple2<Block, Transaction> genesisData = accountStateService.generateGenesisBlock(Util.byteArrayToHexString(pbk1.getValue()), value, accTemp, pvk1);
+        Fun.Tuple2<Block, Transaction> genesisData = accountStateService.generateGenesisBlock(Util.byteArrayToHexString(pbk1.getValue()), value, accTemp, pvk1, null);
 
         TestCase.assertNotNull("Not expecting null for GenesisData ", genesisData);
 

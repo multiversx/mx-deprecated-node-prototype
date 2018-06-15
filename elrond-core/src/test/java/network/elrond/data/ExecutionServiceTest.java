@@ -1,6 +1,7 @@
 package network.elrond.data;
 
 import junit.framework.TestCase;
+import network.elrond.UtilTest;
 import network.elrond.account.AccountAddress;
 import network.elrond.account.AccountState;
 import network.elrond.account.Accounts;
@@ -16,6 +17,7 @@ import network.elrond.service.AppServiceProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mapdb.Fun;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -231,6 +233,11 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         block.setSignature(null);
         block.setCommitment(null);
 
+        //timestamp and round information
+        long crtTimeStamp = System.currentTimeMillis();
+        block.setTimestamp(crtTimeStamp);
+        block.setRoundHeight(AppServiceProvider.getChronologyService().getRoundFromDateTime(blockchain.getGenesisBlock().getTimestamp(), crtTimeStamp).getIndex());
+
         // get new block hash
         blockHash = serializationService.getHash(block);
 
@@ -328,6 +335,8 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
 
     @Test
     public void testProcessBlockInvalidTransactionInBlock() {
+        UtilTest.createDummyGenesisBlock(blockchain);
+
         Block block = generateSignedBlockWithTransactions(100, 3, 50);
         //execute
         ExecutionService executionService = AppServiceProvider.getExecutionService();
@@ -341,6 +350,8 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
 
     @Test
     public void testProcessBlockOK() {
+        UtilTest.createDummyGenesisBlock(blockchain);
+
         Block block = generateSignedBlockWithTransactions(100000, 100, 100);
         //execute
         ExecutionService executionService = AppServiceProvider.getExecutionService();
