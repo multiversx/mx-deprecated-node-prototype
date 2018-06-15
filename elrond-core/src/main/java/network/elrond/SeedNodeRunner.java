@@ -34,7 +34,7 @@ public class SeedNodeRunner {
 
             do {
 
-                AccountAddress address = AccountAddress.fromPublicKey(pbKey);
+                AccountAddress address = AccountAddress.fromBytes(pbKey.getValue());
                 facade.send(address, BigInteger.TEN, application);
                 System.out.println(facade.getBalance(address, application));
 

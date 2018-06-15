@@ -88,7 +88,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
             PublicKey senderPublicKey = state.getPublicKey();
             PrivateKey senderPrivateKey = state.getPrivateKey();
-            AccountAddress senderAddress = AccountAddress.fromBytes(senderPublicKey.getValue());
+            AccountAddress senderAddress = AccountAddress.fromPublicKey(senderPublicKey);
             AccountState senderAccount = AppServiceProvider.getAccountStateService().getAccountState(senderAddress, accounts);
 
 
