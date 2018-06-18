@@ -35,7 +35,7 @@ public class Block implements Serializable {
 
     protected long timestamp = 0;
 
-    protected long roundHeight = 0;
+    protected long roundIndex = 0;
 
     public Block() {
         nonce = BigInteger.ZERO;
@@ -192,17 +192,17 @@ public class Block implements Serializable {
         this.timestamp = timestamp;
     }
 
-    public long getRoundHeight(){
-        return (roundHeight);
+    public long getRoundIndex(){
+        return (roundIndex);
     }
 
-    public void setRoundHeight(long roundHeight){
-        this.roundHeight = roundHeight;
+    public void setRoundIndex(long roundHeight){
+        this.roundIndex = roundIndex;
     }
 
     @Override
     public String toString() {
-        return (String.format("Block{nonce=%d, appStateHash=%s, listTXHashes.size=%d, roundHeight=%d, timestamp=%d}",
-                nonce, Util.byteArrayToHexString(appStateHash), listTXHashes.size(), roundHeight, timestamp));
+        return (String.format("Block{nonce=%d, appStateHash=%s, listTXHashes.size=%d, roundIndex=%d, timestamp=%d}",
+                nonce, Util.byteArrayToHexString(appStateHash), listTXHashes.size(), roundIndex, timestamp));
     }
 }

@@ -70,7 +70,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         Round roundBlock = new Round();
         roundBlock.setStartTimeStamp(blockchain.getGenesisBlock().getTimestamp() +
-                block.getRoundHeight() * chronologyService.getRoundTimeDuration());
+                block.getRoundIndex() * chronologyService.getRoundTimeDuration());
 
         return(chronologyService.isDateTimeInRound(roundBlock, block.getTimestamp()));
     }
@@ -109,7 +109,14 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         //check timestamp and round
         if (!validateBlockTimestampRound(blockchain, block)){
-            blockExecutionReport.ko("Timestamp and round mismatch!");
+            long genesisTimeStamp = -1;
+
+            if (blockchain.getGenesisBlock() != null){
+                genesisTimeStamp = blockchain.getGenesisBlock().getTimestamp();
+            }
+
+            blockExecutionReport.ko(String.format("Timestamp and round mismatch! Block nonce: %d, round index: %d, timestamp %d, genesis timestamp: %d",
+                    block.getNonce().longValue(), block.roundIndex, block.getTimestamp(), genesisTimeStamp));
             return blockExecutionReport;
         }
 

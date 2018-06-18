@@ -236,7 +236,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         //timestamp and round information
         long crtTimeStamp = System.currentTimeMillis();
         block.setTimestamp(crtTimeStamp);
-        block.setRoundHeight(AppServiceProvider.getChronologyService().getRoundFromDateTime(blockchain.getGenesisBlock().getTimestamp(), crtTimeStamp).getIndex());
+        block.setRoundIndex(AppServiceProvider.getChronologyService().getRoundFromDateTime(blockchain.getGenesisBlock().getTimestamp(), crtTimeStamp).getIndex());
 
         // get new block hash
         blockHash = serializationService.getHash(block);

@@ -73,7 +73,7 @@ public class AppBlockManager {
         ChronologyService chronologyService = AppServiceProvider.getChronologyService();
         Round round = chronologyService.getRoundFromDateTime(blockchain.getGenesisBlock().getTimestamp(),
                 chronologyService.getSynchronizedTime(ntpClient));
-        block.setRoundHeight(round.getIndex());
+        block.setRoundIndex(round.getIndex());
         block.setTimestamp(round.getStartTimeStamp());
 
         addTransactions(transactions, accounts, block);

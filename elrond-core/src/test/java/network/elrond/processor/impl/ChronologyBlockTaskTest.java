@@ -42,7 +42,7 @@ public class ChronologyBlockTaskTest {
 
             if (application.getState().getBlockchain().getGenesisBlock() == null){
                 Block blk = new Block();
-                blk.setRoundHeight(0);
+                blk.setRoundIndex(0);
                 blk.setTimestamp(System.currentTimeMillis());
 
                 application.getState().getBlockchain().setGenesisBlock(blk);
