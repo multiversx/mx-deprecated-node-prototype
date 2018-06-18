@@ -1,12 +1,10 @@
 package network.elrond.crypto;
 
-import network.elrond.core.Util;
+import network.elrond.crypto.generators.ECKeyPairGenerator;
 import network.elrond.service.AppServiceProvider;
-import org.spongycastle.crypto.AsymmetricCipherKeyPair;
-import org.spongycastle.crypto.generators.ECKeyPairGenerator;
-import org.spongycastle.crypto.params.ECDomainParameters;
-import org.spongycastle.crypto.params.ECKeyGenerationParameters;
-import org.spongycastle.crypto.params.ECPrivateKeyParameters;
+import network.elrond.crypto.params.ECDomainParameters;
+import network.elrond.crypto.params.ECKeyGenerationParameters;
+import network.elrond.crypto.params.ECPrivateKeyParameters;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -48,7 +46,7 @@ public class PrivateKey {
      * @param src The byte array
      */
     public PrivateKey(byte[] src) {
-        if(src == null){
+        if (src == null) {
             throw new IllegalArgumentException("Src cannot be null");
         }
         privateKey = src.clone();
@@ -61,21 +59,21 @@ public class PrivateKey {
      * @param seed String seed to generate the private key
      */
     public PrivateKey(String seed) {
-        if(seed == null || seed.isEmpty()){
+        if (seed == null || seed.isEmpty()) {
             throw new IllegalArgumentException("Seed cannot be null");
         }
         byte[] seedArray = seed.getBytes();
         BigInteger seedInt;
         ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
-        seedArray = Util.SHA3.get().digest(seedArray);
+        seedArray = SHA3Helper.sha3(seedArray);
         seedInt = new BigInteger(1, seedArray);
 
         // to be a valid private key it needs to verify:
         // 0 < pk < n, where n is the order of the largest prime order subgroup
         while (1 != seedInt.compareTo(BigInteger.ZERO) ||
                 0 <= seedInt.compareTo(ecCryptoService.getN())) {
-            seedArray = Util.SHA3.get().digest(seedArray);
+            seedArray = SHA3Helper.sha3(seedArray);
             seedInt = new BigInteger(1, seedArray);
         }
 

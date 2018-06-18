@@ -2,7 +2,7 @@ package network.elrond.crypto;
 
 import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
-import org.spongycastle.math.ec.ECPoint;
+import network.elrond.crypto.ecmath.ECPoint;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -77,7 +77,7 @@ public class SignatureServiceSchnorrImpl implements SignatureService {
             challengeC = Util.concatenateArrays(commitPointR.getEncoded(true), publicKey);
             challengeC = Util.concatenateArrays(challengeC, message);
             // Calculate the digest of the byte array to getAccountState the challenge
-            challengeC = Util.SHA3.get().digest(challengeC);
+            challengeC = SHA3Helper.sha3(challengeC);
             challengeCInteger = new BigInteger(challengeC);
 
             if (challengeCInteger.equals(BigInteger.ZERO)) {
@@ -159,7 +159,7 @@ public class SignatureServiceSchnorrImpl implements SignatureService {
         // if not at infinity calculate c2 = H(R, publicKey, message)
         c2 = Util.concatenateArrays(commitPointR.getEncoded(true), publicKey);
         c2 = Util.concatenateArrays(c2, message);
-        c2 = Util.SHA3.get().digest(c2);
+        c2 = SHA3Helper.sha3(c2);
 
         return Arrays.equals(challenge, c2);
     }

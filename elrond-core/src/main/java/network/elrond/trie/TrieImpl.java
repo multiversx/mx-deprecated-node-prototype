@@ -4,7 +4,7 @@ import network.elrond.core.ByteUtil;
 import network.elrond.core.Value;
 import network.elrond.crypto.HashUtil;
 import network.elrond.db.ByteArrayWrapper;
-import org.spongycastle.util.encoders.Hex;
+import network.elrond.crypto.util.encoders.Hex;
 import org.iq80.leveldb.DB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +14,7 @@ import java.util.*;
 import static java.util.Arrays.copyOfRange;
 import static network.elrond.core.ByteUtil.matchingNibbleLength;
 import static network.elrond.core.CompactEncoder.*;
-import static org.spongycastle.util.Arrays.concatenate;
+import static network.elrond.crypto.util.Arrays.concatenate;
 
 public class TrieImpl implements Trie {
 
@@ -78,8 +78,8 @@ public class TrieImpl implements Trie {
 
     @Override
     public byte[] get(byte[] key) {
-        if (logger.isDebugEnabled())
-            logger.debug("Retrieving key {}", Hex.toHexString(key));
+//        if (logger.isDebugEnabled())
+//            logger.debug("Retrieving key {}", Hex.toHexString(key));
         byte[] k = binToNibbles(key);
         Value c = new Value(this.get(this.root, k));
 

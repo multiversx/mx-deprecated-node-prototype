@@ -3,7 +3,7 @@ package network.elrond.db;
 import java.util.Arrays;
 
 import network.elrond.core.FastByteComparisons;
-import org.spongycastle.util.encoders.Hex;
+import network.elrond.crypto.util.encoders.Hex;
 
 /**
  * @author Roman Mandeleil

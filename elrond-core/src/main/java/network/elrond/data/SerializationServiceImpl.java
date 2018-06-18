@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import network.elrond.core.Util;
+import network.elrond.crypto.SHA3Helper;
 import network.elrond.service.AppServiceProvider;
-import org.spongycastle.util.encoders.Base64;
+import network.elrond.crypto.util.encoders.Base64;
 
 import java.io.IOException;
 
@@ -56,7 +57,7 @@ public class SerializationServiceImpl implements SerializationService {
 ////            throw new RuntimeException(ex);
 ////        }
 ////        return instance.digest(json.getBytes());
-        return (Util.SHA3.get().digest(json.getBytes()));
+        return (SHA3Helper.sha3(json.getBytes()));
     }
 
     @Override

@@ -9,7 +9,7 @@ import network.elrond.blockchain.SettingsType;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.service.AppServiceProvider;
-import org.spongycastle.util.encoders.Base64;
+import network.elrond.crypto.util.encoders.Base64;
 import org.mapdb.Fun;
 
 import java.io.IOException;

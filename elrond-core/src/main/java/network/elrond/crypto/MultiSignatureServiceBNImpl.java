@@ -2,7 +2,7 @@ package network.elrond.crypto;
 
 import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
-import org.spongycastle.math.ec.ECPoint;
+import network.elrond.crypto.ecmath.ECPoint;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -44,7 +44,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
         // r below order of curve
         while (commitmentSecret.compareTo(BigInteger.ONE) < 0 ||
                 commitmentSecret.compareTo(ecCryptoService.getN()) >= 0) {
-            r = Util.SHA3.get().digest(r);
+            r = SHA3Helper.sha3(r);
             commitmentSecret = new BigInteger(r);
         }
         return r;
@@ -88,7 +88,10 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
         Util.check(commitment != null, "commitment != null");
         Util.check(commitment.length != 0, "commitment.length != 0");
 
-        return Util.SHA256.digest(commitment);
+        byte [] result = Arrays.copyOf(commitment, commitment.length);
+        result = SHA256Helper.sha256(result);
+
+        return result;
     }
 
     /**
@@ -107,7 +110,8 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
         Util.check(commitment.length != 0, "commitment.length != 0");
         Util.check(commitmentHash.length != 0, "commitmentHash.length != 0");
 
-        computedHash = Util.SHA256.digest(commitment);
+        computedHash = Arrays.copyOf(commitment, commitment.length);
+        computedHash = SHA256Helper.sha256(computedHash);
 
         return Arrays.equals(computedHash, commitmentHash);
     }
@@ -219,7 +223,8 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
         // <L'> || public key || R || m
         challenge = Util.concatenateArrays(challenge, message);
         // compute hash
-        challenge = Util.SHA3.get().digest(challenge);
+
+        challenge = SHA3Helper.sha3(challenge);
         challengeInt = new BigInteger(1, challenge);
 
         //reduce the challenge modulo curve order

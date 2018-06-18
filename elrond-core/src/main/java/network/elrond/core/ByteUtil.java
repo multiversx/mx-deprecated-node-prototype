@@ -1,6 +1,6 @@
 package network.elrond.core;
 
-import org.spongycastle.util.encoders.Hex;
+import network.elrond.crypto.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.util.Arrays;

@@ -8,7 +8,7 @@ import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.Util;
 import network.elrond.crypto.MultiSignatureService;
 import network.elrond.service.AppServiceProvider;
-import org.spongycastle.util.encoders.Base64;
+import network.elrond.crypto.util.encoders.Base64;
 
 import java.io.IOException;
 import java.math.BigInteger;

@@ -1,6 +1,6 @@
 package network.elrond.crypto;
 
-import org.spongycastle.crypto.digests.SHA3Digest;
+import network.elrond.crypto.digest.SHA3Digest;
 
 public class SHA3Helper {
 

@@ -152,10 +152,6 @@ public class SPoSTest {
 
         long ms1 = dInterim.getTime() - dStart.getTime();
 
-
-
-        Util.SHA3.get().digest();
-
         dInterim = new Date();
 
         //CalcEligibleListValidators cleanedUpList = SPoS.generateCleanupList(vList);

@@ -14,7 +14,7 @@ import network.elrond.data.*;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.service.AppServiceProvider;
-import org.spongycastle.util.encoders.Base64;
+import network.elrond.crypto.util.encoders.Base64;
 
 import java.math.BigInteger;
 

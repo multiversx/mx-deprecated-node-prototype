@@ -1,7 +1,7 @@
 package network.elrond.trie;
 
 import network.elrond.core.Value;
-import org.spongycastle.util.encoders.Hex;
+import network.elrond.crypto.util.encoders.Hex;
 
 /**
  * www.ethereumJ.com

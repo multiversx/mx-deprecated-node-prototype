@@ -7,8 +7,8 @@ import network.elrond.service.AppServiceProvider;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
-import org.spongycastle.util.encoders.Base64;
-import org.spongycastle.util.encoders.Hex;
+import network.elrond.crypto.util.encoders.Base64;
+import network.elrond.crypto.util.encoders.Hex;
 
 import java.io.IOException;
 import java.math.BigInteger;

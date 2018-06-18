@@ -1,6 +1,7 @@
 package network.elrond.consensus;
 
 import network.elrond.core.Util;
+import network.elrond.crypto.SHA3Helper;
 import network.elrond.service.AppServiceProvider;
 
 import java.math.BigInteger;
@@ -160,7 +161,7 @@ public class SPoSServiceImpl implements SPoSService {
         int size = weightedList.size();
         int startIdx = 0;
         while (tempList.size() < Util.VERIFIER_GROUP_SIZE) {
-            BigInteger bi = new BigInteger(Util.SHA3.get().digest((strRandomSource + Integer.toString(nonce)).getBytes()));
+            BigInteger bi = new BigInteger(SHA3Helper.sha3((strRandomSource + Integer.toString(nonce)).getBytes()));
 
             startIdx = bi.mod(BigInteger.valueOf(size)).intValue();
 

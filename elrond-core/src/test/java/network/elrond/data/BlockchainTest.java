@@ -3,7 +3,7 @@ package network.elrond.data;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.service.AppServiceProvider;
-import org.spongycastle.util.encoders.Base64;
+import network.elrond.crypto.util.encoders.Base64;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

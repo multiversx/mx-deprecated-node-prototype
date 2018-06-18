@@ -1,39 +1,20 @@
 package network.elrond.crypto;
 
-import org.spongycastle.asn1.sec.SECNamedCurves;
-import org.spongycastle.asn1.x9.X9ECParameters;
+import network.elrond.crypto.curves.SECNamedCurves;
+import network.elrond.crypto.asn1.x9.X9ECParameters;
 
-import org.spongycastle.jce.provider.BouncyCastleProvider;
-import org.spongycastle.math.ec.ECCurve;
-import org.spongycastle.math.ec.ECPoint;
+import network.elrond.crypto.ecmath.ECCurve;
+import network.elrond.crypto.ecmath.ECPoint;
 
 import java.math.BigInteger;
-import java.security.Security;
 
 public class ECCryptoServiceSecp256k1Impl implements ECCryptoService {
     private static final X9ECParameters EC_PARAMETERS = SECNamedCurves.getByName("secp256k1");
     private static final String ALGORITHM = "EC";
-    private static final String PROVIDER = "SC";
-
-    static {
-        if (Security.getProvider(PROVIDER) == null) {
-            Security.addProvider(new BouncyCastleProvider());
-        }
-    }
 
     @Override
     public String getAlgorithm() {
         return ALGORITHM;
-    }
-
-    @Override
-    public String getProvider() {
-        return PROVIDER;
-    }
-
-    @Override
-    public X9ECParameters getEcParameters() {
-        return EC_PARAMETERS;
     }
 
     @Override

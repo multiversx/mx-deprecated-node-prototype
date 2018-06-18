@@ -5,7 +5,7 @@ import network.elrond.data.Block;
 import network.elrond.data.DataBlock;
 import network.elrond.data.SerializationService;
 import network.elrond.service.AppServiceProvider;
-import org.spongycastle.util.encoders.Base64;
+import network.elrond.crypto.util.encoders.Base64;
 import org.junit.Assert;
 
 import java.io.IOException;

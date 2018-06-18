@@ -93,7 +93,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
             if (senderAccount == null) {
                 // sender account is new, can't send
-                logger.info("Sender account is new, can't send");
+                //logger.info("Sender account is new, can't send");
                 return false;
             }
 

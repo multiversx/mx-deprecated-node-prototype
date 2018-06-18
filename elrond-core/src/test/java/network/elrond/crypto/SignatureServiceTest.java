@@ -88,8 +88,8 @@ public class SignatureServiceTest {
         SignatureService signatureService = AppServiceProvider.getSignatureService();
         byte[] message = "Hello".getBytes();
         byte[] signature = null;
-        byte[] challenge = Util.SHA3.get().digest("dummy challenge".getBytes());
-        byte[] publicKey = Util.SHA3.get().digest("hello".getBytes());
+        byte[] challenge = SHA3Helper.sha3("dummy challenge".getBytes());
+        byte[] publicKey = SHA3Helper.sha3("hello".getBytes());
 
         signatureService.verifySignature(signature, challenge, message, publicKey);
     }
@@ -98,9 +98,9 @@ public class SignatureServiceTest {
     public void testVerifyNullChallenge() {
         SignatureService signatureService = AppServiceProvider.getSignatureService();
         byte[] message = "Hello".getBytes();
-        byte[] signature = Util.SHA3.get().digest("dummy signature".getBytes());
+        byte[] signature = SHA3Helper.sha3("dummy signature".getBytes());
         byte[] challenge = null;
-        byte[] publicKey = Util.SHA3.get().digest("hello".getBytes());
+        byte[] publicKey = SHA3Helper.sha3("hello".getBytes());
 
         signatureService.verifySignature(signature, challenge, message, publicKey);
     }
@@ -109,9 +109,9 @@ public class SignatureServiceTest {
     public void testVerifyNullMessage() {
         SignatureService signatureService = AppServiceProvider.getSignatureService();
         byte[] message = null;
-        byte[] signature = Util.SHA3.get().digest("dummy signature".getBytes());
-        byte[] challenge = Util.SHA3.get().digest("dummy challenge".getBytes());
-        byte[] publicKey = Util.SHA3.get().digest("hello".getBytes());
+        byte[] signature = SHA3Helper.sha3("dummy signature".getBytes());
+        byte[] challenge = SHA3Helper.sha3("dummy challenge".getBytes());
+        byte[] publicKey = SHA3Helper.sha3("hello".getBytes());
 
         signatureService.verifySignature(signature, challenge, message, publicKey);
     }
@@ -120,8 +120,8 @@ public class SignatureServiceTest {
     public void testVerifyNullPublicKey() {
         SignatureService signatureService = AppServiceProvider.getSignatureService();
         byte[] message = "Hello".getBytes();
-        byte[] signature = Util.SHA3.get().digest("dummy signature".getBytes());
-        byte[] challenge = Util.SHA3.get().digest("dummy challenge".getBytes());
+        byte[] signature = SHA3Helper.sha3("dummy signature".getBytes());
+        byte[] challenge = SHA3Helper.sha3("dummy challenge".getBytes());
         byte[] publicKey = null;
 
         signatureService.verifySignature(signature, challenge, message, publicKey);
@@ -132,8 +132,8 @@ public class SignatureServiceTest {
         SignatureService signatureService = AppServiceProvider.getSignatureService();
         byte[] message = "Hello".getBytes();
         byte[] signature = new byte[0];
-        byte[] challenge = Util.SHA3.get().digest("dummy challenge".getBytes());
-        byte[] publicKey = Util.SHA3.get().digest("hello".getBytes());
+        byte[] challenge = SHA3Helper.sha3("dummy challenge".getBytes());
+        byte[] publicKey = SHA3Helper.sha3("hello".getBytes());
 
         signatureService.verifySignature(signature, challenge, message, publicKey);
     }
@@ -142,9 +142,9 @@ public class SignatureServiceTest {
     public void testVerifyEmptyChallenge() {
         SignatureService signatureService = AppServiceProvider.getSignatureService();
         byte[] message = "Hello".getBytes();
-        byte[] signature = Util.SHA3.get().digest("dummy signature".getBytes());
+        byte[] signature = SHA3Helper.sha3("dummy signature".getBytes());
         byte[] challenge = new byte[0];
-        byte[] publicKey = Util.SHA3.get().digest("hello".getBytes());
+        byte[] publicKey = SHA3Helper.sha3("hello".getBytes());
 
         signatureService.verifySignature(signature, challenge, message, publicKey);
     }
@@ -153,9 +153,9 @@ public class SignatureServiceTest {
     public void testVerifyEmptyMessage() {
         SignatureService signatureService = AppServiceProvider.getSignatureService();
         byte[] message = new byte[0];
-        byte[] signature = Util.SHA3.get().digest("dummy signature".getBytes());
-        byte[] challenge = Util.SHA3.get().digest("dummy challenge".getBytes());
-        byte[] publicKey = Util.SHA3.get().digest("hello".getBytes());
+        byte[] signature = SHA3Helper.sha3("dummy signature".getBytes());
+        byte[] challenge = SHA3Helper.sha3("dummy challenge".getBytes());
+        byte[] publicKey = SHA3Helper.sha3("hello".getBytes());
 
         signatureService.verifySignature(signature, challenge, message, publicKey);
     }
@@ -164,8 +164,8 @@ public class SignatureServiceTest {
     public void testVerifyEmptyPublicKey() {
         SignatureService signatureService = AppServiceProvider.getSignatureService();
         byte[] message = "Hello".getBytes();
-        byte[] signature = Util.SHA3.get().digest("dummy signature".getBytes());
-        byte[] challenge = Util.SHA3.get().digest("dummy challenge".getBytes());
+        byte[] signature = SHA3Helper.sha3("dummy signature".getBytes());
+        byte[] challenge = SHA3Helper.sha3("dummy challenge".getBytes());
         byte[] publicKey = new byte[0];
 
         signatureService.verifySignature(signature, challenge, message, publicKey);
@@ -180,7 +180,7 @@ public class SignatureServiceTest {
             byte[] privateKey = keyPair.getPrivateKey().getValue();
             // variate the message
             String message = "hello Elrond network " + i;
-            byte[] msgHash = Util.SHA3.get().digest(message.getBytes());
+            byte[] msgHash = SHA3Helper.sha3(message.getBytes());
             SignatureService signatureService = AppServiceProvider.getSignatureService();
             Signature sig;
 
@@ -203,7 +203,7 @@ public class SignatureServiceTest {
             byte[] privateKey = keyPair.getPrivateKey().getValue();
             // variate the message
             String message = ("hello Elrond network " + i);
-            byte[] msgHash = Util.SHA3.get().digest(message.getBytes());
+            byte[] msgHash = SHA3Helper.sha3(message.getBytes());
             String msgHashString = Util.byteArrayToHexString(msgHash);
             SignatureService signatureService = AppServiceProvider.getSignatureService();
             Signature sig;

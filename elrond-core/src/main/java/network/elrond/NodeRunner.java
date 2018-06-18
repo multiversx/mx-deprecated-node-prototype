@@ -18,7 +18,7 @@ public class NodeRunner {
         String nodeName = "elrond-node-2";
         Integer port = 4001;
         Integer masterPeerPort = 4000;
-        String masterPeerIpAddress = "192.168.11.121";
+        String masterPeerIpAddress = "127.0.0.1";
         String privateKey = "026c00d83e0dc47e6b626ed6c42f636b";
 
         AppContext context = new AppContext();

@@ -5,7 +5,6 @@ import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
-import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -242,7 +241,7 @@ public class MultiSignatureBNTest {
     @Test(expected = IllegalArgumentException.class)
     public void testComputeSignatureShareNullPrivateKey() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
-        byte[] challenge = Util.SHA3.get().digest("dummy challenge".getBytes());
+        byte[] challenge = SHA3Helper.sha3("dummy challenge".getBytes());
         byte[] privateKey = null;
         byte[] commitmentSecret = signatureService.computeCommitmentSecret();
 
@@ -253,7 +252,7 @@ public class MultiSignatureBNTest {
     public void testComputeSignatureShareEmptyPrivateKey() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         byte[] commitmentSecret = signatureService.computeCommitmentSecret();
-        byte[] challenge = Util.SHA3.get().digest("dummy challenge".getBytes());
+        byte[] challenge = SHA3Helper.sha3("dummy challenge".getBytes());
         byte[] privateKey = new byte[0];
 
         signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);
@@ -262,7 +261,7 @@ public class MultiSignatureBNTest {
     @Test(expected = IllegalArgumentException.class)
     public void testComputeSignatureShareNullCommitmentSecret() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
-        byte[] challenge = Util.SHA3.get().digest("dummy challenge".getBytes());
+        byte[] challenge = SHA3Helper.sha3("dummy challenge".getBytes());
         byte[] privateKey = new PrivateKey().getValue();;
         byte[] commitmentSecret = null;
 
@@ -273,7 +272,7 @@ public class MultiSignatureBNTest {
     public void testComputeSignatureShareEmptyCommitmentSecret() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         byte[] commitmentSecret = new byte[0];
-        byte[] challenge = Util.SHA3.get().digest("dummy challenge".getBytes());
+        byte[] challenge = SHA3Helper.sha3("dummy challenge".getBytes());
         byte[] privateKey = new PrivateKey().getValue();
 
         signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);
@@ -392,7 +391,7 @@ public class MultiSignatureBNTest {
         byte[] aggregatedCommitment;
         byte[] aggregatedSignature;
         byte[] msg_to_sign = "World’s First High Throughput Blockchain Platform Implementing Adaptive State Sharding and Secure Proof of Stake".getBytes();
-        byte[] msg_to_sign_hash = Util.SHA3.get().digest(msg_to_sign);
+        byte[] msg_to_sign_hash = SHA3Helper.sha3(msg_to_sign);
         Random rand = new Random();
         int random;
         int chosen;

@@ -66,7 +66,27 @@ public class ElrondNodeController {
                       @RequestParam(defaultValue = "elrond-node-1", required = false) String blockchainRestorePath
 
     ) {
+        nodeName = "elrond-node-1";
+        port = 4000;
+        masterPeerPort = 4000;
+        masterPeerIpAddress = "127.0.0.1";
+        privateKey = "026c00d83e0dc47e6b626ed6c42f636b";
 
+        AppContext context = new AppContext();
+        context.setMasterPeerIpAddress(masterPeerIpAddress);
+        context.setMasterPeerPort(masterPeerPort);
+        context.setPort(port);
+        context.setNodeName(nodeName);
+        context.setStorageBasePath(nodeName);
+        PrivateKey privateKey1 = new PrivateKey(privateKey);
+        PublicKey publicKey = new PublicKey(privateKey1);
+
+        context.setPrivateKey(privateKey1);
+        String mintAddress = Util.getAddressFromPublicKey(publicKey.getValue());
+        context.setStrAddressMint(mintAddress);
+        context.setValueMint(Util.VALUE_MINTING);
+
+/*
         AppContext context = new AppContext();
 
         context.setMasterPeerIpAddress(masterPeerIpAddress);
@@ -88,7 +108,7 @@ public class ElrondNodeController {
         context.setPrivateKey(privateKey1);
         String mintAddress = Util.getAddressFromPublicKey(publicKey.getValue());
         context.setStrAddressMint(mintAddress);
-
+*/
 
 
         //log appender

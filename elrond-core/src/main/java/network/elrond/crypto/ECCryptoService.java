@@ -1,17 +1,12 @@
 package network.elrond.crypto;
 
-import org.spongycastle.asn1.x9.X9ECParameters;
-import org.spongycastle.math.ec.ECCurve;
-import org.spongycastle.math.ec.ECPoint;
+import network.elrond.crypto.ecmath.ECCurve;
+import network.elrond.crypto.ecmath.ECPoint;
 
 import java.math.BigInteger;
 
 public interface ECCryptoService {
     String getAlgorithm();
-
-    String getProvider();
-
-    X9ECParameters getEcParameters();
 
     ECCurve getCurve();
 

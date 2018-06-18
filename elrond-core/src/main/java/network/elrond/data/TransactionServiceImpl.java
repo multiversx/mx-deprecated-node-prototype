@@ -48,15 +48,13 @@ public class TransactionServiceImpl implements TransactionService {
      */
     public void signTransaction(Transaction tx, byte[] privateKeysBytes, byte[] publicKeyBytes) {
 
-        if(tx == null){
+        if (tx == null) {
             throw new IllegalArgumentException("Transaction cannot be null");
         }
 
-        if(privateKeysBytes == null){
+        if (privateKeysBytes == null) {
             throw new IllegalArgumentException("PrivateKeysBytes cannot be null");
         }
-
-
 
 
         tx.setSignature(null);
@@ -85,7 +83,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @return true if tx passes all consistency tests
      */
     public boolean verifyTransaction(Transaction tx) {
-        if(tx == null){
+        if (tx == null) {
             throw new IllegalArgumentException("Transaction cannot be null");
         }
 
@@ -128,11 +126,11 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public List<Transaction> getTransactions(Blockchain blockchain, Block block) throws IOException, ClassNotFoundException {
 
-        if(blockchain == null){
+        if (blockchain == null) {
             throw new IllegalArgumentException("Blockchain cannot be null");
         }
 
-        if(block == null){
+        if (block == null) {
             throw new IllegalArgumentException("Block cannot be null");
         }
 
@@ -145,7 +143,7 @@ public class TransactionServiceImpl implements TransactionService {
         for (byte[] hash : hashes) {
             String hashString = Util.getDataEncoded64(hash);
             Transaction transaction = AppServiceProvider.getBlockchainService().get(hashString, blockchain, BlockchainUnitType.TRANSACTION);
-            if(transaction==null){
+            if (transaction == null) {
                 logger.info("Found null transaction for hash: " + hash);
                 continue;
             }
@@ -170,8 +168,6 @@ public class TransactionServiceImpl implements TransactionService {
         t.setPubKey(Util.getAddressFromPublicKey(sender.getValue()));
 
 
-
         return t;
     }
-
 }

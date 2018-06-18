@@ -2,9 +2,9 @@ package network.elrond.core;
 
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
-import org.spongycastle.jcajce.provider.digest.SHA256;
-import org.spongycastle.jcajce.provider.digest.SHA3.DigestSHA3;
-import org.spongycastle.util.encoders.Base64;
+import network.elrond.crypto.SHA3Helper;
+import network.elrond.crypto.SHA256Helper;
+import network.elrond.crypto.util.encoders.Base64;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -27,24 +27,18 @@ public class Util {
     public static final int MAX_LEN_ADDR = 33; //equals public key
     public static final int MAX_LEN_PUB_KEY = 33;
 
-    public static final ThreadLocal<DigestSHA3> SHA3 = ThreadLocal.withInitial(() -> new DigestSHA3(256));
-
-
-    public static SHA256.Digest SHA256 = new SHA256.Digest();
+//    public static final ThreadLocal<SHA3Digest> SHA3 = ThreadLocal.withInitial(() -> new SHA3Digest(256));
+//    public static SHA256Digest SHA256 = new SHA256Digest();
 
     public static BigInteger BIG_INT_MIN_ONE = BigInteger.valueOf(-1);
 
     public static byte[] EMPTY_BYTE_ARRAY;
-    public static byte[] EMPTY_DATA_HASH;
-
     public static final PrivateKey PRIVATE_KEY_MINTING;
     public static final PublicKey PUBLIC_KEY_MINTING;
     public static final BigInteger VALUE_MINTING;
 
     static {
         EMPTY_BYTE_ARRAY = new byte[0];
-        EMPTY_DATA_HASH = SHA3.get().digest(EMPTY_BYTE_ARRAY);
-
         PRIVATE_KEY_MINTING = new PrivateKey("MINTING ADDRESS FOR INITIAL TRANSFER");
         PUBLIC_KEY_MINTING = new PublicKey(PRIVATE_KEY_MINTING);
 
@@ -122,8 +116,8 @@ public class Util {
 
 
     public static String getHashEncoded64(String data) {
-        byte[] buff = SHA3.get().digest(data.getBytes());
-
+        byte[] buff = data.getBytes();
+        buff = SHA3Helper.sha3(buff);
         return (new String(Base64.encode(buff)));
     }
 
