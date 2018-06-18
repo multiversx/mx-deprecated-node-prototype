@@ -1,7 +1,7 @@
 package network.elrond.consensus;
 
 import junit.framework.TestCase;
-import network.elrond.chronology.Epoch;
+//import network.elrond.chronology.Epoch;
 import network.elrond.chronology.Round;
 import org.junit.Test;
 import network.elrond.core.Util;

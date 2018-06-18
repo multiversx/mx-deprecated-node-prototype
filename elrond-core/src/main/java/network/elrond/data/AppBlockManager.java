@@ -74,7 +74,7 @@ public class AppBlockManager {
         Round round = chronologyService.getRoundFromDateTime(blockchain.getGenesisBlock().getTimestamp(),
                 chronologyService.getSynchronizedTime(ntpClient));
         block.setRoundHeight(round.getIndex());
-        block.setTimestamp(round.getStartRoundMillis());
+        block.setTimestamp(round.getStartTimeStamp());
 
         addTransactions(transactions, accounts, block);
         block.setAppStateHash(accounts.getAccountsPersistenceUnit().getRootHash());

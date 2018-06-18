@@ -14,21 +14,21 @@ public enum RoundState {
     MULTI_SIGN_ROUND_3(250),
     END_ROUND(0);
 
-    private final int roundStateMillis;
+    private final int roundStateDuration;
 
     private final static EnumSet<RoundState> MAIN_SET = EnumSet.allOf(RoundState.class);
 
-    private RoundState(final int roundStateMillis) {
-        this.roundStateMillis = roundStateMillis;
+    RoundState(final int roundStateDuration) {
+        this.roundStateDuration = roundStateDuration;
     }
 
-    public int getRoundStateMillis(){
-        return (roundStateMillis);
+    public int getRoundStateDuration(){
+        return (roundStateDuration);
     }
 
     @Override
     public String toString(){
-        return (String.format("SubRoundType{%s, order=%d, millis:%d}", this.name(), this.ordinal(), this.roundStateMillis));
+        return (String.format("SubRoundType{%s, order=%d, duration:%d}", this.name(), this.ordinal(), this.roundStateDuration));
     }
 
     public static EnumSet<RoundState> getEnumSet(){

@@ -4,15 +4,12 @@ import java.math.BigInteger;
 import java.util.List;
 
 public interface ChronologyService {
-    long getRoundTimeMillis();
+    long getRoundTimeDuration();
 
-    boolean isDateTimeInRound(Round round, long dateMs) throws IllegalArgumentException;
+    boolean isDateTimeInRound(Round round, long timeStamp) throws IllegalArgumentException;
 
-    Round getRoundFromDateTime(long genesisRoundTimeStartMilliseconds, long dateMs) throws IllegalArgumentException;
+    Round getRoundFromDateTime(long genesisRoundTimeStamp, long timeStamp) throws IllegalArgumentException;
 
     long getSynchronizedTime(NTPClient ntpClient);
 
-//    List<String> getListNTPServers();
-//
-//    NTPClient getNtpClient();
 }

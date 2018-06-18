@@ -69,8 +69,8 @@ public class ExecutionServiceImpl implements ExecutionService {
         ChronologyService chronologyService = AppServiceProvider.getChronologyService();
 
         Round roundBlock = new Round();
-        roundBlock.setStartRoundMillis(blockchain.getGenesisBlock().getTimestamp() +
-                block.getRoundHeight() * chronologyService.getRoundTimeMillis());
+        roundBlock.setStartTimeStamp(blockchain.getGenesisBlock().getTimestamp() +
+                block.getRoundHeight() * chronologyService.getRoundTimeDuration());
 
         return(chronologyService.isDateTimeInRound(roundBlock, block.getTimestamp()));
     }

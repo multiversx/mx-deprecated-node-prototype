@@ -9,6 +9,7 @@ import network.elrond.chronology.SubRoundEventHandler;
 import network.elrond.chronology.RoundState;
 import network.elrond.core.ThreadUtil;
 import network.elrond.data.Block;
+import network.elrond.processor.AppTask;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -23,6 +24,9 @@ public class ChronologyBlockTaskTest {
     public void testEventHandlers() throws Exception{
         ChronologyBlockTask chronologyBlockTask = new ChronologyBlockTask();
         Application application = new Application(new AppContext());
+
+        AppTask ntpClientInitializerProcessor = new NtpClientInitializerProcessor();
+        ntpClientInitializerProcessor.process(application);
 
         chronologyBlockTask.doProcess(application);
 
@@ -57,7 +61,7 @@ public class ChronologyBlockTaskTest {
 
         List<RoundState> listFound = new ArrayList<>();
 
-        for (long i = 0; i < chronologyService.getRoundTimeMillis(); i++){
+        for (long i = 0; i < chronologyService.getRoundTimeDuration(); i++){
             RoundState subRoundsType = chronologyBlockTask.computeRoundState(0, i);
 
             if (!listFound.contains(subRoundsType)){

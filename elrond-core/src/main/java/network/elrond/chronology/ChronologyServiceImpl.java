@@ -2,55 +2,37 @@ package network.elrond.chronology;
 
 import network.elrond.core.Util;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class ChronologyServiceImpl implements ChronologyService {
-    private final long roundTimeMillis;
-
-//    private final List<String> listNTPServers = Arrays.asList("time.windows.com","time-a.nist.gov");
-//    private NTPClient ntpClient = null;
+    private final long roundTimeDuration;
 
     public ChronologyServiceImpl(){
-        roundTimeMillis = 4000; //4 seconds
-//        try {
-//            ntpClient = new NTPClient(listNTPServers, 1000);
-//        } catch (Exception ex) {
-//            System.out.println("Error while instantiating ntpClient!");
-//            ex.printStackTrace();
-//        }
+        roundTimeDuration = 4000; //4 seconds
     }
 
-    public ChronologyServiceImpl(long roundTimeMillis) throws IllegalArgumentException{
-        Util.check(roundTimeMillis > 0, "roundTimeMillis must be a strict positive number!");
+    public ChronologyServiceImpl(long roundTimeDuration) throws IllegalArgumentException{
+        Util.check(roundTimeDuration > 0, "roundTimeDuration must be a strict positive number!");
 
-        this.roundTimeMillis = roundTimeMillis;
-//        try {
-//            ntpClient = new NTPClient(listNTPServers, 1000);
-//        } catch (Exception ex) {
-//            System.out.println("Error while instantiating ntpClient!");
-//            ex.printStackTrace();
-//        }
+        this.roundTimeDuration = roundTimeDuration;
     }
 
-    public long getRoundTimeMillis(){
-        return(roundTimeMillis);
+    public long getRoundTimeDuration(){
+        return(roundTimeDuration);
     }
 
-    public boolean isDateTimeInRound(Round round, long dateMillis) throws IllegalArgumentException{
+    public boolean isDateTimeInRound(Round round, long timeStamp) throws IllegalArgumentException{
         Util.check(round != null, "round should not be null!");
 
-        return((round.getStartRoundMillis() <= dateMillis) && (dateMillis < round.getStartRoundMillis() + roundTimeMillis));
+        return((round.getStartTimeStamp() <= timeStamp) && (timeStamp < round.getStartTimeStamp() + roundTimeDuration));
     }
 
-    public Round getRoundFromDateTime(long genesisRoundTimeStartMillis, long dateMillis) throws IllegalArgumentException{
-        long delta = dateMillis - genesisRoundTimeStartMillis;
+    public Round getRoundFromDateTime(long genesisRoundTimeStamp, long timeStamp) throws IllegalArgumentException{
+        long delta = timeStamp - genesisRoundTimeStamp;
 
-        Util.check(dateMillis >= genesisRoundTimeStartMillis, "genesisRoundTimeStartMillis should be lower or equal to dateMillis!");
+        Util.check(timeStamp >= genesisRoundTimeStamp, "genesisRoundTimeStamp should be lower or equal to dateMillis!");
 
         Round r = new Round();
-        r.setIndex(delta / roundTimeMillis);
-        r.setStartRoundMillis(genesisRoundTimeStartMillis + r.getIndex() * roundTimeMillis);
+        r.setIndex(delta / roundTimeDuration);
+        r.setStartTimeStamp(genesisRoundTimeStamp + r.getIndex() * roundTimeDuration);
 
         return(r);
     }
@@ -62,13 +44,4 @@ public class ChronologyServiceImpl implements ChronologyService {
 
         return(System.currentTimeMillis());
     }
-
-//    public List<String> getListNTPServers(){
-//        return (listNTPServers);
-//    }
-//
-//    public NTPClient getNtpClient(){
-//        return(ntpClient);
-//    }
-
 }

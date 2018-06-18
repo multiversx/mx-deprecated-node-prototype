@@ -3,14 +3,10 @@ package network.elrond.chronology;
 import junit.framework.TestCase;
 import network.elrond.Application;
 import network.elrond.application.AppContext;
-import network.elrond.consensus.Validator;
 import network.elrond.core.ThreadUtil;
 import network.elrond.processor.AppTasks;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
-
-import java.math.BigInteger;
-import java.util.Date;
 
 public class ChronologyServiceTest {
     @Test(expected = IllegalArgumentException.class)
@@ -36,7 +32,7 @@ public class ChronologyServiceTest {
         ChronologyService chronologyService = new ChronologyServiceImpl(4000);
 
         Round r = new Round();
-        r.setStartRoundMillis(10000);
+        r.setStartTimeStamp(10000);
 
         TestCase.assertFalse(chronologyService.isDateTimeInRound(r, 1));
         TestCase.assertFalse(chronologyService.isDateTimeInRound(r, 9999));
@@ -53,37 +49,37 @@ public class ChronologyServiceTest {
         Round r = chronologyService.getRoundFromDateTime(10000, 10000);
 
         TestCase.assertEquals(0, r.getIndex());
-        TestCase.assertEquals(10000, r.getStartRoundMillis());
+        TestCase.assertEquals(10000, r.getStartTimeStamp());
 
         r = chronologyService.getRoundFromDateTime(10001, 10002);
 
         TestCase.assertEquals(0, r.getIndex());
-        TestCase.assertEquals(10001, r.getStartRoundMillis());
+        TestCase.assertEquals(10001, r.getStartTimeStamp());
 
         r = chronologyService.getRoundFromDateTime(10001, 13002);
 
         TestCase.assertEquals(0, r.getIndex());
-        TestCase.assertEquals(10001, r.getStartRoundMillis());
+        TestCase.assertEquals(10001, r.getStartTimeStamp());
 
         r = chronologyService.getRoundFromDateTime(10001, 14000);
 
         TestCase.assertEquals(0, r.getIndex());
-        TestCase.assertEquals(10001, r.getStartRoundMillis());
+        TestCase.assertEquals(10001, r.getStartTimeStamp());
 
         r = chronologyService.getRoundFromDateTime(10001, 14001);
 
         TestCase.assertEquals(1, r.getIndex());
-        TestCase.assertEquals(14001, r.getStartRoundMillis());
+        TestCase.assertEquals(14001, r.getStartTimeStamp());
 
         r = chronologyService.getRoundFromDateTime(10001, 18000);
 
         TestCase.assertEquals(1, r.getIndex());
-        TestCase.assertEquals(14001, r.getStartRoundMillis());
+        TestCase.assertEquals(14001, r.getStartTimeStamp());
 
         r = chronologyService.getRoundFromDateTime(10001, 18001);
 
         TestCase.assertEquals(2, r.getIndex());
-        TestCase.assertEquals(18001, r.getStartRoundMillis());
+        TestCase.assertEquals(18001, r.getStartTimeStamp());
 
         System.out.println(r);
     }

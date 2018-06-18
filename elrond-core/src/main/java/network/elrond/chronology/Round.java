@@ -1,19 +1,17 @@
 package network.elrond.chronology;
 
-import java.math.BigInteger;
-
 public class Round {
     private long index;
-    private long startRoundMillis;
+    private long startTimeStamp;
 
     public Round() {
         index = 0;
-        startRoundMillis = 0;
+        startTimeStamp = 0;
     }
 
-    public Round(long index, long startRoundMillis) {
+    public Round(long index, long startTimeStamp) {
         this.index = index;
-        this.startRoundMillis = startRoundMillis;
+        this.startTimeStamp = startTimeStamp;
     }
 
     public long getIndex() {
@@ -24,16 +22,16 @@ public class Round {
         this.index = index;
     }
 
-    public long getStartRoundMillis() {
-        return(startRoundMillis);
+    public long getStartTimeStamp() {
+        return(startTimeStamp);
     }
 
-    public void setStartRoundMillis(long startRoundMillis){
-        this.startRoundMillis = startRoundMillis;
+    public void setStartTimeStamp(long startTimeStamp){
+        this.startTimeStamp = startTimeStamp;
     }
 
     @Override
     public String toString(){
-        return(String.format("Round{index=%d, start timestamp=%d}", index, startRoundMillis));
+        return(String.format("Round{index=%d, start timestamp=%d}", index, startTimeStamp));
     }
 }

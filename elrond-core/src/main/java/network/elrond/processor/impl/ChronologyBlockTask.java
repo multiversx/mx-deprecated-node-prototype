@@ -2,10 +2,7 @@ package network.elrond.processor.impl;
 
 import network.elrond.Application;
 import network.elrond.application.AppState;
-import network.elrond.chronology.ChronologyService;
-import network.elrond.chronology.Round;
-import network.elrond.chronology.SubRound;
-import network.elrond.chronology.RoundState;
+import network.elrond.chronology.*;
 import network.elrond.core.EventHandler;
 import network.elrond.core.ThreadUtil;
 import network.elrond.service.AppServiceProvider;
@@ -30,14 +27,17 @@ public class ChronologyBlockTask extends AbstractBlockTask {
 
             ChronologyService chronologyService = AppServiceProvider.getChronologyService();
 
-            long genesisTime = Long.MIN_VALUE;
+            long genesisTimeStampCached = Long.MIN_VALUE;
+
+            //TESTING PURPOSES!!!
+            MAIN_QUEUE.add(new SubRoundEventHandler());
 
             AppState state = application.getState();
             while (state.isStillRunning()) {
                 ThreadUtil.sleep(1);
 
                 //check if there is a genesis block (otherwise can not compute current round)
-                if (genesisTime == Long.MIN_VALUE) {
+                if (genesisTimeStampCached == Long.MIN_VALUE) {
                     boolean isGenesisBlockAbsent = (application == null) || (application.getState() == null) ||
                             (application.getState().getBlockchain() == null) || (application.getState().getBlockchain().getGenesisBlock() == null);
 
@@ -49,16 +49,17 @@ public class ChronologyBlockTask extends AbstractBlockTask {
 
                         continue;
                     } else{
-                        genesisTime = application.getState().getBlockchain().getGenesisBlock().getTimestamp();
+                        genesisTimeStampCached = application.getState().getBlockchain().getGenesisBlock().getTimestamp();
+                        logger.info(String.format("Cached genesis time stamp as: %d", genesisTimeStampCached));
                     }
                 }
 
-                long currentTime = chronologyService.getSynchronizedTime(state.getNtpClient());
+                long currentTimeStamp = chronologyService.getSynchronizedTime(state.getNtpClient());
 
-                currentRound = chronologyService.getRoundFromDateTime(genesisTime, currentTime);
+                currentRound = chronologyService.getRoundFromDateTime(genesisTimeStampCached, currentTimeStamp);
 
                 computeAndCallStartEndRounds(application, currentRound);
-                computeAndCallRoundState(application, currentRound, currentTime);
+                computeAndCallRoundState(application, currentRound, currentTimeStamp);
             }
         });
 
@@ -66,11 +67,12 @@ public class ChronologyBlockTask extends AbstractBlockTask {
     }
 
     private void computeAndCallStartEndRounds(Application application, Round currentRound){
-        if ((previousRound == null) || (previousRound.getIndex() != currentRound.getIndex())){
-            //round transition
+        boolean isFirstRoundTransition = (previousRound == null);
+        boolean isRoundTransition = isFirstRoundTransition || (previousRound.getIndex() != currentRound.getIndex());
+        boolean existsPreviousRound = (previousRound != null);
 
-            if (previousRound != null){
-                //close last round
+        if (isRoundTransition){
+            if (existsPreviousRound){
                 notifyEventObjects(application, previousRound, RoundState.END_ROUND);
             }
 
@@ -82,15 +84,18 @@ public class ChronologyBlockTask extends AbstractBlockTask {
     }
 
     private void computeAndCallRoundState(Application application, Round currentRound, long currentTime){
-        RoundState currentRoundState = computeRoundState(currentRound.getStartRoundMillis(), currentTime);
+        RoundState currentRoundState = computeRoundState(currentRound.getStartTimeStamp(), currentTime);
 
-        if (currentRoundState == null){
-            //nothing
+        boolean isCurrentRoundStateNotDefined = (currentRoundState == null);
+
+        if (isCurrentRoundStateNotDefined){
             return;
         }
 
-        if ((previousRoundState == null) || (previousRoundState != currentRoundState)) {
-            //round state transition
+        boolean isFirstRoundStateTransition = (previousRoundState == null);
+        boolean isRoundStateTransition = isFirstRoundStateTransition || (previousRoundState != currentRoundState);
+
+        if (isRoundStateTransition) {
             notifyEventObjects(application, currentRound, currentRoundState);
         }
 
@@ -103,6 +108,8 @@ public class ChronologyBlockTask extends AbstractBlockTask {
         subRound.setRound(round);
         subRound.setRoundState(roundState);
 
+        logger.info(String.format("ChronologyBlockTask event %s, %s", round.toString(), roundState.toString()));
+
         for (EventHandler eventHandler:MAIN_QUEUE){
             eventHandler.onEvent(application,this, subRound);
         }
@@ -114,24 +121,22 @@ public class ChronologyBlockTask extends AbstractBlockTask {
         long cumulatedTime = 0;
 
         for (RoundState roundState : setRoundState){
-            boolean isRoundStartOrRoundEnd = (roundState == RoundState.START_ROUND) || (roundState == RoundState.END_ROUND);
+            boolean isRoundStateTransitionNotSubrounds = (roundState == RoundState.START_ROUND) || (roundState == RoundState.END_ROUND);
 
-            if (isRoundStartOrRoundEnd){
+            if (isRoundStateTransitionNotSubrounds){
                 continue;
             }
 
             boolean isCurrentTimeStampInSubRoundInterval = (cumulatedTime <= currentTimeStamp - roundStartTimeStamp) &&
-                    (currentTimeStamp - roundStartTimeStamp < cumulatedTime + roundState.getRoundStateMillis());
+                    (currentTimeStamp - roundStartTimeStamp < cumulatedTime + roundState.getRoundStateDuration());
 
             if (isCurrentTimeStampInSubRoundInterval){
                 return(roundState);
             }
 
-            cumulatedTime += roundState.getRoundStateMillis();
+            cumulatedTime += roundState.getRoundStateDuration();
         }
 
         return (null);
     }
-
-
 }
