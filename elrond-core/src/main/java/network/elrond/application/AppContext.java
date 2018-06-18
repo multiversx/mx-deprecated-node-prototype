@@ -5,6 +5,8 @@ import network.elrond.data.BootstrapType;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.List;
 
 public class AppContext implements Serializable {
 
@@ -18,6 +20,8 @@ public class AppContext implements Serializable {
     private String strAddressMint = "000000000000000000000000000000000000000000000000000000000000000000";
     private BootstrapType bootstrapType = BootstrapType.REBUILD_FROM_DISK;//BootstrapType.START_FROM_SCRATCH;
     private BigInteger valueMint = BigInteger.ZERO;
+
+    private List<String> listNTPServers = Arrays.asList("time.windows.com", "time-a.nist.gov");
 
     public String getNodeName() {
         return nodeName;
@@ -94,6 +98,10 @@ public class AppContext implements Serializable {
 
     public PrivateKey getPrivateKey() {
         return privateKey;
+    }
+
+    public List<String> getListNTPServers(){
+        return (listNTPServers);
     }
 
 }

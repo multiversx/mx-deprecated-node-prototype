@@ -1,7 +1,11 @@
 package network.elrond.chronology;
 
 import junit.framework.TestCase;
+import network.elrond.Application;
+import network.elrond.application.AppContext;
 import network.elrond.consensus.Validator;
+import network.elrond.core.ThreadUtil;
+import network.elrond.processor.AppTasks;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
@@ -9,112 +13,107 @@ import java.math.BigInteger;
 import java.util.Date;
 
 public class ChronologyServiceTest {
-    @Test(expected = NullPointerException.class)
-    public void testIsDateTimeInEpochWithNullShouldThrowException() {
-        ChronologyService chronologyService = new ChronologyServiceImpl();
-        chronologyService.isDateTimeInEpoch(null, 1);
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetRoundFromDateTimeBadConfigShouldThrowException() {
+        ChronologyService chronologyService = new ChronologyServiceImpl(0);
+        chronologyService.getRoundFromDateTime(0, 0);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void testGetRoundFromDateTimeWithNullShouldThrowException() {
-        ChronologyService chronologyService = new ChronologyServiceImpl();
-        chronologyService.getRoundFromDateTime(null, 1);
+    @Test (expected = IllegalArgumentException.class)
+    public void testGetRoundFromDateTimeShouldThrowExceptionOnBadArguments(){
+        ChronologyService chronologyService = new ChronologyServiceImpl(4000);
+        chronologyService.getRoundFromDateTime(10000, 9999);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testGetRoundFromDateTimeWithNotInRangeShouldThrowException() {
+    public void testIsDateTimeInRoundWithNullShouldThrowException() {
         ChronologyService chronologyService = new ChronologyServiceImpl();
-
-        Epoch epoch = new Epoch();
-        epoch.setDateMsEpochStarts(1);
-
-        Round round = chronologyService.getRoundFromDateTime(epoch, 500000000);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testGenerateNewEpochWithNullShouldThrowException() {
-        ChronologyService chronologyService = new ChronologyServiceImpl();
-        chronologyService.generateNewEpoch(null);
+        chronologyService.isDateTimeInRound(null, 1);
     }
 
     @Test
-    public void testGetSecondsInEpoch(){
-        ChronologyService chronologyService = new ChronologyServiceImpl(10, 5);
+    public void testIsDateTimeInRound(){
+        ChronologyService chronologyService = new ChronologyServiceImpl(4000);
 
-        TestCase.assertEquals(chronologyService.getMillisecondsInEpoch(), 10 * 5 * 100);
-    }
+        Round r = new Round();
+        r.setStartRoundMillis(10000);
 
-    @Test
-    public void testIsDateTimeInEpoch(){
-        ChronologyService chronologyService = new ChronologyServiceImpl(28800, 4);
-
-        Epoch epoch = new Epoch();
-        epoch.setDateMsEpochStarts(1); //1 - 28800 * 4 * 100 + 1
-
-        TestCase.assertTrue(chronologyService.isDateTimeInEpoch(epoch, 1));
-        TestCase.assertTrue(chronologyService.isDateTimeInEpoch(epoch, 28800));
-        TestCase.assertFalse(chronologyService.isDateTimeInEpoch(epoch, 0));
-        TestCase.assertTrue(chronologyService.isDateTimeInEpoch(epoch, 28800*100*4));
-        TestCase.assertFalse(chronologyService.isDateTimeInEpoch(epoch, 28800*100*4 + 1));
-        TestCase.assertFalse(chronologyService.isDateTimeInEpoch(epoch, 28800*100*4 + 2));
+        TestCase.assertFalse(chronologyService.isDateTimeInRound(r, 1));
+        TestCase.assertFalse(chronologyService.isDateTimeInRound(r, 9999));
+        TestCase.assertTrue(chronologyService.isDateTimeInRound(r, 10000));
+        TestCase.assertTrue(chronologyService.isDateTimeInRound(r, 10001));
+        TestCase.assertTrue(chronologyService.isDateTimeInRound(r, 13999));
+        TestCase.assertFalse(chronologyService.isDateTimeInRound(r, 14000));
     }
 
     @Test
     public void testGetRoundFromDateTime() {
-        ChronologyService chronologyService = new ChronologyServiceImpl(28800, 4);
+        ChronologyService chronologyService = new ChronologyServiceImpl(4000);
 
-        Epoch epoch = new Epoch();
-        epoch.setDateMsEpochStarts(1); //1 - 28800 * 4 * 100 + 1
+        Round r = chronologyService.getRoundFromDateTime(10000, 10000);
 
-        TestCase.assertEquals(0, chronologyService.getRoundFromDateTime(epoch, 100).getRoundHeight());
-        TestCase.assertEquals(0, chronologyService.getRoundFromDateTime(epoch, 200).getRoundHeight());
-        TestCase.assertEquals(0, chronologyService.getRoundFromDateTime(epoch, 400).getRoundHeight());
-        TestCase.assertEquals(1, chronologyService.getRoundFromDateTime(epoch, 401).getRoundHeight());
-        TestCase.assertEquals(1, chronologyService.getRoundFromDateTime(epoch, 500).getRoundHeight());
-        TestCase.assertEquals(28799, chronologyService.getRoundFromDateTime(epoch, 28800 * 4 * 100).getRoundHeight());
+        TestCase.assertEquals(0, r.getIndex());
+        TestCase.assertEquals(10000, r.getStartRoundMillis());
 
-        TestCase.assertFalse(chronologyService.getRoundFromDateTime(epoch, 1).isLastRoundInEpoch());
-        TestCase.assertFalse(chronologyService.getRoundFromDateTime(epoch, 401).isLastRoundInEpoch());
-        TestCase.assertTrue(chronologyService.getRoundFromDateTime(epoch, 28800 * 4 * 100).isLastRoundInEpoch());
-    }
+        r = chronologyService.getRoundFromDateTime(10001, 10002);
 
-    @Test
-    public void testGenerateNewEpoch(){
-        ChronologyService chronologyService = new ChronologyServiceImpl(28800, 4);
+        TestCase.assertEquals(0, r.getIndex());
+        TestCase.assertEquals(10001, r.getStartRoundMillis());
 
-        Epoch epoch = new Epoch();
-        epoch.setDateMsEpochStarts(1);
-        epoch.getListEligible().add(new Validator("a"));
-        epoch.getListWaiting().add(new Validator("b"));
+        r = chronologyService.getRoundFromDateTime(10001, 13002);
 
-        Epoch epochNext = chronologyService.generateNewEpoch(epoch);
+        TestCase.assertEquals(0, r.getIndex());
+        TestCase.assertEquals(10001, r.getStartRoundMillis());
 
-        TestCase.assertEquals(epoch.getDateMsEpochStarts() + (28800 * 4 * 100), epochNext.getDateMsEpochStarts());
-        TestCase.assertEquals(0, epochNext.getListWaiting().size());
-        TestCase.assertEquals(2, epochNext.getListEligible().size());
-        TestCase.assertEquals(epoch.getEpochHeight() + 1, epochNext.getEpochHeight());
+        r = chronologyService.getRoundFromDateTime(10001, 14000);
+
+        TestCase.assertEquals(0, r.getIndex());
+        TestCase.assertEquals(10001, r.getStartRoundMillis());
+
+        r = chronologyService.getRoundFromDateTime(10001, 14001);
+
+        TestCase.assertEquals(1, r.getIndex());
+        TestCase.assertEquals(14001, r.getStartRoundMillis());
+
+        r = chronologyService.getRoundFromDateTime(10001, 18000);
+
+        TestCase.assertEquals(1, r.getIndex());
+        TestCase.assertEquals(14001, r.getStartRoundMillis());
+
+        r = chronologyService.getRoundFromDateTime(10001, 18001);
+
+        TestCase.assertEquals(2, r.getIndex());
+        TestCase.assertEquals(18001, r.getStartRoundMillis());
+
+        System.out.println(r);
     }
 
     @Test
     public void testGetNtpTime() throws Exception{
+        Application application = new Application(new AppContext());
+
+        AppTasks.NTP_CLIENT_INITIALIZER.process(application);
+
+        ThreadUtil.sleep(1000);
+
         ChronologyService chronologyService = AppServiceProvider.getChronologyService();
 
-        TestCase.assertNotNull(chronologyService.getNtpClient());
+        TestCase.assertNotNull(application.getState().getNtpClient());
 
-        chronologyService.getNtpClient().setPollMs(100);
+        application.getState().getNtpClient().setPollMs(100);
 
-        Thread.sleep(2000);
+        ThreadUtil.sleep(2000);
 
-        long currentDateNTP = chronologyService.getSynchronizedTime();
+        long currentDateNTP = chronologyService.getSynchronizedTime(application.getState().getNtpClient());
         long currentDateLocal = System.currentTimeMillis();
 
         System.out.println(String.format("NTP time: %d", currentDateNTP));
         System.out.println(String.format("Local time: %d", currentDateLocal));
         System.out.println(String.format("Difference: %d ms", currentDateNTP - currentDateLocal));
 
-        TestCase.assertFalse(chronologyService.getNtpClient().isOffline());
+        TestCase.assertFalse(application.getState().getNtpClient().isOffline());
 
-        System.out.println("Host: " + chronologyService.getNtpClient().getCurrentHostName());
+        System.out.println("Host: " + application.getState().getNtpClient().getCurrentHostName());
     }
 
 }

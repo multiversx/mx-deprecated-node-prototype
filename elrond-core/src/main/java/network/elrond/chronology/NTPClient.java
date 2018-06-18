@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import network.elrond.core.Util;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.NtpUtils;
 import org.apache.commons.net.ntp.NtpV3Packet;
@@ -74,9 +75,7 @@ public class NTPClient implements AutoCloseable{
     public NTPClient(List<String> listHosts, int pollMs) throws UnknownHostException, SocketException, NullPointerException {
         this.pollMs = pollMs;
 
-        if (listHosts == null){
-            throw new NullPointerException("listHosts should not be null!");
-        }
+        Util.check(listHosts != null, "listHosts should not be null!");
 
         StringBuilder stringBuilderHosts = new StringBuilder();
 

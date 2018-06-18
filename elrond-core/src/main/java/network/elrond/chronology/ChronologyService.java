@@ -1,17 +1,18 @@
 package network.elrond.chronology;
 
 import java.math.BigInteger;
+import java.util.List;
 
 public interface ChronologyService {
-    long getMillisecondsInEpoch();
+    long getRoundTimeMillis();
 
-    boolean isDateTimeInEpoch(Epoch epoch, long dateMs) throws NullPointerException;
+    boolean isDateTimeInRound(Round round, long dateMs) throws IllegalArgumentException;
 
-    Round getRoundFromDateTime(Epoch epoch, long dateMs) throws NullPointerException, IllegalArgumentException;
+    Round getRoundFromDateTime(long genesisRoundTimeStartMilliseconds, long dateMs) throws IllegalArgumentException;
 
-    Epoch generateNewEpoch(Epoch previousEpoch) throws NullPointerException;
+    long getSynchronizedTime(NTPClient ntpClient);
 
-    long getSynchronizedTime();
-
-    NTPClient getNtpClient();
+//    List<String> getListNTPServers();
+//
+//    NTPClient getNtpClient();
 }

@@ -5,6 +5,7 @@ import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
+import network.elrond.chronology.NTPClient;
 import network.elrond.data.BootstrapType;
 import network.elrond.data.LocationType;
 import network.elrond.service.AppServiceProvider;
@@ -25,6 +26,7 @@ public class BootstrapBlockTask extends AbstractBlockTask {
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();
         AppContext context = application.getContext();
+        NTPClient ntpClient = state.getNtpClient();
 
         try {
 
@@ -42,10 +44,10 @@ public class BootstrapBlockTask extends AbstractBlockTask {
 
             switch (bootstrapType) {
                 case START_FROM_SCRATCH:
-                    AppServiceProvider.getBootstrapService().startFromGenesis(accounts, blockchain, context);
+                    AppServiceProvider.getBootstrapService().startFromGenesis(accounts, blockchain, context, state.getNtpClient());
                     break;
                 case REBUILD_FROM_DISK:
-                    AppServiceProvider.getBootstrapService().restoreFromDisk(localBlockIndex, accounts, blockchain, context);
+                    AppServiceProvider.getBootstrapService().restoreFromDisk(localBlockIndex, accounts, blockchain, context, state.getNtpClient());
                     break;
                 default:
                     throw new RuntimeException("Not supported type" + bootstrapType);

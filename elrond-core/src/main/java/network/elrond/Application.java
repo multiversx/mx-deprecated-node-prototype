@@ -2,6 +2,7 @@ package network.elrond;
 
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
+import network.elrond.processor.AppTask;
 import network.elrond.processor.AppTasks;
 
 import java.io.IOException;
@@ -79,6 +80,11 @@ public class Application implements Serializable {
         // Execute transactions and emit block
         AppTasks.BLOCK_ASSEMBLY_PROCESSOR.process(this);
 
+        //init NTP client
+        AppTasks.NTP_CLIENT_INITIALIZER.process(this);
+
+        //start chronlogy processor
+        AppTasks.CHRONOLOGY.process(this);
     }
 
     /**

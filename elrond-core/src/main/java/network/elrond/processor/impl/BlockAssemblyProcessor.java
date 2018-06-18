@@ -6,6 +6,7 @@ import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
+import network.elrond.chronology.NTPClient;
 import network.elrond.core.ThreadUtil;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.data.AppBlockManager;
@@ -89,8 +90,9 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         Blockchain blockchain = state.getBlockchain();
         AppContext context = application.getContext();
         PrivateKey privateKey = context.getPrivateKey();
+        NTPClient ntpClient = state.getNtpClient();
 
-        AppBlockManager.instance().generateAndBroadcastBlock(hashes, accounts, blockchain, privateKey);
+        AppBlockManager.instance().generateAndBroadcastBlock(hashes, accounts, blockchain, privateKey, ntpClient);
 
     }
 

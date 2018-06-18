@@ -20,6 +20,8 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
     private Block currentBlock;
     private BigInteger currentBlockIndex = BigInteger.valueOf(-1);
 
+    private Block genesisBlock;
+
     private final Map<BlockchainUnitType, BlockchainPersistenceUnit<?, ?>> blockchain = new HashMap<>();
 
     public Blockchain(BlockchainContext context) throws IOException {
@@ -69,6 +71,17 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
             throw new IllegalArgumentException("CurrentBlock cannot be null");
         }
         this.currentBlock = currentBlock;
+    }
+
+    public Block getGenesisBlock(){
+        return(genesisBlock);
+    }
+
+    public void setGenesisBlock(Block genesisBlock){
+        if (genesisBlock == null) {
+            throw new IllegalArgumentException("GenesisBlock cannot be null");
+        }
+        this.genesisBlock = genesisBlock;
     }
 
     public BigInteger getCurrentBlockIndex() {

@@ -1,5 +1,6 @@
 package network.elrond.account;
 
+import network.elrond.chronology.NTPClient;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.data.Block;
 import network.elrond.data.Transaction;
@@ -28,5 +29,5 @@ public interface AccountStateService {
 
     Fun.Tuple2<Block, Transaction> generateGenesisBlock(
             String initialAddress, BigInteger initialValue,
-            AccountsContext accountsContextTemporary, PrivateKey privateKey);
+            AccountsContext accountsContextTemporary, PrivateKey privateKey, NTPClient ntpClient);
 }

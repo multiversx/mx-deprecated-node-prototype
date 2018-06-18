@@ -5,6 +5,8 @@ import network.elrond.account.AccountsManager;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
+import network.elrond.chronology.ChronologyService;
+import network.elrond.chronology.Round;
 import network.elrond.core.Util;
 import network.elrond.crypto.MultiSignatureService;
 import network.elrond.service.AppServiceProvider;
@@ -63,6 +65,16 @@ public class ExecutionServiceImpl implements ExecutionService {
         return signatureService.verifyAggregatedSignature(signersPublicKeys, signature, commitment, message, bitmap);
     }
 
+    private boolean validateBlockTimestampRound(Blockchain blockchain, Block block){
+        ChronologyService chronologyService = AppServiceProvider.getChronologyService();
+
+        Round roundBlock = new Round();
+        roundBlock.setStartRoundMillis(blockchain.getGenesisBlock().getTimestamp() +
+                block.getRoundHeight() * chronologyService.getRoundTimeMillis());
+
+        return(chronologyService.isDateTimeInRound(roundBlock, block.getTimestamp()));
+    }
+
     private ExecutionReport _processBlock(Accounts accounts, Blockchain blockchain, Block block) throws IOException, ClassNotFoundException {
         ExecutionReport blockExecutionReport = ExecutionReport.create();
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
@@ -81,6 +93,23 @@ public class ExecutionServiceImpl implements ExecutionService {
                 !blockchainService.contains(Util.getDataEncoded64(block.getPrevBlockHash()), blockchain, BlockchainUnitType.BLOCK)) {
 
             blockExecutionReport.ko("Previous block not in blockchain");
+            return blockExecutionReport;
+        }
+
+        //check if the current block is genesis and save it in blockchain structure
+        if (block.getNonce().equals(BigInteger.ZERO)){
+            blockchain.setGenesisBlock(block);
+        }
+
+        //check genesis block existence
+        if (blockchain.getGenesisBlock() == null){
+            blockExecutionReport.ko("Genesis block missing!");
+            return blockExecutionReport;
+        }
+
+        //check timestamp and round
+        if (!validateBlockTimestampRound(blockchain, block)){
+            blockExecutionReport.ko("Timestamp and round mismatch!");
             return blockExecutionReport;
         }
 

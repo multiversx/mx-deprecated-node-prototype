@@ -23,7 +23,7 @@ public class SeedNodeRunner {
         PublicKey pbKey = new PublicKey(new PrivateKey(seedNodeRunnerPrivateKey));
 
         AppContext context = ContextCreator.createAppContext(nodeName, seedNodeRunnerPrivateKey, masterPeerIpAddress, masterPeerPort, port,
-                BootstrapType.START_FROM_SCRATCH, nodeName, Util.VALUE_MINTING);
+                BootstrapType.REBUILD_FROM_DISK, nodeName, Util.VALUE_MINTING);
 
         ElrondFacade facade = new ElrondFacadeImpl();
 
