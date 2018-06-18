@@ -28,7 +28,7 @@ public class ChronologyBlockTaskTest {
         AppTask ntpClientInitializerProcessor = new NtpClientInitializerProcessor();
         ntpClientInitializerProcessor.process(application);
 
-        chronologyBlockTask.doProcess(application);
+        chronologyBlockTask.process(application);
 
         //chronologyBlockTask.MAIN_QUEUE.add(new SubRoundEventHandler());
 
