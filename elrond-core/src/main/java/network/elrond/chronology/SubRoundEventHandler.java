@@ -2,10 +2,14 @@ package network.elrond.chronology;
 
 import network.elrond.Application;
 import network.elrond.core.EventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
 public class SubRoundEventHandler implements EventHandler<SubRound> {
+    private static Logger logger = LoggerFactory.getLogger(SubRoundEventHandler.class.getName());
+
 
     public void onEvent(Application application, Object sender, SubRound data) {
         //just display data for now
@@ -38,7 +42,9 @@ public class SubRoundEventHandler implements EventHandler<SubRound> {
             stringBuilder.append(data);
         }
 
-        System.out.println(stringBuilder.toString());
+        logger.info(stringBuilder.toString());
+
+        //System.out.println(stringBuilder.toString());
     }
 
 

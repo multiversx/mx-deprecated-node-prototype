@@ -5,6 +5,8 @@ import network.elrond.application.AppState;
 import network.elrond.chronology.*;
 import network.elrond.core.EventHandler;
 import network.elrond.core.ThreadUtil;
+import network.elrond.processor.AppTask;
+import network.elrond.processor.AppTasks;
 import network.elrond.service.AppServiceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +15,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class ChronologyBlockTask extends AbstractBlockTask {
+public class ChronologyBlockTask implements AppTask {
 
     public static Queue<EventHandler> MAIN_QUEUE = new ConcurrentLinkedQueue<>();
     private Logger logger = LoggerFactory.getLogger(ChronologyBlockTask.class);
@@ -21,7 +23,7 @@ public class ChronologyBlockTask extends AbstractBlockTask {
     private RoundState previousRoundState = null;
 
     @Override
-    protected void doProcess(Application application) {
+    public void process(Application application) {
         Thread thread = new Thread(() -> {
             Round currentRound = null;
 
@@ -30,6 +32,8 @@ public class ChronologyBlockTask extends AbstractBlockTask {
             long genesisTimeStampCached = Long.MIN_VALUE;
 
             //TESTING PURPOSES!!!
+            logger.info("Called ChronologyBlockTask.doProcess()");
+            MAIN_QUEUE.clear();
             MAIN_QUEUE.add(new SubRoundEventHandler());
 
             AppState state = application.getState();
@@ -108,7 +112,7 @@ public class ChronologyBlockTask extends AbstractBlockTask {
         subRound.setRound(round);
         subRound.setRoundState(roundState);
 
-        logger.info(String.format("ChronologyBlockTask event %s, %s", round.toString(), roundState.toString()));
+        logger.info(String.format("ChronologyBlockTask event %s, %s, counts: %d", round.toString(), roundState.toString(), MAIN_QUEUE.size()));
 
         for (EventHandler eventHandler:MAIN_QUEUE){
             eventHandler.onEvent(application,this, subRound);

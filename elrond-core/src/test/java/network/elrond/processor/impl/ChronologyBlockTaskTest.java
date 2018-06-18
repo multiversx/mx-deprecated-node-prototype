@@ -30,7 +30,7 @@ public class ChronologyBlockTaskTest {
 
         chronologyBlockTask.doProcess(application);
 
-        chronologyBlockTask.MAIN_QUEUE.add(new SubRoundEventHandler());
+        //chronologyBlockTask.MAIN_QUEUE.add(new SubRoundEventHandler());
 
         do{
             ThreadUtil.sleep(1000);
