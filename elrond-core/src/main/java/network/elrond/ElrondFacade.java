@@ -1,15 +1,11 @@
 package network.elrond;
 
-import ch.qos.logback.core.Appender;
-import network.elrond.Application;
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
 import network.elrond.crypto.PKSKPair;
-import org.mapdb.Fun;
 import network.elrond.p2p.PingResponse;
 
 import java.math.BigInteger;
-import java.util.List;
 
 public interface ElrondFacade {
 
@@ -50,6 +46,7 @@ public interface ElrondFacade {
 
     /**
      * Pings an IP address and checks if port is open
+     *
      * @param ipAddress
      * @param port
      * @return
@@ -58,12 +55,14 @@ public interface ElrondFacade {
 
     /**
      * Generate public key and private key
+     *
      * @return
      */
     PKSKPair generatePublicKeyAndPrivateKey();
 
     /**
      * Generate public key from a private key
+     *
      * @param privateKey
      * @return
      */

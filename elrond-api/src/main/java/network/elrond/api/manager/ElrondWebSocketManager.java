@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class ElrondWebSocketManager {
 
-
     private final SimpMessagingTemplate template;
 
     @Autowired
