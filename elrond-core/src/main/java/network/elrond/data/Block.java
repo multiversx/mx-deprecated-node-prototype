@@ -196,7 +196,7 @@ public class Block implements Serializable {
         return (roundIndex);
     }
 
-    public void setRoundIndex(long roundHeight){
+    public void setRoundIndex(long roundIndex){
         this.roundIndex = roundIndex;
     }
 
