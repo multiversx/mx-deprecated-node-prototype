@@ -104,38 +104,40 @@ public class AppBlockManager {
         for (Transaction transaction : transactions) {
             boolean valid = AppServiceProvider.getTransactionService().verifyTransaction(transaction);
             if (!valid) {
-                rejectTransaction(transaction, state);
+                rejectTransaction(block, transaction, state);
                 logger.info("Invalid transaction discarded [verify] " + transaction);
                 continue;
             }
 
             ExecutionReport executionReport = AppServiceProvider.getExecutionService().processTransaction(transaction, accounts);
             if (!executionReport.isOk()) {
-                rejectTransaction(transaction, state);
+                rejectTransaction(block, transaction, state);
                 logger.info("Invalid transaction discarded [exec] " + transaction);
                 continue;
             }
 
             byte[] txHash = AppServiceProvider.getSerializationService().getHash(transaction);
-            acceptTransaction(transaction, state);
+            acceptTransaction(block, transaction, state);
 
             block.getListTXHashes().add(txHash);
         }
     }
 
-    private void acceptTransaction(Transaction transaction, AppState state) throws IOException {
+    private void acceptTransaction(Block block, Transaction transaction, AppState state) throws IOException {
 
         ReceiptStatus status = ReceiptStatus.ACCEPTED;
         String log = "Transaction processed";
 
-        sendReceipt(transaction, log, status, state);
+        sendReceipt(block, transaction, log, status, state);
     }
 
-    private void sendReceipt(Transaction transaction, String log, ReceiptStatus status, AppState state) throws IOException {
+    private void sendReceipt(Block block, Transaction transaction, String log, ReceiptStatus status, AppState state) throws IOException {
 
         String transactionHash = AppServiceProvider.getSerializationService().getHashString(transaction);
 
-        Receipt receipt = new Receipt(transactionHash, status, log);
+
+        String blockHash = AppServiceProvider.getSerializationService().getHashString(block);
+        Receipt receipt = new Receipt(blockHash, transactionHash, status, log);
         String receiptHash = AppServiceProvider.getSerializationService().getHashString(receipt);
 
         // Store on blockchain
@@ -148,12 +150,12 @@ public class AppBlockManager {
         AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, receiptHash);
     }
 
-    private void rejectTransaction(Transaction transaction, AppState state) throws IOException {
+    private void rejectTransaction(Block block, Transaction transaction, AppState state) throws IOException {
 
         ReceiptStatus status = ReceiptStatus.REJECTED;
         String log = "Invalid transaction";
 
-        sendReceipt(transaction, log, status, state);
+        sendReceipt(block, transaction, log, status, state);
 
     }
 
