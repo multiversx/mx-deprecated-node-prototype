@@ -47,11 +47,11 @@
     </Appenders>
 
     <Loggers>
-        <AsyncLogger name="network.elrond" level="debug" additivity="false">
-            <AppenderRef ref="ConsoleAppender"/>
-            <AppenderRef ref="FileAppender"/>
-            <AppenderRef ref="WebSocketAppender"/>
-        </AsyncLogger>
+        <!--<AsyncLogger name="network.elrond" level="debug" additivity="false">-->
+            <!--<AppenderRef ref="ConsoleAppender"/>-->
+            <!--<AppenderRef ref="FileAppender"/>-->
+            <!--<AppenderRef ref="WebSocketAppender"/>-->
+        <!--</AsyncLogger>-->
 
         <Root level="info">
             <AppenderRef ref="ConsoleAppender"/>

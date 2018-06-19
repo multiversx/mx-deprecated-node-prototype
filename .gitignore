@@ -15,3 +15,6 @@
 /producer*
 .project
 *.iml
+elrond-node-1
+logs
+.DS_Store

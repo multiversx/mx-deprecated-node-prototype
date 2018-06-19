@@ -116,7 +116,7 @@ public class BlockchainServiceImpl implements BlockchainService {
         if (isOffline(connection)) {
             return null;
         }
-        String strJSONData = (String) AppServiceProvider.getP2PObjectService().get(connection, hash.toString());
+        String strJSONData = AppServiceProvider.getP2PObjectService().get(connection, hash.toString(), String.class);
         return decodeObject(unit.clazz, strJSONData);
     }
 

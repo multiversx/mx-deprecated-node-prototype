@@ -17,7 +17,6 @@ import network.elrond.service.AppServiceProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mapdb.Fun;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -236,7 +235,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         //timestamp and round information
         long crtTimeStamp = System.currentTimeMillis();
         block.setTimestamp(crtTimeStamp);
-        block.setRoundHeight(AppServiceProvider.getChronologyService().getRoundFromDateTime(blockchain.getGenesisBlock().getTimestamp(), crtTimeStamp).getIndex());
+        block.setRoundIndex(AppServiceProvider.getChronologyService().getRoundFromDateTime(blockchain.getGenesisBlock().getTimestamp(), crtTimeStamp).getIndex());
 
         // get new block hash
         blockHash = serializationService.getHash(block);

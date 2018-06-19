@@ -41,9 +41,10 @@ public class BootstrapServiceImpl implements BootstrapService {
 
     private BigInteger getNetworkBlockIndex(Blockchain blockchain) throws java.io.IOException, ClassNotFoundException {
 
-        BigInteger maxHeight = AppServiceProvider.getP2PObjectService().getJsonDecoded(
+        BigInteger maxHeight = AppServiceProvider.getP2PObjectService().get(
+                blockchain.getConnection(),
                 SettingsType.MAX_BLOCK_HEIGHT.toString(),
-                blockchain.getConnection(), BigInteger.class);
+                BigInteger.class);
 
         if (maxHeight == null) {
             return (Util.BIG_INT_MIN_ONE);
@@ -63,7 +64,7 @@ public class BootstrapServiceImpl implements BootstrapService {
             //network
             BigInteger currentBlockIndexOnNetwork = getCurrentBlockIndex(LocationType.NETWORK, blockchain);
             BigInteger max = currentBlockIndex.max(currentBlockIndexOnNetwork);
-            AppServiceProvider.getP2PObjectService().putJsonEncoded(max, SettingsType.MAX_BLOCK_HEIGHT.toString(), blockchain.getConnection());
+            AppServiceProvider.getP2PObjectService().put(blockchain.getConnection(), SettingsType.MAX_BLOCK_HEIGHT.toString(), max);
 
         }
     }

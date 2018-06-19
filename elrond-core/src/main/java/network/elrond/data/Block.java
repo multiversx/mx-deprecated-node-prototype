@@ -5,7 +5,6 @@ import network.elrond.core.Util;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -35,7 +34,7 @@ public class Block implements Serializable {
 
     protected long timestamp = 0;
 
-    protected long roundHeight = 0;
+    protected long roundIndex = 0;
 
     public Block() {
         nonce = BigInteger.ZERO;
@@ -192,17 +191,17 @@ public class Block implements Serializable {
         this.timestamp = timestamp;
     }
 
-    public long getRoundHeight(){
-        return (roundHeight);
+    public long getRoundIndex(){
+        return (roundIndex);
     }
 
-    public void setRoundHeight(long roundHeight){
-        this.roundHeight = roundHeight;
+    public void setRoundIndex(long roundIndex){
+        this.roundIndex = roundIndex;
     }
 
     @Override
     public String toString() {
-        return (String.format("Block{nonce=%d, appStateHash=%s, listTXHashes.size=%d, roundHeight=%d, timestamp=%d}",
-                nonce, Util.byteArrayToHexString(appStateHash), listTXHashes.size(), roundHeight, timestamp));
+        return (String.format("Block{nonce=%d, appStateHash=%s, listTXHashes.size=%d, roundIndex=%d, timestamp=%d}",
+                nonce, Util.byteArrayToHexString(appStateHash), listTXHashes.size(), roundIndex, timestamp));
     }
 }

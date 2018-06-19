@@ -70,7 +70,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         Round roundBlock = new Round();
         roundBlock.setStartRoundMillis(blockchain.getGenesisBlock().getTimestamp() +
-                block.getRoundHeight() * chronologyService.getRoundTimeMillis());
+                block.getRoundIndex() * chronologyService.getRoundTimeMillis());
 
         return(chronologyService.isDateTimeInRound(roundBlock, block.getTimestamp()));
     }
