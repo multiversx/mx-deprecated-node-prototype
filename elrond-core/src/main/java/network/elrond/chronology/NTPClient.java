@@ -106,19 +106,13 @@ public class NTPClient implements AutoCloseable{
 
     private TimeInfo timeInfo;
     private long timeInfoSetLocalTime;
+    private Object locker = new Object();
 
-    /**
-     * Get the value of timeInfo
-     *
-     * @return the value of timeInfo
-     */
-    public synchronized TimeInfo getTimeInfo() {
-        return timeInfo;
-    }
-
-    private synchronized void setTimeInfo(TimeInfo timeInfo) {
-        this.timeInfo = timeInfo;
-        timeInfoSetLocalTime = System.currentTimeMillis();
+    private void setTimeInfo(TimeInfo timeInfo) {
+        synchronized (locker) {
+            this.timeInfo = timeInfo;
+            timeInfoSetLocalTime = System.currentTimeMillis();
+        }
     }
 
     public long getPollMs(){
@@ -141,14 +135,16 @@ public class NTPClient implements AutoCloseable{
      * @return the difference, measured in milliseconds, between the current time and midnight, January 1, 1970 UTC.
      */
     public long currentTimeMillis(){
-        if (timeInfo == null){
-            //if no message has been received, return current time
-            return(System.currentTimeMillis());
+        synchronized (locker) {
+            if (timeInfo == null) {
+                //if no message has been received, return current time
+                return (System.currentTimeMillis());
+            }
+
+            long diff = System.currentTimeMillis() - timeInfoSetLocalTime;
+
+            return timeInfo.getMessage().getReceiveTimeStamp().getTime() + diff;
         }
-
-        long diff = System.currentTimeMillis() - timeInfoSetLocalTime;
-
-        return timeInfo.getMessage().getReceiveTimeStamp().getTime() + diff;
     }
 
     public boolean isOffline(){

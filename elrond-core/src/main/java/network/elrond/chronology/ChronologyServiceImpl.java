@@ -2,6 +2,8 @@ package network.elrond.chronology;
 
 import network.elrond.core.Util;
 
+import java.util.Set;
+
 public class ChronologyServiceImpl implements ChronologyService {
     private final long roundTimeDuration;
 
@@ -43,5 +45,30 @@ public class ChronologyServiceImpl implements ChronologyService {
         }
 
         return(System.currentTimeMillis());
+    }
+
+    public RoundState computeRoundState(long roundStartTimeStamp, long currentTimeStamp){
+        Set<RoundState> setRoundState = RoundState.getEnumSet();
+
+        long cumulatedTime = 0;
+
+        for (RoundState roundState : setRoundState){
+            boolean isRoundStateTransitionNotSubrounds = (roundState == RoundState.START_ROUND) || (roundState == RoundState.END_ROUND);
+
+            if (isRoundStateTransitionNotSubrounds){
+                continue;
+            }
+
+            boolean isCurrentTimeStampInSubRoundInterval = (cumulatedTime <= currentTimeStamp - roundStartTimeStamp) &&
+                    (currentTimeStamp - roundStartTimeStamp < cumulatedTime + roundState.getRoundStateDuration());
+
+            if (isCurrentTimeStampInSubRoundInterval){
+                return(roundState);
+            }
+
+            cumulatedTime += roundState.getRoundStateDuration();
+        }
+
+        return (null);
     }
 }

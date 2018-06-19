@@ -31,11 +31,6 @@ public class ChronologyBlockTask implements AppTask {
 
             long genesisTimeStampCached = Long.MIN_VALUE;
 
-            //TESTING PURPOSES!!!
-            logger.info("Called ChronologyBlockTask.doProcess()");
-            MAIN_QUEUE.clear();
-            MAIN_QUEUE.add(new SubRoundEventHandler());
-
             AppState state = application.getState();
             while (state.isStillRunning()) {
                 ThreadUtil.sleep(1);
@@ -62,33 +57,32 @@ public class ChronologyBlockTask implements AppTask {
 
                 currentRound = chronologyService.getRoundFromDateTime(genesisTimeStampCached, currentTimeStamp);
 
-                computeAndCallStartEndRounds(application, currentRound);
+                computeAndCallStartEndRounds(application, currentRound, currentTimeStamp);
                 computeAndCallRoundState(application, currentRound, currentTimeStamp);
             }
         });
-
         thread.start();
     }
 
-    private void computeAndCallStartEndRounds(Application application, Round currentRound){
+    private void computeAndCallStartEndRounds(Application application, Round currentRound, long referenceTimeStamp){
         boolean isFirstRoundTransition = (previousRound == null);
         boolean isRoundTransition = isFirstRoundTransition || (previousRound.getIndex() != currentRound.getIndex());
         boolean existsPreviousRound = (previousRound != null);
 
         if (isRoundTransition){
             if (existsPreviousRound){
-                notifyEventObjects(application, previousRound, RoundState.END_ROUND);
+                notifyEventObjects(application, previousRound, RoundState.END_ROUND, referenceTimeStamp);
             }
 
             //start new round
-            notifyEventObjects(application, currentRound, RoundState.START_ROUND);
+            notifyEventObjects(application, currentRound, RoundState.START_ROUND, referenceTimeStamp);
         }
 
         previousRound = currentRound;
     }
 
     private void computeAndCallRoundState(Application application, Round currentRound, long currentTime){
-        RoundState currentRoundState = computeRoundState(currentRound.getStartTimeStamp(), currentTime);
+        RoundState currentRoundState = AppServiceProvider.getChronologyService().computeRoundState(currentRound.getStartTimeStamp(), currentTime);
 
         boolean isCurrentRoundStateNotDefined = (currentRoundState == null);
 
@@ -100,47 +94,31 @@ public class ChronologyBlockTask implements AppTask {
         boolean isRoundStateTransition = isFirstRoundStateTransition || (previousRoundState != currentRoundState);
 
         if (isRoundStateTransition) {
-            notifyEventObjects(application, currentRound, currentRoundState);
+            notifyEventObjects(application, currentRound, currentRoundState, currentTime);
         }
 
         previousRoundState = currentRoundState;
     }
 
 
-    private void notifyEventObjects(Application application, Round round, RoundState roundState){
+    private void notifyEventObjects(Application application, Round round, RoundState roundState, long referenceTimeStamp){
         SubRound subRound = new SubRound();
         subRound.setRound(round);
         subRound.setRoundState(roundState);
+        subRound.setTimeStamp(referenceTimeStamp);
 
-        logger.info(String.format("ChronologyBlockTask event %s, %s, counts: %d", round.toString(), roundState.toString(), MAIN_QUEUE.size()));
+        logger.info(String.format("ChronologyBlockTask event %s, %s", round.toString(), roundState.toString()));
 
+        //calling default event handler object
+        if (roundState.getEventHandler() != null){
+            roundState.getEventHandler().onEvent(application, this, subRound);
+        }
+
+        //calling registered objects
         for (EventHandler eventHandler:MAIN_QUEUE){
             eventHandler.onEvent(application,this, subRound);
         }
     }
 
-    RoundState computeRoundState(long roundStartTimeStamp, long currentTimeStamp){
-        Set<RoundState> setRoundState = RoundState.getEnumSet();
 
-        long cumulatedTime = 0;
-
-        for (RoundState roundState : setRoundState){
-            boolean isRoundStateTransitionNotSubrounds = (roundState == RoundState.START_ROUND) || (roundState == RoundState.END_ROUND);
-
-            if (isRoundStateTransitionNotSubrounds){
-                continue;
-            }
-
-            boolean isCurrentTimeStampInSubRoundInterval = (cumulatedTime <= currentTimeStamp - roundStartTimeStamp) &&
-                    (currentTimeStamp - roundStartTimeStamp < cumulatedTime + roundState.getRoundStateDuration());
-
-            if (isCurrentTimeStampInSubRoundInterval){
-                return(roundState);
-            }
-
-            cumulatedTime += roundState.getRoundStateDuration();
-        }
-
-        return (null);
-    }
 }
