@@ -5,10 +5,12 @@ import network.elrond.Application;
 public class SubRound {
     private RoundState roundState;
     private Round round;
+    private long timeStamp;
 
     public SubRound(){
         round = null;
         roundState = null;
+        timeStamp = 0;
     }
 
     public RoundState getRoundState(){
@@ -27,6 +29,14 @@ public class SubRound {
         this.round = round;
     }
 
+    public void setTimeStamp(long timeStamp){
+        this.timeStamp = timeStamp;
+    }
+
+    public long getTimeStamp(){
+        return(this.timeStamp);
+    }
+
     @Override
     public String toString(){
         String strRoundState = "[NULL]";
@@ -36,8 +46,8 @@ public class SubRound {
             strRoundState = roundState.toString();
         }
 
-        return (String.format("SubRound{RoundState=%s, round=%s}",
-                roundState, round));
+        return (String.format("SubRound{RoundState=%s, round=%s, timestamp=%d}",
+                roundState, round, timeStamp));
     }
 
 }

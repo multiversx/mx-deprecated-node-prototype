@@ -8,6 +8,9 @@ import network.elrond.processor.AppTasks;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ChronologyServiceTest {
     @Test(expected = IllegalArgumentException.class)
     public void testGetRoundFromDateTimeBadConfigShouldThrowException() {
@@ -112,4 +115,19 @@ public class ChronologyServiceTest {
         System.out.println("Host: " + application.getState().getNtpClient().getCurrentHostName());
     }
 
+    @Test
+    public void testGetCurrentSubRoundType(){
+        ChronologyService chronologyService = AppServiceProvider.getChronologyService();
+
+        List<RoundState> listFound = new ArrayList<>();
+
+        for (long i = 0; i < chronologyService.getRoundTimeDuration(); i++){
+            RoundState subRoundsType = chronologyService.computeRoundState(0, i);
+
+            if (!listFound.contains(subRoundsType)){
+                System.out.println(String.format("Found %s @ %d", subRoundsType, i));
+                listFound.add(subRoundsType);
+            }
+        }
+    }
 }

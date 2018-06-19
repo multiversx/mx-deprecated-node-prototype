@@ -42,9 +42,9 @@ public class SubRoundEventHandler implements EventHandler<SubRound> {
             stringBuilder.append(data);
         }
 
-        logger.info(stringBuilder.toString());
+        //logger.info(stringBuilder.toString());
 
-        //System.out.println(stringBuilder.toString());
+        System.out.println(stringBuilder.toString());
     }
 
 

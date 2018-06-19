@@ -12,4 +12,6 @@ public interface ChronologyService {
 
     long getSynchronizedTime(NTPClient ntpClient);
 
+    RoundState computeRoundState(long roundStartTimeStamp, long currentTimeStamp);
+
 }
