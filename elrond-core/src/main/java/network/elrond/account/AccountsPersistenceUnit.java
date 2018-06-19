@@ -2,6 +2,8 @@ package network.elrond.account;
 
 import network.elrond.trie.Trie;
 import network.elrond.trie.TrieImpl;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 
@@ -9,9 +11,13 @@ public class AccountsPersistenceUnit<K extends AccountAddress, S extends Account
 
     final Trie trie;
 
+    private static final Logger logger = LogManager.getLogger(AccountsPersistenceUnit.class);
+
     AccountsPersistenceUnit(String databasePath) throws IOException {
         super(databasePath);
+        logger.traceEntry("params: {}", databasePath);
         trie = new TrieImpl(database);
+        logger.traceExit();
     }
 
     @Override

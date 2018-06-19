@@ -10,10 +10,14 @@ import network.elrond.consensus.Validator;
 import network.elrond.core.Util;
 import network.elrond.data.Block;
 import network.elrond.service.AppServiceProvider;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
+
 
 public class UtilTest {
     public static void displayListValidators(List<Validator> list) {
@@ -61,6 +65,31 @@ public class UtilTest {
         String strAddr = "025f37d20e5b18909361e0ead7ed17c69b417bee70746c9e9c2bcb1394d921d4ae";
 
         TestCase.assertEquals(strAddr, Util.getAddressFromPublicKey(Util.hexStringToByteArray(strPubKeyHexa)));
+    }
+
+    @Test
+    public void testLoggerParameters(){
+        Logger logger = LogManager.getLogger(UtilTest.class);
+
+        logger.traceEntry("Params {} {} {}", null);
+
+        logger.trace("TRACE {} {}", 1, 2);
+        logger.trace("TRACE {} {}", 1, 2);
+        logger.info("INFO {} {}", 1, 2);
+        logger.warn("WARN {} {}", 1, 2);
+        logger.error("ERROR {} {}", 1, 2);
+        logger.fatal("FATAL {} {}", 1, 2);
+        logger.throwing(new Exception("aaa"));
+
+        logger.trace(String.format("BigInteger.TEN = %d", BigInteger.TEN));
+        logger.trace(String.format("BigInteger.TEN = %d", null));
+
+        logger.trace("Exit, returns: " + logger.traceExit("A"));
+        logger.trace("Exit, returns: " + logger.traceExit((Object)null));
+
+        byte[] buff = new byte[]{0, 1, 2, 3, 4};
+        logger.trace("byte array: {}", buff);
+
     }
 
     public static void createDummyGenesisBlock(Blockchain blockchain){

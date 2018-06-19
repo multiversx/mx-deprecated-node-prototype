@@ -1,6 +1,7 @@
 package network.elrond.application;
 
 
+import network.elrond.account.AccountStateServiceImpl;
 import network.elrond.account.Accounts;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.chronology.NTPClient;
@@ -9,6 +10,8 @@ import network.elrond.crypto.PublicKey;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.p2p.P2PConnection;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -32,22 +35,36 @@ public class AppState implements Serializable {
 
     private NTPClient ntpClient = null;
 
+    private static final Logger logger = LogManager.getLogger(AppState.class);
+
     public P2PBroadcastChanel getChanel(P2PChannelName name) {
+        logger.traceEntry("params: {}", name);
         if (name == null) {
-            throw new IllegalArgumentException("Name cannot be null");
+            IllegalArgumentException ex = new IllegalArgumentException("Name cannot be null");
+            logger.throwing(ex);
+            throw ex;
         }
-        return channels.get(name);
+
+        return logger.traceExit(channels.get(name));
     }
 
     public void addChanel(P2PChannelName name, P2PBroadcastChanel channel) {
+        logger.traceEntry("params: {} {}", name, channel);
         if (name == null) {
-            throw new IllegalArgumentException("Name cannot be null");
+            IllegalArgumentException ex = new IllegalArgumentException("Name cannot be null");
+            logger.throwing(ex);
+            throw ex;
         }
+
         if (channel == null) {
-            throw new IllegalArgumentException("Chanel cannot be null");
+            IllegalArgumentException ex = new IllegalArgumentException("Chanel cannot be null");
+            logger.throwing(ex);
+            throw ex;
         }
 
         this.channels.put(name, channel);
+
+        logger.traceExit();
     }
 
     public P2PConnection getConnection() {
@@ -55,10 +72,15 @@ public class AppState implements Serializable {
     }
 
     public void setConnection(P2PConnection connection) {
+        logger.traceEntry("params: {}", connection);
+
         if (connection == null) {
-            throw new IllegalArgumentException("Connection cannot be null");
+            IllegalArgumentException ex = new IllegalArgumentException("Connection cannot be null");
+            logger.throwing(ex);
+            throw ex;
         }
         this.connection = connection;
+        logger.traceExit();
     }
 
     public boolean isStillRunning() {
@@ -70,10 +92,14 @@ public class AppState implements Serializable {
     }
 
     public void setBlockchain(Blockchain blockchain) {
+        logger.traceEntry("params: {}", blockchain);
         if (blockchain == null) {
-            throw new IllegalArgumentException("Blockchain cannot be null");
+            IllegalArgumentException ex = new IllegalArgumentException("Blockchain cannot be null");
+            logger.throwing(ex);
+            throw ex;
         }
         this.blockchain = blockchain;
+        logger.traceExit();
     }
 
     public Blockchain getBlockchain() {
@@ -85,12 +111,15 @@ public class AppState implements Serializable {
     }
 
     public void setAccounts(Accounts accounts) {
+        logger.traceEntry("params: {}", accounts);
         if (accounts == null) {
-            throw new IllegalArgumentException("Accounts cannot be null");
+            IllegalArgumentException ex = new IllegalArgumentException("Accounts cannot be null");
+            logger.throwing(ex);
+            throw ex;
         }
         this.accounts = accounts;
+        logger.traceExit();
     }
-
 
     public void shutdown() {
         this.blockchain.stopPersistenceUnit();
@@ -98,10 +127,14 @@ public class AppState implements Serializable {
     }
 
     public void setPrivateKey(PrivateKey privateKey) {
+        logger.traceEntry("params: {}", privateKey);
         if (privateKey == null) {
-            throw new IllegalArgumentException("PrivateKey cannot be null");
+            IllegalArgumentException ex = new IllegalArgumentException("PrivateKey cannot be null");
+            logger.throwing(ex);
+            throw ex;
         }
         this.privateKey = privateKey;
+        logger.traceExit();
     }
 
     public PrivateKey getPrivateKey() {
@@ -109,10 +142,14 @@ public class AppState implements Serializable {
     }
 
     public void setPublicKey(PublicKey publicKey) {
+        logger.traceEntry("params: {}", publicKey);
         if (publicKey == null) {
-            throw new IllegalArgumentException("PublicKey cannot be null");
+            IllegalArgumentException ex = new IllegalArgumentException("PublicKey cannot be null");
+            logger.throwing(ex);
+            throw ex;
         }
         this.publicKey = publicKey;
+        logger.traceExit();
     }
 
     public PublicKey getPublicKey() {
