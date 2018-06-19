@@ -8,7 +8,7 @@ public class BlockchainPersistenceUnit<K, V> extends AbstractPersistenceUnit<K, 
 
     final Class<V> clazz;
 
-    BlockchainPersistenceUnit(String databasePath, Class<V> clazz) throws IOException {
+    public BlockchainPersistenceUnit(String databasePath, Class<V> clazz) throws IOException {
         super(databasePath);
         this.clazz = clazz;
     }

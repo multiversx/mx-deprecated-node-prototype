@@ -5,14 +5,20 @@ import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainContext;
+import network.elrond.blockchain.BlockchainPersistenceUnit;
 import network.elrond.blockchain.BlockchainUnitType;
+import network.elrond.data.DataBlock;
+import network.elrond.data.Transaction;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.processor.AppTask;
 
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BlockchainStarterProcessor implements AppTask {
 
@@ -44,7 +50,17 @@ public class BlockchainStarterProcessor implements AppTask {
         blockContext.setDatabasePath(BlockchainUnitType.SETTINGS, pathSettings.toString());
         blockContext.setDatabasePath(BlockchainUnitType.BLOCK_INDEX, pathBlkIdx.toString());
 
-        Blockchain blockchain = new Blockchain(blockContext);
+        Map<BlockchainUnitType, BlockchainPersistenceUnit<?, ?>> persistenceUnitMap = new HashMap<>();
+        persistenceUnitMap.put(BlockchainUnitType.BLOCK,
+                new BlockchainPersistenceUnit<String, DataBlock>(pathBlk.toString(), DataBlock.class));
+        persistenceUnitMap.put(BlockchainUnitType.BLOCK_INDEX,
+                new BlockchainPersistenceUnit<BigInteger, String>(pathBlkIdx.toString(), String.class));
+        persistenceUnitMap.put(BlockchainUnitType.TRANSACTION,
+                new BlockchainPersistenceUnit<String, Transaction>(pathTx.toString(), Transaction.class));
+        persistenceUnitMap.put(BlockchainUnitType.SETTINGS,
+                new BlockchainPersistenceUnit<String, String>(pathSettings.toString(), String.class));
+
+        Blockchain blockchain = new Blockchain(blockContext, persistenceUnitMap);
 
         state.setBlockchain(blockchain);
     }

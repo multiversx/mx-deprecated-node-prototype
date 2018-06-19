@@ -27,6 +27,7 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
 
     public Blockchain(BlockchainContext context) throws IOException {
         Util.check(context!=null, "context!=null");
+
         this.context = context;
 
         String blockPath = context.getDatabasePath(BlockchainUnitType.BLOCK);

@@ -55,7 +55,7 @@ public class AppBlockManagerTest {
 
         BlockchainContext blockchainContext = new BlockchainContext();
         blockchainContext.setConnection(state.getConnection());
-        blockchain = new Blockchain(blockchainContext);
+        blockchain = new Blockchain(blockchainContext,Blockchain.generatePersistenceUnitMap(blockchainContext));
         blockchain.setCurrentBlock(blk0);
         state.setBlockchain(blockchain);
         state.setStillRunning(false);

@@ -11,6 +11,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -19,9 +21,12 @@ public class BlockchainTest extends BaseBlockchainTest {
 
     private SerializationService serializationService = AppServiceProvider.getSerializationService();
     private Blockchain blockchain;
-//    List<BlockchainUnitType> blockchainUnitTypes = new ArrayList<BlockchainUnitType> {
-//        BlockchainUnitType.BLOCK,  BlockchainUnitType.BLOCK_INDEX
-//    };
+    List<BlockchainUnitType> blockchainUnitTypes = Arrays.asList(
+            BlockchainUnitType.BLOCK,
+            BlockchainUnitType.BLOCK_INDEX,
+            BlockchainUnitType.TRANSACTION,
+            BlockchainUnitType.SETTINGS)
+   ;
 
     @Before
     public void setUp() throws IOException {
@@ -124,23 +129,19 @@ public class BlockchainTest extends BaseBlockchainTest {
         Assert.assertEquals(bigInteger, blockchain.getCurrentBlockIndex());
     }
 
+    @Test
+    public void testStopPersistenceUnit() throws IOException {
+        byte[] key = new byte[1];
+        byte[] value = new byte[3];
 
-//    @Test
-//    public void testFlush() throws IOException {
-//
-//        blockchain.get
-//
-//        blockchain.flush();
-//
-//    }
+        blockchain.stopPersistenceUnit();
 
+        for(BlockchainUnitType type : blockchainUnitTypes)
+        {
+            BlockchainPersistenceUnit persistenceUnit = blockchain.getUnit(type);
+        }
+    }
 
-//        public void flush() {
-//            for (BlockchainUnitType key : blockchain.keySet()) {
-//                blockchain.get(key).clear();
-//            }
-//        }
-//
 //        @Override
 //        public void stopPersistenceUnit() {
 //            for (AbstractPersistenceUnit<?, ?> unit : blockchain.values()) {
