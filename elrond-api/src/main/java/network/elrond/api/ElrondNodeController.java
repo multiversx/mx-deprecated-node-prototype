@@ -124,5 +124,12 @@ public class ElrondNodeController {
         return elrondApiNode.generatePublicKeyFromPrivateKey(privateKey);
     }
 
+    @RequestMapping(path = "/node/exit", method = RequestMethod.GET)
+    public @ResponseBody
+    void nodeExit(
+            HttpServletResponse response) {
+        System.exit(0);
+    }
+
 
 }
