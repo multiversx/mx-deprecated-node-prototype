@@ -9,6 +9,8 @@ import network.elrond.api.manager.ElrondWebSocketManager;
 import network.elrond.application.AppContext;
 import network.elrond.crypto.PKSKPair;
 import network.elrond.data.BootstrapType;
+import network.elrond.data.Receipt;
+import network.elrond.data.Transaction;
 import network.elrond.p2p.PingResponse;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,8 +61,12 @@ class ElrondApiNode {
         return facade.getBalance(address, application);
     }
 
-    boolean send(AccountAddress receiver, BigInteger value) {
+    Transaction send(AccountAddress receiver, BigInteger value) {
         return getFacade().send(receiver, value, application);
+    }
+
+    Receipt getReceipt(String transactionHash) {
+        return getFacade().getReceipt(transactionHash, application);
     }
 
     PingResponse ping(String ipAddress, int port) {

@@ -56,11 +56,13 @@ public class BlockchainTest extends BaseBlockchainTest {
         BlockchainPersistenceUnit unit = blockchain.getUnit(BlockchainUnitType.BLOCK_INDEX);
         Assert.assertNotNull(unit);
     }
+
     @Test
     public void testGetUnitForTRANSACTION() throws IOException {
         BlockchainPersistenceUnit unit = blockchain.getUnit(BlockchainUnitType.TRANSACTION);
         Assert.assertNotNull(unit);
     }
+
     @Test
     public void testGetUnitForSETTINGS() throws IOException {
         BlockchainPersistenceUnit unit = blockchain.getUnit(BlockchainUnitType.SETTINGS);

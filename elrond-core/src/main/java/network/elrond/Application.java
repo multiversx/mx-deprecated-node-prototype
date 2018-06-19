@@ -2,7 +2,6 @@ package network.elrond;
 
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
-import network.elrond.processor.AppTask;
 import network.elrond.processor.AppTasks;
 
 import java.io.IOException;
@@ -58,21 +57,22 @@ public class Application implements Serializable {
         //  Start blockchain
         AppTasks.INIT_BLOCKCHAIN.process(this);
 
+
         AppTasks.INITIALIZE_PUBLIC_PRIVATE_KEYS.process(this);
+
 
         //  Start accounts
         AppTasks.INIT_ACCOUNTS.process(this);
-
-
         // Start bootstrapping process
         AppTasks.BLOCKCHAIN_BOOTSTRAP.process(this);
-
         // Start synchronization process
         AppTasks.BLOCKCHAIN_SYNCRONIZATION.process(this);
 
 
         // Intercept P2P transactions
         AppTasks.INTERCEPT_TRANSACTIONS.process(this);
+        // Intercept P2P receipts
+        AppTasks.INTERCEPT_RECEIPTS.process(this);
         // Intercept P2P blocks
         AppTasks.INTERCEPT_BLOCKS.process(this);
 
@@ -83,7 +83,7 @@ public class Application implements Serializable {
         //init NTP client
         AppTasks.NTP_CLIENT_INITIALIZER.process(this);
 
-        //start chronlogy processor
+        //start chronology processor
         AppTasks.CHRONOLOGY.process(this);
     }
 

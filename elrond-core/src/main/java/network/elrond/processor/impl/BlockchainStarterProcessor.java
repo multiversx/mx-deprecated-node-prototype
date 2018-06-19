@@ -16,11 +16,6 @@ import java.nio.file.Paths;
 
 public class BlockchainStarterProcessor implements AppTask {
 
-    public static final String BLOCKCHAIN_BLOCK_DATA = "blockchain.block.data";
-    public static final String BLOCKCHAIN_TRANSACTION_DATA = "blockchain.transaction.data";
-    public static final String BLOCKCHAIN_SETTINGS_DATA = "blockchain.settings.data";
-    public static final String BLOCKCHAIN_BLOCKIDX_DATA = "blockchain.blockidx.data";
-
     @Override
     public void process(Application application) throws IOException {
 
@@ -30,22 +25,17 @@ public class BlockchainStarterProcessor implements AppTask {
 
         String workingDirectory = System.getProperty("user.dir");
         String blockchainBasePath = context.getStorageBasePath();
-        Path pathBlk = Paths.get(workingDirectory, blockchainBasePath, BLOCKCHAIN_BLOCK_DATA);
-        Path pathTx = Paths.get(workingDirectory, blockchainBasePath, BLOCKCHAIN_TRANSACTION_DATA);
-        Path pathSettings = Paths.get(workingDirectory, blockchainBasePath, BLOCKCHAIN_SETTINGS_DATA);
-        Path pathBlkIdx = Paths.get(workingDirectory, blockchainBasePath, BLOCKCHAIN_BLOCKIDX_DATA);
 
         BlockchainContext blockContext = new BlockchainContext();
         P2PConnection connection = state.getConnection();
         blockContext.setConnection(connection);
 
-        blockContext.setDatabasePath(BlockchainUnitType.BLOCK, pathBlk.toString());
-        blockContext.setDatabasePath(BlockchainUnitType.TRANSACTION, pathTx.toString());
-        blockContext.setDatabasePath(BlockchainUnitType.SETTINGS, pathSettings.toString());
-        blockContext.setDatabasePath(BlockchainUnitType.BLOCK_INDEX, pathBlkIdx.toString());
+        for (BlockchainUnitType type : BlockchainUnitType.values()) {
+            Path path = Paths.get(workingDirectory, blockchainBasePath, type.name().toLowerCase());
+            blockContext.setDatabasePath(type, path.toString());
+        }
 
         Blockchain blockchain = new Blockchain(blockContext);
-
         state.setBlockchain(blockchain);
     }
 

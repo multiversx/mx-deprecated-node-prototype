@@ -7,7 +7,9 @@ import network.elrond.api.manager.ElrondWebSocketManager;
 import network.elrond.application.AppContext;
 import network.elrond.crypto.PKSKPair;
 import network.elrond.data.BootstrapType;
+import network.elrond.data.Transaction;
 import network.elrond.p2p.PingResponse;
+import network.elrond.service.AppServiceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -73,8 +75,6 @@ public class ElrondNodeController {
     }
 
 
-
-
     @RequestMapping(path = "/node/send", method = RequestMethod.GET)
     public @ResponseBody
     Object send(
@@ -84,9 +84,22 @@ public class ElrondNodeController {
             @RequestParam(defaultValue = "1") BigInteger value) {
 
         AccountAddress _add = AccountAddress.fromHexString(address);
-        return elrondApiNode.send(_add, value);
+        Transaction transaction = elrondApiNode.send(_add, value);
+        return (transaction != null) ? AppServiceProvider.getSerializationService().getHashString(transaction) : null;
+
 
     }
+
+
+    @RequestMapping(path = "/node/receipt", method = RequestMethod.GET)
+    public @ResponseBody
+    Object getReceipt(
+            HttpServletResponse response,
+            @RequestParam() String transactionHash) {
+        return elrondApiNode.getReceipt(transactionHash);
+
+    }
+
 
     @RequestMapping(path = "/node/balance", method = RequestMethod.GET)
     public @ResponseBody

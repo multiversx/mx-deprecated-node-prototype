@@ -21,6 +21,13 @@ public class AppTasks {
     };
 
     /**
+     * P2P receipts broadcast
+     */
+    public static AppTask INTERCEPT_RECEIPTS = (application) -> {
+        new P2PReceiptInterceptorProcessor().process(application);
+    };
+
+    /**
      * P2P transactions broadcast
      */
     public static AppTask BLOCK_ASSEMBLY_PROCESSOR = (application) -> {

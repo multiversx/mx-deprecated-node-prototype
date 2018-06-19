@@ -1,15 +1,16 @@
 package network.elrond.blockchain;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
 
 public interface BlockchainService {
 
-    <H extends Object, B> boolean contains(H hash, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException;
+    <H extends Object, B extends Serializable> boolean contains(H hash, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException;
 
-    <H extends Object, B> void put(H hash, B object, Blockchain blockchain, BlockchainUnitType type) throws IOException;
+    <H extends Object, B extends Serializable> void put(H hash, B object, Blockchain blockchain, BlockchainUnitType type) throws IOException;
 
-    <H extends Object, B> B get(H hash, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException;
+    <H extends Object, B extends Serializable> B get(H hash, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException;
 
-    <H extends Object, B> List<B> getAll(List<H> hashes, Blockchain blockchain, BlockchainUnitType transaction) throws IOException, ClassNotFoundException;
+    <H extends Object, B extends Serializable> List<B> getAll(List<H> hashes, Blockchain blockchain, BlockchainUnitType transaction) throws IOException, ClassNotFoundException;
 }

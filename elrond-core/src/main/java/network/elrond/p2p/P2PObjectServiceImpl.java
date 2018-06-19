@@ -5,20 +5,24 @@ import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
-import network.elrond.service.AppServiceProvider;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Iterator;
 
 public class P2PObjectServiceImpl implements P2PObjectService {
 
+    Logger logger = LoggerFactory.getLogger(P2PObjectServiceImpl.class);
 
     @Override
-    public Object get(P2PConnection connection, String key) throws ClassNotFoundException, IOException {
+    public <T> T get(P2PConnection connection, String key, Class<T> clazz) throws ClassNotFoundException, IOException {
 
         PeerDHT peer = connection.getDht();
-        FutureGet futureGet = peer.get(Number160.createHash(key)).start();
+        String clazzName = clazz.getName();
+
+        FutureGet futureGet = peer.get(Number160.createHash(key + clazzName)).start();
         futureGet.awaitUninterruptibly();
         if (futureGet.isSuccess()) {
             Iterator<Data> iterator = futureGet.dataMap().values().iterator();
@@ -26,48 +30,28 @@ public class P2PObjectServiceImpl implements P2PObjectService {
                 return null;
             }
             Data data = iterator.next();
-            return data.object();
+            T object = (T) data.object();
+            logger.debug("Retrieved key: {0} => {1}", key, object);
+            return object;
         } else {
             LoggerFactory.getLogger(P2PBroadcastServiceImpl.class).info("Timeout getting! hash: " + key);
+            logger.debug("Timeout getting! key:  {0}", key);
         }
         return null;
     }
 
     @Override
-    public FuturePut put(P2PConnection connection, String key, Object value) throws IOException {
+    public <T extends Serializable> FuturePut put(P2PConnection connection, String key, T value) throws IOException {
         PeerDHT peer = connection.getDht();
 
-        FuturePut fp = peer.put(Number160.createHash(key)).data(new Data(value)).start();
+        String clazzName = value.getClass().getName();
+
+        FuturePut fp = peer.put(Number160.createHash(key + clazzName)).data(new Data(value)).start();
+        logger.debug("Put object with key {0}", key + clazzName);
 
         fp.awaitUninterruptibly();
 
         return (fp);
-    }
-
-    @Override
-    public void putJsonEncoded(Object object, String hash, P2PConnection connection) throws IOException{
-        if (object == null || hash == null) {
-            return;
-        }
-
-        String strJSONData = AppServiceProvider.getSerializationService().encodeJSON(object);
-
-        AppServiceProvider.getP2PObjectService().put(connection, hash.toString(), strJSONData);
-    }
-
-    @Override
-    public <T> T getJsonDecoded(String hash, P2PConnection connection, Class<T> clazz) throws IOException, ClassNotFoundException{
-        if (hash == null) {
-            return null;
-        }
-
-        String strJSONData = (String) AppServiceProvider.getP2PObjectService().get(connection, hash);
-
-        if (strJSONData == null){
-            return (null);
-        }
-
-        return (T)AppServiceProvider.getSerializationService().decodeJSON(strJSONData, clazz);
     }
 
 }

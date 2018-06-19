@@ -35,7 +35,7 @@ public class BlockchainProcessTest extends BaseBlockchainTest {
         String receiverAddress = Util.getAddressFromPublicKey(publicKeyReceiver.getValue());
         AppBlockManager appBlockManager = new AppBlockManager();
         for (int i = 0; i < 10; i++) {
-            Block block = new DataBlock();
+            Block block = new Block();
             BigInteger nonce = BigInteger.ZERO.add(BigInteger.valueOf(i));
             block.setNonce(nonce);
 

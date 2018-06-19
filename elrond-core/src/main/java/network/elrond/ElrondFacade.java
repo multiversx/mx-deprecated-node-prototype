@@ -3,6 +3,8 @@ package network.elrond;
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
 import network.elrond.crypto.PKSKPair;
+import network.elrond.data.Receipt;
+import network.elrond.data.Transaction;
 import network.elrond.p2p.PingResponse;
 
 import java.math.BigInteger;
@@ -34,15 +36,25 @@ public interface ElrondFacade {
      */
     BigInteger getBalance(AccountAddress address, Application application);
 
+
+    /**
+     * Get transaction receipt
+     *
+     * @param transactionHash
+     * @param application
+     * @return
+     */
+    Receipt getReceipt(String transactionHash, Application application);
+
     /**
      * Send value to account
      *
      * @param receiver
      * @param value
      * @param application
-     * @return
+     * @return the transaction hash
      */
-    boolean send(AccountAddress receiver, BigInteger value, Application application);
+    Transaction send(AccountAddress receiver, BigInteger value, Application application);
 
     /**
      * Pings an IP address and checks if port is open

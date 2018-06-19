@@ -1,14 +1,5 @@
 package network.elrond.consensus;
 
-import junit.framework.TestCase;
-//import network.elrond.chronology.Epoch;
-import network.elrond.chronology.Round;
-import org.junit.Test;
-import network.elrond.core.Util;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ConsensusTest {
 //    @Test
@@ -66,7 +57,7 @@ public class ConsensusTest {
 //        e.createRound();
 //        e.createRound();
 //        Round r = e.createRound();
-//        TestCase.assertEquals(BigInteger.valueOf(2), r.roundHeight());
+//        TestCase.assertEquals(BigInteger.valueOf(2), r.roundIndex());
 //
 //        //test for eligible list size = 3 => plain copy
 //        for (int i = 0; i < 3; i++) {

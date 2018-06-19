@@ -3,8 +3,6 @@ package network.elrond.blockchain;
 import network.elrond.account.AbstractPersistenceUnit;
 import network.elrond.core.Util;
 import network.elrond.data.Block;
-import network.elrond.data.DataBlock;
-import network.elrond.data.Transaction;
 import network.elrond.p2p.P2PConnection;
 
 import java.io.IOException;
@@ -26,25 +24,18 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
     private final Map<BlockchainUnitType, BlockchainPersistenceUnit<?, ?>> blockchain = new HashMap<>();
 
     public Blockchain(BlockchainContext context) throws IOException {
-        Util.check(context!=null, "context!=null");
+        Util.check(context != null, "context!=null");
         this.context = context;
 
-        String blockPath = context.getDatabasePath(BlockchainUnitType.BLOCK);
-        blockchain.put(BlockchainUnitType.BLOCK,
-                new BlockchainPersistenceUnit<String, DataBlock>(blockPath, DataBlock.class));
+        for (BlockchainUnitType type : BlockchainUnitType.values()) {
+            String path = context.getDatabasePath(type);
 
-        String indexPath = context.getDatabasePath(BlockchainUnitType.BLOCK_INDEX);
-        blockchain.put(BlockchainUnitType.BLOCK_INDEX,
-                new BlockchainPersistenceUnit<BigInteger, String>(indexPath, String.class));
+            Class<?> ketType = type.getKeyType();
+            Class<?> valueType = type.getValueType();
+            BlockchainPersistenceUnit<?, ?> unit = new BlockchainPersistenceUnit<>(path, valueType);
+            blockchain.put(type, unit);
+        }
 
-
-        String transactionsPath = context.getDatabasePath(BlockchainUnitType.TRANSACTION);
-        blockchain.put(BlockchainUnitType.TRANSACTION,
-                new BlockchainPersistenceUnit<String, Transaction>(transactionsPath, Transaction.class));
-
-        String settingsPath = context.getDatabasePath(BlockchainUnitType.SETTINGS);
-        blockchain.put(BlockchainUnitType.SETTINGS,
-                new BlockchainPersistenceUnit<String, String>(settingsPath, String.class));
     }
 
     public <H extends Object, B> BlockchainPersistenceUnit<H, B> getUnit(BlockchainUnitType type) {
@@ -69,16 +60,16 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
     }
 
     public void setCurrentBlock(Block currentBlock) {
-        Util.check(currentBlock!=null, "currentBlock!=null");
+        Util.check(currentBlock != null, "currentBlock!=null");
         this.currentBlock = currentBlock;
     }
 
-    public Block getGenesisBlock(){
-        return(genesisBlock);
+    public Block getGenesisBlock() {
+        return genesisBlock;
     }
 
-    public void setGenesisBlock(Block genesisBlock){
-        Util.check(genesisBlock!=null, "genesisBlock!=null");
+    public void setGenesisBlock(Block genesisBlock) {
+        Util.check(genesisBlock != null, "genesisBlock!=null");
         this.genesisBlock = genesisBlock;
     }
 

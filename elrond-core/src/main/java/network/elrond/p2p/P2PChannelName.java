@@ -4,6 +4,8 @@ public enum P2PChannelName {
 
     BLOCK("BLOCK"),
     TRANSACTION("TRANSACTION"),
+    TRANSACTION_RECEIPT("TRANSACTION_RECEIPT"),
+    RECEIPT("RECEIPT"),
     ;
 
     private final String _name;

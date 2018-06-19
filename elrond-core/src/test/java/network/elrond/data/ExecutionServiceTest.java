@@ -18,7 +18,6 @@ import network.elrond.service.AppServiceProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mapdb.Fun;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
