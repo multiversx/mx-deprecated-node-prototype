@@ -25,7 +25,7 @@ public class BlockchainServiceImpl implements BlockchainService {
      */
     @Override
     public synchronized <H extends Object, B extends Serializable> boolean contains(H hash, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
-
+        logger.traceEntry("params: {} {} {}", hash, blockchain, type);
         BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
         P2PConnection connection = blockchain.getConnection();
         LRUMap<H, B> cache = unit.getCache();
@@ -48,7 +48,7 @@ public class BlockchainServiceImpl implements BlockchainService {
      */
     @Override
     public synchronized <H extends Object, B extends Serializable> void put(H hash, B object, Blockchain blockchain, BlockchainUnitType type) throws IOException {
-
+        logger.traceEntry("params: {} {} {} {}", hash, object, blockchain, type);
 
         if (object == null || hash == null) {
             logger.trace("object or hash is null");
@@ -75,7 +75,7 @@ public class BlockchainServiceImpl implements BlockchainService {
 
     @Override
     public <H extends Object, B extends Serializable> List<B> getAll(List<H> hashes, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
-
+        logger.traceEntry("params: {} {} {}", hashes, blockchain, type);
         List<B> list = new ArrayList<>();
 
         for (H hash : hashes) {
@@ -95,6 +95,7 @@ public class BlockchainServiceImpl implements BlockchainService {
      */
     @Override
     public synchronized <H extends Object, B extends Serializable> B get(H hash, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
+        logger.traceEntry("params: {} {} {}", hash, blockchain, type);
 
         BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
         P2PConnection connection = blockchain.getConnection();
@@ -135,6 +136,7 @@ public class BlockchainServiceImpl implements BlockchainService {
     }
 
     private <B extends Serializable, H extends Object> B getDataFromDatabase(H hash, BlockchainPersistenceUnit<H, B> unit) {
+        logger.traceEntry("params: {} {}", hash, unit);
         byte[] data = unit.get(bytes(hash.toString()));
         if (data == null) {
             logger.trace("data do not exists!");
@@ -147,6 +149,7 @@ public class BlockchainServiceImpl implements BlockchainService {
     }
 
     private <B extends Serializable> B decodeObject(Class<B> clazz, String strJSONData) {
+        logger.traceEntry("params: {} {}", clazz, strJSONData);
         if (strJSONData == null) {
             logger.trace("strJSONData is null");
             logger.traceExit();

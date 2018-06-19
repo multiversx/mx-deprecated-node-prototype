@@ -28,6 +28,7 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
     private static final Logger logger = LogManager.getLogger(Blockchain.class);
 
     public Blockchain(BlockchainContext context) throws IOException {
+        logger.traceEntry("params: {}", context);
         Util.check(context != null, "context!=null");
         this.context = context;
 
@@ -38,8 +39,10 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
             Class<?> valueType = type.getValueType();
             BlockchainPersistenceUnit<?, ?> unit = new BlockchainPersistenceUnit<>(path, valueType);
             blockchain.put(type, unit);
+            logger.trace("Placed blockchain {}!", type);
         }
 
+        logger.traceExit();
     }
 
     public <H extends Object, B> BlockchainPersistenceUnit<H, B> getUnit(BlockchainUnitType type) {
@@ -64,6 +67,7 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
     }
 
     public void setCurrentBlock(Block currentBlock) {
+        logger.traceEntry("params: {}", currentBlock);
         Util.check(currentBlock != null, "currentBlock!=null");
         this.currentBlock = currentBlock;
         logger.traceExit();
@@ -74,6 +78,7 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
     }
 
     public void setGenesisBlock(Block genesisBlock) {
+        logger.traceEntry("params: {}", genesisBlock);
         Util.check(genesisBlock != null, "genesisBlock!=null");
         this.genesisBlock = genesisBlock;
         logger.traceExit();

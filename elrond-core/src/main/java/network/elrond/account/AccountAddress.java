@@ -19,14 +19,17 @@ public class AccountAddress implements Serializable {
 
 
     private AccountAddress(byte[] publicKeyBytes) {
+        logger.traceEntry("params: {}", publicKeyBytes);
         Util.check(publicKeyBytes != null,"publicKeyBytes != null" );
         this.bytes = publicKeyBytes;
+        logger.traceExit();
     }
 
     public static AccountAddress fromHexString(String publicKeyHexString) {
+        logger.traceEntry("params: {}", publicKeyHexString);
         Util.check(publicKeyHexString != null, "publicKeyHexString!=null");
         Util.check(!publicKeyHexString.isEmpty(), "publicKeyHexString!=null");
-        return new AccountAddress(Util.hexStringToByteArray(publicKeyHexString));
+        return logger.traceExit(new AccountAddress(Util.hexStringToByteArray(publicKeyHexString)));
     }
 
     public static AccountAddress fromBytes(byte[] publicKeyBytes) {

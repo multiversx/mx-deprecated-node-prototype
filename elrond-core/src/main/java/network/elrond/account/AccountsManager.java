@@ -20,6 +20,7 @@ public class AccountsManager {
     }
 
     public Boolean hasFunds(Accounts accounts, String addressString, BigInteger value) throws IOException, ClassNotFoundException {
+        logger.traceEntry("params: {} {} {}", accounts, addressString, value);
         Util.check(accounts != null, "accounts!=null");
         Util.check(!(addressString == null || addressString.isEmpty()), "addressString!=null");
 
@@ -30,10 +31,11 @@ public class AccountsManager {
     }
 
     public Boolean hasCorrectNonce(Accounts accounts, String addressString, BigInteger nonce) throws IOException, ClassNotFoundException {
+        logger.traceEntry("params: {} {} {}", accounts, addressString, nonce);
         Util.check(accounts != null, "accounts!=null");
         Util.check(!(addressString == null || addressString.isEmpty()), "addressString!=null");
 
-        return true;
+        return logger.traceExit(true);
         //TODO: uncomment in the future
 //        AccountAddress sendAddress = AccountAddress.fromHexaString(addressString);
 //        AccountState senderAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(sendAddress, accounts);
@@ -41,6 +43,7 @@ public class AccountsManager {
     }
 
     public void transferFunds(Accounts accounts, String senderAddressString, String receiverAddressString, BigInteger value, BigInteger nonce) throws IOException, ClassNotFoundException {
+        logger.traceEntry("params: {} {} {} {} {}", accounts, senderAddressString, receiverAddressString, value, nonce);
         Util.check(accounts!=null, "accounts!=null");
         Util.check(!(senderAddressString == null || senderAddressString.isEmpty()), "senderAddressString!=null");
         Util.check(!(receiverAddressString == null || receiverAddressString.isEmpty()), "receiverAddressString!=null");

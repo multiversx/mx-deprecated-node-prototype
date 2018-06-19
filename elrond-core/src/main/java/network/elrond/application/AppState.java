@@ -34,13 +34,16 @@ public class AppState implements Serializable {
     private static final Logger logger = LogManager.getLogger(AppState.class);
 
     public P2PBroadcastChanel getChanel(P2PChannelName channelName) {
+        logger.traceEntry("params: {}", channelName);
         Util.check(channelName != null, "channelName!=null");
-        return channels.get(channelName);
+        return logger.traceExit(channels.get(channelName));
     }
 
     public void addChanel(P2PBroadcastChanel broadcastChanel) {
+        logger.traceEntry("params: {}", broadcastChanel);
         Util.check(broadcastChanel != null, "broadcastChanel!=null");
         this.channels.put(broadcastChanel.getName(), broadcastChanel);
+        logger.traceExit();
     }
 
     public P2PConnection getConnection() {
@@ -48,6 +51,7 @@ public class AppState implements Serializable {
     }
 
     public void setConnection(P2PConnection connection) {
+        logger.traceEntry("params: {}", connection);
         Util.check(connection != null, "connection!=null");
         this.connection = connection;
         logger.traceExit();
@@ -62,6 +66,7 @@ public class AppState implements Serializable {
     }
 
     public void setBlockchain(Blockchain blockchain) {
+        logger.traceEntry("params: {}", blockchain);
         Util.check(blockchain != null, "blockchain!=null");
         this.blockchain = blockchain;
         logger.traceExit();
@@ -76,17 +81,21 @@ public class AppState implements Serializable {
     }
 
     public void setAccounts(Accounts accounts) {
+        logger.traceEntry("params: {}", accounts);
         Util.check(accounts != null, "accounts!=null");
         this.accounts = accounts;
         logger.traceExit();
     }
 
     public void shutdown() {
+        logger.traceEntry();
         this.blockchain.stopPersistenceUnit();
         this.accounts.stopPersistenceUnit();
+        logger.traceExit();
     }
 
     public void setPrivateKey(PrivateKey privateKey) {
+        logger.traceEntry("params: {}", privateKey);
         Util.check(privateKey != null, "privateKey!=null");
         this.privateKey = privateKey;
         this.publicKey = new PublicKey(privateKey);
