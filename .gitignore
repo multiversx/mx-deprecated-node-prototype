@@ -19,3 +19,6 @@ elrond-node-1
 elrond-node-2
 logs
 .DS_Store
+/classes
+/classes/*
+
