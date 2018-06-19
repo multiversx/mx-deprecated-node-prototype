@@ -1,5 +1,7 @@
 package network.elrond.account;
 
+import network.elrond.core.Util;
+
 import java.math.BigInteger;
 
 public class AccountState {
@@ -14,22 +16,15 @@ public class AccountState {
     }
 
     public AccountState(BigInteger nonce, BigInteger balance) {
-        if (nonce == null || nonce.compareTo(BigInteger.ZERO) < 0) {
-            throw new IllegalArgumentException();
-        }
-
-        if (balance == null || balance.compareTo(BigInteger.ZERO) < 0) {
-            throw new IllegalArgumentException();
-        }
+        Util.check(!(nonce == null || nonce.compareTo(BigInteger.ZERO) < 0), "nonce>=0");
+        Util.check(!(balance == null || balance.compareTo(BigInteger.ZERO) < 0), "balance>=0");
 
         this.nonce = nonce;
         this.balance = balance;
     }
 
     public AccountState(AccountState source) {
-        if (source == null) {
-            throw new IllegalArgumentException();
-        }
+        Util.check(source!=null, "source!=null");
 
         setNonce(source.getNonce());
         setBalance(source.getBalance());
@@ -41,10 +36,8 @@ public class AccountState {
     }
 
     public void setNonce(BigInteger nonce) {
-        if (nonce == null || nonce.compareTo(BigInteger.ZERO) < 0) {
-            throw new IllegalArgumentException();
-        }
-
+        Util.check(!(nonce == null || nonce.compareTo(BigInteger.ZERO) < 0), "nonce>=0");
+        Util.check( !(this.nonce != null && this.nonce.compareTo(nonce)>0), "new nonce should be bigger");
         this.nonce = nonce;
     }
 
@@ -61,14 +54,8 @@ public class AccountState {
     }
 
     public BigInteger addToBalance(BigInteger value) {
-
-        if (value == null) {
-            throw new IllegalArgumentException();
-        }
-
-        if (balance.add(value).compareTo(BigInteger.ZERO) < 0) {
-            throw new IllegalArgumentException("Balance would be negative!!!");
-        }
+        Util.check(value!=null, "value!=null");
+        Util.check(balance.add(value).compareTo(BigInteger.ZERO) > 0, "Balance would be negative!!!");
 
         this.balance = balance.add(value);
         return this.balance;

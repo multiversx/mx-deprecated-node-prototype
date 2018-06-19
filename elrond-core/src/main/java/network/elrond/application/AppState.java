@@ -4,6 +4,7 @@ package network.elrond.application;
 import network.elrond.account.Accounts;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.chronology.NTPClient;
+import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.p2p.P2PBroadcastChanel;
@@ -17,37 +18,24 @@ import java.util.Map;
 public class AppState implements Serializable {
 
     private boolean stillRunning = true;
-
     private boolean lock = false;
-
     private Accounts accounts;
     private Blockchain blockchain;
-
-
     private PublicKey publicKey;
     private PrivateKey privateKey;
-
     private P2PConnection connection;
     private Map<P2PChannelName, P2PBroadcastChanel> channels = new HashMap<>();
 
     private NTPClient ntpClient = null;
 
-    public P2PBroadcastChanel getChanel(P2PChannelName name) {
-        if (name == null) {
-            throw new IllegalArgumentException("Name cannot be null");
-        }
-        return channels.get(name);
+    public P2PBroadcastChanel getChanel(P2PChannelName channelName) {
+        Util.check(channelName != null, "channelName!=null");
+        return channels.get(channelName);
     }
 
-    public void addChanel(P2PChannelName name, P2PBroadcastChanel channel) {
-        if (name == null) {
-            throw new IllegalArgumentException("Name cannot be null");
-        }
-        if (channel == null) {
-            throw new IllegalArgumentException("Chanel cannot be null");
-        }
-
-        this.channels.put(name, channel);
+    public void addChanel(P2PBroadcastChanel broadcastChanel) {
+        Util.check(broadcastChanel != null, "broadcastChanel!=null");
+        this.channels.put(broadcastChanel.getName(), broadcastChanel);
     }
 
     public P2PConnection getConnection() {
@@ -55,9 +43,7 @@ public class AppState implements Serializable {
     }
 
     public void setConnection(P2PConnection connection) {
-        if (connection == null) {
-            throw new IllegalArgumentException("Connection cannot be null");
-        }
+        Util.check(connection != null, "connection!=null");
         this.connection = connection;
     }
 
@@ -70,9 +56,7 @@ public class AppState implements Serializable {
     }
 
     public void setBlockchain(Blockchain blockchain) {
-        if (blockchain == null) {
-            throw new IllegalArgumentException("Blockchain cannot be null");
-        }
+        Util.check(blockchain != null, "blockchain!=null");
         this.blockchain = blockchain;
     }
 
@@ -85,9 +69,7 @@ public class AppState implements Serializable {
     }
 
     public void setAccounts(Accounts accounts) {
-        if (accounts == null) {
-            throw new IllegalArgumentException("Accounts cannot be null");
-        }
+        Util.check(accounts != null, "accounts!=null");
         this.accounts = accounts;
     }
 
@@ -98,21 +80,13 @@ public class AppState implements Serializable {
     }
 
     public void setPrivateKey(PrivateKey privateKey) {
-        if (privateKey == null) {
-            throw new IllegalArgumentException("PrivateKey cannot be null");
-        }
+        Util.check(privateKey != null, "privateKey!=null");
         this.privateKey = privateKey;
+        this.publicKey = new PublicKey(privateKey);
     }
 
     public PrivateKey getPrivateKey() {
         return privateKey;
-    }
-
-    public void setPublicKey(PublicKey publicKey) {
-        if (publicKey == null) {
-            throw new IllegalArgumentException("PublicKey cannot be null");
-        }
-        this.publicKey = publicKey;
     }
 
     public PublicKey getPublicKey() {

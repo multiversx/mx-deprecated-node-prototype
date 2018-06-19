@@ -10,8 +10,8 @@ public class AccountAddressTest {
     public void testAccountAddressAreEqualWhateverMethodYouUse(){
         byte[] addrBytes = Util.PUBLIC_KEY_MINTING.getValue();
 
-        AccountAddress address = new AccountAddress(addrBytes);
-        AccountAddress addressFromPublicKey = AccountAddress.fromPublicKey(Util.PUBLIC_KEY_MINTING);
+        AccountAddress address = AccountAddress.fromBytes(addrBytes);
+        AccountAddress addressFromPublicKey = AccountAddress.fromBytes(addrBytes);
         AccountAddress addressFromHexString = AccountAddress.fromHexString(Util.byteArrayToHexString(addrBytes));
         AccountAddress addressFromBytes = AccountAddress.fromBytes(addrBytes);
 
@@ -28,25 +28,13 @@ public class AccountAddressTest {
 
     @Test
     public void testAccountAddressFromBytes(){
-        AccountAddress accountAddress = new AccountAddress(Util.PUBLIC_KEY_MINTING.getValue());
+        AccountAddress accountAddress = AccountAddress.fromBytes(Util.PUBLIC_KEY_MINTING.getValue());
         Assert.assertTrue(accountAddress!=null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testAccountAddressFromNullBytesShouldThrowException(){
-        AccountAddress accountAddress = new AccountAddress(null);
-        Assert.fail();
-    }
-
-    @Test
-    public void testAccountAddressFromPublicKey(){
-        AccountAddress accountAddress = AccountAddress.fromPublicKey(Util.PUBLIC_KEY_MINTING);
-        Assert.assertTrue(accountAddress!=null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testAccountAddressFromNullPublicKeyShouldThrowException(){
-        AccountAddress accountAddress = AccountAddress.fromPublicKey(null);
+        AccountAddress accountAddress = AccountAddress.fromBytes(null);
         Assert.fail();
     }
 
@@ -61,4 +49,5 @@ public class AccountAddressTest {
         AccountAddress accountAddress = AccountAddress.fromHexString(null);
         Assert.fail();
     }
+
 }

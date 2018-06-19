@@ -41,7 +41,6 @@ public class BootstrappingProcessorIT {
 
         PrivateKey pvKeyRandom = new PrivateKey("RANDOM STUFF THAT'S JUST RANDOM");
         context.setStrAddressMint(Util.getAddressFromPublicKey(new PublicKey(pvKeyRandom).getValue()));
-        context.setValueMint(BigInteger.TEN);
 
         Application app = new Application(context);
         AppState state = app.getState();
@@ -106,7 +105,7 @@ public class BootstrappingProcessorIT {
         bootstrapService.setCurrentBlockIndex(LocationType.NETWORK, blk1.getNonce(), state.getBlockchain());
 
         //mint
-        AccountState acsSender = accountStateService.getOrCreateAccountState(AccountAddress.fromPublicKey(pbk1), state.getAccounts());
+        AccountState acsSender = accountStateService.getOrCreateAccountState(AccountAddress.fromBytes(pbk1.getValue()), state.getAccounts());
         //mint 100 ERDs
         acsSender.setBalance(BigInteger.TEN.pow(10));
         accountStateService.setAccountState(AccountAddress.fromHexString(trx1.getSendAddress()), acsSender, state.getAccounts()); // PMS

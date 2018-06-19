@@ -22,13 +22,13 @@ public class GenesisBlockTest {
 
         PrivateKey pvk1 = new PrivateKey("Another seed in the wall");
         PublicKey pbk1 = new PublicKey(pvk1);
-        AccountAddress acRecv = AccountAddress.fromPublicKey(pbk1);
-        AccountAddress acMint = AccountAddress.fromPublicKey(Util.PUBLIC_KEY_MINTING);
+        AccountAddress acRecv = AccountAddress.fromBytes(pbk1.getValue());
+        AccountAddress acMint = AccountAddress.fromBytes(Util.PUBLIC_KEY_MINTING.getValue());
 
         AccountsContext accTemp = new AccountsContext();
         accTemp.setDatabasePath(null);
 
-        Accounts accounts = new Accounts(accTemp);
+        Accounts accounts = new Accounts(accTemp, new AccountsPersistenceUnit<>(accTemp.getDatabasePath()));
         AccountState acsMintTest = accountStateService.getAccountState(acMint, accounts);
         TestCase.assertEquals("Expected " + Util.VALUE_MINTING, Util.VALUE_MINTING, acsMintTest.getBalance());
 
@@ -36,7 +36,7 @@ public class GenesisBlockTest {
 
         TestCase.assertNotNull("Not expecting null for GenesisData ", genesisData);
 
-        accounts = new Accounts(accTemp);
+        accounts = new Accounts(accTemp, new AccountsPersistenceUnit<>(accTemp.getDatabasePath()));
         AccountState acsMint = accountStateService.getAccountState(acMint, accounts);
         AccountState acsRecv = accountStateService.getAccountState(acRecv, accounts);
 

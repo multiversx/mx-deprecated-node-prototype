@@ -17,7 +17,7 @@ public class NodeRunner {
         String nodeRunnerPrivateKey = "1df1e9456051e43cfa612ecafcfd145cc06c1fb64d7499ef34696ff16b82cbc2";
 
         AppContext context = ContextCreator.createAppContext(nodeName, nodeRunnerPrivateKey, masterPeerIpAddress, masterPeerPort, port,
-                BootstrapType.START_FROM_SCRATCH, nodeName, Util.VALUE_MINTING );
+                BootstrapType.START_FROM_SCRATCH, nodeName );
 
         ElrondFacade facade = new ElrondFacadeImpl();
 
