@@ -7,7 +7,9 @@ import network.elrond.api.manager.ElrondWebSocketManager;
 import network.elrond.application.AppContext;
 import network.elrond.crypto.PKSKPair;
 import network.elrond.data.BootstrapType;
+import network.elrond.data.Transaction;
 import network.elrond.p2p.PingResponse;
+import network.elrond.service.AppServiceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +42,15 @@ public class ElrondNodeController {
         return true;
     }
 
+    @RequestMapping(path = "/node/status", method = RequestMethod.GET)
+    public @ResponseBody
+    boolean nodeStatus(
+            HttpServletResponse response) {
+        Application application = elrondApiNode.getApplication();
+
+        return application !=  null;
+    }
+
 
     @RequestMapping(path = "/node/start", method = RequestMethod.GET)
     public @ResponseBody
@@ -56,14 +67,12 @@ public class ElrondNodeController {
             @RequestParam(defaultValue = "elrond-node-1", required = false) String blockchainRestorePath
 
     ) {
-
+        //Reuploaded
         AppContext context = ContextCreator.createAppContext(nodeName, privateKey, masterPeerIpAddress,
-                masterPeerPort, port, bootstrapType, blockchainPath, new BigInteger(mintValue));
+                masterPeerPort, port, bootstrapType, blockchainPath);
 
         return elrondApiNode.start(context, blockchainPath, blockchainRestorePath);
     }
-
-
 
 
     @RequestMapping(path = "/node/send", method = RequestMethod.GET)
@@ -75,9 +84,22 @@ public class ElrondNodeController {
             @RequestParam(defaultValue = "1") BigInteger value) {
 
         AccountAddress _add = AccountAddress.fromHexString(address);
-        return elrondApiNode.send(_add, value);
+        Transaction transaction = elrondApiNode.send(_add, value);
+        return (transaction != null) ? AppServiceProvider.getSerializationService().getHashString(transaction) : null;
+
 
     }
+
+
+    @RequestMapping(path = "/node/receipt", method = RequestMethod.GET)
+    public @ResponseBody
+    Object getReceipt(
+            HttpServletResponse response,
+            @RequestParam() String transactionHash) {
+        return elrondApiNode.getReceipt(transactionHash);
+
+    }
+
 
     @RequestMapping(path = "/node/balance", method = RequestMethod.GET)
     public @ResponseBody
@@ -113,6 +135,13 @@ public class ElrondNodeController {
             HttpServletResponse response,
             @RequestParam() String privateKey) {
         return elrondApiNode.generatePublicKeyFromPrivateKey(privateKey);
+    }
+
+    @RequestMapping(path = "/node/exit", method = RequestMethod.GET)
+    public @ResponseBody
+    void nodeExit(
+            HttpServletResponse response) {
+        System.exit(0);
     }
 
 

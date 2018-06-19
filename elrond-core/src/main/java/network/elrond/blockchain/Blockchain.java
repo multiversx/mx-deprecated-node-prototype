@@ -1,9 +1,8 @@
 package network.elrond.blockchain;
 
 import network.elrond.account.AbstractPersistenceUnit;
+import network.elrond.core.Util;
 import network.elrond.data.Block;
-import network.elrond.data.DataBlock;
-import network.elrond.data.Transaction;
 import network.elrond.p2p.P2PConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,31 +28,18 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
     private static final Logger logger = LogManager.getLogger(Blockchain.class);
 
     public Blockchain(BlockchainContext context) throws IOException {
-        logger.traceEntry("params: {}", context);
-
+        Util.check(context != null, "context!=null");
         this.context = context;
 
-        logger.trace("Put BLOCK structure...");
-        String blockPath = context.getDatabasePath(BlockchainUnitType.BLOCK);
-        blockchain.put(BlockchainUnitType.BLOCK,
-                new BlockchainPersistenceUnit<String, DataBlock>(blockPath, DataBlock.class));
+        for (BlockchainUnitType type : BlockchainUnitType.values()) {
+            String path = context.getDatabasePath(type);
 
-        logger.trace("Put BLOCK_INDEX structure...");
-        String indexPath = context.getDatabasePath(BlockchainUnitType.BLOCK_INDEX);
-        blockchain.put(BlockchainUnitType.BLOCK_INDEX,
-                new BlockchainPersistenceUnit<BigInteger, String>(indexPath, String.class));
+            Class<?> ketType = type.getKeyType();
+            Class<?> valueType = type.getValueType();
+            BlockchainPersistenceUnit<?, ?> unit = new BlockchainPersistenceUnit<>(path, valueType);
+            blockchain.put(type, unit);
+        }
 
-        logger.trace("Put TRANSACTION structure...");
-        String transactionsPath = context.getDatabasePath(BlockchainUnitType.TRANSACTION);
-        blockchain.put(BlockchainUnitType.TRANSACTION,
-                new BlockchainPersistenceUnit<String, Transaction>(transactionsPath, Transaction.class));
-
-        logger.trace("Put SETTINGS structure...");
-        String settingsPath = context.getDatabasePath(BlockchainUnitType.SETTINGS);
-        blockchain.put(BlockchainUnitType.SETTINGS,
-                new BlockchainPersistenceUnit<String, String>(settingsPath, String.class));
-
-        logger.traceExit();
     }
 
     public <H extends Object, B> BlockchainPersistenceUnit<H, B> getUnit(BlockchainUnitType type) {
@@ -78,27 +64,17 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
     }
 
     public void setCurrentBlock(Block currentBlock) {
-        logger.traceEntry("params: {}", currentBlock);
-        if (currentBlock == null) {
-            IllegalArgumentException ex = new IllegalArgumentException("CurrentBlock cannot be null");
-            logger.throwing(ex);
-            throw ex;
-        }
+        Util.check(currentBlock != null, "currentBlock!=null");
         this.currentBlock = currentBlock;
         logger.traceExit();
     }
 
-    public Block getGenesisBlock(){
-        return(genesisBlock);
+    public Block getGenesisBlock() {
+        return genesisBlock;
     }
 
-    public void setGenesisBlock(Block genesisBlock){
-        logger.traceEntry("params: {}", genesisBlock);
-        if (genesisBlock == null) {
-            IllegalArgumentException ex = new IllegalArgumentException("GenesisBlock cannot be null");
-            logger.throwing(ex);
-            throw ex;
-        }
+    public void setGenesisBlock(Block genesisBlock) {
+        Util.check(genesisBlock != null, "genesisBlock!=null");
         this.genesisBlock = genesisBlock;
         logger.traceExit();
     }

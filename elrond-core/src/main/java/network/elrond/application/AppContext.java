@@ -1,5 +1,6 @@
 package network.elrond.application;
 
+import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.data.BootstrapType;
 
@@ -28,6 +29,7 @@ public class AppContext implements Serializable {
     }
 
     public void setNodeName(String nodeName) {
+        Util.check(!(nodeName==null || nodeName.isEmpty()), "nodeName!=null");
         this.nodeName = nodeName;
     }
 
@@ -36,6 +38,7 @@ public class AppContext implements Serializable {
     }
 
     public void setPort(Integer port) {
+        Util.check(port>0, "port is negative");
         this.port = port;
     }
 
@@ -44,6 +47,7 @@ public class AppContext implements Serializable {
     }
 
     public void setMasterPeerIpAddress(String masterPeerIpAddress) {
+        Util.check(!(masterPeerIpAddress==null || masterPeerIpAddress.isEmpty()), "masterPeerIpAddress!=null");
         this.masterPeerIpAddress = masterPeerIpAddress;
     }
 
@@ -52,6 +56,7 @@ public class AppContext implements Serializable {
     }
 
     public void setMasterPeerPort(Integer masterPeerPort) {
+        Util.check(masterPeerPort>0, "masterPeerPort negative");
         this.masterPeerPort = masterPeerPort;
     }
 
@@ -60,6 +65,7 @@ public class AppContext implements Serializable {
     }
 
     public void setStorageBasePath(String storageBasePath) {
+        Util.check(!(storageBasePath==null || storageBasePath.isEmpty()), "storageBasePath!=null");
         this.storageBasePath = storageBasePath;
     }
 
@@ -80,19 +86,16 @@ public class AppContext implements Serializable {
     }
 
     public void setStrAddressMint(String strAddressMint) {
+        Util.check(!(strAddressMint==null || strAddressMint.isEmpty()), "strAddressMint!=null");
         this.strAddressMint = strAddressMint;
     }
 
     public BigInteger getValueMint() {
-        return valueMint;
+        return Util.VALUE_MINTING;
     }
-
-    public void setValueMint(BigInteger valueMint) {
-        this.valueMint = valueMint;
-    }
-
 
     public void setPrivateKey(PrivateKey privateKey) {
+        Util.check(privateKey!=null, "privateKey!=null");
         this.privateKey = privateKey;
     }
 

@@ -5,10 +5,14 @@ import network.elrond.account.AccountState;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
+import network.elrond.blockchain.Blockchain;
+import network.elrond.blockchain.BlockchainUnitType;
+import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.PKSKPair;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
+import network.elrond.data.Receipt;
 import network.elrond.data.Transaction;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PChannelName;
@@ -19,6 +23,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class ElrondFacadeImpl implements ElrondFacade {
 
@@ -72,11 +80,32 @@ public class ElrondFacadeImpl implements ElrondFacade {
     }
 
     @Override
-    public boolean send(AccountAddress receiver, BigInteger value, Application application) {
+    public Receipt getReceipt(String transactionHash, Application application) {
+
+        try {
+            FutureTask<Receipt> timeoutTask = new FutureTask<Receipt>(() -> {
+                Blockchain blockchain = application.getState().getBlockchain();
+                String receiptHash;
+                do {
+                    receiptHash = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
+                    ThreadUtil.sleep(200);
+                } while (receiptHash == null);
+                return AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT);
+            });
+            new Thread(timeoutTask).start();
+            return timeoutTask.get(30L, TimeUnit.SECONDS);
+        } catch (InterruptedException | TimeoutException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public Transaction send(AccountAddress receiver, BigInteger value, Application application) {
 
         if (application == null) {
             logger.info("Invalid application state, application is null");
-            return false;
+            return null;
         }
 
 
@@ -88,18 +117,18 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
             PublicKey senderPublicKey = state.getPublicKey();
             PrivateKey senderPrivateKey = state.getPrivateKey();
-            AccountAddress senderAddress = AccountAddress.fromPublicKey(senderPublicKey);
+            AccountAddress senderAddress = AccountAddress.fromBytes(senderPublicKey.getValue());
             AccountState senderAccount = AppServiceProvider.getAccountStateService().getAccountState(senderAddress, accounts);
 
 
             if (senderAccount == null) {
                 // sender account is new, can't send
                 logger.info("Sender account is new, can't send");
-                return false;
+                return null;
             }
 
 
-            PublicKey receiverPublicKey = receiver.getPublicKey();
+            PublicKey receiverPublicKey = new PublicKey(receiver.getBytes());
 
             BigInteger nonce = senderAccount.getNonce();
             Transaction transaction = AppServiceProvider.getTransactionService().generateTransaction(senderPublicKey, receiverPublicKey, value, nonce);
@@ -107,19 +136,19 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
             String hash = AppServiceProvider.getSerializationService().getHashString(transaction);
             P2PConnection connection = state.getConnection();
-            AppServiceProvider.getP2PObjectService().putJsonEncoded(transaction, hash, connection);
+            AppServiceProvider.getP2PObjectService().put(connection, hash, transaction);
 
             P2PBroadcastChanel channel = state.getChanel(P2PChannelName.TRANSACTION);
             AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, hash);
 
 
-            return true;
+            return transaction;
 
         } catch (Exception ex) {
             ex.printStackTrace();
         }
 
-        return false;
+        return null;
     }
 
     @Override
@@ -158,4 +187,6 @@ public class ElrondFacadeImpl implements ElrondFacade {
             return new PKSKPair("Error", "Error");
         }
     }
+
+
 }

@@ -3,6 +3,8 @@ package network.elrond.account;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import network.elrond.core.Util;
+
 import java.math.BigInteger;
 
 public class AccountState {
@@ -17,18 +19,8 @@ public class AccountState {
     }
 
     public AccountState(BigInteger nonce, BigInteger balance) {
-        logger.traceEntry("params: {} {}", nonce, balance);
-        if (nonce == null || nonce.compareTo(BigInteger.ZERO) < 0) {
-            IllegalArgumentException ex = new IllegalArgumentException("nonce should not be null nor negative");
-            logger.throwing(ex);
-            throw ex;
-        }
-
-        if (balance == null || balance.compareTo(BigInteger.ZERO) < 0) {
-            IllegalArgumentException ex = new IllegalArgumentException("balance should not be null nor negative");
-            logger.throwing(ex);
-            throw ex;
-        }
+        Util.check(!(nonce == null || nonce.compareTo(BigInteger.ZERO) < 0), "nonce>=0");
+        Util.check(!(balance == null || balance.compareTo(BigInteger.ZERO) < 0), "balance>=0");
 
         this.nonce = nonce;
         this.balance = balance;
@@ -36,12 +28,7 @@ public class AccountState {
     }
 
     public AccountState(AccountState source) {
-        logger.traceEntry("params: {}", source);
-        if (source == null) {
-            IllegalArgumentException ex = new IllegalArgumentException("source object can not be null");
-            logger.throwing(ex);
-            throw ex;
-        }
+        Util.check(source!=null, "source!=null");
 
         setNonce(source.getNonce());
         setBalance(source.getBalance());
@@ -54,13 +41,8 @@ public class AccountState {
     }
 
     public void setNonce(BigInteger nonce) {
-        logger.traceEntry("params: {}", nonce);
-        if (nonce == null || nonce.compareTo(BigInteger.ZERO) < 0) {
-            IllegalArgumentException ex = new IllegalArgumentException("nonce should not be null nor negative");
-            logger.throwing(ex);
-            throw ex;
-        }
-
+        Util.check(!(nonce == null || nonce.compareTo(BigInteger.ZERO) < 0), "nonce>=0");
+        Util.check( !(this.nonce != null && this.nonce.compareTo(nonce)>0), "new nonce should be bigger");
         this.nonce = nonce;
         logger.traceExit();
     }
@@ -82,18 +64,8 @@ public class AccountState {
     }
 
     public BigInteger addToBalance(BigInteger value) {
-        logger.traceEntry("params: {}", value);
-        if ((value == null) || (value.compareTo(BigInteger.ZERO) < 0)) {
-            IllegalArgumentException ex = new IllegalArgumentException("value should not be null nor negative");
-            logger.throwing(ex);
-            throw ex;
-        }
-
-        if (balance.add(value).compareTo(BigInteger.ZERO) < 0) {
-            IllegalArgumentException ex = new IllegalArgumentException("balance would be negative!!!");
-            logger.throwing(ex);
-            throw ex;
-        }
+        Util.check(value!=null, "value!=null");
+        Util.check(balance.add(value).compareTo(BigInteger.ZERO) > 0, "Balance would be negative!!!");
 
         this.balance = balance.add(value);
         return logger.traceExit(this.balance);

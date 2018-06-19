@@ -18,13 +18,14 @@ public class Accounts implements Serializable, PersistenceUnitContainer {
     private final AccountsPersistenceUnit<AccountAddress, AccountState> unit;
 
     private final Set<AccountAddress> addresses;
-
     private static final Logger logger = LogManager.getLogger(Accounts.class);
 
-    public Accounts(AccountsContext context) throws IOException {
+    public Accounts(AccountsContext context, AccountsPersistenceUnit<AccountAddress, AccountState> unit) throws IOException {
         logger.traceEntry();
+        Util.check(context!=null, "context!=null");
+        Util.check(unit!=null, "unit!=null");
         this.context = context;
-        this.unit = new AccountsPersistenceUnit<>(context.getDatabasePath());
+        this.unit = unit;
         addresses = new HashSet<>();
         AppServiceProvider.getAccountStateService().initialMintingToKnownAddress(this);
         logger.traceExit();
@@ -32,6 +33,10 @@ public class Accounts implements Serializable, PersistenceUnitContainer {
 
     public AccountsPersistenceUnit<AccountAddress, AccountState> getAccountsPersistenceUnit() {
         return unit;
+    }
+
+    public Set<AccountAddress> getAddresses() {
+        return (Collections.synchronizedSet(addresses));
     }
 
     public void flush() {
@@ -47,9 +52,5 @@ public class Accounts implements Serializable, PersistenceUnitContainer {
             logger.catching(e);
         }
         logger.traceExit();
-    }
-
-    public Set<AccountAddress> getAddresses() {
-        return (Collections.synchronizedSet(addresses));
     }
 }

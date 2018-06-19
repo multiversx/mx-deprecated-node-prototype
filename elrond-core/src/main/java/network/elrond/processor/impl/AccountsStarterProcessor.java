@@ -3,6 +3,7 @@ package network.elrond.processor.impl;
 import network.elrond.Application;
 import network.elrond.account.Accounts;
 import network.elrond.account.AccountsContext;
+import network.elrond.account.AccountsPersistenceUnit;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.processor.AppTask;
@@ -29,7 +30,7 @@ public class AccountsStarterProcessor implements AppTask {
         AccountsContext accountContext = new AccountsContext();
         accountContext.setDatabasePath(databasePath.toString());
 
-        Accounts accounts = new Accounts(accountContext);
+        Accounts accounts = new Accounts(accountContext, new AccountsPersistenceUnit<>(accountContext.getDatabasePath()));
         state.setAccounts(accounts);
     }
 

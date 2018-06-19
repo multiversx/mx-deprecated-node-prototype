@@ -13,7 +13,7 @@ public class AccountsPersistenceUnit<K extends AccountAddress, S extends Account
 
     private static final Logger logger = LogManager.getLogger(AccountsPersistenceUnit.class);
 
-    AccountsPersistenceUnit(String databasePath) throws IOException {
+    public AccountsPersistenceUnit(String databasePath) throws IOException {
         super(databasePath);
         logger.traceEntry("params: {}", databasePath);
         trie = new TrieImpl(database);

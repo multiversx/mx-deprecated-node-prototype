@@ -7,6 +7,9 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.BootstrapType;
+import network.elrond.data.Receipt;
+import network.elrond.data.Transaction;
+import network.elrond.service.AppServiceProvider;
 
 import java.math.BigInteger;
 
@@ -21,9 +24,9 @@ public class SeedNodeRunner {
         String seedNodeRunnerPrivateKey = "1111111111111111fa612ecafcfd145cc06c1fb64d7499ef34696ff16b82cbc2";
 
         PublicKey pbKey = new PublicKey(new PrivateKey(seedNodeRunnerPrivateKey));
-
+        //Reuploaded
         AppContext context = ContextCreator.createAppContext(nodeName, seedNodeRunnerPrivateKey, masterPeerIpAddress, masterPeerPort, port,
-                BootstrapType.REBUILD_FROM_DISK, nodeName, Util.VALUE_MINTING);
+                BootstrapType.START_FROM_SCRATCH, nodeName);
 
         ElrondFacade facade = new ElrondFacadeImpl();
 
@@ -34,9 +37,15 @@ public class SeedNodeRunner {
 
             do {
 
-                AccountAddress address = AccountAddress.fromPublicKey(pbKey);
-                facade.send(address, BigInteger.TEN, application);
+                AccountAddress address = AccountAddress.fromHexString(Util.TEST_ADDRESS);
+                Transaction transaction = facade.send(address, BigInteger.TEN, application);
                 System.out.println(facade.getBalance(address, application));
+
+                if (transaction != null) {
+                    String hash = AppServiceProvider.getSerializationService().getHashString(transaction);
+                    Receipt receipt = facade.getReceipt(hash, application);
+                    System.out.println(receipt);
+                }
 
                 ThreadUtil.sleep(1000);
             } while (true);

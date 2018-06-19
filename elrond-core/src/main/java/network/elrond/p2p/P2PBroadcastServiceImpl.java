@@ -1,7 +1,6 @@
 package network.elrond.p2p;
 
 import net.tomp2p.dht.FutureGet;
-import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.futures.FutureBootstrap;
@@ -12,7 +11,8 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.storage.Data;
 import network.elrond.application.AppContext;
-import network.elrond.service.AppServiceProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -20,8 +20,11 @@ import java.net.InetAddress;
 import java.util.HashSet;
 import java.util.List;
 
+
 public class P2PBroadcastServiceImpl implements P2PBroadcastService {
 
+
+    private Logger logger = LoggerFactory.getLogger(P2PBroadcastService.class);
 
     public P2PConnection createConnection(AppContext context) throws IOException {
 
@@ -51,7 +54,10 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         fb.awaitUninterruptibly();
         if (fb.isSuccess()) {
             peer.discover().peerAddress(fb.bootstrapTo().iterator().next()).start().awaitUninterruptibly();
+            logger.debug("Connection status" + fb.failedReason());
+
         } else {
+            logger.error("Connection status" + fb.failedReason());
             throw new RuntimeException(fb.failedReason());
         }
 
@@ -140,14 +146,6 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
             e.printStackTrace();
         }
         return false;
-    }
-
-    public Object get(P2PBroadcastChanel chanel, String key) throws ClassNotFoundException, IOException {
-        return AppServiceProvider.getP2PObjectService().get(chanel.getConnection(), key);
-    }
-
-    public FuturePut put(P2PBroadcastChanel chanel, String key, Object value) throws IOException {
-        return AppServiceProvider.getP2PObjectService().put(chanel.getConnection(), key, value);
     }
 
 

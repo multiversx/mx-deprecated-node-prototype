@@ -1,6 +1,7 @@
 package network.elrond.data;
 
 import network.elrond.account.Accounts;
+import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
@@ -11,6 +12,8 @@ import network.elrond.core.Util;
 import network.elrond.crypto.MultiSignatureService;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
+import network.elrond.p2p.P2PBroadcastChanel;
+import network.elrond.p2p.P2PChannelName;
 import network.elrond.service.AppServiceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,14 +35,18 @@ public class AppBlockManager {
     }
 
 
+    public void generateAndBroadcastBlock(List<String> hashes, PrivateKey privateKey, AppState state) {
 
-    public void generateAndBroadcastBlock(List<String> hashes, Accounts accounts, Blockchain blockchain, PrivateKey privateKey, NTPClient ntpClient) {
+        Accounts accounts = state.getAccounts();
+        Blockchain blockchain = state.getBlockchain();
+
+
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
 
         try {
 
             List<Transaction> transactions = blockchainService.getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
-            Block block = AppBlockManager.instance().composeBlock(transactions, blockchain, accounts, ntpClient);
+            Block block = composeBlock(transactions, state);
 
 
             AppBlockManager.instance().signBlock(block, privateKey);
@@ -61,45 +68,97 @@ public class AppBlockManager {
     }
 
 
-    public Block composeBlock(List<Transaction> transactions, Blockchain blockchain, Accounts accounts, NTPClient ntpClient) {
+    public Block composeBlock(List<Transaction> transactions, AppState state) throws IOException {
 
-        Util.check(transactions!=null, "transactions!=null");
-        Util.check(blockchain!=null, "blockchain!=null");
-        Util.check(accounts!=null, "accounts!=null");
-        Util.check(blockchain.getGenesisBlock()!=null, "genesisBlock!=null");
+        Util.check(state != null, "state!=null");
+
+        Accounts accounts = state.getAccounts();
+        Blockchain blockchain = state.getBlockchain();
+        NTPClient ntpClient = state.getNtpClient();
+
+
+        Util.check(transactions != null, "transactions!=null");
+        Util.check(blockchain != null, "blockchain!=null");
+        Util.check(accounts != null, "accounts!=null");
+        Util.check(blockchain.getGenesisBlock() != null, "genesisBlock!=null");
 
         Block block = getNewBlockAndBindToPrevious(blockchain.getCurrentBlock());
         //compute round and round start millis = calculated round start millis
+
         ChronologyService chronologyService = AppServiceProvider.getChronologyService();
         Round round = chronologyService.getRoundFromDateTime(blockchain.getGenesisBlock().getTimestamp(),
                 chronologyService.getSynchronizedTime(ntpClient));
         block.setRoundIndex(round.getIndex());
         block.setTimestamp(round.getStartTimeStamp());
 
-        addTransactions(transactions, accounts, block);
+
+        addTransactions(transactions, block, state);
         block.setAppStateHash(accounts.getAccountsPersistenceUnit().getRootHash());
         AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
 
         return block;
     }
 
-    private void addTransactions(List<Transaction> transactions, Accounts accounts, Block block) {
+    private void addTransactions(List<Transaction> transactions, Block block, AppState state) throws IOException {
+
+        Accounts accounts = state.getAccounts();
+
         for (Transaction transaction : transactions) {
             boolean valid = AppServiceProvider.getTransactionService().verifyTransaction(transaction);
             if (!valid) {
+                rejectTransaction(block, transaction, state);
                 logger.info("Invalid transaction discarded [verify] " + transaction);
                 continue;
             }
 
             ExecutionReport executionReport = AppServiceProvider.getExecutionService().processTransaction(transaction, accounts);
             if (!executionReport.isOk()) {
+                rejectTransaction(block, transaction, state);
                 logger.info("Invalid transaction discarded [exec] " + transaction);
                 continue;
             }
 
             byte[] txHash = AppServiceProvider.getSerializationService().getHash(transaction);
+            acceptTransaction(block, transaction, state);
+
             block.getListTXHashes().add(txHash);
         }
+    }
+
+    private void acceptTransaction(Block block, Transaction transaction, AppState state) throws IOException {
+
+        ReceiptStatus status = ReceiptStatus.ACCEPTED;
+        String log = "Transaction processed";
+
+        sendReceipt(block, transaction, log, status, state);
+    }
+
+    private void sendReceipt(Block block, Transaction transaction, String log, ReceiptStatus status, AppState state) throws IOException {
+
+        String transactionHash = AppServiceProvider.getSerializationService().getHashString(transaction);
+
+
+        String blockHash = AppServiceProvider.getSerializationService().getHashString(block);
+        Receipt receipt = new Receipt(blockHash, transactionHash, status, log);
+        String receiptHash = AppServiceProvider.getSerializationService().getHashString(receipt);
+
+        // Store on blockchain
+        Blockchain blockchain = state.getBlockchain();
+        AppServiceProvider.getBlockchainService().put(transactionHash, receiptHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
+        AppServiceProvider.getBlockchainService().put(receiptHash, receipt, blockchain, BlockchainUnitType.RECEIPT);
+
+        // Broadcast
+        P2PBroadcastChanel channel = state.getChanel(P2PChannelName.RECEIPT);
+        AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, receiptHash);
+    }
+
+    private void rejectTransaction(Block block, Transaction transaction, AppState state) throws IOException {
+
+        ReceiptStatus status = ReceiptStatus.REJECTED;
+        String log = "Invalid transaction";
+
+        sendReceipt(block, transaction, log, status, state);
+
     }
 
     private Block getNewBlockAndBindToPrevious(Block currentBlock) {
@@ -113,7 +172,7 @@ public class AppBlockManager {
         return block;
     }
 
-    public void signBlock(Block block, PrivateKey privateKey){
+    public void signBlock(Block block, PrivateKey privateKey) {
         Util.check(block != null, "block != null");
         Util.check(privateKey != null, "application != null");
 

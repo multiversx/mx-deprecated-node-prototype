@@ -89,7 +89,7 @@ public class SerializationServiceTest {
         //System.out.println(strEncoded);
         //System.out.println(strEncoded2);
 
-        Block decodedBlock = serializationService.decodeJSON(encodedBlock, DataBlock.class);
+        Block decodedBlock = serializationService.decodeJSON(encodedBlock, Block.class);
 
         TestCase.assertEquals(encodedBlock, serializationService.encodeJSON(decodedBlock));
         Assert.assertArrayEquals(signature, decodedBlock.getSignature());
@@ -114,7 +114,7 @@ public class SerializationServiceTest {
         //System.out.println(strEncoded);
         //System.out.println(strEncoded2);
 
-        Block decodedBlock = serializationService.decodeJSON(encodedBlock, DataBlock.class);
+        Block decodedBlock = serializationService.decodeJSON(encodedBlock, Block.class);
 
         TestCase.assertEquals(encodedBlock, serializationService.encodeJSON(decodedBlock));
         Assert.assertArrayEquals(null, decodedBlock.getSignature());
@@ -132,7 +132,7 @@ public class SerializationServiceTest {
     }
 
     private Block getTestBlock() {
-        Block blk = new DataBlock();
+        Block blk = new Block();
         blk.setNonce(BigInteger.ONE);
         blk.setPrevBlockHash(new byte[]{0, 1, 2});
         blk.setShard(2);

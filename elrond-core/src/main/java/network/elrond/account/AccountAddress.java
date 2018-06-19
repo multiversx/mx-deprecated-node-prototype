@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 public class AccountAddress implements Serializable {
+    private static final Logger logger = LogManager.getLogger(AccountAddress.class);
 
     private byte[] bytes;
 
@@ -16,50 +17,28 @@ public class AccountAddress implements Serializable {
         return bytes;
     }
 
-    public PublicKey getPublicKey() {
-        return new PublicKey(bytes);
+
+    private AccountAddress(byte[] publicKeyBytes) {
+        Util.check(publicKeyBytes != null,"publicKeyBytes != null" );
+        this.bytes = publicKeyBytes;
     }
 
-    private static final Logger logger = LogManager.getLogger(AccountAddress.class);
-
-    public AccountAddress(byte[] bytes) {
-        logger.traceEntry("params: {}", bytes);
-        if (bytes == null) {
-            IllegalArgumentException ex = new IllegalArgumentException("Bytes cannot be null");
-            logger.throwing(ex);
-            throw ex;
-        }
-        this.bytes = bytes;
-        logger.traceExit();
+    public static AccountAddress fromHexString(String publicKeyHexString) {
+        Util.check(publicKeyHexString != null, "publicKeyHexString!=null");
+        Util.check(!publicKeyHexString.isEmpty(), "publicKeyHexString!=null");
+        return new AccountAddress(Util.hexStringToByteArray(publicKeyHexString));
     }
 
-
-    public static AccountAddress fromHexString(String value) {
-        logger.traceEntry("params: {}", value);
-        if (value == null || value.isEmpty()) {
-            IllegalArgumentException ex = new IllegalArgumentException("value is not a HexaString!!!");
-            logger.throwing(ex);
-            throw ex;
-        }
-
-        return logger.traceExit(new AccountAddress(Util.hexStringToByteArray(value)));
+    public static AccountAddress fromBytes(byte[] publicKeyBytes) {
+        return new AccountAddress(publicKeyBytes);
     }
 
-    public static AccountAddress fromBytes(byte[] value) {
-        return new AccountAddress(value);
-    }
-
-    public static AccountAddress fromPublicKey(PublicKey key) {
-        logger.traceEntry();
-        if (key == null) {
-            IllegalArgumentException ex = new IllegalArgumentException("PublicKey cannot be null");
-            logger.throwing(ex);
-            throw ex;
-        }
-        logger.trace("Public key: {}", key.getValue());
-
-        return logger.traceExit(fromBytes(key.getValue()));
-    }
+//    public static AccountAddress fromPublicKey(PublicKey key) {
+//        if (key == null) {
+//            throw new IllegalArgumentException("PublicKey cannot be null");
+//        }
+//        return fromBytes(key.getValue());
+//    }
 
     @Override
     public boolean equals(Object o) {

@@ -17,7 +17,6 @@ public class AppP2PManager {
 
     public P2PBroadcastChanel subscribeToChannel(Application application, P2PChannelName channelName, P2PChannelListener listener) {
 
-
         AppState state = application.getState();
         P2PConnection connection = state.getConnection();
 
@@ -26,7 +25,7 @@ public class AppP2PManager {
             channel = AppServiceProvider.getP2PBroadcastService().createChannel(connection, channelName);
         }
         AppServiceProvider.getP2PBroadcastService().subscribeToChannel(channel);
-        state.addChanel(channelName, channel);
+        state.addChanel(channel);
 
         channel.getListeners().add(listener);
 

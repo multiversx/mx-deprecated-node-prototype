@@ -6,6 +6,7 @@ import network.elrond.account.AccountAddress;
 import network.elrond.account.AccountState;
 import network.elrond.account.Accounts;
 import network.elrond.account.AccountsContext;
+import network.elrond.account.*;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
@@ -17,7 +18,6 @@ import network.elrond.service.AppServiceProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mapdb.Fun;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         }
 
         blockchain = new Blockchain(getDefaultTestBlockchainContext());
-        accounts = new Accounts(accountsContext);
+        accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
     }
 
     @After
@@ -68,7 +68,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         byte[] hash;
         byte[] appStateHash = new byte[0];
         AccountsContext accountsContext = new AccountsContext();
-        Accounts accountsSandbox = new Accounts(accountsContext);
+        Accounts accountsSandbox = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
 
         for (PublicKey pkWallet : publicKeysWallets) {
             if (!pkWallet.equals(publicKeyMint)) {
@@ -107,7 +107,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         AccountState accountState;
 
         for (PublicKey pk : publicKeysWallets) {
-            address = AccountAddress.fromPublicKey(pk);
+            address = AccountAddress.fromBytes(pk.getValue());
             accountState = AppServiceProvider.getAccountStateService()
                     .getOrCreateAccountState(address, accounts);
             if (pk.equals(publicKeyMint)) {

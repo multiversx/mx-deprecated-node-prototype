@@ -49,7 +49,7 @@ public class BlockchainTest extends BaseBlockchainTest{
 
         for (int i = 0; i < 100000; i++) {
 
-            Block block = new DataBlock();
+            Block block = new Block();
             BigInteger nonce = BigInteger.ONE.add(BigInteger.valueOf(i));
             block.setNonce(nonce);
             for (int d = 0; d < 5; d++) {

@@ -21,6 +21,10 @@ public class AccountStateServiceImpl implements AccountStateService {
     @Override
     public synchronized AccountState getOrCreateAccountState(AccountAddress address, Accounts accounts) throws IOException, ClassNotFoundException {
         logger.traceEntry("params: {} {}", address, accounts);
+
+        Util.check(address!=null,"address!=null");
+        Util.check(accounts!=null,"accounts!=null");
+
         AccountState state = getAccountState(address, accounts);
 
         if (state != null) {
@@ -113,9 +117,10 @@ public class AccountStateServiceImpl implements AccountStateService {
         AccountState accountState = null;
 
         try {
-            accountState = getOrCreateAccountState(AccountAddress.fromPublicKey(Util.PUBLIC_KEY_MINTING), accounts);
+            AccountAddress accountAddress = AccountAddress.fromBytes(Util.PUBLIC_KEY_MINTING.getValue());
+            accountState = getOrCreateAccountState(accountAddress, accounts);
             accountState.setBalance(Util.VALUE_MINTING);
-            setAccountState(AccountAddress.fromPublicKey(Util.PUBLIC_KEY_MINTING), accountState, accounts);
+            setAccountState(accountAddress, accountState, accounts);
             accounts.getAccountsPersistenceUnit().commit();
             logger.trace("Done initial minting!");
         } catch (Exception ex) {
@@ -128,6 +133,11 @@ public class AccountStateServiceImpl implements AccountStateService {
                                                                AccountsContext accountsContextTemporary, PrivateKey privateKey,
                                                                NTPClient ntpClient) {
         logger.traceEntry("params: {} {} {} {} {}", initialAddress, initialValue, accountsContextTemporary, privateKey, ntpClient);
+
+        Util.check(!(initialAddress == null || initialAddress.isEmpty()), "initialAddress!=null");
+        Util.check(!(initialValue.compareTo(BigInteger.ZERO) < 0), "initialValue is less than zero");
+        Util.check(accountsContextTemporary!= null, "accountsContextTemporary!=null");
+        Util.check(privateKey!=null, "privateKey!=null");
 
         if (initialValue.compareTo(Util.VALUE_MINTING) > 0) {
             initialValue = Util.VALUE_MINTING;
@@ -149,7 +159,7 @@ public class AccountStateServiceImpl implements AccountStateService {
 
         logger.trace("Computing state root hash...");
         try {
-            Accounts accountsTemp = new Accounts(accountsContextTemporary);
+            Accounts accountsTemp = new Accounts(accountsContextTemporary, new AccountsPersistenceUnit<>(accountsContextTemporary.getDatabasePath()));
 
             ExecutionService executionService = AppServiceProvider.getExecutionService();
             ExecutionReport executionReport = executionService.processTransaction(transactionMint, accountsTemp);
