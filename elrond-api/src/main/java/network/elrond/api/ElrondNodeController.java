@@ -40,6 +40,15 @@ public class ElrondNodeController {
         return true;
     }
 
+    @RequestMapping(path = "/node/status", method = RequestMethod.GET)
+    public @ResponseBody
+    boolean nodeStatus(
+            HttpServletResponse response) {
+        Application application = elrondApiNode.getApplication();
+
+        return application !=  null;
+    }
+
 
     @RequestMapping(path = "/node/start", method = RequestMethod.GET)
     public @ResponseBody
