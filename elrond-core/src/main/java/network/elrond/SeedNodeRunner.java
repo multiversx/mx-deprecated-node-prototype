@@ -3,6 +3,7 @@ package network.elrond;
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
 import network.elrond.core.ThreadUtil;
+import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.BootstrapType;
@@ -36,7 +37,7 @@ public class SeedNodeRunner {
 
             do {
 
-                AccountAddress address = AccountAddress.fromBytes(pbKey.getValue());
+                AccountAddress address = AccountAddress.fromHexString(Util.TEST_ADDRESS);
                 Transaction transaction = facade.send(address, BigInteger.TEN, application);
                 System.out.println(facade.getBalance(address, application));
 
