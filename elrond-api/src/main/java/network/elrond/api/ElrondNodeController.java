@@ -1,14 +1,6 @@
 package network.elrond.api;
 
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.classic.spi.LoggingEvent;
-import ch.qos.logback.core.Appender;
-import ch.qos.logback.core.filter.Filter;
-import ch.qos.logback.core.spi.FilterReply;
 import network.elrond.Application;
 import network.elrond.ContextCreator;
 import network.elrond.account.AccountAddress;
@@ -18,7 +10,6 @@ import network.elrond.crypto.PKSKPair;
 import network.elrond.data.BootstrapType;
 import network.elrond.p2p.PingResponse;
 import org.apache.commons.io.FileUtils;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Iterator;
 
 @Controller
 public class ElrondNodeController {
@@ -70,7 +60,7 @@ public class ElrondNodeController {
     ) {
 
         AppContext context = ContextCreator.createAppContext(nodeName, privateKey, masterPeerIpAddress,
-                masterPeerPort, port, bootstrapType, blockchainPath, new BigInteger(mintValue));
+                masterPeerPort, port, bootstrapType, blockchainPath);
 
         if (bootstrapType.equals(BootstrapType.REBUILD_FROM_DISK)) {
             setupRestoreDir(new File(blockchainRestorePath), new File(blockchainPath));

@@ -41,7 +41,7 @@ public class BootstrappingProcessorNodeProducer {
         context.setPrivateKey(pvKeyInitial);
 
         //1 mil ERD's go to initial address
-        context.setValueMint(BigInteger.TEN.pow(14));
+        //context.setValueMint(BigInteger.TEN.pow(14));
 
         //================================Setup done
 
