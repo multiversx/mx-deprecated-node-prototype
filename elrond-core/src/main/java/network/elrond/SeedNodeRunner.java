@@ -18,9 +18,9 @@ public class SeedNodeRunner {
     public static void main(String[] args) throws Exception {
 
         String nodeName = "elrond-node-1";
-        Integer port = 40010;
-        Integer masterPeerPort = 40010;
-        String masterPeerIpAddress = "192.168.11.51";
+        Integer port = 4000;
+        Integer masterPeerPort = 4000;
+        String masterPeerIpAddress = "127.0.0.1";
         String seedNodeRunnerPrivateKey = "1111111111111111fa612ecafcfd145cc06c1fb64d7499ef34696ff16b82cbc2";
 
         PublicKey pbKey = new PublicKey(new PrivateKey(seedNodeRunnerPrivateKey));

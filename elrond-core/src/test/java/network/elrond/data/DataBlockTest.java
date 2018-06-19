@@ -9,7 +9,7 @@ import java.math.BigInteger;
 public class DataBlockTest {
     @Test
     public void testBlock() {
-        DataBlock db = new DataBlock();
+        Block db = new Block();
         db.nonce = BigInteger.ONE;
         db.shard = 0;
         db.appStateHash = new byte[]{0, 45, 22, -10, 23, -123};
@@ -26,7 +26,7 @@ public class DataBlockTest {
         SerializationService serializationService = AppServiceProvider.getSerializationService();
         System.out.println(serializationService.encodeJSON(db));
 
-        Block db2 = serializationService.decodeJSON(serializationService.encodeJSON(db), DataBlock.class);
+        Block db2 = serializationService.decodeJSON(serializationService.encodeJSON(db), Block.class);
         System.out.println(serializationService.encodeJSON(db2));
 
         TestCase.assertEquals(serializationService.encodeJSON(db), serializationService.encodeJSON(db2));

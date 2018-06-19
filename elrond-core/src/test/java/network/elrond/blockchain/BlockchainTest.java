@@ -2,11 +2,10 @@ package network.elrond.blockchain;
 
 import network.elrond.data.BaseBlockchainTest;
 import network.elrond.data.Block;
-import network.elrond.data.DataBlock;
 import network.elrond.data.SerializationService;
 import network.elrond.service.AppServiceProvider;
-import org.spongycastle.util.encoders.Base64;
 import org.junit.Assert;
+import org.spongycastle.util.encoders.Base64;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -49,7 +48,7 @@ public class BlockchainTest extends BaseBlockchainTest {
 
         for (int i = 0; i < 100000; i++) {
 
-            Block block = new DataBlock();
+            Block block = new Block();
             BigInteger nonce = BigInteger.ONE.add(BigInteger.valueOf(i));
             block.setNonce(nonce);
             for (int d = 0; d < 5; d++) {

@@ -1,13 +1,13 @@
 package network.elrond.blockchain;
 
-import network.elrond.data.DataBlock;
+import network.elrond.data.Block;
 import network.elrond.data.Receipt;
 import network.elrond.data.Transaction;
 
 import java.math.BigInteger;
 
 public enum BlockchainUnitType {
-    BLOCK(String.class, DataBlock.class),
+    BLOCK(String.class, Block.class),
     BLOCK_INDEX(BigInteger.class, String.class),
     TRANSACTION(String.class, Transaction.class),
     SETTINGS(String.class, String.class),
