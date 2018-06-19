@@ -15,3 +15,5 @@
 /producer*
 .project
 *.iml
+/classes
+/classes/*
