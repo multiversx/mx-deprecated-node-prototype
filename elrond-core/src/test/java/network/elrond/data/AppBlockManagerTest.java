@@ -37,7 +37,7 @@ public class AppBlockManagerTest {
     @Before
     public void setupTest() throws Exception {
         AppContext context = new AppContext();
-        context.setMasterPeerIpAddress(null);
+        //context.setMasterPeerIpAddress("");
         context.setMasterPeerPort(4000);
         context.setPort(4000);
         context.setNodeName("Producer and main node");

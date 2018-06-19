@@ -67,7 +67,7 @@ public class ElrondNodeController {
     ) {
 
         AppContext context = ContextCreator.createAppContext(nodeName, privateKey, masterPeerIpAddress,
-                masterPeerPort, port, bootstrapType, blockchainPath, new BigInteger(mintValue));
+                masterPeerPort, port, bootstrapType, blockchainPath);
 
         return elrondApiNode.start(context, blockchainPath, blockchainRestorePath);
     }

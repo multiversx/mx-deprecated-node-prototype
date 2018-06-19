@@ -126,7 +126,7 @@ public class AccountStateServiceImplTest {
         AccountsContext accountsContext = new AccountsContext();
         PublicKey publicKey = new PublicKey(new PrivateKey());
         accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(""));
-        accountStateService.generateGenesisBlock(Util.byteArrayToHexString(publicKey.getValue()), BigInteger.TEN, accountsContext, new PrivateKey());
+        accountStateService.generateGenesisBlock(Util.byteArrayToHexString(publicKey.getValue()), BigInteger.TEN, accountsContext, new PrivateKey(), null);
         AccountState state = accountStateService.getAccountState(AccountAddress.fromBytes(Util.PUBLIC_KEY_MINTING.getValue()), accounts);
         Assert.assertNotNull(state);
         Assert.assertTrue(state.getBalance().compareTo(Util.VALUE_MINTING) == 0);

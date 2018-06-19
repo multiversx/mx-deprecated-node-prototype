@@ -150,7 +150,7 @@ public class AppBlockManagerIT {
 
         long start = System.currentTimeMillis();
         List<Transaction> transactions = blockchainService.getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
-        Block block = AppBlockManager.instance().composeBlock(transactions, blockchain, accounts);
+        Block block = AppBlockManager.instance().composeBlock(transactions, blockchain, accounts, null);
         AppBlockManager.instance().signBlock(block, privateKey);
         long end = System.currentTimeMillis();
         System.out.println((end - start));
@@ -169,7 +169,7 @@ public class AppBlockManagerIT {
 
         long start = System.currentTimeMillis();
 
-        AppBlockManager.instance().generateAndBroadcastBlock(hashes, accounts, blockchain, privateKey);
+        AppBlockManager.instance().generateAndBroadcastBlock(hashes, accounts, blockchain, privateKey, null);
 
         long end = System.currentTimeMillis();
         System.out.println((end - start));

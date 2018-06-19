@@ -68,7 +68,7 @@ public class BootstrappingProcessorIT {
 
 
         //test 1: test start from scratch
-        ExecutionReport executionReport = bootstrapService.startFromGenesis(app.getState().getAccounts(), app.getState().getBlockchain(), app.getContext());
+        ExecutionReport executionReport = bootstrapService.startFromGenesis(app.getState().getAccounts(), app.getState().getBlockchain(), app.getContext(), null);
 
         TestCase.assertEquals(true, executionReport.isOk());
         TestCase.assertEquals(BigInteger.ZERO, bootstrapService.getCurrentBlockIndex(LocationType.LOCAL, state.getBlockchain()));
