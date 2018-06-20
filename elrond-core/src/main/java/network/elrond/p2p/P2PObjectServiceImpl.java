@@ -5,20 +5,19 @@ import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Iterator;
 
 public class P2PObjectServiceImpl implements P2PObjectService {
-
-    Logger logger = LoggerFactory.getLogger(P2PObjectServiceImpl.class);
+    private static final Logger logger = LogManager.getLogger(P2PObjectServiceImpl.class);
 
     @Override
     public <T> T get(P2PConnection connection, String key, Class<T> clazz) throws ClassNotFoundException, IOException {
-
+        logger.traceEntry("params: {} {} {}", connection, key, clazz);
         PeerDHT peer = connection.getDht();
         String clazzName = clazz.getName();
 
@@ -31,27 +30,27 @@ public class P2PObjectServiceImpl implements P2PObjectService {
             }
             Data data = iterator.next();
             T object = (T) data.object();
-            logger.debug("Retrieved key: {0} => {1}", key, object);
-            return object;
+            logger.trace("Retrieved key: {} => {}", key, object);
+            return logger.traceExit(object);
         } else {
-            LoggerFactory.getLogger(P2PBroadcastServiceImpl.class).info("Timeout getting! hash: " + key);
-            logger.debug("Timeout getting! key:  {0}", key);
+            logger.warn("Timeout getting data with hash {}", key);
         }
-        return null;
+        return logger.traceExit((T)null);
     }
 
     @Override
     public <T extends Serializable> FuturePut put(P2PConnection connection, String key, T value) throws IOException {
+        logger.traceEntry("params: {} {} {}", connection, key, value);
         PeerDHT peer = connection.getDht();
 
         String clazzName = value.getClass().getName();
 
         FuturePut fp = peer.put(Number160.createHash(key + clazzName)).data(new Data(value)).start();
-        logger.debug("Put object with key {0}", key + clazzName);
+        logger.trace("Put object with key {}", key + clazzName);
 
         fp.awaitUninterruptibly();
 
-        return (fp);
+        return logger.traceExit(fp);
     }
 
 }

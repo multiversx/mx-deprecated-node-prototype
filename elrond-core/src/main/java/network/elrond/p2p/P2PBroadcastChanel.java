@@ -37,5 +37,10 @@ public class P2PBroadcastChanel {
     public void setListeners(List<P2PChannelListener> listeners) {
         this.listeners = listeners;
     }
+
+    @Override
+    public String toString(){
+        return String.format("P2PBroadcastChannel{name=%s, listeners.size()=%d}", name, listeners.size());
+    }
 }
 

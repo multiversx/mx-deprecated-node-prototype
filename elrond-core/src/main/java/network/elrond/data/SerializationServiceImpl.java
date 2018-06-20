@@ -6,15 +6,18 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongycastle.util.encoders.Base64;
 
 import java.io.IOException;
 
 public class SerializationServiceImpl implements SerializationService {
-
+    private static final Logger logger = LogManager.getLogger(SerializationServiceImpl.class);
 
     @Override
     public <T> String encodeJSON(T object) {
+        logger.traceEntry("params {}", object);
         ObjectMapper mapper = new ObjectMapper();
         SimpleFilterProvider filter = new SimpleFilterProvider();
 
@@ -23,28 +26,28 @@ public class SerializationServiceImpl implements SerializationService {
         mapper.setFilterProvider(filter);
 
         try {
-            return (mapper.writeValueAsString(object));
+            return logger.traceExit(mapper.writeValueAsString(object));
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return null;
+            logger.catching(e);
+            return logger.traceExit((String)null);
         }
     }
 
     @Override
     public <T> T decodeJSON(String strJSONData, Class<T> clazz) {
+        logger.traceEntry("params {} {}", strJSONData, clazz);
         ObjectMapper mapper = new ObjectMapper();
         try {
-            return mapper.readValue(strJSONData, clazz);
+            return logger.traceExit(mapper.readValue(strJSONData, clazz));
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            logger.catching(e);
+            return logger.traceExit((T)null);
         }
     }
 
     public byte[] getHash(Object object) {
-        if (object == null) {
-            throw new IllegalArgumentException();
-        }
+        logger.traceEntry("params {}", object);
+        Util.check(object != null, "object is null");
 
         String json = AppServiceProvider.getSerializationService().encodeJSON(object);
         Util.check(json != null, "json is null");
@@ -56,7 +59,7 @@ public class SerializationServiceImpl implements SerializationService {
 ////            throw new RuntimeException(ex);
 ////        }
 ////        return instance.digest(json.getBytes());
-        return (Util.SHA3.get().digest(json.getBytes()));
+        return logger.traceExit((Util.SHA3.get().digest(json.getBytes())));
     }
 
     @Override

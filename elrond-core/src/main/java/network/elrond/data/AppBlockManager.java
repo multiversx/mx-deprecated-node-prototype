@@ -15,8 +15,9 @@ import network.elrond.crypto.PublicKey;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.service.AppServiceProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -24,9 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AppBlockManager {
-
-
-    private Logger logger = LoggerFactory.getLogger(AppBlockManager.class);
+    private static final Logger logger = LogManager.getLogger(AppBlockManager.class);
 
     private static AppBlockManager instance = new AppBlockManager();
 
@@ -34,48 +33,42 @@ public class AppBlockManager {
         return instance;
     }
 
-
     public void generateAndBroadcastBlock(List<String> hashes, PrivateKey privateKey, AppState state) {
-
+        logger.traceEntry("params: {} {} {}", hashes, privateKey, state);
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();
-
 
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
 
         try {
-
             List<Transaction> transactions = blockchainService.getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
             Block block = composeBlock(transactions, state);
-
 
             AppBlockManager.instance().signBlock(block, privateKey);
             ExecutionService executionService = AppServiceProvider.getExecutionService();
             ExecutionReport result = executionService.processBlock(block, accounts, blockchain);
 
             if (result.isOk()) {
-
                 String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
                 AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
 
-                logger.info("New block proposed" + hashBlock);
+                logger.info("New block proposed with hash {}", hashBlock);
             }
-
-
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+            logger.throwing(e);
         }
+
+        logger.traceExit();
     }
 
 
     public Block composeBlock(List<Transaction> transactions, AppState state) throws IOException {
-
+        logger.traceEntry("params: {} {}", transactions, state);
         Util.check(state != null, "state!=null");
 
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();
         NTPClient ntpClient = state.getNtpClient();
-
 
         Util.check(transactions != null, "transactions!=null");
         Util.check(blockchain != null, "blockchain!=null");
@@ -83,23 +76,30 @@ public class AppBlockManager {
         Util.check(blockchain.getGenesisBlock() != null, "genesisBlock!=null");
 
         Block block = getNewBlockAndBindToPrevious(blockchain.getCurrentBlock());
-        //compute round and round start millis = calculated round start millis
+        logger.trace("done generating blank new block as {}", block);
 
         ChronologyService chronologyService = AppServiceProvider.getChronologyService();
         Round round = chronologyService.getRoundFromDateTime(blockchain.getGenesisBlock().getTimestamp(),
                 chronologyService.getSynchronizedTime(ntpClient));
         block.setRoundIndex(round.getIndex());
         block.setTimestamp(round.getStartTimeStamp());
-
+        logger.trace("done computing round and round start millis = calculated round start millis, round index = {}, time stamp = {}",
+                block.roundIndex, block.timestamp);
 
         addTransactions(transactions, block, state);
-        block.setAppStateHash(accounts.getAccountsPersistenceUnit().getRootHash());
-        AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
+        logger.trace("done added {} transactions to block", transactions.size());
 
-        return block;
+        block.setAppStateHash(accounts.getAccountsPersistenceUnit().getRootHash());
+        logger.trace("done added state root hash to block as {}", block.getAppStateHash());
+
+        AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
+        logger.trace("reverted app state to original form");
+
+        return logger.traceExit(block);
     }
 
     private void addTransactions(List<Transaction> transactions, Block block, AppState state) throws IOException {
+        logger.traceEntry("params: {} {} {}", transactions, block, state);
 
         Accounts accounts = state.getAccounts();
 
@@ -107,34 +107,38 @@ public class AppBlockManager {
             boolean valid = AppServiceProvider.getTransactionService().verifyTransaction(transaction);
             if (!valid) {
                 rejectTransaction(block, transaction, state);
-                logger.info("Invalid transaction discarded [verify] " + transaction);
+                logger.info("Invalid transaction discarded [verify] {}", transaction);
                 continue;
             }
 
             ExecutionReport executionReport = AppServiceProvider.getExecutionService().processTransaction(transaction, accounts);
             if (!executionReport.isOk()) {
                 rejectTransaction(block, transaction, state);
-                logger.info("Invalid transaction discarded [exec] " + transaction);
+                logger.info("Invalid transaction discarded [exec] {}", transaction);
                 continue;
             }
 
             byte[] txHash = AppServiceProvider.getSerializationService().getHash(transaction);
             acceptTransaction(block, transaction, state);
 
+            logger.trace("added transaction {} in block", txHash);
             block.getListTXHashes().add(txHash);
         }
+
+        logger.traceExit();
     }
 
     private void acceptTransaction(Block block, Transaction transaction, AppState state) throws IOException {
-
+        logger.traceEntry("params: {} {} {}", block, transaction, state);
         ReceiptStatus status = ReceiptStatus.ACCEPTED;
         String log = "Transaction processed";
 
         sendReceipt(block, transaction, log, status, state);
+        logger.traceExit();
     }
 
     private void sendReceipt(Block block, Transaction transaction, String log, ReceiptStatus status, AppState state) throws IOException {
-
+        logger.traceEntry("params: {} {} {} {} {}", block, transaction, log, status, state);
         String transactionHash = AppServiceProvider.getSerializationService().getHashString(transaction);
 
 
@@ -146,22 +150,26 @@ public class AppBlockManager {
         Blockchain blockchain = state.getBlockchain();
         AppServiceProvider.getBlockchainService().put(transactionHash, receiptHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
         AppServiceProvider.getBlockchainService().put(receiptHash, receipt, blockchain, BlockchainUnitType.RECEIPT);
+        logger.trace("placed on blockchain (TRANSACTION_RECEIPT and RECEIPT)");
 
         // Broadcast
         P2PBroadcastChanel channel = state.getChanel(P2PChannelName.RECEIPT);
         AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, receiptHash);
+        logger.trace("broadcast the receipt hash");
+        logger.traceExit();
     }
 
     private void rejectTransaction(Block block, Transaction transaction, AppState state) throws IOException {
-
+        logger.traceEntry("params: {} {} {}", block, transaction, state);
         ReceiptStatus status = ReceiptStatus.REJECTED;
         String log = "Invalid transaction";
 
         sendReceipt(block, transaction, log, status, state);
-
+        logger.traceExit();
     }
 
     private Block getNewBlockAndBindToPrevious(Block currentBlock) {
+        logger.traceEntry("params: {}", currentBlock);
         Block block = new Block();
         byte[] hash = AppServiceProvider.getSerializationService().getHash(currentBlock);
 
@@ -169,10 +177,11 @@ public class AppBlockManager {
         block.setPrevBlockHash(hash);
         BigInteger nonce = currentBlock.getNonce().add(BigInteger.ONE);
         block.setNonce(nonce);
-        return block;
+        return logger.traceExit(block);
     }
 
     public void signBlock(Block block, PrivateKey privateKey) {
+        logger.traceEntry("params: {} {}", block, privateKey);
         Util.check(block != null, "block != null");
         Util.check(privateKey != null, "application != null");
 
@@ -182,6 +191,7 @@ public class AppBlockManager {
         block.listPubKeys.add(Util.byteArrayToHexString(new PublicKey(privateKey).getValue()));
         block.setCommitment(null);
         block.setSignature(null);
+        logger.trace("set block's signature data to null!");
 
         ArrayList<byte[]> signersPublicKeys = new ArrayList<>();
         ArrayList<byte[]> commitmentSecrets = new ArrayList<>();
@@ -202,9 +212,10 @@ public class AppBlockManager {
         }
 
         byte[] blockHashNoSig = AppServiceProvider.getSerializationService().getHash(block);
+        logger.trace("done hashing block {}", blockHashNoSig);
 
-        // aggregate the commitments
         aggregatedCommitment = multiSignatureService.aggregateCommitments(commitments, 1);
+        logger.trace("done aggregating commitments {}", aggregatedCommitment);
 
         // compute challenges and signatures for each signer
         for (int i = 0; i < sizeConsensusGroup; i++) {
@@ -234,9 +245,12 @@ public class AppBlockManager {
 
             aggregatedSignature = multiSignatureService.aggregateSignatures(signatureShares, 1);
         }
+        logger.trace("done aggregating signature {}", aggregatedSignature);
 
         //boolean sigOk = multiSignatureService.verifyAggregatedSignature(signersPublicKeys,aggregatedSignature, aggregatedCommitment, blockHashNoSig, 1 );
         block.setSignature(aggregatedSignature);
         block.setCommitment(aggregatedCommitment);
+        logger.trace("placed signature data on block!");
+        logger.traceExit();
     }
 }

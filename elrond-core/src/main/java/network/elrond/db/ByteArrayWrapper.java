@@ -3,6 +3,9 @@ package network.elrond.db;
 import java.util.Arrays;
 
 import network.elrond.core.FastByteComparisons;
+import network.elrond.core.Util;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongycastle.util.encoders.Hex;
 
 /**
@@ -11,21 +14,32 @@ import org.spongycastle.util.encoders.Hex;
  */
 public class ByteArrayWrapper implements Comparable<ByteArrayWrapper> {
 
+    private static final Logger logger = LogManager.getLogger(ByteArrayWrapper.class);
+
     private final byte[] data;
 
     public ByteArrayWrapper(byte[] data) {
-        if (data == null)
-            throw new NullPointerException("Data must not be null");
+        logger.traceEntry("params: {}", data);
+
+        Util.check(data != null, "data is null");
+
         this.data = data;
+
+        logger.traceExit();
     }
 
     public boolean equals(Object other) {
-        if (!(other instanceof ByteArrayWrapper))
-            return false;
+        logger.traceEntry("params: {}", other);
+
+        if (!(other instanceof ByteArrayWrapper)) {
+            logger.trace("Not same class!");
+            return logger.traceExit(false);
+        }
+
         byte[] otherData = ((ByteArrayWrapper) other).getData();
-        return FastByteComparisons.compareTo(
+        return logger.traceExit(FastByteComparisons.compareTo(
                 data, 0, data.length,
-                otherData, 0, otherData.length) == 0;
+                otherData, 0, otherData.length) == 0);
     }
 
     @Override

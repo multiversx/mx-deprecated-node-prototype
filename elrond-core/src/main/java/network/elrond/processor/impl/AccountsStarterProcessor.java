@@ -7,6 +7,8 @@ import network.elrond.account.AccountsPersistenceUnit;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.processor.AppTask;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -15,10 +17,11 @@ import java.nio.file.Paths;
 public class AccountsStarterProcessor implements AppTask {
 
     public static final String ACCOUNTS_DATA = "blockchain.accounts.data";
+    private static final Logger logger = LogManager.getLogger(AccountsStarterProcessor.class);
 
     @Override
     public void process(Application application) throws IOException {
-
+        logger.traceEntry("params: {}", application);
         AppContext context = application.getContext();
 
         AppState state = application.getState();
@@ -32,6 +35,7 @@ public class AccountsStarterProcessor implements AppTask {
 
         Accounts accounts = new Accounts(accountContext, new AccountsPersistenceUnit<>(accountContext.getDatabasePath()));
         state.setAccounts(accounts);
+        logger.traceExit();
     }
 
 }

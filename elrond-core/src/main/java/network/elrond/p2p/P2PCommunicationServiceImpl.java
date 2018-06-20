@@ -2,6 +2,8 @@ package network.elrond.p2p;
 
 
 import network.elrond.core.Util;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.OutputStream;
 import java.net.InetAddress;
@@ -9,22 +11,24 @@ import java.net.Socket;
 import java.util.Date;
 
 public class P2PCommunicationServiceImpl implements P2PCommunicationService {
+    private static final Logger logger = LogManager.getLogger(P2PCommunicationServiceImpl.class);
+
     public PingResponse getPingResponse(String address, int port) throws Exception {
+        logger.traceEntry("params: {} {}", address, port);
+
         PingResponse pingResponse = new PingResponse();
 
-//        Util.check(address != null, "address is null");
-        if (!(address != null)) {
+        if (address == null) {
             pingResponse.setErrorMessage("address is null");
-            return(pingResponse);
+            logger.trace("address is null");
+            return logger.traceExit(pingResponse);
         }
 
-//        Util.check((port > 1) && (port < 65535), "port not valid");
-
         String[] addr = address.split("\\.");
-//        Util.check(addr.length == 4, "addess is not valid");
-        if (!(addr.length == 4)) {
+        if (addr.length != 4) {
             pingResponse.setErrorMessage("addess is not valid");
-            return(pingResponse);
+            logger.trace("address is not valid");
+            return logger.traceExit(pingResponse);
         }
 
         for (int i = 0; i < 4; i++) {
@@ -32,18 +36,14 @@ public class P2PCommunicationServiceImpl implements P2PCommunicationService {
                 int val = Integer.decode(addr[i]);
 
                 if ((val < 0) || (val > 254)) {
-//                    Util.check(false, "addess is not valid");
-                    if (!(false)) {
-                        pingResponse.setErrorMessage("addess is not valid");
-                        return(pingResponse);
-                    }
+                    pingResponse.setErrorMessage("addess is not valid");
+                    logger.trace("address is not valid");
+                    return logger.traceExit(pingResponse);
                 }
             } catch (Exception ex) {
-//                Util.check(false, "addess is not valid");
-                if (!(false)) {
-                    pingResponse.setErrorMessage(ex.getLocalizedMessage());
-                    return(pingResponse);
-                }
+                pingResponse.setErrorMessage(ex.getLocalizedMessage());
+                logger.catching(ex);
+                return logger.traceExit(pingResponse);
             }
         }
 
@@ -51,14 +51,10 @@ public class P2PCommunicationServiceImpl implements P2PCommunicationService {
         InetAddress inet = InetAddress.getByName(address);
         Date dStart = new Date();
 
-//        PingResponse pingResponse = new PingResponse();
-
         if (!inet.isReachable(5000)) {
-//            pingResponse.setReachablePing(false);
-//            pingResponse.setReachablePort(false);
-//            pingResponse.setResponseTimeMs(0);
             pingResponse.setErrorMessage("timeout");
-            return (pingResponse);
+            logger.trace("timeout");
+            return logger.traceExit(pingResponse);
         }
 
         Date dEnd = new Date();
@@ -67,7 +63,8 @@ public class P2PCommunicationServiceImpl implements P2PCommunicationService {
 
         if (!((port > 1) && (port < 65535))) {
             pingResponse.setErrorMessage("port not valid");
-            return(pingResponse);
+            logger.trace("port is not valid");
+            return logger.traceExit(pingResponse);
         }
 
         //set 2. try to open socket on port
@@ -79,11 +76,11 @@ public class P2PCommunicationServiceImpl implements P2PCommunicationService {
             socket.close();
             pingResponse.setReachablePort(true);
         } catch (Exception ex){
-//            pingResponse.setReachablePort(false);
             pingResponse.setErrorMessage(ex.getLocalizedMessage());
+            logger.catching(ex);
         }
 
-        return(pingResponse);
+        return logger.traceExit(pingResponse);
     }
 
 

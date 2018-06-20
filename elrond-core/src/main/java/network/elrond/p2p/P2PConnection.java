@@ -32,7 +32,7 @@ public class P2PConnection {
                         continue;
                     }
 
-                    listener.onReciveMessage(sender, (P2PBroadcastMessage) request);
+                    listener.onReceiveMessage(sender, (P2PBroadcastMessage) request);
                 }
             }
             return null;
@@ -61,5 +61,10 @@ public class P2PConnection {
     public ObjectDataReply registerChannel(P2PBroadcastChanel channel) {
         channels.add(channel);
         return dataReplyCallback;
+    }
+
+    @Override
+    public String toString(){
+        return(String.format("P2PConnection{MEM=%s, nodeName=%s}", (Object)dht, nodeName));
     }
 }

@@ -47,8 +47,8 @@ public class PingResponse {
 
     @Override
     public String toString(){
-        return ("Ping: " + String.valueOf(isReachablePing()) + ", response time: " +
-            String.valueOf(responseTimeMs) + " ms, reachable port: " + String.valueOf(reachablePort));
+        return String.format("PingResponse{ping=%b, response time=%d, reachable port=%b, error=%s}",
+                isReachablePing(), responseTimeMs, isReachablePort(), errorMessage);
     }
 
 

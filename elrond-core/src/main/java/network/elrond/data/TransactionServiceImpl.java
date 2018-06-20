@@ -7,8 +7,8 @@ import network.elrond.crypto.PublicKey;
 import network.elrond.crypto.Signature;
 import network.elrond.crypto.SignatureService;
 import network.elrond.service.AppServiceProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -23,7 +23,7 @@ import java.util.List;
  * @since 2018-05-16
  */
 public class TransactionServiceImpl implements TransactionService {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LogManager.getLogger(TransactionServiceImpl.class);
     private SerializationService serializationService = AppServiceProvider.getSerializationService();
 
 
@@ -43,24 +43,20 @@ public class TransactionServiceImpl implements TransactionService {
     /**
      * Signs the transaction using private keys
      *
-     * @param tx               transaction
+     * @param transaction      transaction
      * @param privateKeysBytes private key as byte array
      */
-    public void signTransaction(Transaction tx, byte[] privateKeysBytes, byte[] publicKeyBytes) {
+    public void signTransaction(Transaction transaction, byte[] privateKeysBytes, byte[] publicKeyBytes) {
+        logger.traceEntry("params: {} {} {}", transaction, privateKeysBytes, publicKeyBytes);
 
-        if (tx == null) {
-            throw new IllegalArgumentException("Transaction cannot be null");
-        }
+        Util.check(transaction != null, "transaction is null");
+        Util.check(privateKeysBytes != null, "privateKeysBytes is null");
 
-        if (privateKeysBytes == null) {
-            throw new IllegalArgumentException("PrivateKeysBytes cannot be null");
-        }
+        logger.trace("Setting signature data to null...");
+        transaction.setSignature(null);
+        transaction.setChallenge(null);
 
-
-        tx.setSignature(null);
-        tx.setChallenge(null);
-
-        byte[] hashNoSigLocal = serializationService.getHash(tx);
+        byte[] hashNoSigLocal = serializationService.getHash(transaction);
 
 //        tx.setSignature(signature);
 //        tx.setChallenge(challenge);
@@ -68,71 +64,78 @@ public class TransactionServiceImpl implements TransactionService {
 
         Signature sig;
 
+        logger.trace("Signing transaction...");
         SignatureService schnorr = AppServiceProvider.getSignatureService();
         sig = schnorr.signMessage(hashNoSigLocal, privateKeysBytes, publicKeyBytes);
 
-        tx.setSignature(sig.getSignature());
-        tx.setChallenge(sig.getChallenge());
-        tx.setPubKey(Util.byteArrayToHexString(publicKeyBytes));
+        transaction.setSignature(sig.getSignature());
+        transaction.setChallenge(sig.getChallenge());
+        transaction.setPubKey(Util.byteArrayToHexString(publicKeyBytes));
+
+        logger.traceExit();
     }
 
     /**
      * Verify the data stored in tx
      *
-     * @param tx to be verified
+     * @param transaction to be verified
      * @return true if tx passes all consistency tests
      */
-    public boolean verifyTransaction(Transaction tx) {
-        if (tx == null) {
-            throw new IllegalArgumentException("Transaction cannot be null");
-        }
+    public boolean verifyTransaction(Transaction transaction) {
+        logger.traceEntry("params: {}", transaction);
+
+        Util.check(transaction != null, "transaction is null");
 
         //test 1. consistency checks
-        if ((tx.getNonce().compareTo(BigInteger.ZERO) < 0) ||
-                (tx.getValue().compareTo(BigInteger.ZERO) < 0) ||
-                (tx.getSignature() == null) ||
-                (tx.getChallenge() == null) ||
-                (tx.getSignature().length == 0) ||
-                (tx.getChallenge().length == 0) ||
-                (tx.getSendAddress().length() != Util.MAX_LEN_ADDR * 2) ||
-                (tx.getReceiverAddress().length() != Util.MAX_LEN_ADDR * 2) ||
-                (tx.getPubKey().length() != Util.MAX_LEN_PUB_KEY * 2)
+        if ((transaction.getNonce().compareTo(BigInteger.ZERO) < 0) ||
+                (transaction.getValue().compareTo(BigInteger.ZERO) < 0) ||
+                (transaction.getSignature() == null) ||
+                (transaction.getChallenge() == null) ||
+                (transaction.getSignature().length == 0) ||
+                (transaction.getChallenge().length == 0) ||
+                (transaction.getSendAddress().length() != Util.MAX_LEN_ADDR * 2) ||
+                (transaction.getReceiverAddress().length() != Util.MAX_LEN_ADDR * 2) ||
+                (transaction.getPubKey().length() != Util.MAX_LEN_PUB_KEY * 2)
                 ) {
-            return (false);
+            logger.trace("Failed at conistency check (negative nonce, negative value, sig null or empty, wrong lengths for addresses and pub key)");
+            return logger.traceExit(false);
         }
 
         //test 2. verify if sender address is generated from public key used to sign tx
-        if (!tx.getSendAddress().equals(Util.getAddressFromPublicKey(Util.hexStringToByteArray(tx.getPubKey())))) {
+        if (!transaction.getSendAddress().equals(Util.getAddressFromPublicKey(Util.hexStringToByteArray(transaction.getPubKey())))) {
+            logger.trace("Failed at sender address not being generated (or equal) to public key");
             return (false);
         }
 
         //test 3. verify the signature
-        byte[] signature = tx.getSignature();
-        byte[] challenge = tx.getChallenge();
+        byte[] signature = transaction.getSignature();
+        byte[] challenge = transaction.getChallenge();
 
-        tx.setSignature(null);
-        tx.setChallenge(null);
+        transaction.setSignature(null);
+        transaction.setChallenge(null);
 
-        byte[] message = serializationService.getHash(tx);
+        byte[] message = serializationService.getHash(transaction);
 
-        tx.setSignature(signature);
-        tx.setChallenge(challenge);
+        transaction.setSignature(signature);
+        transaction.setChallenge(challenge);
 
         SignatureService schnorr = AppServiceProvider.getSignatureService();
 
-        return schnorr.verifySignature(tx.getSignature(), tx.getChallenge(), message, Util.hexStringToByteArray(tx.getPubKey()));
+        boolean isSignatureVerified = schnorr.verifySignature(transaction.getSignature(), transaction.getChallenge(), message, Util.hexStringToByteArray(transaction.getPubKey()));
+
+        if (!isSignatureVerified){
+            logger.trace("Failed at signature verify");
+        }
+
+        return logger.traceExit(isSignatureVerified);
     }
 
     @Override
     public List<Transaction> getTransactions(Blockchain blockchain, Block block) throws IOException, ClassNotFoundException {
+        logger.traceEntry("params: {} {}", blockchain, block);
 
-        if (blockchain == null) {
-            throw new IllegalArgumentException("Blockchain cannot be null");
-        }
-
-        if (block == null) {
-            throw new IllegalArgumentException("Block cannot be null");
-        }
+        Util.check(blockchain != null, "blockchain is null");
+        Util.check(block != null, "block is null");
 
         List<Transaction> transactions = new ArrayList<>();
 
@@ -144,14 +147,14 @@ public class TransactionServiceImpl implements TransactionService {
             String hashString = Util.getDataEncoded64(hash);
             Transaction transaction = AppServiceProvider.getBlockchainService().get(hashString, blockchain, BlockchainUnitType.TRANSACTION);
             if (transaction == null) {
-                logger.info("Found null transaction for hash: " + hash);
+                logger.warn("Found null transaction for hash {}", hash);
                 continue;
             }
             transactions.add(transaction);
             //appPersistenceService.put(hashString, transaction, blockchain, BlockchainUnitType.TRANSACTION);
         }
 
-        return transactions;
+        return logger.traceExit(transactions);
     }
 
     @Override
@@ -161,6 +164,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction generateTransaction(PublicKey sender, PublicKey receiver, BigInteger value, BigInteger nonce) {
+        logger.traceEntry("params: {} {} {} {}", sender, receiver, value, nonce);
         Transaction t = new Transaction(Util.getAddressFromPublicKey(sender.getValue()),
                 Util.getAddressFromPublicKey(receiver.getValue()),
                 value,
@@ -168,7 +172,7 @@ public class TransactionServiceImpl implements TransactionService {
         t.setPubKey(Util.getAddressFromPublicKey(sender.getValue()));
 
 
-        return t;
+        return logger.traceExit(t);
     }
 
 

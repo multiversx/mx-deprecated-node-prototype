@@ -49,7 +49,7 @@
             <!--<AppenderRef ref="WebSocketAppender"/>-->
         <!--</AsyncLogger>-->
 
-        <Root level="TRACE">
+        <Root level="INFO">
             <AppenderRef ref="ConsoleAppender"/>
             <AppenderRef ref="FileAppender"/>
             <!--<AppenderRef ref="WebSocketAppender"/>-->

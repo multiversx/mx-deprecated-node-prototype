@@ -27,7 +27,7 @@ public class P2PAppBroadcastTest {
 
         P2PBroadcastChanel channel = AppP2PManager.instance().subscribeToChannel(app, P2PChannelName.TRANSACTION, new P2PChannelListener() {
             @Override
-            public void onReciveMessage(PeerAddress sender, P2PBroadcastMessage request) throws InterruptedException {
+            public void onReceiveMessage(PeerAddress sender, P2PBroadcastMessage request) throws InterruptedException {
                 if ((request.getPayload().equals("###"))) {
                     messagesCount.incrementAndGet();
                 }

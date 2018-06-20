@@ -69,11 +69,7 @@ public class Receipt implements Serializable {
 
     @Override
     public String toString() {
-        return "Receipt{" +
-                "blockHash='" + blockHash + '\'' +
-                ", transactionHash='" + transactionHash + '\'' +
-                ", status=" + status +
-                ", logs=" + logs +
-                '}';
+        return String.format("Receipt{blockHash='%s', transactionHash='%s', status=%s, logs='%s'}",
+            blockHash, transactionHash, status, logs);
     }
 }

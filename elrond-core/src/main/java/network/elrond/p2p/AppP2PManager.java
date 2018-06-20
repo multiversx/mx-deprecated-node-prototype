@@ -3,10 +3,14 @@ package network.elrond.p2p;
 import network.elrond.Application;
 import network.elrond.application.AppState;
 import network.elrond.service.AppServiceProvider;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
 public class AppP2PManager {
+
+    private static final Logger logger = LogManager.getLogger(AppP2PManager.class);
 
     private static AppP2PManager instance = new AppP2PManager();
 
@@ -16,12 +20,14 @@ public class AppP2PManager {
 
 
     public P2PBroadcastChanel subscribeToChannel(Application application, P2PChannelName channelName, P2PChannelListener listener) {
+        logger.traceEntry("params: {} {} {}", application, channelName, listener);
 
         AppState state = application.getState();
         P2PConnection connection = state.getConnection();
 
         P2PBroadcastChanel channel = state.getChanel(channelName);
         if (channel == null) {
+            logger.trace("channel NULL, creating...");
             channel = AppServiceProvider.getP2PBroadcastService().createChannel(connection, channelName);
         }
         AppServiceProvider.getP2PBroadcastService().subscribeToChannel(channel);
@@ -29,23 +35,25 @@ public class AppP2PManager {
 
         channel.getListeners().add(listener);
 
-        return channel;
-
+        return logger.traceExit(channel);
     }
 
     public <T> ArrayBlockingQueue<T> subscribeToChannel(Application application, P2PChannelName channelName) {
+        logger.traceEntry("params: {} {}", application, channelName);
 
         ArrayBlockingQueue<T> queue = new ArrayBlockingQueue<>(50000, true);
 
         subscribeToChannel(application, channelName, (sender, request) -> {
             if (request == null) {
+                logger.trace("request == null");
                 return;
             }
             T object = (T) request.getPayload();
             queue.put(object);
 
         });
-        return queue;
+
+        return logger.traceExit(queue);
     }
 
 

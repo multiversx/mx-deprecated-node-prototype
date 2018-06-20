@@ -2,6 +2,7 @@ package network.elrond.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import network.elrond.account.AccountAddress;
+import network.elrond.core.Util;
 
 import java.beans.Transient;
 import java.io.Serializable;
@@ -213,5 +214,11 @@ public class Transaction implements Serializable {
      * @param pubKey to be set
      */
     public void setPubKey(String pubKey) {this.pubKey = pubKey;}
+
+    @Override
+    public String toString() {
+        return (String.format("Transaction{nonce=%d, value=%d, sender='%s', receiver='%s'}",
+                nonce, value, sendAddress, receiverAddress));
+    }
 
 }

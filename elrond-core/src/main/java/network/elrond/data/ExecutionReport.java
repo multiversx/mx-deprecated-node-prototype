@@ -1,16 +1,17 @@
 package network.elrond.data;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 public class ExecutionReport {
 
     private boolean valid = true;
     private final List<String> entries = new ArrayList<>();
-    private final Logger logger = Logger.getLogger(ExecutionReport.class.getName());
-
+    private static final Logger logger = LogManager.getLogger(ExecutionReport.class);
 
     public ExecutionReport() {
     }
@@ -21,7 +22,7 @@ public class ExecutionReport {
 
     public ExecutionReport ko(String message) {
         entries.add(message);
-        logger.log(Level.SEVERE, message);
+        logger.error(message);
         valid = false;
         return this;
     }
@@ -33,7 +34,7 @@ public class ExecutionReport {
     }
 
     public ExecutionReport ko(Exception ex) {
-        ex.printStackTrace();
+        logger.throwing(ex);
         ko(ex.getMessage());
         return this;
     }
@@ -45,7 +46,7 @@ public class ExecutionReport {
 
     public ExecutionReport ok(String message) {
         entries.add(message);
-        logger.log(Level.INFO, message);
+        logger.info(message);
         valid = true;
         return this;
     }
@@ -54,5 +55,13 @@ public class ExecutionReport {
         return valid;
     }
 
+    @Override
+    public String toString(){
+        String status = "NOT OK";
+        if (isOk()){
+            status = "OK";
+        }
 
+        return(String.format("Execution report: %s", status));
+    }
 }

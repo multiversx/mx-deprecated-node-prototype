@@ -201,7 +201,7 @@ public class Block implements Serializable {
 
     @Override
     public String toString() {
-        return (String.format("Block{nonce=%d, appStateHash=%s, listTXHashes.size=%d, roundIndex=%d, timestamp=%d}",
+        return (String.format("Block{nonce=%d, appStateHash='%s', listTXHashes.size=%d, roundIndex=%d, timestamp=%d}",
                 nonce, Util.byteArrayToHexString(appStateHash), listTXHashes.size(), roundIndex, timestamp));
     }
 }

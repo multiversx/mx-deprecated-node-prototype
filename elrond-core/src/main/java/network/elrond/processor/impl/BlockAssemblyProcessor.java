@@ -8,8 +8,8 @@ import network.elrond.core.ThreadUtil;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.data.AppBlockManager;
 import network.elrond.p2p.P2PChannelName;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +20,7 @@ import java.util.concurrent.TimeUnit;
  * Collect new transactions and put them into new block
  */
 public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
-
-    private Logger logger = LoggerFactory.getLogger(BlockAssemblyProcessor.class);
+    private static final Logger logger = LogManager.getLogger(BlockAssemblyProcessor.class);
 
     @Override
     protected P2PChannelName getChannelName() {
@@ -30,7 +29,7 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
 
     @Override
     protected void process(ArrayBlockingQueue<String> queue, Application application) {
-
+        logger.traceEntry("params: {} {}", queue, application);
 
         ThreadUtil.sleep(4000);
 

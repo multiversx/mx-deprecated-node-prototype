@@ -31,5 +31,10 @@ public class P2PBroadcastMessage implements Serializable {
     public boolean isForChannel(P2PChannelName channelName) {
         return this.channelName.equals(channelName);
     }
+
+    @Override
+    public String toString(){
+        return String.format("P2PBroadcastMessage{payload=%s, channelName=%s}", payload.toString(), channelName);
+    }
 }
 

@@ -11,8 +11,8 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.storage.Data;
 import network.elrond.application.AppContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -22,9 +22,7 @@ import java.util.List;
 
 
 public class P2PBroadcastServiceImpl implements P2PBroadcastService {
-
-
-    private Logger logger = LoggerFactory.getLogger(P2PBroadcastService.class);
+    private static final Logger logger = LogManager.getLogger(P2PBroadcastServiceImpl.class);
 
     public P2PConnection createConnection(AppContext context) throws IOException {
 
@@ -37,15 +35,10 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
 
     }
 
-    public P2PConnection createConnection(
-            String nodeName,
-            int peerPort,
-            String masterPeerIpAddress,
-            int masterPeerPort
-    ) throws IOException {
+    public P2PConnection createConnection(String nodeName, int peerPort, String masterPeerIpAddress, int masterPeerPort) throws IOException {
+        logger.traceEntry("params: {} {} {} {}", nodeName, peerPort, masterPeerIpAddress, masterPeerPort);
         Peer peer = new PeerBuilder(Number160.createHash(nodeName)).ports(peerPort).start();
         PeerDHT dht = new PeerBuilderDHT(peer).start();
-
 
         FutureBootstrap fb = peer
                 .bootstrap()
@@ -54,51 +47,52 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         fb.awaitUninterruptibly();
         if (fb.isSuccess()) {
             peer.discover().peerAddress(fb.bootstrapTo().iterator().next()).start().awaitUninterruptibly();
-            logger.debug("Connection status" + fb.failedReason());
-
+            logger.info("Connection was SUCCESSFUL! Status: %s", fb.failedReason());
         } else {
-            logger.error("Connection status" + fb.failedReason());
-            throw new RuntimeException(fb.failedReason());
+            RuntimeException ex = new RuntimeException(fb.failedReason()) ;
+            logger.throwing(ex);
+            throw ex;
         }
 
-        return new P2PConnection(nodeName, peer, dht);
+        return logger.traceExit(new P2PConnection(nodeName, peer, dht));
     }
 
     public P2PBroadcastChanel createChannel(P2PConnection connection, P2PChannelName channelName) {
-
+        logger.traceEntry("params: {} {}", connection, channelName);
         try {
-
             PeerDHT dht = connection.getDht();
+            logger.trace("got connection...");
 
             FutureGet futureGet = dht.get(Number160.createHash(channelName.toString())).start();
             futureGet.awaitUninterruptibly();
-            if (futureGet.isSuccess() && futureGet.isEmpty())
+            if (futureGet.isSuccess() && futureGet.isEmpty()) {
                 dht.put(Number160.createHash(channelName.toString()))
                         .data(new Data(new HashSet<PeerAddress>()))
                         .start()
                         .awaitUninterruptibly();
+            }
             P2PBroadcastChanel channel = new P2PBroadcastChanel(channelName, connection);
+            logger.trace("created new channel");
 
             Peer peer = connection.getPeer();
             peer.objectDataReply(connection.registerChannel(channel));
 
-            return channel;
-
-
+            return logger.traceExit(channel);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.catching(e);
         }
-        return null;
+
+        return logger.traceExit((P2PBroadcastChanel)null);
     }
 
     @SuppressWarnings("unchecked")
-    public boolean subscribeToChannel(P2PBroadcastChanel chanel) {
+    public boolean subscribeToChannel(P2PBroadcastChanel channel) {
+        logger.traceEntry("params: {}", channel);
         try {
-
-
-            P2PConnection connection = chanel.getConnection();
-            P2PChannelName channelName = chanel.getName();
+            P2PConnection connection = channel.getConnection();
+            P2PChannelName channelName = channel.getName();
             PeerDHT dht = connection.getDht();
+            logger.trace("got connection...");
 
             FutureGet futureGet = dht.get(Number160.createHash(channelName.toString())).start();
             futureGet.awaitUninterruptibly();
@@ -109,23 +103,26 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
                 peersOnChannel.add(dht.peer().peerAddress());
                 dht.put(Number160.createHash(channelName.toString())).data(new Data(peersOnChannel)).start().awaitUninterruptibly();
 
-                return true;
+                logger.trace("subscribed to channel!");
+
+                return logger.traceExit(true);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.catching(e);
         }
-        return false;
+        return logger.traceExit(false);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public boolean publishToChannel(P2PBroadcastChanel chanel, Serializable object) {
+    public boolean publishToChannel(P2PBroadcastChanel channel, Serializable object) {
+        logger.traceEntry("params: {} {}", channel, object);
         try {
-
-            P2PConnection connection = chanel.getConnection();
-            P2PChannelName channelName = chanel.getName();
+            P2PConnection connection = channel.getConnection();
+            P2PChannelName channelName = channel.getName();
 
             PeerDHT dht = connection.getDht();
+            logger.trace("got connection...");
 
             FutureGet futureGet = dht.get(Number160.createHash(channelName.toString())).start();
             futureGet.awaitUninterruptibly();
@@ -139,24 +136,26 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
                             .start();
                     futureDirect.awaitUninterruptibly();
                 }
-
-                return true;
+                logger.trace("published to channel!");
+                return logger.traceExit(true);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.catching(e);
         }
-        return false;
+        return logger.traceExit(false);
     }
 
 
     @SuppressWarnings("unchecked")
-    public boolean unsubscribeFromChannel(P2PBroadcastChanel chanel) {
+    public boolean unsubscribeFromChannel(P2PBroadcastChanel channel) {
+        logger.traceEntry("params: {}", channel);
         try {
 
-            P2PConnection connection = chanel.getConnection();
-            P2PChannelName channelName = chanel.getName();
+            P2PConnection connection = channel.getConnection();
+            P2PChannelName channelName = channel.getName();
 
             PeerDHT dht = connection.getDht();
+            logger.trace("got connection...");
 
             FutureGet futureGet = dht.get(Number160.createHash(channelName.toString())).start();
             futureGet.awaitUninterruptibly();
@@ -166,17 +165,17 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
                 peersOnChannel = (HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object();
                 peersOnChannel.remove(dht.peer().peerAddress());
                 dht.put(Number160.createHash(channelName.toString())).data(new Data(peersOnChannel)).start().awaitUninterruptibly();
-
-                return true;
+                logger.trace("unsubscribed from channel!");
+                return logger.traceExit(true);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.catching(e);
         }
-        return false;
+        return logger.traceExit(false);
     }
 
     public boolean leaveNetwork(List<P2PBroadcastChanel> channels) {
-
+        logger.traceEntry("params: {}", channels);
         P2PConnection connection = channels.get(0).getConnection();
 
         for (P2PBroadcastChanel chanel : channels) {
@@ -185,7 +184,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
 
         PeerDHT dht = connection.getDht();
         dht.peer().announceShutdown().start().awaitUninterruptibly();
-
-        return true;
+        logger.trace("left network!");
+        return logger.traceExit(true);
     }
 }
