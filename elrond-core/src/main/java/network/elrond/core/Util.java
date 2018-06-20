@@ -2,6 +2,8 @@ package network.elrond.core;
 
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongycastle.jcajce.provider.digest.SHA256;
 import org.spongycastle.jcajce.provider.digest.SHA3.DigestSHA3;
 import org.spongycastle.util.encoders.Base64;
@@ -11,6 +13,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 public class Util {
+    private static final Logger logger = LogManager.getLogger(Util.class);
+
     public static final int VERIFIER_GROUP_SIZE = 21;
     public static String CRT_PUB_KEY = "0xA8";
     public static final int MAX_SCORE = 10;
@@ -141,6 +145,10 @@ public class Util {
      * @param message string message to be given as argument to the exception in case of failure
      */
     public static void check(boolean test, String message) {
-        if (!test) throw new IllegalArgumentException(message);
+        if (!test) {
+            IllegalArgumentException ex = new IllegalArgumentException(message);
+            logger.throwing(ex);
+            throw ex;
+        }
     }
 }

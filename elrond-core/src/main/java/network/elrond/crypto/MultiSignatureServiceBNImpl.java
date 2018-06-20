@@ -1,7 +1,10 @@
 package network.elrond.crypto;
 
+import network.elrond.core.PrintlnEventHandler;
 import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongycastle.math.ec.ECPoint;
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -12,6 +15,8 @@ import java.util.Arrays;
  * Class implementing Belare and Neven Multi-signature
  */
 public class MultiSignatureServiceBNImpl implements MultiSignatureService {
+    private static final Logger logger = LogManager.getLogger(MultiSignatureServiceBNImpl.class);
+
     private static SecureRandom secureRandom;
 
     static {
@@ -35,19 +40,19 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
     @Override
     public byte[] computeCommitmentSecret() {
         // choose a random r (commitment secret) in interval[1, n-1], where n is the order of the curve
+        logger.traceEntry();
         byte[] r = new byte[32];
         secureRandom.nextBytes(r);
         BigInteger commitmentSecret = new BigInteger(r);
         ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
-        // make sure r is not 0
-        // r below order of curve
+        logger.trace("Making sure r is not 0, r below order of curve...");
         while (commitmentSecret.compareTo(BigInteger.ONE) < 0 ||
                 commitmentSecret.compareTo(ecCryptoService.getN()) >= 0) {
             r = Util.SHA3.get().digest(r);
             commitmentSecret = new BigInteger(r);
         }
-        return r;
+        return logger.traceExit(r);
     }
 
     /**
@@ -58,6 +63,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
      */
     @Override
     public byte[] computeCommitment(byte[] commitmentSecret) {
+        logger.traceEntry("params: {}", commitmentSecret);
         BigInteger secretInt;
         ECPoint basePointG;
         ECPoint commitmentPointR;
@@ -71,7 +77,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
         basePointG = ecCryptoService.getG();
         commitmentPointR = basePointG.multiply(secretInt);
 
-        return commitmentPointR.getEncoded(true);
+        return logger.traceExit(commitmentPointR.getEncoded(true));
     }
 
     /**
@@ -82,13 +88,14 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
      */
     @Override
     public byte[] computeCommitmentHash(byte[] commitment) {
+        logger.traceEntry("params: {}", commitment);
         // Hash function needs to be different than what is used
         // for challenge so use SHA256 for commitment
 
         Util.check(commitment != null, "commitment != null");
         Util.check(commitment.length != 0, "commitment.length != 0");
 
-        return Util.SHA256.digest(commitment);
+        return logger.traceExit(Util.SHA256.digest(commitment));
     }
 
     /**
@@ -100,6 +107,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
      */
     @Override
     public boolean validateCommitment(byte[] commitment, byte[] commitmentHash) {
+        logger.traceEntry("params: {} {}", commitment, commitmentHash);
         byte[] computedHash;
 
         Util.check(commitment != null, "commitment != null");
@@ -109,7 +117,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
 
         computedHash = Util.SHA256.digest(commitment);
 
-        return Arrays.equals(computedHash, commitmentHash);
+        return logger.traceExit(Arrays.equals(computedHash, commitmentHash));
     }
 
     /**
@@ -121,6 +129,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
      */
     @Override
     public byte[] aggregateCommitments(ArrayList<byte[]> commitments, long bitmapCommitments) {
+        logger.traceEntry("params: {} {}", commitments, bitmapCommitments);
         int idx = 0;
         ECPoint aggregatedCommitment = null;
         ECPoint decodedCommitment;
@@ -147,7 +156,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
             result = aggregatedCommitment.getEncoded(true);
         }
 
-        return result;
+        return logger.traceExit(result);
     }
 
     /**
@@ -158,6 +167,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
      * @return a byte array holding the concatenation of public keys
      */
     private byte[] concatenatePublicKeys(ArrayList<byte[]> publicKeys, long bitmapCommitments) {
+        logger.traceEntry("params: {} {}", publicKeys, bitmapCommitments);
         int idx = 0;
         byte[] result = new byte[0];
 
@@ -173,7 +183,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
             idx++;
         }
 
-        return result;
+        return logger.traceExit(result);
     }
 
     /**
@@ -194,6 +204,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
                                    byte[] aggregatedCommitment,
                                    byte[] message,
                                    long bitmapCommitments) {
+        logger.traceEntry("params: {} {} {} {} {}", signers, publicKey, aggregatedCommitment, message, bitmapCommitments);
         byte[] challenge = new byte[0];
         BigInteger challengeInt;
         ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
@@ -207,25 +218,31 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
         Util.check(message.length != 0, "message.length != 0");
 
         if (0 == bitmapCommitments) {
-            return challenge;
+            logger.trace("bitmapCommitments == 0");
+            return logger.traceExit(challenge);
         }
 
-        // computing <L'> as concatenation of participating signers public keys
         challenge = concatenatePublicKeys(signers, bitmapCommitments);
-        // do rest of concatenation <L'> || public key
+        logger.trace("computed <L'> as concatenation of participating signers public keys = {}", challenge);
+
         challenge = Util.concatenateArrays(challenge, publicKey);
-        // <L'> || public key || R
+        logger.trace("done rest of concatenation <L'> || public key = {}", challenge);
+
         challenge = Util.concatenateArrays(challenge, aggregatedCommitment);
-        // <L'> || public key || R || m
+        logger.trace("done <L'> || public key || R = {}", challenge);
+
         challenge = Util.concatenateArrays(challenge, message);
-        // compute hash
+        logger.trace("done <L'> || public key || R || m = {}", challenge);
+
+
         challenge = Util.SHA3.get().digest(challenge);
         challengeInt = new BigInteger(1, challenge);
+        logger.trace("done computing hash as BigInteger = {}", challengeInt);
 
         //reduce the challenge modulo curve order
         challengeInt = challengeInt.mod(ecCryptoService.getN());
 
-        return challengeInt.toByteArray();
+        return logger.traceExit(challengeInt.toByteArray());
     }
 
     /**
@@ -240,6 +257,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
      */
     @Override
     public byte[] computeSignatureShare(byte[] challenge, byte[] privateKey, byte[] commitmentSecret) {
+        logger.traceEntry("params: {} {} {}", challenge, privateKey, commitmentSecret);
         ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
         BigInteger curveOrder = ecCryptoService.getN();
         BigInteger sigShare;
@@ -259,7 +277,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
         commitmentSecretInt = new BigInteger(commitmentSecret);
         sigShare = commitmentSecretInt.add(challengeInt.multiply(privateKeyInt).mod(curveOrder)).mod(curveOrder);
 
-        return sigShare.toByteArray();
+        return logger.traceExit(sigShare.toByteArray());
     }
 
     /**
@@ -287,6 +305,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
                                         byte[] commitment,
                                         byte[] message,
                                         long bitmap) {
+        logger.traceEntry("params: {} {} {} {} {} {}", publicKeys, publicKey, signature, aggCommitment, commitment, message, bitmap);
         // Compute R2 = s*G + c*publicKey
         ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
         ECPoint basePointG = ecCryptoService.getG();
@@ -310,14 +329,19 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
 
         publicKeyPoint = ecCryptoService.getCurve().decodePoint(publicKey.clone());
         commitmentRInt = new BigInteger(commitment);
-        // calculate challenge
+        logger.trace("done computing commitnentRInt = {}", commitmentRInt);
+
         challenge = computeChallenge(publicKeys, publicKey, aggCommitment, message, bitmap);
+        logger.trace("done calculating challenge = {}", challenge);
+
         // getAccountState BigInteger challenge
         challengeInt = (new BigInteger(1, challenge));
+
         // Compute R2 = s*G - c*publicKey
         commitmentR2 = basePointG.multiply(new BigInteger(signature)).subtract(publicKeyPoint.multiply(challengeInt));
+        logger.trace("done computing R2 = s*G - c*publicKey = {}", commitmentR2);
 
-        return (new BigInteger(commitmentR2.getEncoded(true))).equals(commitmentRInt);
+        return logger.traceExit(new BigInteger(commitmentR2.getEncoded(true)).equals(commitmentRInt));
     }
 
     /**
@@ -329,6 +353,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
      */
     @Override
     public byte[] aggregateSignatures(ArrayList<byte[]> signatureShares, long bitmapSigners) {
+        logger.traceEntry("params: {} {}", signatureShares, bitmapSigners);
         byte idx = 0;
         ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
         BigInteger curveOrder = ecCryptoService.getN();
@@ -344,7 +369,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
             idx++;
         }
 
-        return aggregatedSignature.toByteArray();
+        return logger.traceExit(aggregatedSignature.toByteArray());
     }
 
     /**
@@ -372,6 +397,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
                                              byte[] aggregatedCommitment,
                                              byte[] message,
                                              long bitmapSigners) {
+        logger.traceEntry("params: {} {} {} {} {}", signers, aggregatedSignature, aggregatedCommitment, message, bitmapSigners);
         ECPoint aggregatedCommitmentPoint;
         int idx = 0;
         ECPoint sum = null;
@@ -388,7 +414,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
         ECPoint publicKeyPoint;
 
         aggregatedCommitmentPoint = ecCryptoService.getCurve().decodePoint(aggregatedCommitment.clone());
-        // compute sum(H1(<L'> || Xi || R || m)*Xi*Bitmap[i])
+        logger.trace("computing sum(H1(<L'> || Xi || R || m)*Xi*Bitmap[i])...");
         for (byte[] publicKey : signers) {
             if (0 != ((1 << idx) & bitmapSigners)) {
                 publicKeyPoint = ecCryptoService.getCurve().decodePoint(publicKey.clone());
@@ -406,13 +432,15 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
             }
             idx++;
         }
+        logger.trace("done computing sum = {}", sum);
 
-        // calculate s*G
         sG = ecCryptoService.getG().multiply(new BigInteger(aggregatedSignature));
-        // calculate sG-sum(H1(...)Xi)
+        logger.trace("done computing s*G = {}", sG);
+
         sum = sG.subtract(sum);
+        logger.trace("done calculating sG-sum(H1(...)Xi) = {}", sum);
 
         // comparison R == sG - sum(H1(<L'>||Xi||R||m)Xi)
-        return aggregatedCommitmentPoint.equals(sum);
+        return logger.traceExit(aggregatedCommitmentPoint.equals(sum));
     }
 }

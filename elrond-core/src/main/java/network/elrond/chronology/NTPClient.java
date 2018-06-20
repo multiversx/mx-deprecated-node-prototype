@@ -14,8 +14,6 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import network.elrond.core.Util;
 import org.apache.commons.net.ntp.NTPUDPClient;
@@ -23,6 +21,8 @@ import org.apache.commons.net.ntp.NtpUtils;
 import org.apache.commons.net.ntp.NtpV3Packet;
 import org.apache.commons.net.ntp.TimeInfo;
 import org.apache.commons.net.ntp.TimeStamp;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * NTPClient polls an NTP server with UDP  and returns milli seconds with
@@ -32,6 +32,8 @@ import org.apache.commons.net.ntp.TimeStamp;
  */
 
 public class NTPClient implements AutoCloseable{
+    private static final Logger logger = LogManager.getLogger(NTPClient.class);
+
     //final InetAddress hostAddr;
     NTPUDPClient ntpUdpClient;
     Thread pollThread = null;
@@ -47,12 +49,10 @@ public class NTPClient implements AutoCloseable{
                 try {
                     Thread.sleep(pollMs);
                     TimeInfo ti = ntpUdpClient.getTime(listHostsAddr.get(currentHost));
-//                    long diff0 = ti.getMessage().getReceiveTimeStamp().getTime() - System.currentTimeMillis();
-//                    System.out.println("diff0 = " + diff0);
                     this.setTimeInfo(ti);
                     offline = false;
                 } catch (SocketTimeoutException ste) {
-                    //try get another server from the list
+                    logger.trace("Failed to reach NTPServer %s, trying nex server from list!", getCurrentHostName());
                     currentHost++;
                     currentHost = currentHost % listHostsAddr.size();
                     offline = true;
@@ -60,7 +60,7 @@ public class NTPClient implements AutoCloseable{
             }
         } catch (InterruptedException interruptedException) {
         } catch (IOException ex) {
-            Logger.getLogger(NTPClient.class.getName()).log(Level.SEVERE, null, ex);
+            logger.throwing(ex);
         }
     }
 
@@ -73,13 +73,14 @@ public class NTPClient implements AutoCloseable{
      * @throws SocketException
      */
     public NTPClient(List<String> listHosts, int pollMs) throws UnknownHostException, SocketException, NullPointerException {
+        logger.traceEntry("params: {} {}", listHosts, pollMs);
         this.pollMs = pollMs;
 
         Util.check(listHosts != null, "listHosts should not be null!");
 
         StringBuilder stringBuilderHosts = new StringBuilder();
 
-        //build internal lists
+        logger.trace("Building internal lists...");
         for (int i = 0; i < listHosts.size(); i++){
             InetAddress host = InetAddress.getByName(listHosts.get(i));
             listHostsAddr.add(host);
@@ -90,8 +91,8 @@ public class NTPClient implements AutoCloseable{
             stringBuilderHosts.append(host);
         }
 
-        //if lists are empy, populate with default
         if (listHostsAddr.size() == 0){
+            logger.trace("Lists are empty, adding a default, not usable server!");
             listHostsAddr.add(InetAddress.getByName("[N/A]"));
             listHosts.add("[N/A]");
         }
@@ -102,6 +103,7 @@ public class NTPClient implements AutoCloseable{
         ntpUdpClient.setSoTimeout(pollMs * 2 + 20);
         pollThread = new Thread(this::pollNtpServer, "pollNtpServer(" + stringBuilderHosts.toString() + "," + pollMs + ")");
         pollThread.start();
+        logger.traceExit();
     }
 
     private TimeInfo timeInfo;
@@ -137,7 +139,7 @@ public class NTPClient implements AutoCloseable{
     public long currentTimeMillis(){
         synchronized (locker) {
             if (timeInfo == null) {
-                //if no message has been received, return current time
+                logger.trace("NTP client is not available, returning system's clock.");
                 return (System.currentTimeMillis());
             }
 
@@ -157,6 +159,7 @@ public class NTPClient implements AutoCloseable{
 
     @Override
     public void close() throws Exception {
+        logger.traceEntry();
         if (null != pollThread) {
             pollThread.interrupt();
             pollThread.join(200);
@@ -166,14 +169,14 @@ public class NTPClient implements AutoCloseable{
             ntpUdpClient.close();
             ntpUdpClient = null;
         }
-
+        logger.traceExit();
     }
 
     protected void finalizer() {
         try {
             this.close();
         } catch (Exception ex) {
-            Logger.getLogger(NTPClient.class.getName()).log(Level.SEVERE, null, ex);
+            logger.throwing(ex);
         }
     }
 

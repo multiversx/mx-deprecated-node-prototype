@@ -65,7 +65,7 @@ public class AccountState {
     public BigInteger addToBalance(BigInteger value) {
         logger.traceEntry("params: {}", value);
         Util.check(value!=null, "value!=null");
-        Util.check(value.compareTo(BigInteger.ZERO)<0, "value must be positive");
+        Util.check(value.compareTo(BigInteger.ZERO)>0, "value must be positive");
         Util.check(balance.add(value).compareTo(BigInteger.ZERO) > 0, "Balance would be negative!!!");
 
         this.balance = balance.add(value);

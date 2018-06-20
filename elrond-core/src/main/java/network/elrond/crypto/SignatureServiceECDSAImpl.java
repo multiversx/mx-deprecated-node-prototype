@@ -2,7 +2,9 @@ package network.elrond.crypto;
 
 import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
-import org.slf4j.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongycastle.crypto.digests.SHA256Digest;
 import org.spongycastle.crypto.params.ECDomainParameters;
 import org.spongycastle.crypto.params.ECPrivateKeyParameters;
@@ -10,13 +12,13 @@ import org.spongycastle.crypto.params.ECPublicKeyParameters;
 import org.spongycastle.crypto.signers.ECDSASigner;
 import org.spongycastle.crypto.signers.HMacDSAKCalculator;
 import java.math.BigInteger;
-import org.slf4j.LoggerFactory;
 
 public class SignatureServiceECDSAImpl implements SignatureService {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LogManager.getLogger(SignatureServiceECDSAImpl.class);
 
     @Override
     public Signature signMessage(byte[] message, byte[] privateKey, byte[] publicKey) {
+        logger.traceEntry();
         ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
         BigInteger[] sig;
         Signature  signature = new Signature();
@@ -42,7 +44,7 @@ public class SignatureServiceECDSAImpl implements SignatureService {
         signature.setChallenge(sig[0].toByteArray());
         signature.setSignature(sig[1].toByteArray());
 
-        return signature;
+        return logger.traceExit(signature);
     }
 
     @Override
@@ -54,6 +56,7 @@ public class SignatureServiceECDSAImpl implements SignatureService {
 
     @Override
     public boolean verifySignature(byte[] signature, byte[] challenge, byte[] message, byte[] publicKey) {
+        logger.traceEntry();
         ECDSASigner signer = new ECDSASigner();
         ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
         ECPublicKeyParameters parameters;
@@ -76,10 +79,10 @@ public class SignatureServiceECDSAImpl implements SignatureService {
 
         signer.init(false, parameters);
         try{
-            return signer.verifySignature(message, new BigInteger(challenge), new BigInteger(signature));
+            return logger.traceExit(signer.verifySignature(message, new BigInteger(challenge), new BigInteger(signature)));
         } catch(NullPointerException ex) {
-            logger.error("Null pointer exception in spongy castle: ", ex.getMessage());
-            return false;
+            logger.throwing(ex);
+            return logger.traceExit(false);
         }
     }
 

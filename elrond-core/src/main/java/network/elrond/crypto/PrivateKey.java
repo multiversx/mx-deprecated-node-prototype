@@ -2,6 +2,8 @@ package network.elrond.crypto;
 
 import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongycastle.crypto.AsymmetricCipherKeyPair;
 import org.spongycastle.crypto.generators.ECKeyPairGenerator;
 import org.spongycastle.crypto.params.ECDomainParameters;
@@ -12,6 +14,8 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 
 public class PrivateKey {
+    private static final Logger logger = LogManager.getLogger(PrivateKey.class);
+
     private byte[] privateKey;
 
     /**
@@ -19,6 +23,7 @@ public class PrivateKey {
      * Creates a new private key
      */
     public PrivateKey() {
+        logger.traceEntry();
         AsymmetricCipherKeyPair keyPair;
         ECDomainParameters domainParameters;
         ECKeyGenerationParameters keyParameters;
@@ -40,6 +45,8 @@ public class PrivateKey {
         keyPair = keyPairGenerator.generateKeyPair();
         ECPrivateKeyParameters privateKey = (ECPrivateKeyParameters) keyPair.getPrivate();
         this.privateKey = privateKey.getD().toByteArray();
+        logger.trace("done initializing private key = {}", this.getValue());
+        logger.traceExit();
     }
 
     /**
@@ -48,10 +55,15 @@ public class PrivateKey {
      * @param src The byte array
      */
     public PrivateKey(byte[] src) {
+        logger.traceEntry("params: {}", src);
         if(src == null){
-            throw new IllegalArgumentException("Src cannot be null");
+            IllegalArgumentException ex = new IllegalArgumentException("Src cannot be null");
+            logger.throwing(ex);
+            throw ex;
         }
         privateKey = src.clone();
+        logger.trace("done initializing private key = {}", this.getValue());
+        logger.traceExit();
     }
 
     /**
@@ -61,8 +73,11 @@ public class PrivateKey {
      * @param seed String seed to generate the private key
      */
     public PrivateKey(String seed) {
+        logger.traceEntry("params: {}", seed);
         if(seed == null || seed.isEmpty()){
-            throw new IllegalArgumentException("Seed cannot be null");
+            IllegalArgumentException ex = new IllegalArgumentException("Seed cannot be null");
+            logger.throwing(ex);
+            throw ex;
         }
         byte[] seedArray = seed.getBytes();
         BigInteger seedInt;
@@ -81,6 +96,8 @@ public class PrivateKey {
 
         // store without the extra byte in case of unsigned
         privateKey = seedInt.toByteArray();
+        logger.trace("done initializing private key = {}", this.getValue());
+        logger.traceExit();
     }
 
     /**
@@ -89,14 +106,15 @@ public class PrivateKey {
      * @return true if private key is valid, false otherwise
      */
     public boolean isValid() {
+        logger.traceEntry();
         BigInteger privateKeyInt = new BigInteger(privateKey);
         ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
 
         if (1 != privateKeyInt.compareTo(BigInteger.ZERO) ||
                 0 <= privateKeyInt.compareTo(ecCryptoService.getN())) {
-            return false;
+            return logger.traceExit(false);
         }
-        return true;
+        return logger.traceExit(true);
     }
 
     /**
@@ -106,6 +124,11 @@ public class PrivateKey {
      */
     public byte[] getValue() {
         return privateKey.clone();
+    }
+
+    @Override
+    public String toString(){
+        return String.format("PrivateKey{%s}", Util.byteArrayToHexString(this.getValue()));
     }
 
 //    /**

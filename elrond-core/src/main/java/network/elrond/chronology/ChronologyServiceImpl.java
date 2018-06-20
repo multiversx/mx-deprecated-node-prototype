@@ -1,11 +1,16 @@
 package network.elrond.chronology;
 
+import network.elrond.account.AbstractPersistenceUnit;
 import network.elrond.core.Util;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Set;
 
 public class ChronologyServiceImpl implements ChronologyService {
     private final long roundTimeDuration;
+
+    private static final Logger logger = LogManager.getLogger(ChronologyServiceImpl.class);
 
     public ChronologyServiceImpl(){
         roundTimeDuration = 4000; //4 seconds
@@ -28,6 +33,7 @@ public class ChronologyServiceImpl implements ChronologyService {
     }
 
     public Round getRoundFromDateTime(long genesisRoundTimeStamp, long timeStamp) throws IllegalArgumentException{
+        logger.traceEntry("params: {} {}", genesisRoundTimeStamp, timeStamp);
         long delta = timeStamp - genesisRoundTimeStamp;
 
         Util.check(timeStamp >= genesisRoundTimeStamp, "genesisRoundTimeStamp should be lower or equal to dateMillis!");
@@ -36,18 +42,21 @@ public class ChronologyServiceImpl implements ChronologyService {
         r.setIndex(delta / roundTimeDuration);
         r.setStartTimeStamp(genesisRoundTimeStamp + r.getIndex() * roundTimeDuration);
 
-        return(r);
+        return logger.traceExit(r);
     }
 
     public long getSynchronizedTime(NTPClient ntpClient){
+        logger.traceEntry();
         if (ntpClient != null){
             return(ntpClient.currentTimeMillis());
         }
 
-        return(System.currentTimeMillis());
+        logger.trace("NTP client is null, returning system's clock.");
+        return logger.traceExit(System.currentTimeMillis());
     }
 
     public RoundState computeRoundState(long roundStartTimeStamp, long currentTimeStamp){
+        logger.traceEntry("params: {} {}", roundStartTimeStamp, currentTimeStamp);
         Set<RoundState> setRoundState = RoundState.getEnumSet();
 
         long cumulatedTime = 0;
@@ -63,12 +72,13 @@ public class ChronologyServiceImpl implements ChronologyService {
                     (currentTimeStamp - roundStartTimeStamp < cumulatedTime + roundState.getRoundStateDuration());
 
             if (isCurrentTimeStampInSubRoundInterval){
-                return(roundState);
+                return logger.traceExit(roundState);
             }
 
             cumulatedTime += roundState.getRoundStateDuration();
         }
 
-        return (null);
+        logger.trace("Round state not found!");
+        return logger.traceExit((RoundState)null);
     }
 }

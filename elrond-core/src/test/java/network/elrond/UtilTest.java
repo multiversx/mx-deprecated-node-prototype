@@ -71,7 +71,7 @@ public class UtilTest {
     public void testLoggerParameters(){
         Logger logger = LogManager.getLogger(UtilTest.class);
 
-        logger.traceEntry("Params {} {} {}", null);
+        //logger.traceEntry("Params {} {} {}", null, null, null);
 
         logger.trace("TRACE {} {}", 1, 2);
         logger.trace("TRACE {} {}", 1, 2);
@@ -82,7 +82,7 @@ public class UtilTest {
         logger.throwing(new Exception("aaa"));
 
         logger.trace(String.format("BigInteger.TEN = %d", BigInteger.TEN));
-        logger.trace(String.format("BigInteger.TEN = %d", null));
+        //logger.trace(String.format("BigInteger.TEN = %d", null));
 
         logger.trace("Exit, returns: " + logger.traceExit("A"));
         logger.trace("Exit, returns: " + logger.traceExit((Object)null));

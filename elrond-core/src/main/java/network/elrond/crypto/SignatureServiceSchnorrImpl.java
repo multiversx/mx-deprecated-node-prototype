@@ -2,6 +2,8 @@ package network.elrond.crypto;
 
 import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongycastle.math.ec.ECPoint;
 
 import java.math.BigInteger;
@@ -9,6 +11,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 
 public class SignatureServiceSchnorrImpl implements SignatureService {
+    private static final Logger logger = LogManager.getLogger(SignatureServiceSchnorrImpl.class);
     private static SecureRandom secureRandom;
 
     static {
@@ -35,6 +38,7 @@ public class SignatureServiceSchnorrImpl implements SignatureService {
      */
     @Override
     public Signature signMessage(byte[] message, byte[] privateKey, byte[] publicKey) {
+        logger.traceEntry("params: {} {} {}", message, privateKey, publicKey);
         // Choose random private part r
         byte[] r = new byte[32];
         BigInteger rInteger;
@@ -59,18 +63,18 @@ public class SignatureServiceSchnorrImpl implements SignatureService {
             secureRandom.nextBytes(r);
             rInteger = new BigInteger(1, r);
 
-            //make sure r is not zero
+            logger.trace("making sure r is not zero...");
             while (rInteger.equals(BigInteger.ZERO)) {
                 secureRandom.nextBytes(r);
                 rInteger = new BigInteger(1, r);
             }
 
-            //without possible extra byte for unsigned
             rInteger = new BigInteger(r);
+            logger.trace("without possible extra byte for unsigned rInteger = {}", rInteger);
 
-            // Calculate public part (commit point) Q = k*G
             basePointG = ecCryptoService.getG();
             commitPointR = basePointG.multiply(rInteger);
+            logger.trace("done calculating public part (commit point) Q = k*G = {}", commitPointR);
 
             // Calculate the challenge
             // First concatenate R, public key and message
@@ -79,8 +83,10 @@ public class SignatureServiceSchnorrImpl implements SignatureService {
             // Calculate the digest of the byte array to getAccountState the challenge
             challengeC = Util.SHA3.get().digest(challengeC);
             challengeCInteger = new BigInteger(challengeC);
+            logger.trace("done calculating challange as BigInteger = {}", challengeCInteger);
 
             if (challengeCInteger.equals(BigInteger.ZERO)) {
+                logger.trace("trying again...");
                 cValid = false;
             } else {
                 cValid = true;
@@ -88,17 +94,19 @@ public class SignatureServiceSchnorrImpl implements SignatureService {
                 sInteger = rInteger.subtract(challengeCInteger.multiply(new BigInteger(privateKey)));
 
                 if (sInteger.equals(BigInteger.ZERO)) {
+                    logger.trace("trying again...");
                     calculated = false;
                 } else {
                     signature.setSignature(sInteger.toByteArray());
                     signature.setChallenge(challengeC);
                     signature.setCommitment(commitPointR.getEncoded(true));
+                    logger.trace("done, everything is OK");
                     calculated = true;
                 }
             }
         }
 
-        return signature;
+        return logger.traceExit(signature);
     }
 
     /**
@@ -128,6 +136,7 @@ public class SignatureServiceSchnorrImpl implements SignatureService {
      */
     @Override
     public boolean verifySignature(byte[] signature, byte[] challenge, byte[] message, byte[] publicKey) {
+        logger.traceEntry("params: {} {} {} {}", signature, challenge, message, publicKey);
         ECPoint basePointG;
         ECPoint commitPointR;
         byte[] c2;
@@ -152,7 +161,8 @@ public class SignatureServiceSchnorrImpl implements SignatureService {
                 .add(publicKeyPoint.multiply(challengeInt));
 
         if (commitPointR.isInfinity()) {
-            return false;
+            logger.trace("commitPointR is infinity");
+            return logger.traceExit(false);
         }
 
 
@@ -161,7 +171,7 @@ public class SignatureServiceSchnorrImpl implements SignatureService {
         c2 = Util.concatenateArrays(c2, message);
         c2 = Util.SHA3.get().digest(c2);
 
-        return Arrays.equals(challenge, c2);
+        return logger.traceExit(Arrays.equals(challenge, c2));
     }
 
     /**

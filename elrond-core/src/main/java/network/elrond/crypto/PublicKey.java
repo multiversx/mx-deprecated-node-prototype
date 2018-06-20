@@ -1,6 +1,9 @@
 package network.elrond.crypto;
 
+import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongycastle.crypto.params.ECDomainParameters;
 import org.spongycastle.jce.interfaces.ECPublicKey;
 import org.spongycastle.jce.spec.ECParameterSpec;
@@ -14,6 +17,7 @@ import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 
 public class PublicKey {
+    private static final Logger logger = LogManager.getLogger(PublicKey.class);
     private ECPoint q;
     private boolean initialized;
 
@@ -31,8 +35,11 @@ public class PublicKey {
      * @param publicPointQEncoding the public point Q encoding, as a byte array
      */
     public PublicKey(byte[] publicPointQEncoding) {
+        logger.traceEntry("params: {}", publicPointQEncoding);
         if(publicPointQEncoding == null){
-            throw new IllegalArgumentException("publicPointQEncoding cannot be null");
+            IllegalArgumentException ex = new IllegalArgumentException("publicPointQEncoding cannot be null");
+            logger.throwing(ex);
+            throw ex;
         }
 
         ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
@@ -48,14 +55,20 @@ public class PublicKey {
             keyFactory = KeyFactory.getInstance(ecCryptoService.getAlgorithm(), ecCryptoService.getProvider());
             q = ((ECPublicKey) keyFactory.generatePublic(publicKeySpec)).getQ();
             initialized = true;
+            logger.trace("done initializing public key = {}", q);
         } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
-            e.printStackTrace();
+            logger.catching(e);
         }
+
+        logger.traceExit();
     }
 
     public PublicKey(PublicKey publicKey) {
+        logger.traceEntry("params: {}", publicKey);
         if(publicKey == null){
-            throw new IllegalArgumentException();
+            IllegalArgumentException ex = new IllegalArgumentException();
+            logger.throwing(ex);
+            throw ex;
         }
 
         ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
@@ -71,9 +84,12 @@ public class PublicKey {
             keyFactory = KeyFactory.getInstance(ecCryptoService.getAlgorithm(), ecCryptoService.getProvider());
             q = ((ECPublicKey) keyFactory.generatePublic(publicKeySpec)).getQ();
             initialized = true;
+            logger.trace("done initializing public key = {}", q);
         } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
-            e.printStackTrace();
+            logger.catching(e);
         }
+
+        logger.traceExit();
     }
 
     /**
@@ -83,8 +99,11 @@ public class PublicKey {
      * @param privateKey the corresponding private key
      */
     public PublicKey(PrivateKey privateKey) {
+        logger.traceEntry("params: {}", privateKey);
         if(privateKey == null){
-            throw new IllegalArgumentException("PrivateKey cannot be null");
+            IllegalArgumentException ex = new IllegalArgumentException("PrivateKey cannot be null");
+            logger.throwing(ex);
+            throw ex;
         }
 
         ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
@@ -98,6 +117,8 @@ public class PublicKey {
         // compute the public key based on the private key
         q = domainParameters.getG().multiply(new BigInteger(privateKey.getValue()));
         initialized = true;
+        logger.trace("done initializing public key = {}", q);
+        logger.traceExit();
     }
 
     /**
@@ -147,16 +168,19 @@ public class PublicKey {
      * @return true if public key is valid, false otherwise
      */
     public boolean isValid() {
+        logger.traceEntry();
         if (!initialized || q.isInfinity() || new BigInteger(q.getEncoded(true)).equals(BigInteger.ZERO)) {
-            return false;
+            logger.trace("not correctly initialized!");
+            return logger.traceExit(false);
         }
 
         // check if it satisfies curve equation
         if (!q.isValid()) {
-            return false;
+            logger.trace("does not satisfy curve equation!");
+            return logger.traceExit(false);
         }
 
-        return true;
+        return logger.traceExit(true);
     }
 
     public boolean isInitialized() {
@@ -166,5 +190,11 @@ public class PublicKey {
     public ECPoint getQ() {
         return (initialized) ? q : null;
     }
+
+    @Override
+    public String toString(){
+        return String.format("PublicKey{%s}", Util.byteArrayToHexString(this.getValue()));
+    }
+
 
 }

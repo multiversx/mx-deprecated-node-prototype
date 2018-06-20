@@ -1,10 +1,15 @@
 package network.elrond.core;
 
 import network.elrond.Application;
+import network.elrond.chronology.NTPClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Date;
 
 public class PrintlnEventHandler implements EventHandler<String> {
+    private static final Logger logger = LogManager.getLogger(PrintlnEventHandler.class);
+
     public void onEvent(Application application, Object sender, String data){
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -23,7 +28,6 @@ public class PrintlnEventHandler implements EventHandler<String> {
             stringBuilder.append(data);
         }
 
-        System.out.println(stringBuilder.toString());
-        return;
+        logger.trace(stringBuilder.toString());
     }
 }

@@ -89,6 +89,9 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
     }
 
     public void setCurrentBlockIndex(BigInteger currentBlockIndex) {
+        Util.check(currentBlockIndex != null, "currentBlockIndex!=null");
+        Util.check(currentBlockIndex.compareTo(BigInteger.ZERO) > 0, "currentBlockIndex should be positive!");
+
         this.currentBlockIndex = currentBlockIndex;
     }
 
