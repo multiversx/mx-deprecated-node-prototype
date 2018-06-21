@@ -51,7 +51,7 @@ public class P2PCommunicationServiceImpl implements P2PCommunicationService {
         InetAddress inet = InetAddress.getByName(address);
         Date dStart = new Date();
 
-        if (!inet.isReachable(5000)) {
+        if (!inet.isReachable(1000)) {
             pingResponse.setErrorMessage("timeout");
             logger.trace("timeout");
             return logger.traceExit(pingResponse);
