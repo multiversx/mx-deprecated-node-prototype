@@ -9,12 +9,12 @@ import network.elrond.data.Receipt;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.processor.AppTasks;
 import network.elrond.service.AppServiceProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class P2PReceiptInterceptorProcessor extends AbstractChannelTask<String> {
 
-    private Logger logger = LoggerFactory.getLogger(AppTasks.class);
+    private static final Logger logger = LogManager.getLogger(P2PReceiptInterceptorProcessor.class);
 
     @Override
     protected P2PChannelName getChannelName() {
@@ -23,7 +23,7 @@ public class P2PReceiptInterceptorProcessor extends AbstractChannelTask<String> 
 
     @Override
     protected void process(String hash, Application application) {
-
+        logger.traceEntry("params: {} {}", hash, application);
         AppState state = application.getState();
         Blockchain blockchain = state.getBlockchain();
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
@@ -33,13 +33,16 @@ public class P2PReceiptInterceptorProcessor extends AbstractChannelTask<String> 
             Receipt receipt = blockchainService.get(hash, blockchain, BlockchainUnitType.RECEIPT);
 
             if (receipt == null) {
-                logger.info("Receipt not found !!!: " + hash);
+                logger.warn("Receipt with hash {} was not found!", hash);
+                logger.traceExit();
                 return;
             }
 
-        } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.trace("Got new receipt with hash {}", hash);
 
+        } catch (Exception ex) {
+            logger.catching(ex);
         }
+        logger.traceExit();
     }
 }

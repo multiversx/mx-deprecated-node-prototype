@@ -5,14 +5,19 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.BootstrapType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ContextCreator {
+    private static final Logger logger = LogManager.getLogger(ContextCreator.class);
 
     protected static final String mintAddress = "026c00d83e0dc47e6b626ed6c42f636b";
 
     public static AppContext createAppContext(String nodeName, String nodePrivateKeyString, String masterPeerIpAddress,
                                               Integer masterPeerPort, Integer port, BootstrapType bootstrapType,
                                               String blockchainPath) {
+        logger.traceEntry("params: {} {} {} {} {} {} {}", nodeName, nodePrivateKeyString, masterPeerIpAddress,
+                masterPeerPort, port, bootstrapType, blockchainPath);
 
         AppContext context = new AppContext();
 
@@ -31,8 +36,7 @@ public class ContextCreator {
         String mintAddress = Util.getAddressFromPublicKey(mintPublicKey.getValue());
         context.setStrAddressMint(mintAddress);
 
-        return context;
-
+        return logger.traceExit(context);
     }
 
 }

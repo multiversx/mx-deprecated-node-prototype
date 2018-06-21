@@ -19,8 +19,8 @@ import network.elrond.p2p.P2PChannelName;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.p2p.PingResponse;
 import network.elrond.service.AppServiceProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.math.BigInteger;
 import java.util.concurrent.ExecutionException;
@@ -29,59 +29,63 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class ElrondFacadeImpl implements ElrondFacade {
-
-    private static final Logger logger = LoggerFactory.getLogger("ElrondFacadeImpl");
+    private static final Logger logger = LogManager.getLogger(ElrondFacadeImpl.class);
 
     @Override
     public Application start(AppContext context) {
+        logger.traceEntry("params: {}", context);
 
         try {
             Application application = new Application(context);
             application.start();
-            return application;
+            logger.trace("Started!");
+            return logger.traceExit(application);
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            logger.catching(e);
+            return logger.traceExit((Application)null);
         }
     }
 
     @Override
     public boolean stop(Application application) {
+        logger.traceEntry("params: {}", application);
 
         try {
             application.stop();
-            return true;
+            logger.trace("Stopped!");
+            return logger.traceExit(true);
         } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+            logger.catching(e);
+            return logger.traceExit(false);
         }
     }
 
     @Override
     public BigInteger getBalance(AccountAddress address, Application application) {
+        logger.traceEntry("params: {} {}", address, application);
 
         if (application == null) {
+            logger.warn("application is null");
             return BigInteger.ZERO;
         }
 
         try {
-
             AppState state = application.getState();
             Accounts accounts = state.getAccounts();
 
             AccountState account = AppServiceProvider.getAccountStateService().getAccountState(address, accounts);
 
-            return (account == null) ? BigInteger.ZERO : account.getBalance();
+            return logger.traceExit((account == null) ? BigInteger.ZERO : account.getBalance());
 
         } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
+            logger.throwing(ex);
+            return logger.traceExit((BigInteger)null);
         }
     }
 
     @Override
     public Receipt getReceipt(String transactionHash, Application application) {
-
+        logger.traceEntry("params: {} {}", transactionHash, application);
         try {
             FutureTask<Receipt> timeoutTask = new FutureTask<Receipt>(() -> {
                 Blockchain blockchain = application.getState().getBlockchain();
@@ -90,24 +94,23 @@ public class ElrondFacadeImpl implements ElrondFacade {
                     receiptHash = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
                     ThreadUtil.sleep(200);
                 } while (receiptHash == null);
-                return AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT);
+                return logger.traceExit((Receipt)AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT));
             });
             new Thread(timeoutTask).start();
-            return timeoutTask.get(30L, TimeUnit.SECONDS);
+            return logger.traceExit(timeoutTask.get(30L, TimeUnit.SECONDS));
         } catch (InterruptedException | TimeoutException | ExecutionException e) {
-            e.printStackTrace();
+            logger.catching(e);
         }
-        return null;
+        return logger.traceExit((Receipt)null);
     }
 
     @Override
     public Transaction send(AccountAddress receiver, BigInteger value, Application application) {
-
+        logger.traceEntry("params: {} {} {}", receiver, value, application);
         if (application == null) {
-            logger.info("Invalid application state, application is null");
-            return null;
+            logger.warn("Invalid application state, application is null");
+            return logger.traceExit((Transaction)null);
         }
-
 
         try {
 
@@ -123,10 +126,9 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
             if (senderAccount == null) {
                 // sender account is new, can't send
-                logger.info("Sender account is new, can't send");
-                return null;
+                logger.warn("Sender account is new, can't send");
+                return logger.traceExit((Transaction)null);
             }
-
 
             PublicKey receiverPublicKey = new PublicKey(receiver.getBytes());
 
@@ -142,49 +144,51 @@ public class ElrondFacadeImpl implements ElrondFacade {
             AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, hash);
 
 
-            return transaction;
+            return logger.traceExit((Transaction)null);
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.catching(ex);
         }
 
-        return null;
+        return logger.traceExit((Transaction)null);
     }
 
     @Override
     public PingResponse ping(String ipAddress, int port) {
+        logger.traceEntry("params: {} {}", ipAddress, port);
         try {
-            return (AppServiceProvider.getP2PCommunicationService().getPingResponse(ipAddress, port));
+            return logger.traceExit(AppServiceProvider.getP2PCommunicationService().getPingResponse(ipAddress, port));
         } catch (Exception ex) {
-            ex.printStackTrace();
-//            return (new PingResponse());
+            logger.catching(ex);
             PingResponse pingResponse = new PingResponse();
             pingResponse.setErrorMessage(ex.getLocalizedMessage());
-            return (pingResponse);
+            return logger.traceExit(pingResponse);
         }
     }
 
     @Override
     public PKSKPair generatePublicKeyAndPrivateKey() {
+        logger.traceEntry();
         try {
             PrivateKey privateKey = new PrivateKey();
             PublicKey publicKey = new PublicKey(privateKey);
-            return new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue()));
+            return logger.traceExit(new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue())));
         } catch (Exception ex) {
-            ex.printStackTrace();
-            return new PKSKPair("Error", "Error");
+            logger.catching(ex);
+            return logger.traceExit(new PKSKPair("Error", "Error"));
         }
     }
 
     @Override
     public PKSKPair generatePublicKeyFromPrivateKey(String strPrivateKey) {
+        logger.traceEntry("params: ", strPrivateKey);
         try {
             PrivateKey privateKey = new PrivateKey(Util.hexStringToByteArray(strPrivateKey));
             PublicKey publicKey = new PublicKey(privateKey);
-            return new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue()));
+            return logger.traceExit(new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue())));
         } catch (Exception ex) {
-            ex.printStackTrace();
-            return new PKSKPair("Error", "Error");
+            logger.catching(ex);
+            return logger.traceExit(new PKSKPair("Error", "Error"));
         }
     }
 

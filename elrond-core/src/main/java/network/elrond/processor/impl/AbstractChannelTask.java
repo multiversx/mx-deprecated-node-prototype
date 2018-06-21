@@ -16,7 +16,6 @@ public abstract class AbstractChannelTask<T> implements AppTask {
 
     @Override
     public void process(Application application) {
-        logger.traceEntry("params: {}", application);
         ArrayBlockingQueue<T> queue = AppP2PManager.instance().subscribeToChannel(application, getChannelName());
 
         Thread thread = new Thread(() -> {
@@ -37,7 +36,6 @@ public abstract class AbstractChannelTask<T> implements AppTask {
         });
         thread.setName(getChannelName() + "_" + getClass().getName());
         thread.start();
-
     }
 
     protected void process(ArrayBlockingQueue<T> queue, Application application) {

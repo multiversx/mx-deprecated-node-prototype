@@ -20,6 +20,8 @@ import java.util.List;
 
 
 public class UtilTest {
+    private static Logger logger = LogManager.getLogger(UtilTest.class);
+
     public static void displayListValidators(List<Validator> list) {
         for (int i = 0; i < list.size(); i++) {
             Validator v = list.get(i);
@@ -69,7 +71,7 @@ public class UtilTest {
 
     @Test
     public void testLoggerParameters(){
-        Logger logger = LogManager.getLogger(UtilTest.class);
+
 
         //logger.traceEntry("Params {} {} {}", null, null, null);
 
@@ -90,6 +92,11 @@ public class UtilTest {
         byte[] buff = new byte[]{0, 1, 2, 3, 4};
         logger.trace("byte array: {}", buff);
 
+    }
+
+    @Test
+    public void testStringFormat(){
+        logger.info(String.format("test %s %d", (Object)null, (BigInteger)null));
     }
 
     public static void createDummyGenesisBlock(Blockchain blockchain){

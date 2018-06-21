@@ -9,18 +9,18 @@ import network.elrond.chronology.NTPClient;
 import network.elrond.data.BootstrapType;
 import network.elrond.data.LocationType;
 import network.elrond.service.AppServiceProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.math.BigInteger;
 
 public class BootstrapBlockTask extends AbstractBlockTask {
 
-    private Logger logger = LoggerFactory.getLogger(BootstrapBlockTask.class);
-
+    private static final Logger logger = LogManager.getLogger(BlockchainStarterProcessor.class);
 
     @Override
     protected void doProcess(Application application) {
+        logger.traceEntry("params: {}", application);
 
         AppState state = application.getState();
         Accounts accounts = state.getAccounts();
@@ -29,7 +29,6 @@ public class BootstrapBlockTask extends AbstractBlockTask {
         NTPClient ntpClient = state.getNtpClient();
 
         try {
-
             BigInteger remoteBlockIndex = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.NETWORK, blockchain);
             BigInteger localBlockIndex = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.LOCAL, blockchain);
 
@@ -37,6 +36,7 @@ public class BootstrapBlockTask extends AbstractBlockTask {
             boolean isMissingGenesisBlock = remoteBlockIndex.compareTo(BigInteger.ZERO) < 0;
             boolean shouldGenerateGenesis = isSeedNode && isMissingGenesisBlock;
             if (!shouldGenerateGenesis) {
+                logger.traceExit("should not generate genesis!");
                 return;
             }
 
@@ -44,17 +44,21 @@ public class BootstrapBlockTask extends AbstractBlockTask {
 
             switch (bootstrapType) {
                 case START_FROM_SCRATCH:
+                    logger.trace("starting from genesis...");
                     AppServiceProvider.getBootstrapService().startFromGenesis(accounts, blockchain, context, state.getNtpClient());
                     break;
                 case REBUILD_FROM_DISK:
+                    logger.trace("starting from disk...");
                     AppServiceProvider.getBootstrapService().restoreFromDisk(localBlockIndex, accounts, blockchain, context, state.getNtpClient());
                     break;
                 default:
-                    throw new RuntimeException("Not supported type" + bootstrapType);
+                    RuntimeException ex = new RuntimeException("Not supported type" + bootstrapType);
+                    logger.throwing(ex);
+                    throw ex;
             }
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.catching(ex);
         }
     }
 

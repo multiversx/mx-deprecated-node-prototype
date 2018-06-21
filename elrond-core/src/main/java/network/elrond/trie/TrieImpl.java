@@ -4,10 +4,10 @@ import network.elrond.core.ByteUtil;
 import network.elrond.core.Value;
 import network.elrond.crypto.HashUtil;
 import network.elrond.db.ByteArrayWrapper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongycastle.util.encoders.Hex;
 import org.iq80.leveldb.DB;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -17,8 +17,7 @@ import static network.elrond.core.CompactEncoder.*;
 import static org.spongycastle.util.Arrays.concatenate;
 
 public class TrieImpl implements Trie {
-
-    private static final Logger logger = LoggerFactory.getLogger("trie");
+    private static final Logger logger = LogManager.getLogger(TrieImpl.class);
 
     private static byte PAIR_SIZE = 2;
     private static byte LIST_SIZE = 17;
@@ -78,8 +77,7 @@ public class TrieImpl implements Trie {
 
     @Override
     public byte[] get(byte[] key) {
-        if (logger.isDebugEnabled())
-            logger.debug("Retrieving key {}", Hex.toHexString(key));
+        logger.trace("Retrieving key {}", Hex.toHexString(key));
         byte[] k = binToNibbles(key);
         Value c = new Value(this.get(this.root, k));
 
@@ -103,10 +101,8 @@ public class TrieImpl implements Trie {
         byte[] k = binToNibbles(key);
 
         this.root = this.insertOrDelete(this.root, k, value);
-        if(logger.isDebugEnabled()) {
-            logger.info("Added key {} and value {}", Hex.toHexString(key), Hex.toHexString(value));
-            logger.debug("New root-hash: {}", Hex.toHexString(this.getRootHash()));
-        }
+        logger.trace("Added key {} and value {}", Hex.toHexString(key), Hex.toHexString(value));
+        logger.trace("New root-hash: {}", Hex.toHexString(this.getRootHash()));
     }
 
     /**
@@ -121,10 +117,8 @@ public class TrieImpl implements Trie {
     @Override
     public void delete(byte[] key) {
         delete(new String(key));
-        if(logger.isDebugEnabled()) {
-            logger.debug("Deleted value for key {}", Hex.toHexString(key));
-            logger.debug("New root-hash: {}", Hex.toHexString(this.getRootHash()));
-        }
+        logger.trace("Deleted value for key {}", Hex.toHexString(key));
+        logger.trace("New root-hash: {}", Hex.toHexString(this.getRootHash()));
     }
 
     @Override
@@ -435,12 +429,10 @@ public class TrieImpl implements Trie {
 
             this.getCache().delete(key.getData());
 
-            if (logger.isTraceEnabled())
-                logger.trace("Garbage collected node: [{}]",
-                        Hex.toHexString(key.getData()));
+            logger.trace("Garbage collected node: [{}]", Hex.toHexString(key.getData()));
         }
-        logger.info("Garbage collected node list, size: [{}]", toRemoveSet.size());
-        logger.info("Garbage collection time: [{}ms]", System.currentTimeMillis() - startTime);
+        logger.trace("Garbage collected node list, size: [{}]", toRemoveSet.size());
+        logger.trace("Garbage collection time: [{}ms]", System.currentTimeMillis() - startTime);
     }
 
     private void scanTree(byte[] hash, ScanAction scanAction) {

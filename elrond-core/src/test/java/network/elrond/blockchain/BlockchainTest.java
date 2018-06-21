@@ -114,10 +114,10 @@ public class BlockchainTest extends BaseBlockchainTest {
         blockchain.setCurrentBlockIndex(null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testSetCurrentBlockIndexWithNegativeShouldThrowException() throws IOException {
-        blockchain.setCurrentBlockIndex(BigInteger.valueOf(-2));
-    }
+//    @Test(expected = IllegalArgumentException.class)
+//    public void testSetCurrentBlockIndexWithNegativeShouldThrowException() throws IOException {
+//        blockchain.setCurrentBlockIndex(BigInteger.valueOf(-2));
+//    }
 
     @Test
     public void testSetCurrentBlockIndex() throws IOException {

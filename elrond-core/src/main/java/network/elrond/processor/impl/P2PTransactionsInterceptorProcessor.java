@@ -9,12 +9,11 @@ import network.elrond.data.Transaction;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.processor.AppTasks;
 import network.elrond.service.AppServiceProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class P2PTransactionsInterceptorProcessor extends AbstractChannelTask<String> {
-
-    private Logger logger = LoggerFactory.getLogger(AppTasks.class);
+    private static final Logger logger = LogManager.getLogger(P2PTransactionsInterceptorProcessor.class);
 
     @Override
     protected P2PChannelName getChannelName() {
@@ -23,7 +22,7 @@ public class P2PTransactionsInterceptorProcessor extends AbstractChannelTask<Str
 
     @Override
     protected void process(String hash, Application application) {
-
+        logger.traceEntry("params: {} {}", hash, application);
         AppState state = application.getState();
         Blockchain blockchain = state.getBlockchain();
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
@@ -34,15 +33,15 @@ public class P2PTransactionsInterceptorProcessor extends AbstractChannelTask<Str
             Transaction transaction = blockchainService.get(hash, blockchain, BlockchainUnitType.TRANSACTION);
 
             if (transaction == null) {
-                logger.info("Transaction not found !!!: " + hash);
+                logger.info("Transaction with hash {} was not found!", hash);
                 return;
             }
 
-            //logger.info("Received new transaction " + hash);
-
+            logger.trace("Got new transaction with hash {}", hash);
         } catch (Exception ex) {
-            ex.printStackTrace();
-
+            logger.catching(ex);
         }
+
+        logger.traceExit();
     }
 }

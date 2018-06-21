@@ -43,16 +43,15 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         AppState state = application.getState();
         if (state.isLock()) {
             // If sync is running stop
-            logger.info("Can't execute, state locked");
+            logger.info("Can't execute, state locked!");
             return;
         }
 
         if (state.getBlockchain().getCurrentBlock() == null) {
             // Require synchronize
-            logger.info("Can't execute, synchronize required");
+            logger.info("Can't execute, synchronize required!");
             return;
         }
-
 
         int size = queue.size();
         TimeWatch watch = TimeWatch.start();
@@ -66,10 +65,11 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         long tps = (time > 0) ? ((size*1000) / time) : 0;
         logger.info(" ###### Executed " + size + " transactions in " + time + "ms  TPS:" + tps + "   ###### ");
 
+        logger.traceExit();
     }
 
     private void proposeBlock(ArrayBlockingQueue<String> queue, Application application) {
-
+        logger.traceEntry("params: {} {}", queue, application);
 
         AppState state = application.getState();
 
@@ -77,7 +77,7 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         queue.clear();
 
         if (hashes.isEmpty()) {
-            logger.info("Can't execute, no transaction");
+            logger.info("Can't execute, no transaction!");
             return;
         }
 
@@ -86,6 +86,7 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
 
         AppBlockManager.instance().generateAndBroadcastBlock(hashes, privateKey, state);
 
+        logger.traceExit();
     }
 
 

@@ -7,23 +7,20 @@ import network.elrond.blockchain.Blockchain;
 import network.elrond.data.ExecutionReport;
 import network.elrond.data.LocationType;
 import network.elrond.service.AppServiceProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.math.BigInteger;
 
 public class SynchronizationBlockTask extends AbstractBlockTask {
-
-    private Logger logger = LoggerFactory.getLogger(SynchronizationBlockTask.class);
-
+    private static final Logger logger = LogManager.getLogger(SynchronizationBlockTask.class);
 
     @Override
     protected void doProcess(Application application) {
-
+        logger.traceEntry("params: {}", application);
         AppState state = application.getState();
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();
-
 
         try {
 
@@ -39,15 +36,17 @@ public class SynchronizationBlockTask extends AbstractBlockTask {
             logger.info("Current bloc index " + localBlockIndex + " | remote block index " + remoteBlockIndex);
 
             if (!isSyncRequired) {
+                logger.trace("is not sync required!");
                 return;
             }
 
+            logger.trace("Starting to synchronize...");
             ExecutionReport report = AppServiceProvider.getBootstrapService().synchronize(localBlockIndex, remoteBlockIndex, blockchain, accounts);
             exReport.combine(report);
 
-
+            logger.trace("Sync result: {}", report);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.catching(ex);
         }
     }
 

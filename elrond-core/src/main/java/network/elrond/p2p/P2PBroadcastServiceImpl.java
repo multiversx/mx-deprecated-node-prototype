@@ -47,7 +47,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         fb.awaitUninterruptibly();
         if (fb.isSuccess()) {
             peer.discover().peerAddress(fb.bootstrapTo().iterator().next()).start().awaitUninterruptibly();
-            logger.info("Connection was SUCCESSFUL! Status: %s", fb.failedReason());
+            logger.info("Connection was SUCCESSFUL! Status: {}", fb.failedReason());
         } else {
             RuntimeException ex = new RuntimeException(fb.failedReason()) ;
             logger.throwing(ex);

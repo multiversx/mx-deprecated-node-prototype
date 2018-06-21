@@ -51,7 +51,7 @@ public class TransactionServiceTest extends ExpectedExceptionTest {
 
     @Test
     public void testSignTransactionWithNullTransactionShouldThrowException() {
-        expected(IllegalArgumentException.class, "Transaction cannot be null");
+        expected(IllegalArgumentException.class, "transaction is null");
 
         transactionService.signTransaction(null, new byte[]{}, new byte[]{});
         Assert.fail();
@@ -59,7 +59,7 @@ public class TransactionServiceTest extends ExpectedExceptionTest {
 
     @Test
     public void testSignTransactionWithNullPrivateKeyBytesShouldThrowException() {
-        expected(IllegalArgumentException.class, "PrivateKeysBytes cannot be null");
+        expected(IllegalArgumentException.class, "privateKeysBytes is null");
 
         Transaction tx = transactionService.generateTransaction(publicKeySender, publicKeyReceiver, value.longValue(), nonce.longValue());
         transactionService.signTransaction(tx, null, new byte[]{});
@@ -68,7 +68,7 @@ public class TransactionServiceTest extends ExpectedExceptionTest {
 
     @Test
     public void testVerifyTransactionWithNullTransactionShouldThrowException() {
-        expected(IllegalArgumentException.class, "Transaction cannot be null");
+        expected(IllegalArgumentException.class, "transaction is null");
 
         transactionService.verifyTransaction(null);
         Assert.fail();
@@ -76,7 +76,7 @@ public class TransactionServiceTest extends ExpectedExceptionTest {
 
     @Test
     public void testgetTransactionsWithNullBlockchainShouldThrowException() throws IOException, ClassNotFoundException {
-        expected(IllegalArgumentException.class, "Blockchain cannot be null");
+        expected(IllegalArgumentException.class, "blockchain is null");
 
         List<Transaction> transactions = AppServiceProvider.getTransactionService().getTransactions((Blockchain)null, (Block) null);
         transactionService.verifyTransaction(null);
@@ -85,7 +85,7 @@ public class TransactionServiceTest extends ExpectedExceptionTest {
 
     @Test
     public void testgetTransactionsWithNullBlockShouldThrowException() throws IOException, ClassNotFoundException {
-        expected(IllegalArgumentException.class, "Block cannot be null");
+        expected(IllegalArgumentException.class, "block is null");
 
         List<Transaction> transactions = AppServiceProvider.getTransactionService().getTransactions(new Blockchain(new BlockchainContext()), (Block) null);
         Assert.fail();

@@ -3,6 +3,9 @@ package network.elrond;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.processor.AppTasks;
+import network.elrond.processor.impl.SynchronizationBlockTask;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -10,15 +13,21 @@ import java.io.Serializable;
 
 public class Application implements Serializable {
 
+    private static final Logger logger = LogManager.getLogger(Application.class);
+
     private AppContext context;
 
     private AppState state = new AppState();
 
     public Application(AppContext context) {
+        logger.traceEntry("params: {}", context);
         if (context == null) {
-            throw new IllegalArgumentException("Context cannot be null");
+            IllegalArgumentException ex = new IllegalArgumentException("Context cannot be null");
+            logger.throwing(ex);
+            throw ex;
         }
         this.context = context;
+        logger.traceExit();
     }
 
     public AppContext getContext() {
@@ -26,10 +35,14 @@ public class Application implements Serializable {
     }
 
     public void setContext(AppContext context) {
+        logger.traceEntry("params: {}", context);
         if (context == null) {
-            throw new IllegalArgumentException("Context cannot be null");
+            IllegalArgumentException ex = new IllegalArgumentException("Context cannot be null");
+            logger.throwing(ex);
+            throw ex;
         }
         this.context = context;
+        logger.traceExit();
     }
 
     public AppState getState() {
@@ -37,10 +50,14 @@ public class Application implements Serializable {
     }
 
     public void setState(AppState state) {
+        logger.traceEntry("params: {}", state);
         if (state == null) {
-            throw new IllegalArgumentException("State cannot be null");
+            IllegalArgumentException ex = new IllegalArgumentException("State cannot be null");
+            logger.throwing(ex);
+            throw ex;
         }
         this.state = state;
+        logger.traceExit();
     }
 
     /**
@@ -49,41 +66,42 @@ public class Application implements Serializable {
      * @throws IOException
      */
     public void start() throws IOException {
+        logger.traceEntry();
 
-
-        // Start P2P communications
+        logger.trace("Starting P2P communications...");
         AppTasks.INIT_P2P_CONNECTION.process(this);
 
-        //  Start blockchain
+        logger.trace("Starting blockchain...");
         AppTasks.INIT_BLOCKCHAIN.process(this);
 
-
+        logger.trace("Starting private-public keys processor...");
         AppTasks.INITIALIZE_PUBLIC_PRIVATE_KEYS.process(this);
 
-
-        //  Start accounts
+        logger.trace("Starting accounts...");
         AppTasks.INIT_ACCOUNTS.process(this);
-        // Start bootstrapping process
+
+        logger.trace("Starting bootstrapping processor...");
         AppTasks.BLOCKCHAIN_BOOTSTRAP.process(this);
-        // Start synchronization process
+
+        logger.trace("Starting blockchain synchronization...");
         AppTasks.BLOCKCHAIN_SYNCRONIZATION.process(this);
 
-
-        // Intercept P2P transactions
+        logger.trace("Intercept P2P transactions...");
         AppTasks.INTERCEPT_TRANSACTIONS.process(this);
-        // Intercept P2P receipts
+
+        logger.trace("Intercept P2P receipts...");
         AppTasks.INTERCEPT_RECEIPTS.process(this);
-        // Intercept P2P blocks
+
+        logger.trace("Intercept P2P blocks...");
         AppTasks.INTERCEPT_BLOCKS.process(this);
 
-
-        // Execute transactions and emit block
+        logger.trace("Execute transactions and emit blocks...");
         AppTasks.BLOCK_ASSEMBLY_PROCESSOR.process(this);
 
-        //init NTP client
+        logger.trace("Init NTP client...");
         AppTasks.NTP_CLIENT_INITIALIZER.process(this);
-
-        //start chronology processor
+        
+        logger.trace("Start chronology processor...");
         AppTasks.CHRONOLOGY.process(this);
     }
 
