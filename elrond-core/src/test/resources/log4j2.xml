@@ -1,34 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN" monitorInterval="30">
     <Properties>
-        <Property name="LOG_PATTERN">
-            %d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex
+        <Property name="MAIN_LOG_PATTERN">
+        %d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex
+        </Property>
+        <Property name="ALT_LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss.SSS} %5p: %msg  >>> [%t] %c{1.}%n
         </Property>
     </Properties>
 
     <Appenders>
         <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
-            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <PatternLayout pattern="${MAIN_LOG_PATTERN}"/>
+            <!--<Filters>-->
+                <!--<MarkerFilter marker="CATCHING" onMatch="DENY" onMismatch="NEUTRAL"/>-->
+            <!--</Filters>-->
         </Console>
-
-        <!-- Rolling File Appender -->
-        <RollingFile name="FileAppender" fileName="logs/elrond.log"
-                     filePattern="logs/elrond-%d{yyyy-MM-dd}-%i.log">
-            <PatternLayout>
-                <Pattern>${LOG_PATTERN}</Pattern>
-            </PatternLayout>
-            <Policies>
-                <TimeBasedTriggeringPolicy interval="1"/>
-                <SizeBasedTriggeringPolicy size="10MB"/>
-            </Policies>
-            <DefaultRolloverStrategy max="10"/>
-        </RollingFile>
-
     </Appenders>
 
     <Loggers>
-        <Root level="INFO">
+        <Root level="ERROR">
             <AppenderRef ref="ConsoleAppender"/>
         </Root>
+
+        <Logger name="network.elrond" level="TRACE"></Logger>
     </Loggers>
 </Configuration>

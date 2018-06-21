@@ -10,6 +10,8 @@ import network.elrond.data.BootstrapType;
 import network.elrond.data.Transaction;
 import network.elrond.p2p.PingResponse;
 import network.elrond.service.AppServiceProvider;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +24,7 @@ import java.math.BigInteger;
 
 @Controller
 public class ElrondNodeController {
+    private static final Logger logger = LogManager.getLogger(ElrondNodeController.class);
 
     @Autowired
     ElrondApiNode elrondApiNode;
@@ -32,23 +35,24 @@ public class ElrondNodeController {
 
     @RequestMapping(path = "/node/stop", method = RequestMethod.GET)
     public @ResponseBody
-    boolean stopNode(
-            HttpServletResponse response) {
+    boolean stopNode(HttpServletResponse response) {
+        logger.traceEntry();
         Application application = elrondApiNode.getApplication();
         if (application != null) {
+            logger.trace("application is null");
             application.stop();
         }
 
-        return true;
+        return logger.traceExit(true);
     }
 
     @RequestMapping(path = "/node/status", method = RequestMethod.GET)
     public @ResponseBody
-    boolean nodeStatus(
-            HttpServletResponse response) {
+    boolean nodeStatus(HttpServletResponse response) {
+        logger.traceEntry();
         Application application = elrondApiNode.getApplication();
 
-        return application !=  null;
+        return logger.traceExit(application != null);
     }
 
 
@@ -67,11 +71,13 @@ public class ElrondNodeController {
             @RequestParam(defaultValue = "elrond-node-1", required = false) String blockchainRestorePath
 
     ) {
+        logger.traceEntry("params: {} {} {} {} {} {} {} {} {}", nodeName, port, masterPeerPort, masterPeerIpAddress,
+                privateKey, mintValue, bootstrapType, blockchainPath, blockchainRestorePath);
         //Reuploaded
         AppContext context = ContextCreator.createAppContext(nodeName, privateKey, masterPeerIpAddress,
                 masterPeerPort, port, bootstrapType, blockchainPath);
 
-        return elrondApiNode.start(context, blockchainPath, blockchainRestorePath);
+        return logger.traceExit(elrondApiNode.start(context, blockchainPath, blockchainRestorePath));
     }
 
 
@@ -82,12 +88,11 @@ public class ElrondNodeController {
             @RequestParam(defaultValue = "0326e7875aadaba270ae93ec40ef4706934d070eb21c9acad4743e31289fa4ebc7")
                     String address,
             @RequestParam(defaultValue = "1") BigInteger value) {
+        logger.traceEntry("params: {} {}", address, value);
 
         AccountAddress _add = AccountAddress.fromHexString(address);
         Transaction transaction = elrondApiNode.send(_add, value);
-        return (transaction != null) ? AppServiceProvider.getSerializationService().getHashString(transaction) : null;
-
-
+        return logger.traceExit((transaction != null) ? AppServiceProvider.getSerializationService().getHashString(transaction) : null);
     }
 
 
@@ -96,7 +101,9 @@ public class ElrondNodeController {
     Object getReceipt(
             HttpServletResponse response,
             @RequestParam() String transactionHash) {
-        return elrondApiNode.getReceipt(transactionHash);
+
+        logger.traceEntry("params: {}", transactionHash);
+        return logger.traceExit(elrondApiNode.getReceipt(transactionHash));
 
     }
 
@@ -107,8 +114,9 @@ public class ElrondNodeController {
             HttpServletResponse response,
             @RequestParam() String address) {
 
+        logger.traceEntry("params: {}", address);
         AccountAddress _add = AccountAddress.fromHexString(address);
-        return elrondApiNode.getBalance(_add);
+        return logger.traceExit(elrondApiNode.getBalance(_add));
 
     }
 
@@ -119,14 +127,16 @@ public class ElrondNodeController {
             @RequestParam() String ipAddress,
             @RequestParam() int port
     ) {
-        return (elrondApiNode.ping(ipAddress, port));
+        logger.traceEntry("params: {} {}", ipAddress, port);
+        return logger.traceExit(elrondApiNode.ping(ipAddress, port));
     }
 
     @RequestMapping(path = "/node/publickeyandprivatekey", method = RequestMethod.GET)
     public @ResponseBody
     PKSKPair generatePublicAndPrivateKey(
             HttpServletResponse response) {
-        return elrondApiNode.generatePublicKeyAndPrivateKey();
+        logger.traceEntry();
+        return logger.traceExit(elrondApiNode.generatePublicKeyAndPrivateKey());
     }
 
     @RequestMapping(path = "/node/publickeyfromprivatekey", method = RequestMethod.GET)
@@ -134,14 +144,17 @@ public class ElrondNodeController {
     PKSKPair generatePublicKeyFromPrivateKey(
             HttpServletResponse response,
             @RequestParam() String privateKey) {
-        return elrondApiNode.generatePublicKeyFromPrivateKey(privateKey);
+        logger.traceEntry("params: {}", privateKey);
+        return logger.traceExit(elrondApiNode.generatePublicKeyFromPrivateKey(privateKey));
     }
 
     @RequestMapping(path = "/node/exit", method = RequestMethod.GET)
     public @ResponseBody
     void nodeExit(
             HttpServletResponse response) {
+        logger.traceEntry();
         System.exit(0);
+        logger.traceExit();
     }
 
 

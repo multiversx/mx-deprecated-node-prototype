@@ -13,6 +13,8 @@ import network.elrond.data.Receipt;
 import network.elrond.data.Transaction;
 import network.elrond.p2p.PingResponse;
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +24,7 @@ import java.math.BigInteger;
 
 @Component
 class ElrondApiNode {
+    private static final Logger logger = LogManager.getLogger(ElrondApiNode.class);
 
     @Autowired
     private ElrondWebSocketManager elrondWebSocketManager;
@@ -37,76 +40,96 @@ class ElrondApiNode {
     }
 
     boolean start(AppContext context, String blockchainPath, String blockchainRestorePath) {
-
+        logger.traceEntry("params: {} {} {}", context, blockchainPath, blockchainRestorePath);
 
         WebSocketAppenderAdapter.instance().setElrondWebSocketManager(elrondWebSocketManager);
 
         BootstrapType bootstrapType = context.getBootstrapType();
         if (bootstrapType.equals(BootstrapType.REBUILD_FROM_DISK)) {
+            logger.trace("REBUILD_FROM_DISK selected!");
             setupRestoreDir(new File(blockchainRestorePath), new File(blockchainPath));
         }
 
+        if (bootstrapType.equals(BootstrapType.START_FROM_SCRATCH)){
+            logger.trace("START_FROM_SCRATCH selected!");
+        }
+
+        logger.trace("Starting facade...");
         ElrondFacade facade = getFacade();
         application = facade.start(context);
-        return application != null;
+        return logger.traceExit(application != null);
     }
 
     boolean stop() {
+        logger.traceEntry();
         ElrondFacade facade = getFacade();
-        return facade.stop(application);
+        return logger.traceExit(facade.stop(application));
     }
 
     BigInteger getBalance(AccountAddress address) {
+        logger.traceEntry("params: {}", address);
         ElrondFacade facade = getFacade();
-        return facade.getBalance(address, application);
+        return logger.traceExit(facade.getBalance(address, application));
     }
 
     Transaction send(AccountAddress receiver, BigInteger value) {
-        return getFacade().send(receiver, value, application);
+        logger.traceEntry("params: {} {}", receiver, value);
+        return logger.traceExit(getFacade().send(receiver, value, application));
     }
 
     Receipt getReceipt(String transactionHash) {
-        return getFacade().getReceipt(transactionHash, application);
+        logger.traceEntry("params: {}", transactionHash);
+        return logger.traceExit(getFacade().getReceipt(transactionHash, application));
     }
 
     PingResponse ping(String ipAddress, int port) {
+        logger.traceEntry("params: {} {}", ipAddress, port);
         ElrondFacade facade = getFacade();
-        return facade.ping(ipAddress, port);
+        return logger.traceExit(facade.ping(ipAddress, port));
     }
 
     PKSKPair generatePublicKeyAndPrivateKey() {
+        logger.traceEntry();
         ElrondFacade facade = getFacade();
-        return facade.generatePublicKeyAndPrivateKey();
+        return logger.traceExit(facade.generatePublicKeyAndPrivateKey());
     }
 
     PKSKPair generatePublicKeyFromPrivateKey(String privateKey) {
+        logger.traceEntry("params: {}", privateKey);
         ElrondFacade facade = getFacade();
-        return facade.generatePublicKeyFromPrivateKey(privateKey);
+        return logger.traceExit(facade.generatePublicKeyFromPrivateKey(privateKey));
     }
 
     private void setupRestoreDir(File sourceDir, File destinationDir) {
+        logger.traceEntry("params: {} {}", sourceDir, destinationDir);
         if (!sourceDir.getAbsolutePath().equals(destinationDir.getAbsolutePath())) {
+            logger.trace("source and destination paths are different!");
             deleteDirectory(destinationDir);
             copyDirectory(sourceDir, destinationDir);
         }
+        logger.traceExit();
     }
 
     private void copyDirectory(File src, File dest) {
+        logger.traceEntry("params: {} {}", src, dest);
         try {
             FileUtils.copyDirectory(src, dest);
+            logger.trace("done");
         } catch (IOException ex) {
-            System.out.println("Copy directory exception");
-            ex.printStackTrace();
+            logger.throwing(ex);
         }
+        logger.traceExit();
     }
 
     private void deleteDirectory(File dir) {
+        logger.traceEntry("params: {}", dir);
         try {
             FileUtils.deleteDirectory(dir);
+            logger.trace("done");
         } catch (IOException ex) {
-            System.out.println("Delete directory exception");
-            ex.printStackTrace();
+            logger.throwing(ex);
         }
+        logger.traceExit();
     }
 
 }

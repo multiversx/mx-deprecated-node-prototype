@@ -1,26 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN" monitorInterval="30">
     <Properties>
-        <!--<Property name="LOG_PATTERN">-->
-            <!--%d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} -&#45;&#45; [%15.15t] %-40.40c{1.} : %m%n%ex-->
-        <!--</Property>-->
-        <Property name="LOG_PATTERN">
-            %d{yyyy-MM-dd HH:mm:ss.SSS} %5p-%ex: %msg  >>> [%t] %c{1.}%n
+        <Property name="MAIN_LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex
         </Property>
-
-
+        <Property name="ALT_LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss.SSS} %5p: %msg  >>> [%t] %c{1.}%n
+        </Property>
     </Properties>
 
     <Appenders>
         <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
-            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <PatternLayout pattern="${MAIN_LOG_PATTERN}"/>
         </Console>
 
         <!-- Rolling File Appender -->
         <RollingFile name="FileAppender" fileName="logs/elrond.log"
                      filePattern="logs/elrond-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout>
-                <Pattern>${LOG_PATTERN}</Pattern>
+                <Pattern>${MAIN_LOG_PATTERN}</Pattern>
             </PatternLayout>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
@@ -41,7 +39,7 @@
               bufferSize="1">
             <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout>
-                <Pattern>${LOG_PATTERN}</Pattern>
+                <Pattern>${MAIN_LOG_PATTERN}</Pattern>
             </PatternLayout>
         </SMTP>
          -->
@@ -54,10 +52,12 @@
             <!--<AppenderRef ref="WebSocketAppender"/>-->
         <!--</AsyncLogger>-->
 
-        <Root level="INFO">
+        <Root level="ERROR">
             <AppenderRef ref="ConsoleAppender"/>
             <AppenderRef ref="FileAppender"/>
             <!--<AppenderRef ref="WebSocketAppender"/>-->
         </Root>
+
+        <Logger name="network.elrond" level="INFO"></Logger>
     </Loggers>
 </Configuration>
