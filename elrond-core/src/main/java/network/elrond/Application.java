@@ -95,8 +95,8 @@ public class Application implements Serializable {
         logger.trace("Intercept P2P blocks...");
         AppTasks.INTERCEPT_BLOCKS.process(this);
 
-        logger.trace("Execute transactions and emit blocks...");
-        AppTasks.BLOCK_ASSEMBLY_PROCESSOR.process(this);
+        //logger.trace("Execute transactions and emit blocks...");
+        //AppTasks.BLOCK_ASSEMBLY_PROCESSOR.process(this);
 
         logger.trace("Init NTP client...");
         AppTasks.NTP_CLIENT_INITIALIZER.process(this);

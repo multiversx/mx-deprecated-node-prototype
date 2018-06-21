@@ -5,6 +5,8 @@ import network.elrond.application.AppState;
 import network.elrond.chronology.*;
 import network.elrond.core.EventHandler;
 import network.elrond.core.ThreadUtil;
+import network.elrond.p2p.AppP2PManager;
+import network.elrond.p2p.P2PChannelName;
 import network.elrond.processor.AppTask;
 import network.elrond.processor.AppTasks;
 import network.elrond.service.AppServiceProvider;
@@ -13,9 +15,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class ChronologyBlockTask implements AppTask {
+public class ChronologyBlockTask<T> implements AppTask {
 
     public static Queue<EventHandler> MAIN_QUEUE = new ConcurrentLinkedQueue<>();
     private static final Logger logger = LogManager.getLogger(ChronologyBlockTask.class);
@@ -25,6 +28,8 @@ public class ChronologyBlockTask implements AppTask {
 
     @Override
     public void process(Application application) {
+        ArrayBlockingQueue<T> queueTransactionHashes = AppP2PManager.instance().subscribeToChannel(application, P2PChannelName.TRANSACTION);
+
         Thread thread = new Thread(() -> {
             logger.traceEntry();
             Round currentRound = null;
@@ -61,8 +66,8 @@ public class ChronologyBlockTask implements AppTask {
 
                 currentRound = chronologyService.getRoundFromDateTime(genesisTimeStampCached, currentTimeStamp);
 
-                computeAndCallStartEndRounds(application, currentRound, currentTimeStamp);
-                computeAndCallRoundState(application, currentRound, currentTimeStamp);
+                computeAndCallStartEndRounds(application, currentRound, currentTimeStamp, queueTransactionHashes);
+                computeAndCallRoundState(application, currentRound, currentTimeStamp, queueTransactionHashes);
             }
 
             logger.traceExit();
@@ -70,7 +75,7 @@ public class ChronologyBlockTask implements AppTask {
         thread.start();
     }
 
-    private void computeAndCallStartEndRounds(Application application, Round currentRound, long referenceTimeStamp){
+    private void computeAndCallStartEndRounds(Application application, Round currentRound, long referenceTimeStamp, ArrayBlockingQueue<T> queueTransactionHashes){
         boolean isFirstRoundTransition = (previousRound == null);
         boolean isRoundTransition = isFirstRoundTransition || (previousRound.getIndex() != currentRound.getIndex());
         boolean existsPreviousRound = (previousRound != null);
@@ -78,17 +83,17 @@ public class ChronologyBlockTask implements AppTask {
         if (isRoundTransition){
             logger.trace("round transition detected!");
             if (existsPreviousRound){
-                notifyEventObjects(application, previousRound, RoundState.END_ROUND, referenceTimeStamp);
+                notifyEventObjects(application, previousRound, RoundState.END_ROUND, referenceTimeStamp, queueTransactionHashes);
             }
 
             //start new round
-            notifyEventObjects(application, currentRound, RoundState.START_ROUND, referenceTimeStamp);
+            notifyEventObjects(application, currentRound, RoundState.START_ROUND, referenceTimeStamp, queueTransactionHashes);
         }
 
         previousRound = currentRound;
     }
 
-    private void computeAndCallRoundState(Application application, Round currentRound, long currentTime){
+    private void computeAndCallRoundState(Application application, Round currentRound, long currentTime, ArrayBlockingQueue<T> queueTransactionHashes){
         RoundState currentRoundState = AppServiceProvider.getChronologyService().computeRoundState(currentRound.getStartTimeStamp(), currentTime);
 
         boolean isCurrentRoundStateNotDefined = (currentRoundState == null);
@@ -102,14 +107,14 @@ public class ChronologyBlockTask implements AppTask {
 
         if (isRoundStateTransition) {
             logger.trace("round state transition detected!");
-            notifyEventObjects(application, currentRound, currentRoundState, currentTime);
+            notifyEventObjects(application, currentRound, currentRoundState, currentTime, queueTransactionHashes);
         }
 
         previousRoundState = currentRoundState;
     }
 
 
-    private void notifyEventObjects(Application application, Round round, RoundState roundState, long referenceTimeStamp){
+    private void notifyEventObjects(Application application, Round round, RoundState roundState, long referenceTimeStamp, ArrayBlockingQueue<T> queueTransactionHashes){
         SubRound subRound = new SubRound();
         subRound.setRound(round);
         subRound.setRoundState(roundState);
@@ -119,12 +124,12 @@ public class ChronologyBlockTask implements AppTask {
 
         if (roundState.getEventHandler() != null){
             logger.trace("calling default event handler object (from enum)...");
-            roundState.getEventHandler().onEvent(application, this, subRound);
+            roundState.getEventHandler().onEvent(application, this, subRound, queueTransactionHashes);
         }
 
         logger.trace("calling %d registered objects...", MAIN_QUEUE.size());
         for (EventHandler eventHandler:MAIN_QUEUE){
-            eventHandler.onEvent(application,this, subRound);
+            eventHandler.onEvent(application,this, subRound, queueTransactionHashes);
         }
     }
 

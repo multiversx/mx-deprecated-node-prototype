@@ -8,9 +8,9 @@ public class PrintlnEventHandlerTest {
     public void testPrinting() {
         EventHandler printlnEventHandler = new PrintlnEventHandler();
 
-        printlnEventHandler.onEvent(null,null, null);
-        printlnEventHandler.onEvent(null, null, "1");
-        printlnEventHandler.onEvent(null, new Object(), "2");
+        printlnEventHandler.onEvent(null,null, null, null);
+        printlnEventHandler.onEvent(null, null, "1", null);
+        printlnEventHandler.onEvent(null, new Object(), "2", null);
     }
 
 

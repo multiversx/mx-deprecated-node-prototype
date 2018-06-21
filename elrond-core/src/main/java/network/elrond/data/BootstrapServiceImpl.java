@@ -232,7 +232,9 @@ public class BootstrapServiceImpl implements BootstrapService {
 
                 commitBlock(block, blockHash, blockchain);
                 commitBlockTransactions(block, blockchain);
-
+                // Update current block
+                blockchain.setCurrentBlock(block);
+                logger.trace("done updating current block");
 
             } catch (Exception ex) {
                 result.ko(ex);
@@ -293,6 +295,10 @@ public class BootstrapServiceImpl implements BootstrapService {
 
                 result.ok("Added block in blockchain : " + blockHash + " # " + block);
                 blockchain.setCurrentBlockIndex(blockIndex);
+
+                // Update current block
+                blockchain.setCurrentBlock(block);
+                logger.trace("done updating current block");
 
 
             } catch (Exception ex) {
