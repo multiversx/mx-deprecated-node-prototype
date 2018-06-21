@@ -1,6 +1,9 @@
 package network.elrond.chronology;
 
 import junit.framework.TestCase;
+import network.elrond.Application;
+import network.elrond.application.AppContext;
+import network.elrond.core.ThreadUtil;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
@@ -31,7 +34,7 @@ public class NTPClientTest {
     public void getTimeWithValidServersListShouldProduceValue() throws Exception{
         //ChronologyService chronologyService = AppServiceProvider.getChronologyService();
 
-        NTPClient ntp = new NTPClient(Arrays.asList("", "time.windows.com"), 100);
+        NTPClient ntp = new NTPClient(Arrays.asList("", "time.google.com"), 100);
 
         Thread.sleep(1000);
 
@@ -41,6 +44,20 @@ public class NTPClientTest {
         System.out.println(new Date(time));
 
         TestCase.assertFalse(ntp.isOffline());
-        TestCase.assertEquals("time.windows.com", ntp.getCurrentHostName());
+        TestCase.assertEquals("time.google.com", ntp.getCurrentHostName());
+    }
+
+    @Test
+    public void getTimeFromAppContext() throws Exception{
+        Application app = new Application(new AppContext());
+
+        NTPClient ntpClient = new NTPClient(app.getContext().getListNTPServers(), 100);
+
+        System.out.println("Waiting...");
+        ThreadUtil.sleep(500);
+
+        System.out.println(String.format("Host: %s, offline: %b, time: %d", ntpClient.getCurrentHostName(),
+                ntpClient.isOffline(), ntpClient.currentTimeMillis()));
+
     }
 }

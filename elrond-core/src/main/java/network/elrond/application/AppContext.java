@@ -22,7 +22,7 @@ public class AppContext implements Serializable {
     private BootstrapType bootstrapType = BootstrapType.REBUILD_FROM_DISK;//BootstrapType.START_FROM_SCRATCH;
     private BigInteger valueMint = BigInteger.ZERO;
 
-    private List<String> listNTPServers = Arrays.asList("time.windows.com", "time-a.nist.gov");
+    private List<String> listNTPServers = Arrays.asList("time.google.com", "pool.ntp.org", "time.windows.com");
 
     public String getNodeName() {
         return nodeName;
