@@ -21,6 +21,7 @@ import network.elrond.p2p.PingResponse;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.mapdb.Fun;
 
 import java.math.BigInteger;
 import java.util.concurrent.ExecutionException;
@@ -165,6 +166,34 @@ public class ElrondFacadeImpl implements ElrondFacade {
             return logger.traceExit(pingResponse);
         }
     }
+
+    @Override
+    public Fun.Tuple2<PKSKPair, Integer> generatePublicKeyPrivateKeyShardNr(String strPrivateKey) {
+        logger.traceEntry();
+        try {
+            PrivateKey privateKey = null;
+
+            if (strPrivateKey==null || strPrivateKey.isEmpty()){
+                privateKey = new PrivateKey();
+            }
+            else{
+            privateKey = new PrivateKey(Util.hexStringToByteArray(strPrivateKey));
+        }
+
+            PublicKey publicKey = new PublicKey(privateKey);
+
+            BigInteger index = new BigInteger(Util.byteArrayToHexString(publicKey.getValue()));
+            int nrShards=2;
+            int ShardNr = index.mod(BigInteger.valueOf(nrShards)).intValue();
+
+            return logger.traceExit(new Fun.Tuple2<>(new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue())), ShardNr));
+        } catch (Exception ex) {
+            logger.catching(ex);
+            return logger.traceExit(new Fun.Tuple2<>(new PKSKPair("Error", "Error"),-1));
+        }
+    }
+
+
 
     @Override
     public PKSKPair generatePublicKeyAndPrivateKey() {

@@ -12,6 +12,7 @@ import network.elrond.p2p.PingResponse;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.mapdb.Fun;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,7 +32,6 @@ public class ElrondNodeController {
 
     @Autowired
     ElrondWebSocketManager elrondWebSocketManager;
-
 
     @RequestMapping(path = "/node/stop", method = RequestMethod.GET)
     public @ResponseBody
@@ -139,6 +139,18 @@ public class ElrondNodeController {
         logger.traceEntry("params: {} {}", ipAddress, port);
         return logger.traceExit(elrondApiNode.ping(ipAddress, port));
     }
+
+    @RequestMapping(path = "/node/publickeyprivatekeyshardnr", method = RequestMethod.GET)
+    public @ResponseBody
+    Fun.Tuple2<PKSKPair,Integer> generatePublicKeyPrivateKeyShardNr(
+            HttpServletResponse response,
+            @RequestParam() String privateKey) {
+        logger.traceEntry("params: {}", privateKey);
+        return logger.traceExit(elrondApiNode.generatePublicKeyPrivateKeyShardNr(privateKey));
+    }
+
+
+
 
     @RequestMapping(path = "/node/publickeyandprivatekey", method = RequestMethod.GET)
     public @ResponseBody

@@ -15,6 +15,7 @@ import network.elrond.p2p.PingResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.mapdb.Fun;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -88,11 +89,19 @@ class ElrondApiNode {
         return logger.traceExit(facade.ping(ipAddress, port));
     }
 
+
     PKSKPair generatePublicKeyAndPrivateKey() {
         logger.traceEntry();
         ElrondFacade facade = getFacade();
         return logger.traceExit(facade.generatePublicKeyAndPrivateKey());
     }
+
+    Fun.Tuple2<PKSKPair, Integer> generatePublicKeyPrivateKeyShardNr(String privateKey) {
+        logger.traceEntry("params: {}", privateKey);
+        ElrondFacade facade = getFacade();
+        return logger.traceExit(facade.generatePublicKeyPrivateKeyShardNr(privateKey));
+    }
+
 
     PKSKPair generatePublicKeyFromPrivateKey(String privateKey) {
         logger.traceEntry("params: {}", privateKey);
