@@ -67,7 +67,7 @@ public class ElrondNodeController {
 
     @RequestMapping(path = "/node/start", method = RequestMethod.GET)
     public @ResponseBody
-    boolean stopNode(
+    boolean startNode(
             HttpServletResponse response,
             @RequestParam(defaultValue = "elrond-node-1") String nodeName,
             @RequestParam(defaultValue = "4001") Integer port,
