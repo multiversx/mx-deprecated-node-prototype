@@ -182,7 +182,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
             PublicKey publicKey = new PublicKey(privateKey);
 
-            BigInteger index = new BigInteger(Util.byteArrayToHexString(publicKey.getValue()));
+            BigInteger index = new BigInteger(publicKey.getValue());
             int nrShards=2;
             int ShardNr = index.mod(BigInteger.valueOf(nrShards)).intValue();
 
@@ -201,7 +201,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
         try {
             PrivateKey privateKey = new PrivateKey();
             PublicKey publicKey = new PublicKey(privateKey);
-            return logger.traceExit(new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue())));
+            return logger.traceExit(new PKSKPair(   Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue())));
         } catch (Exception ex) {
             logger.catching(ex);
             return logger.traceExit(new PKSKPair("Error", "Error"));
