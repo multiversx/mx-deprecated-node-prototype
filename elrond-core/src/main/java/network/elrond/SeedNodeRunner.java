@@ -10,10 +10,13 @@ import network.elrond.data.BootstrapType;
 import network.elrond.data.Receipt;
 import network.elrond.data.Transaction;
 import network.elrond.service.AppServiceProvider;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.math.BigInteger;
 
 public class SeedNodeRunner {
+    private static final Logger logger = LogManager.getLogger(SeedNodeRunner.class);
 
     public static void main(String[] args) throws Exception {
 
@@ -36,15 +39,14 @@ public class SeedNodeRunner {
         Thread thread = new Thread(() -> {
 
             do {
-
                 AccountAddress address = AccountAddress.fromHexString(Util.TEST_ADDRESS);
                 Transaction transaction = facade.send(address, BigInteger.TEN, application);
-                System.out.println(facade.getBalance(address, application));
+                logger.info("Balance: {}", facade.getBalance(address, application));
 
                 if (transaction != null) {
                     String hash = AppServiceProvider.getSerializationService().getHashString(transaction);
                     Receipt receipt = facade.getReceipt(hash, application);
-                    System.out.println(receipt);
+                    logger.info(receipt);
                 }
 
                 ThreadUtil.sleep(1000);

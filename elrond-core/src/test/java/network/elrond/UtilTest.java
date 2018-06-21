@@ -82,6 +82,7 @@ public class UtilTest {
         logger.error("ERROR {} {}", 1, 2);
         logger.fatal("FATAL {} {}", 1, 2);
         logger.throwing(new Exception("aaa"));
+        logger.catching(new Exception("bbb"));
 
         logger.trace(String.format("BigInteger.TEN = %d", BigInteger.TEN));
         //logger.trace(String.format("BigInteger.TEN = %d", null));

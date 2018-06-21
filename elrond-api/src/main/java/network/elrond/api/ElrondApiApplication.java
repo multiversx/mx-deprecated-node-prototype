@@ -1,5 +1,8 @@
 package network.elrond.api;
 
+import network.elrond.account.AbstractPersistenceUnit;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,7 +17,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @SpringBootApplication
 @EnableSwagger2
 public class ElrondApiApplication {
-
+    private static final Logger logger = LogManager.getLogger(ElrondApiApplication.class);
 
     /**
      * Configure swagger-ui
@@ -31,6 +34,7 @@ public class ElrondApiApplication {
     }
 
     public static void main(String[] args) {
+        logger.info("Starting ElrondApiApplication...");
         SpringApplication.run(ElrondApiApplication.class, args);
     }
 }
