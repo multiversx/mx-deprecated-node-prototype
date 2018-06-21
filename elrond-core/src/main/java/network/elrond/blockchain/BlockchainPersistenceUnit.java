@@ -1,6 +1,7 @@
 package network.elrond.blockchain;
 
 import network.elrond.account.AbstractPersistenceUnit;
+import network.elrond.core.Util;
 
 import java.io.IOException;
 
@@ -15,6 +16,8 @@ public class BlockchainPersistenceUnit<K, V> extends AbstractPersistenceUnit<K, 
 
     @Override
     public void put(byte[] key, byte[] val) {
+        Util.check(key!=null, "key!=null");
+        Util.check(val!=null, "val!=null");
         database.put(key, val);
     }
 

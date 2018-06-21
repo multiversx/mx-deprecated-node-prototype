@@ -11,17 +11,21 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.List;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class BlockchainTest extends BaseBlockchainTest {
 
     private SerializationService serializationService = AppServiceProvider.getSerializationService();
     private Blockchain blockchain;
-//    List<BlockchainUnitType> blockchainUnitTypes = new ArrayList<BlockchainUnitType> {
-//        BlockchainUnitType.BLOCK,  BlockchainUnitType.BLOCK_INDEX
-//    };
+    List<BlockchainUnitType> blockchainUnitTypes = Arrays.asList(
+            BlockchainUnitType.BLOCK,
+            BlockchainUnitType.BLOCK_INDEX,
+            BlockchainUnitType.TRANSACTION,
+            BlockchainUnitType.SETTINGS)
+            ;
 
     @Before
     public void setUp() throws IOException {
@@ -56,13 +60,11 @@ public class BlockchainTest extends BaseBlockchainTest {
         BlockchainPersistenceUnit unit = blockchain.getUnit(BlockchainUnitType.BLOCK_INDEX);
         Assert.assertNotNull(unit);
     }
-
     @Test
     public void testGetUnitForTRANSACTION() throws IOException {
         BlockchainPersistenceUnit unit = blockchain.getUnit(BlockchainUnitType.TRANSACTION);
         Assert.assertNotNull(unit);
     }
-
     @Test
     public void testGetUnitForSETTINGS() throws IOException {
         BlockchainPersistenceUnit unit = blockchain.getUnit(BlockchainUnitType.SETTINGS);
@@ -114,10 +116,10 @@ public class BlockchainTest extends BaseBlockchainTest {
         blockchain.setCurrentBlockIndex(null);
     }
 
-//    @Test(expected = IllegalArgumentException.class)
-//    public void testSetCurrentBlockIndexWithNegativeShouldThrowException() throws IOException {
-//        blockchain.setCurrentBlockIndex(BigInteger.valueOf(-2));
-//    }
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetCurrentBlockIndexWithNegativeShouldThrowException() throws IOException {
+        blockchain.setCurrentBlockIndex(BigInteger.valueOf(-2));
+    }
 
     @Test
     public void testSetCurrentBlockIndex() throws IOException {
@@ -126,38 +128,16 @@ public class BlockchainTest extends BaseBlockchainTest {
         Assert.assertEquals(bigInteger, blockchain.getCurrentBlockIndex());
     }
 
+    @Test
+    public void testStopPersistenceUnit() throws IOException {
+        CustomTestBlockchain chain = new CustomTestBlockchain(new BlockchainContext());
+        chain.stopPersistenceUnit();
+        for(BlockchainUnitType type : blockchainUnitTypes)
+        {
+            BlockchainPersistenceUnit persistenceUnit = chain.getUnit(type);
+            verify(persistenceUnit,  times(1)).close();
+        }
+    }
 
-//    @Test
-//    public void testFlush() throws IOException {
-//
-//        blockchain.get
-//
-//        blockchain.flush();
-//
-//    }
-
-
-//        public void flush() {
-//            for (BlockchainUnitType key : blockchain.keySet()) {
-//                blockchain.get(key).clear();
-//            }
-//        }
-//
-//        @Override
-//        public void stopPersistenceUnit() {
-//            for (AbstractPersistenceUnit<?, ?> unit : blockchain.values()) {
-//                try {
-//                    unit.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//
-//        @Override
-//        public String toString() {
-//            return "Current block: " + ((currentBlock != null) ? currentBlock.toString() : "No block");
-//        }
-//    }
 
 }
