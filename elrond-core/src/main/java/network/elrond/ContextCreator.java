@@ -5,8 +5,12 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.BootstrapType;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.io.File;
+import java.io.IOException;
 
 public class ContextCreator {
     private static final Logger logger = LogManager.getLogger(ContextCreator.class);
@@ -18,6 +22,10 @@ public class ContextCreator {
                                               String blockchainPath) {
         logger.traceEntry("params: {} {} {} {} {} {} {}", nodeName, nodePrivateKeyString, masterPeerIpAddress,
                 masterPeerPort, port, bootstrapType, blockchainPath);
+
+        if(bootstrapType == BootstrapType.START_FROM_SCRATCH){
+            deleteDirectory(new File(blockchainPath));
+        }
 
         AppContext context = new AppContext();
 
@@ -37,6 +45,17 @@ public class ContextCreator {
         context.setStrAddressMint(mintAddress);
 
         return logger.traceExit(context);
+    }
+
+    private static void deleteDirectory(File dir) {
+        logger.traceEntry("params: {}", dir);
+        try {
+            FileUtils.deleteDirectory(dir);
+            logger.trace("done");
+        } catch (IOException ex) {
+            logger.throwing(ex);
+        }
+        logger.traceExit();
     }
 
 }
