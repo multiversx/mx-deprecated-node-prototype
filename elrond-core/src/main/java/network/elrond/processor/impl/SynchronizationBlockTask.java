@@ -15,6 +15,8 @@ import java.math.BigInteger;
 public class SynchronizationBlockTask extends AbstractBlockTask {
     private static final Logger logger = LogManager.getLogger(SynchronizationBlockTask.class);
 
+    private String oldStringWithCurrentBlockIndex = "";
+
     @Override
     protected void doProcess(Application application) {
         logger.traceEntry("params: {}", application);
@@ -33,10 +35,16 @@ public class SynchronizationBlockTask extends AbstractBlockTask {
             boolean isNewBlockRemote = remoteBlockIndex.compareTo(localBlockIndex) > 0;
             boolean isSyncRequired = isBlocAvailable && isNewBlockRemote;
 
-            logger.info("Current bloc index " + localBlockIndex + " | remote block index " + remoteBlockIndex);
+            String stringWithCurrentBlockIndex = String.format("Current bloc index %d | remote block index %d", localBlockIndex, remoteBlockIndex);
+            boolean isStringsDifferent = !stringWithCurrentBlockIndex.equals(oldStringWithCurrentBlockIndex);
+
+            if (isStringsDifferent){
+                oldStringWithCurrentBlockIndex = stringWithCurrentBlockIndex;
+                logger.info(oldStringWithCurrentBlockIndex);
+            }
 
             if (!isSyncRequired) {
-                logger.trace("is not sync required!");
+                logger.debug("is not sync required!");
                 return;
             }
 
@@ -44,7 +52,7 @@ public class SynchronizationBlockTask extends AbstractBlockTask {
             ExecutionReport report = AppServiceProvider.getBootstrapService().synchronize(localBlockIndex, remoteBlockIndex, blockchain, accounts);
             exReport.combine(report);
 
-            logger.trace("Sync result: {}", report);
+            logger.debug("Sync result: {}", report);
         } catch (Exception ex) {
             logger.catching(ex);
         }

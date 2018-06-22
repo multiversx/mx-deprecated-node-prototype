@@ -1,9 +1,8 @@
-package network.elrond.consensus.variant01;
+package network.elrond.consensus;
 
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 import network.elrond.Application;
-import network.elrond.chronology.ChronologyServiceImpl;
 import network.elrond.chronology.SubRound;
 import network.elrond.core.EventHandler;
 import network.elrond.core.Util;
@@ -16,8 +15,8 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
 
-public class ConsensusV01EventHandler_COMPUTE_LEADER implements EventHandler<SubRound, ArrayBlockingQueue<String>> {
-    private static final Logger logger = LogManager.getLogger(ConsensusV01EventHandler_COMPUTE_LEADER.class);
+public class EventHandler_COMPUTE_LEADER implements EventHandler<SubRound, ArrayBlockingQueue<String>> {
+    private static final Logger logger = LogManager.getLogger(EventHandler_COMPUTE_LEADER.class);
 
     public void onEvent(Application application, Object sender, SubRound data, ArrayBlockingQueue<String> queue) {
         logger.traceEntry("params: {} {} {} {}", application, sender, data, queue);
@@ -26,10 +25,10 @@ public class ConsensusV01EventHandler_COMPUTE_LEADER implements EventHandler<Sub
 
         logger.debug("computed list as: {}", nodeList);
 
-        ConsensusV01_StateHolder.instance().setSelectedLeaderPeerID(computeLeader(nodeList, data.getRound().getIndex()));
+        application.getState().getConsensusStateHolder().setSelectedLeaderPeerID(computeLeader(nodeList, data.getRound().getIndex()));
 
         logger.debug("Round: {}, subRound: {} > current leader: {}", data.getRound().getIndex(), data.getRoundState(),
-                ConsensusV01_StateHolder.instance().getSelectedLeaderPeerID().toString());
+                application.getState().getConsensusStateHolder().getSelectedLeaderPeerID().toString());
 
         logger.traceExit();
     }

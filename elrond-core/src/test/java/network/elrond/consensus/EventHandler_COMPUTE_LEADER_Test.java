@@ -1,14 +1,15 @@
-package network.elrond.consensus.variant01;
+package network.elrond.consensus;
 
 import junit.framework.TestCase;
 import net.tomp2p.peers.Number160;
+import network.elrond.consensus.EventHandler_COMPUTE_LEADER;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class ConsensusV01EventHandler_COMPUTE_LEADER_Test {
+public class EventHandler_COMPUTE_LEADER_Test {
 
     @Test
     public void testIfLeaderIsComputedFromAstaticList(){
@@ -34,7 +35,7 @@ public class ConsensusV01EventHandler_COMPUTE_LEADER_Test {
 
         System.out.println(String.format("%s", listNodes));
 
-        ConsensusV01EventHandler_COMPUTE_LEADER compute_leader = new ConsensusV01EventHandler_COMPUTE_LEADER();
+        EventHandler_COMPUTE_LEADER compute_leader = new EventHandler_COMPUTE_LEADER();
         TestCase.assertEquals(listNodes.get(0), compute_leader.computeLeader(listNodes, 0));
         TestCase.assertEquals(listNodes.get(1), compute_leader.computeLeader(listNodes, 1));
         TestCase.assertEquals(listNodes.get(2), compute_leader.computeLeader(listNodes, 2));

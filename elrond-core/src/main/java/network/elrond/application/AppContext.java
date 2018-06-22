@@ -2,6 +2,7 @@ package network.elrond.application;
 
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
+import network.elrond.crypto.PublicKey;
 import network.elrond.data.BootstrapType;
 
 import java.io.Serializable;
@@ -17,6 +18,7 @@ public class AppContext implements Serializable {
     private Integer masterPeerPort;
     private String storageBasePath = "main";
     private PrivateKey privateKey;
+    private PublicKey publicKey;
 
     private String strAddressMint = "000000000000000000000000000000000000000000000000000000000000000000";
     private BootstrapType bootstrapType = BootstrapType.REBUILD_FROM_DISK;//BootstrapType.START_FROM_SCRATCH;
@@ -97,11 +99,14 @@ public class AppContext implements Serializable {
     public void setPrivateKey(PrivateKey privateKey) {
         Util.check(privateKey!=null, "privateKey!=null");
         this.privateKey = privateKey;
+        this.publicKey = new PublicKey(privateKey);
     }
 
     public PrivateKey getPrivateKey() {
         return privateKey;
     }
+
+    public PublicKey getPublicKey(){return publicKey;}
 
     public List<String> getListNTPServers(){
         return (listNTPServers);

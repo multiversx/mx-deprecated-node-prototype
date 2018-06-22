@@ -144,7 +144,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
             AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, hash);
 
 
-            return logger.traceExit((Transaction)null);
+            return logger.traceExit((Transaction)transaction);
 
         } catch (Exception ex) {
             logger.catching(ex);

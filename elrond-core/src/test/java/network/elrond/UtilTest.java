@@ -76,7 +76,7 @@ public class UtilTest {
         //logger.traceEntry("Params {} {} {}", null, null, null);
 
         logger.trace("TRACE {} {}", 1, 2);
-        logger.trace("TRACE {} {}", 1, 2);
+        logger.debug("DEBUG {} {}", 1, 2);
         logger.info("INFO {} {}", 1, 2);
         logger.warn("WARN {} {}", 1, 2);
         logger.error("ERROR {} {}", 1, 2);

@@ -1,7 +1,6 @@
-package network.elrond.consensus.variant01;
+package network.elrond.consensus;
 
 import net.tomp2p.peers.Number160;
-import net.tomp2p.peers.PeerAddress;
 import network.elrond.Application;
 import network.elrond.TimeWatch;
 import network.elrond.application.AppContext;
@@ -15,14 +14,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 
-public class ConsensusV01EventHandler_ASSEMBLY_BLOCK implements EventHandler<SubRound, ArrayBlockingQueue<String>> {
-    private static final Logger logger = LogManager.getLogger(ConsensusV01EventHandler_ASSEMBLY_BLOCK.class);
+public class EventHandler_ASSEMBLY_BLOCK implements EventHandler<SubRound, ArrayBlockingQueue<String>> {
+    private static final Logger logger = LogManager.getLogger(EventHandler_ASSEMBLY_BLOCK.class);
 
     public void onEvent(Application application, Object sender, SubRound data, ArrayBlockingQueue<String> queue) {
         logger.traceEntry("params: {} {} {} {}", application, sender, data, queue);
@@ -31,7 +29,7 @@ public class ConsensusV01EventHandler_ASSEMBLY_BLOCK implements EventHandler<Sub
         Util.check(application.getState() != null, "state is null while trying to get full nodes list!");
         Util.check(application.getState().getConnection() != null, "connection is null while trying to get full nodes list!");
 
-        if (!isThisNodesTurnToProcess(application.getState().getConnection().getPeer().peerID())) {
+        if (!isThisNodesTurnToProcess(application.getState())) {
             logger.info("Not this node's turn to process ...");
             return;
         }
@@ -85,8 +83,8 @@ public class ConsensusV01EventHandler_ASSEMBLY_BLOCK implements EventHandler<Sub
         logger.traceExit();
     }
 
-    private boolean isThisNodesTurnToProcess(Number160 peerID){
-        return(ConsensusV01_StateHolder.instance().getSelectedLeaderPeerID().equals(peerID));
+    private boolean isThisNodesTurnToProcess(AppState state){
+        return(state.getConsensusStateHolder().getSelectedLeaderPeerID().equals(state.getConnection().getPeer().peerID()));
     }
 
 }
