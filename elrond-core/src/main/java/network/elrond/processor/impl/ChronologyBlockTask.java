@@ -8,13 +8,11 @@ import network.elrond.core.ThreadUtil;
 import network.elrond.p2p.AppP2PManager;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.processor.AppTask;
-import network.elrond.processor.AppTasks;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
