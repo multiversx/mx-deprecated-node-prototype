@@ -63,9 +63,9 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         int size = queue.size();
         TimeWatch watch = TimeWatch.start();
 
-        state.setLock();
+        state.acquireLock();
         proposeBlock(queue, application);
-        state.clearLock();
+        state.releaseLock();
 
 
         long time = watch.time(TimeUnit.MILLISECONDS);

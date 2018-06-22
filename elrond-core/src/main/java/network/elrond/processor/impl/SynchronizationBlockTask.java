@@ -25,7 +25,6 @@ public class SynchronizationBlockTask extends AbstractBlockTask {
         Blockchain blockchain = state.getBlockchain();
 
         try {
-
             BigInteger remoteBlockIndex = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.NETWORK, blockchain);
             BigInteger localBlockIndex = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.LOCAL, blockchain);
 
@@ -57,7 +56,5 @@ public class SynchronizationBlockTask extends AbstractBlockTask {
             logger.catching(ex);
         }
     }
-
-
 }
 

@@ -1,11 +1,10 @@
 package network.elrond.application;
 
-
-import network.elrond.account.AccountStateServiceImpl;
 import network.elrond.account.Accounts;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.chronology.NTPClient;
 import network.elrond.consensus.ConsensusStateHolder;
+import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
@@ -118,33 +117,27 @@ public class AppState implements Serializable {
         return lock;
     }
 
-    public synchronized void setLock() {
-        this.lock = true;
+    public NTPClient getNtpClient() {
+        return (ntpClient);
     }
 
-    public synchronized boolean checkIsLockAndLock(){
-        if (this.lock){
-            return(true);
-        }
-
-        this.lock = true;
-        return(false);
-    }
-
-    public synchronized void clearLock() {
-        this.lock = false;
-    }
-
-    public NTPClient getNtpClient(){
-        return(ntpClient);
-    }
-
-    public void setNtpClient(NTPClient ntpClient){
+    public void setNtpClient(NTPClient ntpClient) {
         this.ntpClient = ntpClient;
     }
 
-    public ConsensusStateHolder getConsensusStateHolder(){
-        return(consensusStateHolder);
+    public ConsensusStateHolder getConsensusStateHolder() {
+        return (consensusStateHolder);
     }
 
+    public synchronized void acquireLock() {
+        while (lock) {
+            ThreadUtil.sleep(50);
+        }
+
+        lock = true;
+    }
+
+    public synchronized void releaseLock() {
+        lock = false;
+    }
 }

@@ -23,29 +23,29 @@ public class AppStateTest {
     private AppState appState;
 
     @Before
-    public void SetUp(){
+    public void SetUp() {
         appState = new AppState();
 
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testGetChannelWithNullChannelNameShouldThrowException(){
+    public void testGetChannelWithNullChannelNameShouldThrowException() {
         appState.getChanel(null);
     }
 
     @Test
-    public void testGetChannelWithUnknownChannel(){
+    public void testGetChannelWithUnknownChannel() {
         P2PBroadcastChanel channel = appState.getChanel(P2PChannelName.BLOCK);
         Assert.assertNull(channel);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testAddChannelWithNullChannelShouldThrowException(){
+    public void testAddChannelWithNullChannelShouldThrowException() {
         appState.addChanel(null);
     }
 
     @Test
-    public void testAddChannel(){
+    public void testAddChannel() {
         P2PBroadcastChanel test = new P2PBroadcastChanel(P2PChannelName.BLOCK, null);
         Assert.assertNull(appState.getChanel(P2PChannelName.BLOCK));
         appState.addChanel(test);
@@ -53,48 +53,48 @@ public class AppStateTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSetConnectionWithNullConnectionShouldThrowException(){
+    public void testSetConnectionWithNullConnectionShouldThrowException() {
         appState.setConnection(null);
     }
 
     @Test
-    public void testSetConnection(){
+    public void testSetConnection() {
         P2PConnection connection = new P2PConnection("testConnection", mock(Peer.class), mock(PeerDHT.class));
         appState.setConnection(connection);
         Assert.assertEquals(connection, appState.getConnection());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSetBlockchainWithNullBlockchainShouldThrowException(){
+    public void testSetBlockchainWithNullBlockchainShouldThrowException() {
         appState.setBlockchain(null);
     }
 
     @Test
-    public void testSetBlockchain(){
+    public void testSetBlockchain() {
         Blockchain blockchain = mock(Blockchain.class);
         appState.setBlockchain(blockchain);
         Assert.assertEquals(blockchain, appState.getBlockchain());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSetAccountsWithNullAccountsShouldThrowException(){
+    public void testSetAccountsWithNullAccountsShouldThrowException() {
         appState.setAccounts(null);
     }
 
     @Test
-    public void testSetAccounts(){
+    public void testSetAccounts() {
         Accounts accounts = mock(Accounts.class);
         appState.setAccounts(accounts);
         Assert.assertEquals(accounts, appState.getAccounts());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSetPrivateKeyWithNullPrivateKeyShouldThrowException(){
+    public void testSetPrivateKeyWithNullPrivateKeyShouldThrowException() {
         appState.setPrivateKey(null);
     }
 
     @Test
-    public void testSetPrivateKey(){
+    public void testSetPrivateKey() {
         PrivateKey key = new PrivateKey();
         Assert.assertNull(appState.getPublicKey());
         appState.setPrivateKey(key);
@@ -103,7 +103,7 @@ public class AppStateTest {
     }
 
     @Test
-    public void testShutdown(){
+    public void testShutdown() {
         Blockchain blockchain = mock(Blockchain.class);
         Accounts accounts = mock(Accounts.class);
 
@@ -120,11 +120,11 @@ public class AppStateTest {
     }
 
     @Test
-    public void testLock(){
+    public void testLock() {
         Assert.assertFalse(appState.isLock());
-        appState.setLock();
+        appState.acquireLock();
         Assert.assertTrue(appState.isLock());
-        appState.clearLock();
+        appState.releaseLock();
         Assert.assertFalse(appState.isLock());
     }
 
@@ -166,7 +166,7 @@ public class AppStateTest {
                 dummyValue.setValue(5);
 
                 //acquire lock
-                application.getState().setLock();
+                application.getState().acquireLock();
                 //increment value
                 currentValue.setValue(currentValue.getValue() + 1);
 
@@ -177,7 +177,7 @@ public class AppStateTest {
 
                 //reset current value
                 currentValue.setValue(0);
-                application.getState().clearLock();
+                application.getState().releaseLock();
             }
         });
         thread1.start();
@@ -194,7 +194,7 @@ public class AppStateTest {
                 dummyValue.setValue(5);
 
                 //--------------------------------------acquire lock
-                application.getState().setLock();
+                application.getState().acquireLock();
                 //increment value
                 currentValue.setValue(currentValue.getValue() + 1);
 
@@ -206,7 +206,7 @@ public class AppStateTest {
                 //reset current value
                 currentValue.setValue(0);
                 //--------------------------------------release lock
-                application.getState().clearLock();
+                application.getState().releaseLock();
             }
         });
         thread2.start();
@@ -259,9 +259,7 @@ public class AppStateTest {
             while (application.getState().isStillRunning()) {
                 ThreadUtil.sleep(1);
 
-                if (application.getState().checkIsLockAndLock()) {
-                    continue;
-                }
+                application.getState().acquireLock();
                 //lock acquired
 
                 //do a dummy instruction
@@ -277,7 +275,7 @@ public class AppStateTest {
 
                 //reset current value
                 currentValue.setValue(0);
-                application.getState().clearLock();
+                application.getState().releaseLock();
             }
         });
         thread1.start();
@@ -286,9 +284,7 @@ public class AppStateTest {
             while (application.getState().isStillRunning()) {
                 ThreadUtil.sleep(1);
 
-                if (application.getState().checkIsLockAndLock()) {
-                    continue;
-                }
+                application.getState().acquireLock();
                 //lock acquired
 
                 //do a dummy instruction
@@ -304,7 +300,7 @@ public class AppStateTest {
 
                 //reset current value
                 currentValue.setValue(0);
-                application.getState().clearLock();
+                application.getState().releaseLock();
             }
         });
         thread2.start();
