@@ -62,17 +62,15 @@ public class ChronologyBlockTask<T> implements AppTask {
                     }
                 }
 
-                //acquiring lock
-                state.acquireLock();
+                synchronized (state.lockerSyncPropose) {
+                    long currentTimeStamp = chronologyService.getSynchronizedTime(state.getNtpClient());
 
-                long currentTimeStamp = chronologyService.getSynchronizedTime(state.getNtpClient());
+                    currentRound = chronologyService.getRoundFromDateTime(genesisTimeStampCached, currentTimeStamp);
 
-                currentRound = chronologyService.getRoundFromDateTime(genesisTimeStampCached, currentTimeStamp);
+                    computeAndCallStartEndRounds(application, currentRound, currentTimeStamp, queueTransactionHashes);
+                    computeAndCallRoundState(application, currentRound, currentTimeStamp, queueTransactionHashes);
 
-                computeAndCallStartEndRounds(application, currentRound, currentTimeStamp, queueTransactionHashes);
-                computeAndCallRoundState(application, currentRound, currentTimeStamp, queueTransactionHashes);
-
-                state.releaseLock();
+                }
             }
 
             logger.traceExit();

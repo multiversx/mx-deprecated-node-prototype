@@ -53,9 +53,7 @@ public class EventHandler_ASSEMBLY_BLOCK implements EventHandler<SubRound, Array
         int size = queue.size();
         TimeWatch watch = TimeWatch.start();
 
-        state.acquireLock();
         proposeBlock(queue, application, data);
-        state.releaseLock();
 
         long time = watch.time(TimeUnit.MILLISECONDS);
         long tps = (time > 0) ? ((size*1000) / time) : 0;

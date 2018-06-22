@@ -21,7 +21,7 @@ import java.util.Map;
 public class AppState implements Serializable {
 
     private boolean stillRunning = true;
-    private boolean lock = false;
+    //private boolean lock = false;
     private Accounts accounts;
     private Blockchain blockchain;
     private PublicKey publicKey;
@@ -34,6 +34,8 @@ public class AppState implements Serializable {
     private ConsensusStateHolder consensusStateHolder = new ConsensusStateHolder();
 
     private static final Logger logger = LogManager.getLogger(AppState.class);
+
+    public final Object lockerSyncPropose = new Object();
 
     public P2PBroadcastChanel getChanel(P2PChannelName channelName) {
         logger.traceEntry("params: {}", channelName);
@@ -113,9 +115,9 @@ public class AppState implements Serializable {
     }
 
 
-    public synchronized boolean isLock() {
-        return lock;
-    }
+//    public synchronized boolean isLock() {
+//        return lock;
+//    }
 
     public NTPClient getNtpClient() {
         return (ntpClient);
@@ -129,15 +131,15 @@ public class AppState implements Serializable {
         return (consensusStateHolder);
     }
 
-    public synchronized void acquireLock() {
-        while (lock) {
-            ThreadUtil.sleep(50);
-        }
-
-        lock = true;
-    }
-
-    public synchronized void releaseLock() {
-        lock = false;
-    }
+//    public synchronized void acquireLock() {
+//        while (lock) {
+//            ThreadUtil.sleep(50);
+//        }
+//
+//        lock = true;
+//    }
+//
+//    public synchronized void releaseLock() {
+//        lock = false;
+//    }
 }

@@ -48,11 +48,11 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         }
 
         AppState state = application.getState();
-        if (state.isLock()) {
-            // If sync is running stop
-            logger.info("Can't execute, state locked!");
-            return;
-        }
+//        if (state.isLock()) {
+//            // If sync is running stop
+//            logger.info("Can't execute, state locked!");
+//            return;
+//        }
 
         if (state.getBlockchain().getCurrentBlock() == null) {
             // Require synchronize
@@ -63,9 +63,9 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         int size = queue.size();
         TimeWatch watch = TimeWatch.start();
 
-        state.acquireLock();
-        proposeBlock(queue, application);
-        state.releaseLock();
+        synchronized (state.lockerSyncPropose) {
+            proposeBlock(queue, application);
+        }
 
 
         long time = watch.time(TimeUnit.MILLISECONDS);
