@@ -21,6 +21,7 @@ import network.elrond.p2p.PingResponse;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.mapdb.Fun;
 
 import java.math.BigInteger;
 import java.util.concurrent.ExecutionException;
@@ -167,30 +168,24 @@ public class ElrondFacadeImpl implements ElrondFacade {
     }
 
     @Override
-    public PKSKPair generatePublicKeyAndPrivateKey() {
+    public PKSKPair generatePublicKeyAndPrivateKey(String strPrivateKey) {
         logger.traceEntry();
         try {
-            PrivateKey privateKey = new PrivateKey();
+            PrivateKey privateKey = null;
+
+            if ((strPrivateKey == null) || strPrivateKey.isEmpty()) {
+                privateKey = new PrivateKey();
+            } else {
+                privateKey = new PrivateKey(Util.hexStringToByteArray(strPrivateKey));
+            }
+
             PublicKey publicKey = new PublicKey(privateKey);
-            return logger.traceExit(new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue())));
+
+            return logger.traceExit(new PKSKPair(   Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue())));
         } catch (Exception ex) {
             logger.catching(ex);
             return logger.traceExit(new PKSKPair("Error", "Error"));
         }
     }
-
-    @Override
-    public PKSKPair generatePublicKeyFromPrivateKey(String strPrivateKey) {
-        logger.traceEntry("params: ", strPrivateKey);
-        try {
-            PrivateKey privateKey = new PrivateKey(Util.hexStringToByteArray(strPrivateKey));
-            PublicKey publicKey = new PublicKey(privateKey);
-            return logger.traceExit(new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue())));
-        } catch (Exception ex) {
-            logger.catching(ex);
-            return logger.traceExit(new PKSKPair("Error", "Error"));
-        }
-    }
-
 
 }

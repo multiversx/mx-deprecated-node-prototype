@@ -5,6 +5,7 @@ import network.elrond.data.Receipt;
 import network.elrond.data.Transaction;
 
 import java.math.BigInteger;
+import java.util.List;
 
 public enum BlockchainUnitType {
     BLOCK(String.class, Block.class),
@@ -13,6 +14,7 @@ public enum BlockchainUnitType {
     SETTINGS(String.class, String.class),
     RECEIPT(String.class, Receipt.class),
     TRANSACTION_RECEIPT(String.class, String.class),
+    TRANSACTION_BLOCK(String.class, String.class),
     ;
 
     private Class<?> keyType;

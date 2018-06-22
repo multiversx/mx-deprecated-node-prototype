@@ -1,19 +1,23 @@
 package network.elrond.consensus;
 
-import net.tomp2p.peers.Number160;
 import network.elrond.Application;
 import network.elrond.TimeWatch;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
+import network.elrond.blockchain.Blockchain;
+import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.chronology.SubRound;
 import network.elrond.core.EventHandler;
 import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.data.AppBlockManager;
+import network.elrond.data.LocationType;
+import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -31,6 +35,8 @@ public class EventHandler_ASSEMBLY_BLOCK implements EventHandler<SubRound, Array
         Util.check(application.getState().getConnection() != null, "connection is null while trying to get full nodes list!");
 
         String nodeName = application.getContext().getNodeName();
+
+        removeProcessedTransactions(queue, application);
 
         if (!isThisNodesTurnToProcess(application.getState())) {
             logger.info("{}, round: {}, subRound: {}> Not this node's turn to process ...", nodeName, data.getRound().getIndex(), data.getRoundState().name());
@@ -73,6 +79,40 @@ public class EventHandler_ASSEMBLY_BLOCK implements EventHandler<SubRound, Array
         logger.traceExit();
     }
 
+    private void removeProcessedTransactions(ArrayBlockingQueue<String> queue, Application application) {
+        logger.traceEntry("params: {} {}", queue, application);
+
+        List<String> hashes = new ArrayList<>(queue);
+        Blockchain blockchain = application.getState().getBlockchain();
+        BigInteger localBlockIndex;
+        List<String> lastBlockHashes = new ArrayList<>();
+
+        try {
+            localBlockIndex = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.LOCAL, blockchain);
+
+            // TODO: take the number of blocks to check from a config file
+            BigInteger earliestBlockToCheck = (localBlockIndex.subtract(BigInteger.valueOf(50)).compareTo(BigInteger.ZERO) < 0) ?
+                    BigInteger.ZERO : localBlockIndex.subtract(BigInteger.valueOf(50));
+
+            for (BigInteger i = localBlockIndex; i.compareTo(earliestBlockToCheck) >= 0; i = i.subtract(BigInteger.ONE)) {
+                lastBlockHashes.add(AppServiceProvider.getBootstrapService().getBlockHashFromIndex(i, blockchain));
+            }
+
+            for (String txHash : hashes) {
+                String blockHash = AppServiceProvider.getBlockchainService().get(txHash, blockchain, BlockchainUnitType.TRANSACTION_BLOCK);
+
+                boolean transactionLinkedToLocalBlocks = (blockHash != null) && lastBlockHashes.contains(blockHash);
+
+                if (transactionLinkedToLocalBlocks) {
+                    queue.remove(txHash);
+                }
+            }
+        } catch (Exception e) {
+            logger.catching(e);
+        }
+        logger.traceExit();
+    }
+
     private void proposeBlock(ArrayBlockingQueue<String> queue, Application application, SubRound data) {
         logger.traceEntry("params: {} {}", queue, application);
 
@@ -100,5 +140,4 @@ public class EventHandler_ASSEMBLY_BLOCK implements EventHandler<SubRound, Array
     private boolean isThisNodesTurnToProcess(AppState state){
         return(state.getConsensusStateHolder().getSelectedLeaderPeerID().equals(state.getConnection().getPeer().peerID()));
     }
-
 }
