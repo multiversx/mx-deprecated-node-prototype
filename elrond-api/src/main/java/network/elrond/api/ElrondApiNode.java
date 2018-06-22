@@ -89,24 +89,10 @@ class ElrondApiNode {
         return logger.traceExit(facade.ping(ipAddress, port));
     }
 
-
-    PKSKPair generatePublicKeyAndPrivateKey() {
+    PKSKPair generatePublicKeyAndPrivateKey(String privateKey) {
         logger.traceEntry();
         ElrondFacade facade = getFacade();
-        return logger.traceExit(facade.generatePublicKeyAndPrivateKey());
-    }
-
-    Fun.Tuple2<PKSKPair, Integer> generatePublicKeyPrivateKeyShardNr(String privateKey) {
-        logger.traceEntry("params: {}", privateKey);
-        ElrondFacade facade = getFacade();
-        return logger.traceExit(facade.generatePublicKeyPrivateKeyShardNr(privateKey));
-    }
-
-
-    PKSKPair generatePublicKeyFromPrivateKey(String privateKey) {
-        logger.traceEntry("params: {}", privateKey);
-        ElrondFacade facade = getFacade();
-        return logger.traceExit(facade.generatePublicKeyFromPrivateKey(privateKey));
+        return logger.traceExit(facade.generatePublicKeyAndPrivateKey(privateKey));
     }
 
     private void setupRestoreDir(File sourceDir, File destinationDir) {

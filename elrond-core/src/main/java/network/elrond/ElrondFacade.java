@@ -71,21 +71,6 @@ public interface ElrondFacade {
      *
      * @return
      */
-    PKSKPair generatePublicKeyAndPrivateKey();
-    /**
-     * Generate public key, private key and calculate shard placement
-     *
-     * @param privateKey
-     * @return
-     */
 
-    Fun.Tuple2<PKSKPair, Integer> generatePublicKeyPrivateKeyShardNr(String strPrivateKey);
-
-    /**
-     * Generate public key from a private key
-     *
-     * @param privateKey
-     * @return
-     */
-    PKSKPair generatePublicKeyFromPrivateKey(String privateKey);
+    PKSKPair generatePublicKeyAndPrivateKey(String strPrivateKey);
 }

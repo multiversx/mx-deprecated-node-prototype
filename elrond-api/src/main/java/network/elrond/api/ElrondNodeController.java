@@ -140,33 +140,26 @@ public class ElrondNodeController {
         return logger.traceExit(elrondApiNode.ping(ipAddress, port));
     }
 
-    @RequestMapping(path = "/node/publickeyprivatekeyshardnr", method = RequestMethod.GET)
+    @RequestMapping(path = "/node/generatepublickeyandprivateKey", method = RequestMethod.GET)
     public @ResponseBody
-    Fun.Tuple2<PKSKPair,Integer> generatePublicKeyPrivateKeyShardNr(
+    PKSKPair generatePublicKeyAndPrivateKey(
             HttpServletResponse response,
             @RequestParam() String privateKey) {
         logger.traceEntry("params: {}", privateKey);
-        return logger.traceExit(elrondApiNode.generatePublicKeyPrivateKeyShardNr(privateKey));
+        return logger.traceExit(elrondApiNode.generatePublicKeyAndPrivateKey(privateKey));
     }
 
-
-
-
-    @RequestMapping(path = "/node/publickeyandprivatekey", method = RequestMethod.GET)
+    @RequestMapping(path = "/node/shardofaddress", method = RequestMethod.GET)
     public @ResponseBody
-    PKSKPair generatePublicAndPrivateKey(
-            HttpServletResponse response) {
-        logger.traceEntry();
-        return logger.traceExit(elrondApiNode.generatePublicKeyAndPrivateKey());
-    }
-
-    @RequestMapping(path = "/node/publickeyfromprivatekey", method = RequestMethod.GET)
-    public @ResponseBody
-    PKSKPair generatePublicKeyFromPrivateKey(
+    Integer ShardOfAddress(
             HttpServletResponse response,
-            @RequestParam() String privateKey) {
-        logger.traceEntry("params: {}", privateKey);
-        return logger.traceExit(elrondApiNode.generatePublicKeyFromPrivateKey(privateKey));
+            @RequestParam() String address) {
+        BigInteger index = new BigInteger(address);
+        int nrShards = 2;
+        int ShardNr = index.mod(BigInteger.valueOf(nrShards)).intValue();
+
+        logger.traceEntry("params: {}", address);
+        return logger.traceExit(ShardNr);
     }
 
     @RequestMapping(path = "/node/exit", method = RequestMethod.GET)
@@ -177,6 +170,5 @@ public class ElrondNodeController {
         System.exit(0);
         logger.traceExit();
     }
-
 
 }

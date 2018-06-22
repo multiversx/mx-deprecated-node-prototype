@@ -168,58 +168,24 @@ public class ElrondFacadeImpl implements ElrondFacade {
     }
 
     @Override
-    public Fun.Tuple2<PKSKPair, Integer> generatePublicKeyPrivateKeyShardNr(String strPrivateKey) {
+    public PKSKPair generatePublicKeyAndPrivateKey(String strPrivateKey) {
         logger.traceEntry();
         try {
             PrivateKey privateKey = null;
 
-            if (strPrivateKey==null || strPrivateKey.isEmpty()){
+            if ((strPrivateKey == null) || strPrivateKey.isEmpty()) {
                 privateKey = new PrivateKey();
+            } else {
+                privateKey = new PrivateKey(Util.hexStringToByteArray(strPrivateKey));
             }
-            else{
-            privateKey = new PrivateKey(Util.hexStringToByteArray(strPrivateKey));
-        }
 
             PublicKey publicKey = new PublicKey(privateKey);
 
-            BigInteger index = new BigInteger(publicKey.getValue());
-            int nrShards=2;
-            int ShardNr = index.mod(BigInteger.valueOf(nrShards)).intValue();
-
-            return logger.traceExit(new Fun.Tuple2<>(new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue())), ShardNr));
-        } catch (Exception ex) {
-            logger.catching(ex);
-            return logger.traceExit(new Fun.Tuple2<>(new PKSKPair("Error", "Error"),-1));
-        }
-    }
-
-
-
-    @Override
-    public PKSKPair generatePublicKeyAndPrivateKey() {
-        logger.traceEntry();
-        try {
-            PrivateKey privateKey = new PrivateKey();
-            PublicKey publicKey = new PublicKey(privateKey);
             return logger.traceExit(new PKSKPair(   Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue())));
         } catch (Exception ex) {
             logger.catching(ex);
             return logger.traceExit(new PKSKPair("Error", "Error"));
         }
     }
-
-    @Override
-    public PKSKPair generatePublicKeyFromPrivateKey(String strPrivateKey) {
-        logger.traceEntry("params: ", strPrivateKey);
-        try {
-            PrivateKey privateKey = new PrivateKey(Util.hexStringToByteArray(strPrivateKey));
-            PublicKey publicKey = new PublicKey(privateKey);
-            return logger.traceExit(new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue())));
-        } catch (Exception ex) {
-            logger.catching(ex);
-            return logger.traceExit(new PKSKPair("Error", "Error"));
-        }
-    }
-
 
 }
