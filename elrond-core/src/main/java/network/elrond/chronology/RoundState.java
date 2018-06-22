@@ -20,9 +20,9 @@ public enum RoundState {
 //    END_ROUND(0, new SubRoundEventHandler());
 
     START_ROUND(0, new EventHandler_START_ROUND()),
-    COMPUTE_LEADER(200, new EventHandler_COMPUTE_LEADER()),
-    PROPOSE_BLOCK(2000, new EventHandler_ASSEMBLY_BLOCK()),
-    BROADCAST_BLOCK(1800, null),
+    COMPUTE_LEADER(400, new EventHandler_COMPUTE_LEADER()),
+    PROPOSE_BLOCK(3000, new EventHandler_ASSEMBLY_BLOCK()),
+    BROADCAST_BLOCK(3000, null),
     END_ROUND(0, null);
 
     private final int roundStateDuration;
