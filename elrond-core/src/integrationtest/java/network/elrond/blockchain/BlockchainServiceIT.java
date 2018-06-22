@@ -2,7 +2,6 @@ package network.elrond.blockchain;
 
 import network.elrond.data.BaseBlockchainTest;
 import network.elrond.data.Block;
-import network.elrond.data.DataBlock;
 import network.elrond.data.SerializationService;
 import network.elrond.service.AppServiceProvider;
 import org.spongycastle.util.encoders.Base64;
@@ -43,7 +42,7 @@ public class BlockchainServiceIT extends BaseBlockchainTest {
     private Block GenerateRandomBlock() {
         byte[] buff = new byte[32];
 
-        DataBlock db = new DataBlock();
+        Block db = new Block();
         db.setNonce(BigInteger.ONE);
         db.setShard(0);
 

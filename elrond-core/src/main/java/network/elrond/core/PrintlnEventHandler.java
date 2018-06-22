@@ -6,11 +6,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Date;
+import java.util.concurrent.ArrayBlockingQueue;
 
-public class PrintlnEventHandler implements EventHandler<String> {
+public class PrintlnEventHandler implements EventHandler<String, ArrayBlockingQueue<String>> {
     private static final Logger logger = LogManager.getLogger(PrintlnEventHandler.class);
 
-    public void onEvent(Application application, Object sender, String data){
+    public void onEvent(Application application, Object sender, String data, ArrayBlockingQueue<String> queue){
         StringBuilder stringBuilder = new StringBuilder();
 
         String strSender = "[NULL SENDER]";

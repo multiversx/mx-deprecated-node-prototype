@@ -2,16 +2,18 @@ package network.elrond.chronology;
 
 import network.elrond.Application;
 import network.elrond.core.EventHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 import java.util.Date;
+import java.util.concurrent.ArrayBlockingQueue;
 
-public class SubRoundEventHandler implements EventHandler<SubRound> {
-    private static Logger logger = LoggerFactory.getLogger(SubRoundEventHandler.class.getName());
+public class SubRoundEventHandler implements EventHandler<SubRound, ArrayBlockingQueue<String>> {
+    private static final Logger logger = LogManager.getLogger(ChronologyServiceImpl.class);
 
 
-    public void onEvent(Application application, Object sender, SubRound data) {
+    public void onEvent(Application application, Object sender, SubRound data, ArrayBlockingQueue<String> queue) {
         //just display data for now
         StringBuilder stringBuilder = new StringBuilder();
 

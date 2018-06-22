@@ -14,11 +14,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ArrayBlockingQueue;
 
-public class DelayingEventHandler implements EventHandler<SubRound> {
+public class DelayingEventHandler implements EventHandler<SubRound, ArrayBlockingQueue<String>> {
     private static Random rdm = null;
 
-    public void onEvent(Application application, Object sender, SubRound data){
+    public void onEvent(Application application, Object sender, SubRound data, ArrayBlockingQueue<String> queue){
         ChronologyService chronologyService = AppServiceProvider.getChronologyService();
         NTPClient ntpClient = application.getState().getNtpClient();
         TestCase.assertNotNull(ntpClient);

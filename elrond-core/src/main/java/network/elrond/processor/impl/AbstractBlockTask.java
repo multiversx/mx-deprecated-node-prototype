@@ -35,7 +35,7 @@ public abstract class AbstractBlockTask implements AppTask {
                     state.clearLock();
 
                     logger.trace("waiting...");
-                    ThreadUtil.sleep(5000);
+                    ThreadUtil.sleep(200);
                 } catch (Exception ex) {
                     logger.catching(ex);
                 }

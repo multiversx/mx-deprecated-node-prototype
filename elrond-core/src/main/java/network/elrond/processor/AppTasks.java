@@ -30,9 +30,9 @@ public class AppTasks {
     /**
      * P2P transactions broadcast
      */
-    public static AppTask BLOCK_ASSEMBLY_PROCESSOR = (application) -> {
-        new BlockAssemblyProcessor().process(application);
-    };
+//    public static AppTask BLOCK_ASSEMBLY_PROCESSOR = (application) -> {
+//        new BlockAssemblyProcessor().process(application);
+//    };
 
 
     /**

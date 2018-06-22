@@ -30,6 +30,9 @@ public class NodeRunner {
                 AccountAddress address = AccountAddress.fromHexString(Util.TEST_ADDRESS);
                 //facade.send(address, BigInteger.TEN, application);
                 System.out.println(facade.getBalance(address, application));
+
+                SeedNodeRunner.printPeers(application);
+
                 ThreadUtil.sleep(2000);
 
 

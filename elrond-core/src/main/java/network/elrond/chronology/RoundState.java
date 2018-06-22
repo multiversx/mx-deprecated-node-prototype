@@ -1,7 +1,9 @@
 package network.elrond.chronology;
 
+import network.elrond.consensus.EventHandler_ASSEMBLY_BLOCK;
+import network.elrond.consensus.EventHandler_COMPUTE_LEADER;
+import network.elrond.consensus.EventHandler_START_ROUND;
 import network.elrond.core.EventHandler;
-import network.elrond.core.PrintlnEventHandler;
 
 import java.util.*;
 
@@ -9,13 +11,19 @@ import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toMap;
 
 public enum RoundState {
-    START_ROUND(0, new SubRoundEventHandler()),
-    PROPOSE_BLOCK(2000, null),
-    VERIFY_BLOCK(1000, null),
-    MULTI_SIGN_ROUND_1(250, new SubRoundEventHandler()),
-    MULTI_SIGN_ROUND_2(250, null),
-    MULTI_SIGN_ROUND_3(250, null),
-    END_ROUND(0, new SubRoundEventHandler());
+//    START_ROUND(0, new SubRoundEventHandler()),
+//    PROPOSE_BLOCK(2000, null),
+//    VERIFY_BLOCK(1000, null),
+//    MULTI_SIGN_ROUND_1(250, new SubRoundEventHandler()),
+//    MULTI_SIGN_ROUND_2(250, null),
+//    MULTI_SIGN_ROUND_3(250, null),
+//    END_ROUND(0, new SubRoundEventHandler());
+
+    START_ROUND(0, new EventHandler_START_ROUND()),
+    COMPUTE_LEADER(200, new EventHandler_COMPUTE_LEADER()),
+    PROPOSE_BLOCK(2000, new EventHandler_ASSEMBLY_BLOCK()),
+    BROADCAST_BLOCK(1800, null),
+    END_ROUND(0, null);
 
     private final int roundStateDuration;
     private final EventHandler eventHandler;

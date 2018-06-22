@@ -5,6 +5,7 @@ import network.elrond.account.AccountStateServiceImpl;
 import network.elrond.account.Accounts;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.chronology.NTPClient;
+import network.elrond.consensus.ConsensusStateHolder;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
@@ -30,6 +31,8 @@ public class AppState implements Serializable {
     private Map<P2PChannelName, P2PBroadcastChanel> channels = new HashMap<>();
 
     private NTPClient ntpClient = null;
+
+    private ConsensusStateHolder consensusStateHolder = new ConsensusStateHolder();
 
     private static final Logger logger = LogManager.getLogger(AppState.class);
 
@@ -129,6 +132,10 @@ public class AppState implements Serializable {
 
     public void setNtpClient(NTPClient ntpClient){
         this.ntpClient = ntpClient;
+    }
+
+    public ConsensusStateHolder getConsensusStateHolder(){
+        return(consensusStateHolder);
     }
 
 }
