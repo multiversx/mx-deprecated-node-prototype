@@ -5,6 +5,7 @@ import network.elrond.ContextCreator;
 import network.elrond.account.AccountAddress;
 import network.elrond.api.manager.ElrondWebSocketManager;
 import network.elrond.application.AppContext;
+import network.elrond.core.Util;
 import network.elrond.crypto.PKSKPair;
 import network.elrond.data.BootstrapType;
 import network.elrond.data.Transaction;
@@ -154,7 +155,8 @@ public class ElrondNodeController {
     Integer ShardOfAddress(
             HttpServletResponse response,
             @RequestParam() String address) {
-        BigInteger index = new BigInteger(address);
+
+        BigInteger index = new BigInteger(Util.byteArrayToHexString(address.getBytes()));
         int nrShards = 2;
         int ShardNr = index.mod(BigInteger.valueOf(nrShards)).intValue();
 
