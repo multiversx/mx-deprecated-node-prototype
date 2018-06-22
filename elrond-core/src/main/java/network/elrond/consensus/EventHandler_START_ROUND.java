@@ -19,8 +19,10 @@ public class EventHandler_START_ROUND implements EventHandler<SubRound, ArrayBlo
 
         Util.check(application.getState() != null, "application state is null");
 
+        String nodeName = application.getContext().getNodeName();
+
         application.getState().getConsensusStateHolder().setSelectedLeaderPeerID(Number160.ZERO);
-        logger.debug("Round: {}, subRound: {} > initialized!", data.getRound().getIndex(), data.getRoundState());
+        logger.debug("{}, round: {}, subRound: {}> initialized!", nodeName, data.getRound().getIndex(), data.getRoundState().name());
 
         logger.traceExit();
     }

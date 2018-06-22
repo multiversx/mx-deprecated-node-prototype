@@ -8,6 +8,7 @@ import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.chronology.SubRound;
 import network.elrond.core.EventHandler;
+import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.data.AppBlockManager;
@@ -33,23 +34,32 @@ public class EventHandler_ASSEMBLY_BLOCK implements EventHandler<SubRound, Array
         Util.check(application.getState() != null, "state is null while trying to get full nodes list!");
         Util.check(application.getState().getConnection() != null, "connection is null while trying to get full nodes list!");
 
+        String nodeName = application.getContext().getNodeName();
+
         removeProcessedTransactions(queue, application);
 
         if (!isThisNodesTurnToProcess(application.getState())) {
-            logger.info("Not this node's turn to process ...");
+            logger.info("{}, round: {}, subRound: {}> Not this node's turn to process ...", nodeName, data.getRound().getIndex(), data.getRoundState().name());
             return;
         }
 
         AppState state = application.getState();
+        for (int i = 0; i < 5; i++) {
+            if (state.isLock()) {
+                // If sync is running try to wait
+                logger.info("{}, round: {}, subRound: {}> Can't execute, state locked! Retrying...", nodeName, data.getRound().getIndex(), data.getRoundState().name());
+                ThreadUtil.sleep(50);
+            }
+        }
+
         if (state.isLock()) {
-            // If sync is running stop
-            logger.info("Can't execute, state locked!");
+            logger.warn("{}, round: {}, subRound: {}> Can not acquire lock! Can not propose block!", nodeName, data.getRound().getIndex(), data.getRoundState().name());
             return;
         }
 
         if (state.getBlockchain().getCurrentBlock() == null) {
             // Require synchronize
-            logger.info("Can't execute, synchronize required!");
+            logger.info("{}, round: {}, subRound: {}> Can't execute, synchronize required!", nodeName, data.getRound().getIndex(), data.getRoundState().name());
             return;
         }
 
@@ -57,12 +67,13 @@ public class EventHandler_ASSEMBLY_BLOCK implements EventHandler<SubRound, Array
         TimeWatch watch = TimeWatch.start();
 
         state.acquireLock();
-        proposeBlock(queue, application);
+        proposeBlock(queue, application, data);
         state.releaseLock();
 
         long time = watch.time(TimeUnit.MILLISECONDS);
         long tps = (time > 0) ? ((size*1000) / time) : 0;
-        logger.info(" ###### Executed " + size + " transactions in " + time + "ms  TPS:" + tps + "   ###### ");
+        logger.info("{}, round: {}, subRound: {}> ###### Executed " + size + " transactions in " + time + "ms  TPS:" + tps + "   ###### ", nodeName,
+                data.getRound().getIndex(), data.getRoundState().name());
 
         logger.traceExit();
     }
@@ -101,7 +112,7 @@ public class EventHandler_ASSEMBLY_BLOCK implements EventHandler<SubRound, Array
         logger.traceExit();
     }
 
-    private void proposeBlock(ArrayBlockingQueue<String> queue, Application application) {
+    private void proposeBlock(ArrayBlockingQueue<String> queue, Application application, SubRound data) {
         logger.traceEntry("params: {} {}", queue, application);
 
         AppState state = application.getState();
@@ -109,8 +120,11 @@ public class EventHandler_ASSEMBLY_BLOCK implements EventHandler<SubRound, Array
         List<String> hashes = new ArrayList<>(queue);
         queue.clear();
 
+        String nodeName = application.getContext().getNodeName();
+
         if (hashes.isEmpty()) {
-            logger.info("Can't execute, no transaction!");
+            logger.info("{}, round: {}, subRound: {}> Can't execute, no transaction!", nodeName,
+                    data.getRound().getIndex(), data.getRoundState().name());
             return;
         }
 
