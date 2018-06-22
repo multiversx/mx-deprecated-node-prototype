@@ -1,9 +1,12 @@
 package network.elrond.application;
 
+import junit.framework.TestCase;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.p2p.Peer;
+import network.elrond.Application;
 import network.elrond.account.Accounts;
 import network.elrond.blockchain.Blockchain;
+import network.elrond.core.ThreadUtil;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PChannelName;
@@ -123,5 +126,206 @@ public class AppStateTest {
         Assert.assertTrue(appState.isLock());
         appState.clearLock();
         Assert.assertFalse(appState.isLock());
+    }
+
+    @Test
+    public void testConcurrencyTestOnLock() throws Exception{
+        //Details:
+        //start 2 threads and monitor if both threads can acquire in the same time the lock
+        //in this method there is a chance to get value 2 in maxValue
+
+        class DummyInt{
+            private int value = 0;
+
+            public void setValue(int value){
+                this.value = value;
+            }
+
+            public int getValue(){
+                return(this.value);
+            }
+        }
+
+        Application application = new Application(new AppContext());
+
+        DummyInt currentValue = new DummyInt();
+        DummyInt maxValue = new DummyInt();
+        DummyInt dummyValue = new DummyInt();
+
+        application.getState().setStillRunning(true);
+
+        Thread thread1 = new Thread(() -> {
+            while (application.getState().isStillRunning()) {
+                ThreadUtil.sleep(1);
+
+                if (application.getState().isLock()) {
+                    continue;
+                }
+
+                //do a dummy instruction
+                dummyValue.setValue(5);
+
+                //acquire lock
+                application.getState().setLock();
+                //increment value
+                currentValue.setValue(currentValue.getValue() + 1);
+
+                //set max
+                if (maxValue.getValue() < currentValue.getValue()){
+                    maxValue.setValue(currentValue.getValue());
+                }
+
+                //reset current value
+                currentValue.setValue(0);
+                application.getState().clearLock();
+            }
+        });
+        thread1.start();
+
+        Thread thread2 = new Thread(() -> {
+            while (application.getState().isStillRunning()) {
+                ThreadUtil.sleep(1);
+
+                if (application.getState().isLock()) {
+                    continue;
+                }
+
+                //do a dummy instruction
+                dummyValue.setValue(5);
+
+                //--------------------------------------acquire lock
+                application.getState().setLock();
+                //increment value
+                currentValue.setValue(currentValue.getValue() + 1);
+
+                //set max
+                if (maxValue.getValue() < currentValue.getValue()){
+                    maxValue.setValue(currentValue.getValue());
+                }
+
+                //reset current value
+                currentValue.setValue(0);
+                //--------------------------------------release lock
+                application.getState().clearLock();
+            }
+        });
+        thread2.start();
+
+        for (int i = 0; i < 10; i++){
+            if (maxValue.getValue() > 1)
+            {
+                break;
+            }
+
+            ThreadUtil.sleep(1000);
+        }
+
+        application.getState().setStillRunning(false);
+
+        System.out.println(maxValue.getValue());
+
+        thread1.join();
+        thread2.join();
+
+    }
+
+    @Test
+    public void testConcurrencyTestOnLockWithCheckAndLock() throws Exception{
+        //Details:
+        //start 2 threads and monitor if both threads can acquire in the same time the lock
+        //in this method there is NO chance to get value other than 1 in maxValue
+
+        class DummyInt{
+            private int value = 0;
+
+            public void setValue(int value){
+                this.value = value;
+            }
+
+            public int getValue(){
+                return(this.value);
+            }
+        }
+
+        Application application = new Application(new AppContext());
+
+        DummyInt currentValue = new DummyInt();
+        DummyInt maxValue = new DummyInt();
+        DummyInt dummyValue = new DummyInt();
+
+        application.getState().setStillRunning(true);
+
+        Thread thread1 = new Thread(() -> {
+            while (application.getState().isStillRunning()) {
+                ThreadUtil.sleep(1);
+
+                if (application.getState().checkIsLockAndLock()) {
+                    continue;
+                }
+                //lock acquired
+
+                //do a dummy instruction
+                dummyValue.setValue(5);
+
+                //increment value
+                currentValue.setValue(currentValue.getValue() + 1);
+
+                //set max
+                if (maxValue.getValue() < currentValue.getValue()){
+                    maxValue.setValue(currentValue.getValue());
+                }
+
+                //reset current value
+                currentValue.setValue(0);
+                application.getState().clearLock();
+            }
+        });
+        thread1.start();
+
+        Thread thread2 = new Thread(() -> {
+            while (application.getState().isStillRunning()) {
+                ThreadUtil.sleep(1);
+
+                if (application.getState().checkIsLockAndLock()) {
+                    continue;
+                }
+                //lock acquired
+
+                //do a dummy instruction
+                dummyValue.setValue(5);
+
+                //increment value
+                currentValue.setValue(currentValue.getValue() + 1);
+
+                //set max
+                if (maxValue.getValue() < currentValue.getValue()){
+                    maxValue.setValue(currentValue.getValue());
+                }
+
+                //reset current value
+                currentValue.setValue(0);
+                application.getState().clearLock();
+            }
+        });
+        thread2.start();
+
+        for (int i = 0; i < 10; i++){
+            if (maxValue.getValue() > 1)
+            {
+                break;
+            }
+
+            ThreadUtil.sleep(1000);
+        }
+
+        application.getState().setStillRunning(false);
+
+        System.out.println(maxValue.getValue());
+
+        thread1.join();
+        thread2.join();
+
+        TestCase.assertTrue(maxValue.getValue() == 1);
+
     }
 }

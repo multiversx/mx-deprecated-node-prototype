@@ -21,13 +21,16 @@ public class EventHandler_COMPUTE_LEADER implements EventHandler<SubRound, Array
     public void onEvent(Application application, Object sender, SubRound data, ArrayBlockingQueue<String> queue) {
         logger.traceEntry("params: {} {} {} {}", application, sender, data, queue);
 
+        Util.check(application.getState()!=null, "application state is null");
+
+        String nodeName = application.getContext().getNodeName();
         List<Number160> nodeList = getCurrentNodes(application);
 
-        logger.debug("computed list as: {}", nodeList);
+        logger.debug("{}, round: {}, subRound: {}> computed list as: {}", nodeName, data.getRound().getIndex(), data.getRoundState().name(), nodeList);
 
         application.getState().getConsensusStateHolder().setSelectedLeaderPeerID(computeLeader(nodeList, data.getRound().getIndex()));
 
-        logger.debug("Round: {}, subRound: {} > current leader: {}", data.getRound().getIndex(), data.getRoundState(),
+        logger.debug("{}, round: {}, subRound: {}> current leader: {}", nodeName, data.getRound().getIndex(), data.getRoundState().name(),
                 application.getState().getConsensusStateHolder().getSelectedLeaderPeerID().toString());
 
         logger.traceExit();

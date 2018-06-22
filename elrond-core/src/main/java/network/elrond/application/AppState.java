@@ -122,6 +122,15 @@ public class AppState implements Serializable {
         this.lock = true;
     }
 
+    public synchronized boolean checkIsLockAndLock(){
+        if (this.lock){
+            return(true);
+        }
+
+        this.lock = true;
+        return(false);
+    }
+
     public synchronized void clearLock() {
         this.lock = false;
     }
