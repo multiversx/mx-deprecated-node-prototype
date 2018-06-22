@@ -37,6 +37,8 @@ public class ChronologyBlockTask<T> implements AppTask {
             long genesisTimeStampCached = Long.MIN_VALUE;
 
             AppState state = application.getState();
+
+
             while (state.isStillRunning()) {
                 ThreadUtil.sleep(1);
 
@@ -54,7 +56,7 @@ public class ChronologyBlockTask<T> implements AppTask {
                         ThreadUtil.sleep(1000);
 
                         continue;
-                    } else{
+                    } else {
                         genesisTimeStampCached = application.getState().getBlockchain().getGenesisBlock().getTimestamp();
                         logger.trace(String.format("Cached genesis time stamp as: %d", genesisTimeStampCached));
                     }
@@ -73,14 +75,14 @@ public class ChronologyBlockTask<T> implements AppTask {
         thread.start();
     }
 
-    private void computeAndCallStartEndRounds(Application application, Round currentRound, long referenceTimeStamp, ArrayBlockingQueue<T> queueTransactionHashes){
+    private void computeAndCallStartEndRounds(Application application, Round currentRound, long referenceTimeStamp, ArrayBlockingQueue<T> queueTransactionHashes) {
         boolean isFirstRoundTransition = (previousRound == null);
         boolean isRoundTransition = isFirstRoundTransition || (previousRound.getIndex() != currentRound.getIndex());
         boolean existsPreviousRound = (previousRound != null);
 
-        if (isRoundTransition){
+        if (isRoundTransition) {
             logger.trace("round transition detected!");
-            if (existsPreviousRound){
+            if (existsPreviousRound) {
                 notifyEventObjects(application, previousRound, RoundState.END_ROUND, referenceTimeStamp, queueTransactionHashes);
             }
 
@@ -91,12 +93,12 @@ public class ChronologyBlockTask<T> implements AppTask {
         previousRound = currentRound;
     }
 
-    private void computeAndCallRoundState(Application application, Round currentRound, long currentTime, ArrayBlockingQueue<T> queueTransactionHashes){
+    private void computeAndCallRoundState(Application application, Round currentRound, long currentTime, ArrayBlockingQueue<T> queueTransactionHashes) {
         RoundState currentRoundState = AppServiceProvider.getChronologyService().computeRoundState(currentRound.getStartTimeStamp(), currentTime);
 
         boolean isCurrentRoundStateNotDefined = (currentRoundState == null);
 
-        if (isCurrentRoundStateNotDefined){
+        if (isCurrentRoundStateNotDefined) {
             return;
         }
 
@@ -112,7 +114,7 @@ public class ChronologyBlockTask<T> implements AppTask {
     }
 
 
-    private void notifyEventObjects(Application application, Round round, RoundState roundState, long referenceTimeStamp, ArrayBlockingQueue<T> queueTransactionHashes){
+    private void notifyEventObjects(Application application, Round round, RoundState roundState, long referenceTimeStamp, ArrayBlockingQueue<T> queueTransactionHashes) {
         SubRound subRound = new SubRound();
         subRound.setRound(round);
         subRound.setRoundState(roundState);
@@ -120,16 +122,14 @@ public class ChronologyBlockTask<T> implements AppTask {
 
         logger.trace("ChronologyBlockTask event {}, {}", round.toString(), roundState.toString());
 
-        if (roundState.getEventHandler() != null){
+        if (roundState.getEventHandler() != null) {
             logger.trace("calling default event handler object (from enum)...");
             roundState.getEventHandler().onEvent(application, this, subRound, queueTransactionHashes);
         }
 
         logger.trace("calling %d registered objects...", MAIN_QUEUE.size());
-        for (EventHandler eventHandler:MAIN_QUEUE){
-            eventHandler.onEvent(application,this, subRound, queueTransactionHashes);
+        for (EventHandler eventHandler : MAIN_QUEUE) {
+            eventHandler.onEvent(application, this, subRound, queueTransactionHashes);
         }
     }
-
-
 }
