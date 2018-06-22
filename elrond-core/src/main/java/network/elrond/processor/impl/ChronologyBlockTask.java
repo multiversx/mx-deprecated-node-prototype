@@ -37,6 +37,8 @@ public class ChronologyBlockTask<T> implements AppTask {
             long genesisTimeStampCached = Long.MIN_VALUE;
 
             AppState state = application.getState();
+            String nodeName = application.getContext().getNodeName();
+
             while (state.isStillRunning()) {
                 ThreadUtil.sleep(1);
 
@@ -54,10 +56,16 @@ public class ChronologyBlockTask<T> implements AppTask {
                         ThreadUtil.sleep(1000);
 
                         continue;
-                    } else{
+                    } else {
                         genesisTimeStampCached = application.getState().getBlockchain().getGenesisBlock().getTimestamp();
                         logger.trace(String.format("Cached genesis time stamp as: %d", genesisTimeStampCached));
                     }
+                }
+
+                //acquiring lock
+                if (state.checkIsLockAndLock()) {
+                    //couldn't acquire lock!
+                    continue;
                 }
 
                 long currentTimeStamp = chronologyService.getSynchronizedTime(state.getNtpClient());
@@ -66,6 +74,8 @@ public class ChronologyBlockTask<T> implements AppTask {
 
                 computeAndCallStartEndRounds(application, currentRound, currentTimeStamp, queueTransactionHashes);
                 computeAndCallRoundState(application, currentRound, currentTimeStamp, queueTransactionHashes);
+
+                state.clearLock();
             }
 
             logger.traceExit();

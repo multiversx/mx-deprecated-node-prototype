@@ -24,12 +24,12 @@ public abstract class AbstractBlockTask implements AppTask {
             while (state.isStillRunning()) {
 
                 try {
-                    if (state.isLock()) {
+                    if (state.checkIsLockAndLock()) {
                         ThreadUtil.sleep(100);
                         continue;
                     }
 
-                    state.setLock();
+                    //state.setLock();
                     logger.trace("doing some work...");
                     doProcess(application);
                     state.clearLock();

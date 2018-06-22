@@ -42,20 +42,7 @@ public class EventHandler_ASSEMBLY_BLOCK implements EventHandler<SubRound, Array
             logger.info("{}, round: {}, subRound: {}> Not this node's turn to process ...", nodeName, data.getRound().getIndex(), data.getRoundState().name());
             return;
         }
-
         AppState state = application.getState();
-        for (int i = 0; i < 5; i++) {
-            if (state.isLock()) {
-                // If sync is running try to wait
-                logger.info("{}, round: {}, subRound: {}> Can't execute, state locked! Retrying...", nodeName, data.getRound().getIndex(), data.getRoundState().name());
-                ThreadUtil.sleep(50);
-            }
-        }
-
-        if (state.isLock()) {
-            logger.warn("{}, round: {}, subRound: {}> Can not acquire lock! Can not propose block!", nodeName, data.getRound().getIndex(), data.getRoundState().name());
-            return;
-        }
 
         if (state.getBlockchain().getCurrentBlock() == null) {
             // Require synchronize
