@@ -201,7 +201,16 @@ public class Block implements Serializable {
 
     @Override
     public String toString() {
-        return (String.format("Block{nonce=%d, appStateHash='%s', listTXHashes.size=%d, roundIndex=%d, timestamp=%d}",
-                nonce, Util.byteArrayToHexString(appStateHash), listTXHashes.size(), roundIndex, timestamp));
+        StringBuilder stringBuilder = new StringBuilder();
+        for (byte[] transactionHash: this.getListTXHashes()){
+            if (!stringBuilder.toString().equals("")){
+                stringBuilder.append(", ");
+            }
+
+            stringBuilder.append(Util.getDataEncoded64(transactionHash));
+        }
+
+        return (String.format("Block{nonce=%d, appStateHash='%s', listTXHashes.size=%d, listTXHashes=[%s], roundIndex=%d, timestamp=%d}",
+                nonce, Util.byteArrayToHexString(appStateHash), listTXHashes.size(), stringBuilder.toString(), roundIndex, timestamp));
     }
 }

@@ -42,6 +42,7 @@ public class EventHandler_ASSEMBLY_BLOCK implements EventHandler<SubRound, Array
             logger.info("{}, round: {}, subRound: {}> Not this node's turn to process ...", nodeName, data.getRound().getIndex(), data.getRoundState().name());
             return;
         }
+        logger.info("{}, round: {}, subRound: {}> This node will assemble block.", nodeName, data.getRound().getIndex(), data.getRoundState().name());
         AppState state = application.getState();
 
         if (state.getBlockchain().getCurrentBlock() == null) {

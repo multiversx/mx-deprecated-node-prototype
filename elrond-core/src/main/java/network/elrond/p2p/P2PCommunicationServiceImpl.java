@@ -13,8 +13,8 @@ import java.util.Date;
 public class P2PCommunicationServiceImpl implements P2PCommunicationService {
     private static final Logger logger = LogManager.getLogger(P2PCommunicationServiceImpl.class);
 
-    private final int pingConnectionTimeOut = 1000;
-    private final int portConnectionTimeOut = 1000;
+    private final int pingConnectionTimeOut = 2000;
+    private final int portConnectionTimeOut = 2000;
 
     public PingResponse getPingResponse(String address, int port) throws Exception {
         long timeStampStart = System.currentTimeMillis();

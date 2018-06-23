@@ -9,6 +9,7 @@ import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.chronology.ChronologyService;
 import network.elrond.chronology.NTPClient;
 import network.elrond.chronology.Round;
+import network.elrond.chronology.RoundState;
 import network.elrond.core.Util;
 import network.elrond.crypto.MultiSignatureService;
 import network.elrond.crypto.PrivateKey;
@@ -48,6 +49,15 @@ public class AppBlockManager {
             List<Receipt> receipts = blockReceiptsPair.getValue();
 
             AppBlockManager.instance().signBlock(block, privateKey);
+
+            //test whether the block should be published or not!
+            if (!AppServiceProvider.getChronologyService().isStillInRoundState(state.getNtpClient(),
+                    blockchain.getGenesisBlock().getTimestamp(), block.roundIndex, RoundState.PROPOSE_BLOCK)){
+                logger.debug("Proposed block arrived to late!");
+                logger.traceExit();
+                return;
+            }
+
             ExecutionService executionService = AppServiceProvider.getExecutionService();
             ExecutionReport result = executionService.processBlock(block, accounts, blockchain);
 

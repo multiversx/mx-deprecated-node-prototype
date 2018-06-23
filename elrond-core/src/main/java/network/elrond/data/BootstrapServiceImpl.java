@@ -312,5 +312,19 @@ public class BootstrapServiceImpl implements BootstrapService {
         return logger.traceExit(result);
     }
 
+    @Override
+    public SynchronizationRequirement getSynchronizationRequirement(Blockchain blockchain) throws Exception{
+        SynchronizationRequirement synchronizationRequirement = new SynchronizationRequirement();
+
+        synchronizationRequirement.setRemoteBlockIndex(AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.NETWORK, blockchain));
+        synchronizationRequirement.setLocalBlockIndex(AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.LOCAL, blockchain));
+
+        boolean isBlocAvailable = synchronizationRequirement.getRemoteBlockIndex().compareTo(BigInteger.ZERO) >= 0;
+        boolean isNewBlockRemote = synchronizationRequirement.getRemoteBlockIndex().compareTo(synchronizationRequirement.getLocalBlockIndex()) > 0;
+        synchronizationRequirement.setSyncRequired(isBlocAvailable && isNewBlockRemote);
+
+        return(synchronizationRequirement);
+    }
+
 
 }

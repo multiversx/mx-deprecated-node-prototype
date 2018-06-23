@@ -34,8 +34,8 @@ public class ConsensusTest01 {
     private static final Logger logger = LogManager.getLogger(Util.class);
 
 
-    @Test
-    public void testRoundRobin() throws Exception{
+
+    public void BADtestRoundRobin() throws Exception{
         //Description:
         //   1. start a seeder
         //   2. start a runner
@@ -48,7 +48,14 @@ public class ConsensusTest01 {
         Application[] applicationsAvailable = new Application[]{
                 startSeeder(),
                 startRunner("elrond-runner-1", 4001, 4000),
-                startRunner("elrond-runner-2", 4002, 4000)
+                startRunner("elrond-runner-2", 4002, 4000),
+                startRunner("elrond-runner-3", 4003, 4000),
+                startRunner("elrond-runner-4", 4004, 4000),
+                startRunner("elrond-runner-5", 4005, 4000),
+                startRunner("elrond-runner-6", 4006, 4000),
+                startRunner("elrond-runner-7", 4007, 4000),
+                startRunner("elrond-runner-8", 4008, 4000),
+                startRunner("elrond-runner-9", 4009, 4000)
         };
 
         ElrondFacade facade = new ElrondFacadeImpl();
@@ -74,7 +81,7 @@ public class ConsensusTest01 {
 
             sendToLog(Level.ERROR, "Sent tx ", transaction, " to ", Util.byteArrayToHexString(applicationsAvailable[0].getContext().getPublicKey().getValue()));
 
-            ThreadUtil.sleep(1000);
+            ThreadUtil.sleep(20);
         }
 
         //settle down
@@ -281,4 +288,41 @@ public class ConsensusTest01 {
 
         return(object.toString());
     }
+
+    @Test
+    public void testStartSeeder(){
+        Application seeder = startSeeder();
+
+        ElrondFacadeImpl facade = new ElrondFacadeImpl();
+
+        int value = 1;
+
+        while (true){
+            ThreadUtil.sleep(100);
+
+            AccountAddress address = AccountAddress.fromHexString(Util.TEST_ADDRESS);
+            Transaction transaction = facade.send(address, BigInteger.valueOf(value), seeder);
+
+            sendToLog(Level.ERROR, "Sent tx ", transaction, " to ", Util.byteArrayToHexString(seeder.getContext().getPublicKey().getValue()));
+
+            value++;
+        }
+    }
+
+    @Test
+    public void testStartNode1(){
+        Application seeder = startRunner("runner-1", 4001, 4000);
+        while (true){
+            ThreadUtil.sleep(100);
+        }
+    }
+
+    @Test
+    public void testStartNode2(){
+        Application seeder = startRunner("runner-2", 4002, 4000);
+        while (true){
+            ThreadUtil.sleep(100);
+        }
+    }
+
 }

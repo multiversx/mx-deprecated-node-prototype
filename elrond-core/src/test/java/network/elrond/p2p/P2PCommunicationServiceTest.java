@@ -85,9 +85,9 @@ public class P2PCommunicationServiceTest {
         thrAccept.join();
     }
 
-    //@Test
+    @Test
     public void testPingIP() throws Exception{
-        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse("192.168.11.131", 40454);
+        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse("192.168.11.121", 4000);
 
         System.out.println(pingResponse.toString());
 

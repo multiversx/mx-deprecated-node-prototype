@@ -2,9 +2,11 @@ package network.elrond.processor.impl;
 
 import network.elrond.Application;
 import network.elrond.application.AppState;
+import network.elrond.blockchain.Blockchain;
 import network.elrond.chronology.*;
 import network.elrond.core.EventHandler;
 import network.elrond.core.ThreadUtil;
+import network.elrond.data.SynchronizationRequirement;
 import network.elrond.p2p.AppP2PManager;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.processor.AppTask;
@@ -28,6 +30,10 @@ public class ChronologyBlockTask<T> implements AppTask {
     public void process(Application application) {
         ArrayBlockingQueue<T> queueTransactionHashes = AppP2PManager.instance().subscribeToChannel(application, P2PChannelName.TRANSACTION);
 
+        AppState state = application.getState();
+        Blockchain blockchain = state.getBlockchain();
+        String nodeName = application.getContext().getNodeName();
+
         Thread thread = new Thread(() -> {
             logger.traceEntry();
             Round currentRound = null;
@@ -35,9 +41,6 @@ public class ChronologyBlockTask<T> implements AppTask {
             ChronologyService chronologyService = AppServiceProvider.getChronologyService();
 
             long genesisTimeStampCached = Long.MIN_VALUE;
-
-            AppState state = application.getState();
-            String nodeName = application.getContext().getNodeName();
 
             while (state.isStillRunning()) {
                 ThreadUtil.sleep(1);
@@ -62,14 +65,24 @@ public class ChronologyBlockTask<T> implements AppTask {
                     }
                 }
 
-                synchronized (state.lockerSyncPropose) {
-                    long currentTimeStamp = chronologyService.getSynchronizedTime(state.getNtpClient());
+                try {
+                    SynchronizationRequirement synchronizationRequirement = AppServiceProvider.getBootstrapService().getSynchronizationRequirement(blockchain);
 
-                    currentRound = chronologyService.getRoundFromDateTime(genesisTimeStampCached, currentTimeStamp);
+                    if (synchronizationRequirement.isSyncRequired()){
+                        continue;
+                    }
 
-                    computeAndCallStartEndRounds(application, currentRound, currentTimeStamp, queueTransactionHashes);
-                    computeAndCallRoundState(application, currentRound, currentTimeStamp, queueTransactionHashes);
+                    synchronized (state.lockerSyncPropose) {
+                        long currentTimeStamp = chronologyService.getSynchronizedTime(state.getNtpClient());
 
+                        currentRound = chronologyService.getRoundFromDateTime(genesisTimeStampCached, currentTimeStamp);
+
+                        computeAndCallStartEndRounds(application, currentRound, currentTimeStamp, queueTransactionHashes);
+                        computeAndCallRoundState(application, currentRound, currentTimeStamp, queueTransactionHashes);
+
+                    }
+                } catch (Exception ex){
+                    logger.catching(ex);
                 }
             }
 
