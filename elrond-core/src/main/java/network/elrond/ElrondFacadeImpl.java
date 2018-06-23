@@ -6,6 +6,7 @@ import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.benchmark.BenchmarkResult;
+import network.elrond.benchmark.MultipleTransactionResult;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.ThreadUtil;
@@ -104,6 +105,27 @@ public class ElrondFacadeImpl implements ElrondFacade {
             logger.catching(e);
         }
         return logger.traceExit((Receipt)null);
+    }
+
+    @Override
+    public MultipleTransactionResult sendMultipleTransactions(AccountAddress receiver, BigInteger value, Integer nrTransactions, Application application) {
+        logger.traceEntry("params: {} {} {}", receiver, value, application);
+        if (application == null) {
+            logger.warn("Invalid application state, application is null");
+            return logger.traceExit((MultipleTransactionResult)null);
+        }
+
+        MultipleTransactionResult result = new MultipleTransactionResult();
+        for(int i = 0;i<nrTransactions;i++){
+            Transaction transaction = send(receiver, value, application);
+            if(transaction == null){
+                result.setFailedTransactionsNumber(result.getFailedTransactionsNumber()+1);
+            }
+            else{
+                result.setSuccessfulTransactionsNumber(result.getSuccessfulTransactionsNumber() +1);
+            }
+        }
+        return result;
     }
 
     @Override
