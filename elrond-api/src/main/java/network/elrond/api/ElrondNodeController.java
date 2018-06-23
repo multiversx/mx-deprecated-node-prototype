@@ -100,7 +100,7 @@ public class ElrondNodeController {
 
         AccountAddress _add = AccountAddress.fromHexString(address);
         Transaction transaction = elrondApiNode.send(_add, value);
-        return logger.traceExit((transaction != null) ? transaction : null);
+        return logger.traceExit((transaction != null) ? transaction : (Transaction)null);
     }
 
 
