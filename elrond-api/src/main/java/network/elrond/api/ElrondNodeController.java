@@ -10,7 +10,6 @@ import network.elrond.crypto.PKSKPair;
 import network.elrond.data.BootstrapType;
 import network.elrond.data.Transaction;
 import network.elrond.p2p.PingResponse;
-import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,8 +94,7 @@ public class ElrondNodeController {
     public @ResponseBody
     Transaction send(
             HttpServletResponse response,
-            @RequestParam(defaultValue = "0326e7875aadaba270ae93ec40ef4706934d070eb21c9acad4743e31289fa4ebc7")
-                    String address,
+            @RequestParam  String address,
             @RequestParam(defaultValue = "1") BigInteger value) {
         logger.traceEntry("params: {} {}", address, value);
 
@@ -134,8 +132,7 @@ public class ElrondNodeController {
     public @ResponseBody
     Object sendMultipleTransactions(
             HttpServletResponse response,
-            @RequestParam(defaultValue = "0326e7875aadaba270ae93ec40ef4706934d070eb21c9acad4743e31289fa4ebc7")
-                    String address,
+            @RequestParam String address,
             @RequestParam(defaultValue = "1") BigInteger value,
             @RequestParam(defaultValue = "1") Integer nrTransactions) {
         logger.traceEntry("params: {} {} {}", address, value, nrTransactions);

@@ -1,51 +1,52 @@
 package network.elrond.benchmark;
 
 public class BenchmarkResult {
-    private Double liveTps;
-    private Double maxTps;
-    private Double averageTps;
-    private Integer activeNodes;
-    private Integer nrShards;
+    private long liveTps;
+    private long maxTps;
+    private long averageTps;
+    private long activeNodes;
+    private long nrShards;
     private Double averageRoundTime;
-    private Double averageTransactionsPerBlock;
+    private long averageNrTransactionsPerBlock;
+    private long liveNrTransactionsPerBlock;
 
-    public Double getLiveTps() {
+    public long getLiveTps() {
         return liveTps;
     }
 
-    public void setLiveTps(Double liveTps) {
+    public void setLiveTps(long liveTps) {
         this.liveTps = liveTps;
     }
 
-    public Double getMaxTps() {
+    public long getMaxTps() {
         return maxTps;
     }
 
-    public void setMaxTps(Double maxTps) {
+    public void setMaxTps(long maxTps) {
         this.maxTps = maxTps;
     }
 
-    public Double getAverageTps() {
+    public long getAverageTps() {
         return averageTps;
     }
 
-    public void setAverageTps(Double averageTps) {
+    public void setAverageTps(long averageTps) {
         this.averageTps = averageTps;
     }
 
-    public Integer getActiveNodes() {
+    public long getActiveNodes() {
         return activeNodes;
     }
 
-    public void setActiveNodes(Integer activeNodes) {
+    public void setActiveNodes(long activeNodes) {
         this.activeNodes = activeNodes;
     }
 
-    public Integer getNrShards() {
+    public long getNrShards() {
         return nrShards;
     }
 
-    public void setNrShards(Integer nrShards) {
+    public void setNrShards(long nrShards) {
         this.nrShards = nrShards;
     }
 
@@ -57,11 +58,19 @@ public class BenchmarkResult {
         this.averageRoundTime = averageRoundTime;
     }
 
-    public Double getAverageTransactionsPerBlock() {
-        return averageTransactionsPerBlock;
+    public long getAverageNrTransactionsPerBlock() {
+        return averageNrTransactionsPerBlock;
     }
 
-    public void setAverageTransactionsPerBlock(Double averageTransactionsPerBlock) {
-        this.averageTransactionsPerBlock = averageTransactionsPerBlock;
+    public void setAverageNrTransactionsPerBlock(long averageNrTransactionsPerBlock) {
+        this.averageNrTransactionsPerBlock = averageNrTransactionsPerBlock;
+    }
+
+    public long getLiveNrTransactionsPerBlock() {
+        return liveNrTransactionsPerBlock;
+    }
+
+    public void setLiveNrTransactionsPerBlock(long liveNrTransactionsPerBlock) {
+        this.liveNrTransactionsPerBlock = liveNrTransactionsPerBlock;
     }
 }

@@ -4,11 +4,13 @@ import network.elrond.Application;
 import network.elrond.TimeWatch;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
+import network.elrond.benchmark.Statistic;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.ThreadUtil;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.data.AppBlockManager;
+import network.elrond.data.Block;
 import network.elrond.data.LocationType;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.service.AppServiceProvider;
@@ -60,22 +62,28 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
             return;
         }
 
-        int size = queue.size();
+
         TimeWatch watch = TimeWatch.start();
 
         state.setLock();
-        proposeBlock(queue, application);
+        Block block = proposeBlock(queue, application);
+        int size = block.getListTXHashes().size();
         state.clearLock();
-
 
         long time = watch.time(TimeUnit.MILLISECONDS);
         long tps = (time > 0) ? ((size * 1000) / time) : 0;
         logger.info(" ###### Executed " + size + " transactions in " + time + "ms  TPS:" + tps + "   ###### ");
+        Statistic stats = new Statistic();
+
+        stats.setNrTransactionsInBlock(size);
+        stats.setTps(tps);
+
+        application.getStatisticsManager().addStatistic(stats);
 
         logger.traceExit();
     }
 
-    private void proposeBlock(ArrayBlockingQueue<String> queue, Application application) {
+    private Block proposeBlock(ArrayBlockingQueue<String> queue, Application application) {
         logger.traceEntry("params: {} {}", queue, application);
 
         AppState state = application.getState();
@@ -85,15 +93,15 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
 
         if (hashes.isEmpty()) {
             logger.info("Can't execute, no transaction!");
-            return;
+            return null;
         }
 
         AppContext context = application.getContext();
         PrivateKey privateKey = context.getPrivateKey();
 
-        AppBlockManager.instance().generateAndBroadcastBlock(hashes, privateKey, state);
+        Block block = AppBlockManager.instance().generateAndBroadcastBlock(hashes, privateKey, state);
 
-        logger.traceExit();
+        return logger.traceExit(block);
     }
 
     private void removeProcessedTransactions(ArrayBlockingQueue<String> queue, Application application) {

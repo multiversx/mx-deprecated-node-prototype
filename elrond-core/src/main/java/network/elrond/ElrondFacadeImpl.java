@@ -25,7 +25,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.math.BigInteger;
-import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
@@ -214,13 +213,13 @@ public class ElrondFacadeImpl implements ElrondFacade {
     @Override
     public BenchmarkResult getBenchmarkResult(String benchmarkId, Application application) {
         BenchmarkResult benchmarkResult = new BenchmarkResult();
-        Random rand = new Random();
         benchmarkResult.setActiveNodes(10);
         benchmarkResult.setAverageRoundTime(3.75);
-        benchmarkResult.setAverageTransactionsPerBlock(100.0);
-        benchmarkResult.setAverageTps(250.0);
-        benchmarkResult.setLiveTps(750.0);
-        benchmarkResult.setMaxTps(999.0);
+        benchmarkResult.setLiveNrTransactionsPerBlock(application.getStatisticsManager().getCurrentStatistic().getNrTransactionsInBlock());
+        benchmarkResult.setAverageNrTransactionsPerBlock(application.getStatisticsManager().getAverageNrTransactionsInBlock());
+        benchmarkResult.setAverageTps(application.getStatisticsManager().getAverageTps());
+        benchmarkResult.setLiveTps(application.getStatisticsManager().getCurrentStatistic().getTps());
+        benchmarkResult.setMaxTps(application.getStatisticsManager().getMaxTps());
         benchmarkResult.setNrShards(2);
         return benchmarkResult;
     }

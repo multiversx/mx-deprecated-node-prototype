@@ -25,6 +25,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+//TODO: remove from "data" package
 public class AppBlockManager {
     private static final Logger logger = LogManager.getLogger(AppBlockManager.class);
 
@@ -34,13 +35,12 @@ public class AppBlockManager {
         return instance;
     }
 
-    public void generateAndBroadcastBlock(List<String> hashes, PrivateKey privateKey, AppState state) {
+    public Block generateAndBroadcastBlock(List<String> hashes, PrivateKey privateKey, AppState state) {
         logger.traceEntry("params: {} {} {}", hashes, privateKey, state);
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();
 
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
-
         try {
             List<Transaction> transactions = blockchainService.getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
             Pair<Block, List<Receipt>> blockReceiptsPair = composeBlock(transactions, state);
@@ -62,12 +62,13 @@ public class AppBlockManager {
                 }
 
                 logger.info("New block proposed with hash {}", hashBlock);
+                return logger.traceExit(block);
             }
         } catch (IOException | ClassNotFoundException e) {
             logger.throwing(e);
         }
 
-        logger.traceExit();
+        return logger.traceExit((Block) null);
     }
 
 
