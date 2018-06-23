@@ -13,7 +13,6 @@ import network.elrond.p2p.PingResponse;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.mapdb.Fun;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.math.BigInteger;
 
 @Controller
@@ -80,7 +80,7 @@ public class ElrondNodeController {
             @RequestParam(defaultValue = "elrond-node-1", required = false) String blockchainPath,
             @RequestParam(defaultValue = "elrond-node-1", required = false) String blockchainRestorePath
 
-    ) {
+    ) throws IOException {
         logger.traceEntry("params: {} {} {} {} {} {} {} {} {}", nodeName, port, masterPeerPort, masterPeerIpAddress,
                 privateKey, mintValue, bootstrapType, blockchainPath, blockchainRestorePath);
         //Reuploaded

@@ -7,6 +7,7 @@ import network.elrond.account.AccountAddress;
 import network.elrond.api.log.WebSocketAppenderAdapter;
 import network.elrond.api.manager.ElrondWebSocketManager;
 import network.elrond.application.AppContext;
+import network.elrond.core.Util;
 import network.elrond.crypto.PKSKPair;
 import network.elrond.data.BootstrapType;
 import network.elrond.data.Receipt;
@@ -15,7 +16,6 @@ import network.elrond.p2p.PingResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.mapdb.Fun;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +40,7 @@ class ElrondApiNode {
         return new ElrondFacadeImpl();
     }
 
-    boolean start(AppContext context, String blockchainPath, String blockchainRestorePath) {
+    boolean start(AppContext context, String blockchainPath, String blockchainRestorePath) throws IOException {
         logger.traceEntry("params: {} {} {}", context, blockchainPath, blockchainRestorePath);
 
         WebSocketAppenderAdapter.instance().setElrondWebSocketManager(elrondWebSocketManager);
@@ -95,11 +95,11 @@ class ElrondApiNode {
         return logger.traceExit(facade.generatePublicKeyAndPrivateKey(privateKey));
     }
 
-    private void setupRestoreDir(File sourceDir, File destinationDir) {
+    private void setupRestoreDir(File sourceDir, File destinationDir) throws IOException {
         logger.traceEntry("params: {} {}", sourceDir, destinationDir);
         if (!sourceDir.getAbsolutePath().equals(destinationDir.getAbsolutePath())) {
             logger.trace("source and destination paths are different!");
-            deleteDirectory(destinationDir);
+            Util.deleteDirectory(destinationDir);
             copyDirectory(sourceDir, destinationDir);
         }
         logger.traceExit();
@@ -116,15 +116,6 @@ class ElrondApiNode {
         logger.traceExit();
     }
 
-    private void deleteDirectory(File dir) {
-        logger.traceEntry("params: {}", dir);
-        try {
-            FileUtils.deleteDirectory(dir);
-            logger.trace("done");
-        } catch (IOException ex) {
-            logger.throwing(ex);
-        }
-        logger.traceExit();
-    }
+
 
 }
