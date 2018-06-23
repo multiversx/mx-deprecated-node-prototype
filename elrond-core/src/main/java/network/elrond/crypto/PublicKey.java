@@ -151,6 +151,4 @@ public class PublicKey {
     public String toString() {
         return String.format("PublicKey{%s}", Util.byteArrayToHexString(this.getValue()));
     }
-
-
 }
