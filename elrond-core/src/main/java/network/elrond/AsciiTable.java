@@ -131,5 +131,6 @@ public class AsciiTable {
                     "values=" + values +
                     '}';
         }
+
     }
 }

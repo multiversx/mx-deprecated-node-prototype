@@ -68,7 +68,8 @@ public class AppBlockManager {
                 AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
 
                 logger.info("New block proposed with hash {}", hashBlock);
-                logger.info("\n" + state.print());
+                logger.info("\n" + block.print().render());
+
 
             }
         } catch (IOException | ClassNotFoundException e) {

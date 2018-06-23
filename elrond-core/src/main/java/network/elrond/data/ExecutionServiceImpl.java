@@ -45,7 +45,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     private boolean validateBlockSigners(Accounts accounts, Blockchain blockchain, Block block) {
         logger.traceEntry("params: {} {} {}", accounts, blockchain, block);
         // TODO: need to check that signers are the right ones for that specific epoch & round
-        // Signers part of the eligible list in the epoch
+        // Signers part of the eligible listToTable in the epoch
         // Signers are selected by the previous block signature
         return logger.traceExit(true);
     }
@@ -199,6 +199,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         try {
             return logger.traceExit(_processTransaction(accounts, transaction));
         } catch (Exception e) {
+            logger.catching(e);
             return logger.traceExit(ExecutionReport.create().ko(e));
         }
     }
@@ -222,19 +223,19 @@ public class ExecutionServiceImpl implements ExecutionService {
         String senderAddress = transaction.getSenderAddress();
         String receiverAddress = transaction.getReceiverAddress();
 
-        //We have to copy-construct the objects for sandbox mode
+
         BigInteger value = transaction.getValue();
-        if (!AccountsManager.instance().hasFunds(accounts, senderAddress, value)) {
+        if (operation.isCheckSource() && !AccountsManager.instance().hasFunds(accounts, senderAddress, value)) {
             return logger.traceExit(ExecutionReport.create().ko("Invalid transaction! Will result in negative balance! tx hash: " + strHash));
         }
 
         BigInteger nonce = transaction.getNonce();
-        if (!AccountsManager.instance().hasCorrectNonce(accounts, senderAddress, nonce)) {
+        if (operation.isCheckSource() && !AccountsManager.instance().hasCorrectNonce(accounts, senderAddress, nonce)) {
             return logger.traceExit(ExecutionReport.create().ko("Invalid transaction! Nonce mismatch! tx hash: " + strHash));
         }
 
 
-        AccountsManager.instance().transferFunds(accounts, senderAddress, receiverAddress, value, nonce);
+        AccountsManager.instance().transferFunds(accounts, senderAddress, receiverAddress, value, nonce, operation);
 
         return logger.traceExit(ExecutionReport.create().ok());
 

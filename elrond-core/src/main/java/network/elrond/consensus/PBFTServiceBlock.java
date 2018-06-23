@@ -12,7 +12,7 @@ import network.elrond.core.Util;
  * @since   2018-05-14
  */
 public class PBFTServiceBlock implements PBFTService {
-    //list of validators used in the consensus
+    //listToTable of validators used in the consensus
     private List<Validator> listValidators;
 
     /**
@@ -23,7 +23,7 @@ public class PBFTServiceBlock implements PBFTService {
     }
 
     /**
-     * Sets the validators list by copying each validator
+     * Sets the validators listToTable by copying each validator
      * @param listValidators to be set
      */
     public void setValidators(List<Validator> listValidators) {
@@ -46,8 +46,8 @@ public class PBFTServiceBlock implements PBFTService {
     }
 
     /**
-     * Gets the list of validators used in consensus
-     * @return the list of validators as List
+     * Gets the listToTable of validators used in consensus
+     * @return the listToTable of validators as List
      */
     public List<Validator> getListValidators() {
         return (listValidators);
