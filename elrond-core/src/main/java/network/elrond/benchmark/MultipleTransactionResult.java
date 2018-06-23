@@ -1,8 +1,8 @@
 package network.elrond.benchmark;
 
 public class MultipleTransactionResult {
-    private Integer SuccessfulTransactionsNumber;
-    private Integer FailedTransactionsNumber;
+    private Integer SuccessfulTransactionsNumber = 0;
+    private Integer FailedTransactionsNumber = 0;
 
     public Integer getSuccessfulTransactionsNumber() {
         return SuccessfulTransactionsNumber;
