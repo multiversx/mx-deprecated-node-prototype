@@ -23,6 +23,6 @@
             <AppenderRef ref="ConsoleAppender"/>
         </Root>
 
-        <Logger name="network.elrond" level="TRACE"></Logger>
+        <Logger name="network.elrond" level="INFO"></Logger>
     </Loggers>
 </Configuration>

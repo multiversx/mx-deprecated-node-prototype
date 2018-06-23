@@ -5,6 +5,7 @@ import network.elrond.ContextCreator;
 import network.elrond.account.AccountAddress;
 import network.elrond.api.manager.ElrondWebSocketManager;
 import network.elrond.application.AppContext;
+import network.elrond.core.Util;
 import network.elrond.crypto.PKSKPair;
 import network.elrond.data.BootstrapType;
 import network.elrond.data.Transaction;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.math.BigInteger;
 
 @Controller
@@ -31,7 +33,6 @@ public class ElrondNodeController {
 
     @Autowired
     ElrondWebSocketManager elrondWebSocketManager;
-
 
     @RequestMapping(path = "/node/stop", method = RequestMethod.GET)
     public @ResponseBody
@@ -46,6 +47,15 @@ public class ElrondNodeController {
         return logger.traceExit(true);
     }
 
+
+    @RequestMapping(path = "/node/appstatus", method = RequestMethod.GET)
+    public @ResponseBody
+    boolean nodeAppStatus(
+            HttpServletResponse response) {
+        return true;
+    }
+
+
     @RequestMapping(path = "/node/status", method = RequestMethod.GET)
     public @ResponseBody
     boolean nodeStatus(HttpServletResponse response) {
@@ -58,7 +68,7 @@ public class ElrondNodeController {
 
     @RequestMapping(path = "/node/start", method = RequestMethod.GET)
     public @ResponseBody
-    boolean stopNode(
+    boolean startNode(
             HttpServletResponse response,
             @RequestParam(defaultValue = "elrond-node-1") String nodeName,
             @RequestParam(defaultValue = "4001") Integer port,
@@ -70,7 +80,7 @@ public class ElrondNodeController {
             @RequestParam(defaultValue = "elrond-node-1", required = false) String blockchainPath,
             @RequestParam(defaultValue = "elrond-node-1", required = false) String blockchainRestorePath
 
-    ) {
+    ) throws IOException {
         logger.traceEntry("params: {} {} {} {} {} {} {} {} {}", nodeName, port, masterPeerPort, masterPeerIpAddress,
                 privateKey, mintValue, bootstrapType, blockchainPath, blockchainRestorePath);
         //Reuploaded
@@ -131,21 +141,27 @@ public class ElrondNodeController {
         return logger.traceExit(elrondApiNode.ping(ipAddress, port));
     }
 
-    @RequestMapping(path = "/node/publickeyandprivatekey", method = RequestMethod.GET)
+    @RequestMapping(path = "/node/generatepublickeyandprivateKey", method = RequestMethod.GET)
     public @ResponseBody
-    PKSKPair generatePublicAndPrivateKey(
-            HttpServletResponse response) {
-        logger.traceEntry();
-        return logger.traceExit(elrondApiNode.generatePublicKeyAndPrivateKey());
-    }
-
-    @RequestMapping(path = "/node/publickeyfromprivatekey", method = RequestMethod.GET)
-    public @ResponseBody
-    PKSKPair generatePublicKeyFromPrivateKey(
+    PKSKPair generatePublicKeyAndPrivateKey(
             HttpServletResponse response,
             @RequestParam() String privateKey) {
         logger.traceEntry("params: {}", privateKey);
-        return logger.traceExit(elrondApiNode.generatePublicKeyFromPrivateKey(privateKey));
+        return logger.traceExit(elrondApiNode.generatePublicKeyAndPrivateKey(privateKey));
+    }
+
+    @RequestMapping(path = "/node/shardofaddress", method = RequestMethod.GET)
+    public @ResponseBody
+    Integer ShardOfAddress(
+            HttpServletResponse response,
+            @RequestParam() String address) {
+
+        BigInteger index = new BigInteger(Util.byteArrayToHexString(address.getBytes()));
+        int nrShards = 2;
+        int ShardNr = index.mod(BigInteger.valueOf(nrShards)).intValue();
+
+        logger.traceEntry("params: {}", address);
+        return logger.traceExit(ShardNr);
     }
 
     @RequestMapping(path = "/node/exit", method = RequestMethod.GET)
@@ -156,6 +172,5 @@ public class ElrondNodeController {
         System.exit(0);
         logger.traceExit();
     }
-
 
 }

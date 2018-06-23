@@ -6,6 +6,7 @@ import network.elrond.crypto.PKSKPair;
 import network.elrond.data.Receipt;
 import network.elrond.data.Transaction;
 import network.elrond.p2p.PingResponse;
+import org.mapdb.Fun;
 
 import java.math.BigInteger;
 
@@ -70,13 +71,6 @@ public interface ElrondFacade {
      *
      * @return
      */
-    PKSKPair generatePublicKeyAndPrivateKey();
 
-    /**
-     * Generate public key from a private key
-     *
-     * @param privateKey
-     * @return
-     */
-    PKSKPair generatePublicKeyFromPrivateKey(String privateKey);
+    PKSKPair generatePublicKeyAndPrivateKey(String strPrivateKey);
 }

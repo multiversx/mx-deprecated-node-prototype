@@ -7,6 +7,7 @@ import network.elrond.account.AccountAddress;
 import network.elrond.api.log.WebSocketAppenderAdapter;
 import network.elrond.api.manager.ElrondWebSocketManager;
 import network.elrond.application.AppContext;
+import network.elrond.core.Util;
 import network.elrond.crypto.PKSKPair;
 import network.elrond.data.BootstrapType;
 import network.elrond.data.Receipt;
@@ -39,7 +40,7 @@ class ElrondApiNode {
         return new ElrondFacadeImpl();
     }
 
-    boolean start(AppContext context, String blockchainPath, String blockchainRestorePath) {
+    boolean start(AppContext context, String blockchainPath, String blockchainRestorePath) throws IOException {
         logger.traceEntry("params: {} {} {}", context, blockchainPath, blockchainRestorePath);
 
         WebSocketAppenderAdapter.instance().setElrondWebSocketManager(elrondWebSocketManager);
@@ -88,23 +89,17 @@ class ElrondApiNode {
         return logger.traceExit(facade.ping(ipAddress, port));
     }
 
-    PKSKPair generatePublicKeyAndPrivateKey() {
+    PKSKPair generatePublicKeyAndPrivateKey(String privateKey) {
         logger.traceEntry();
         ElrondFacade facade = getFacade();
-        return logger.traceExit(facade.generatePublicKeyAndPrivateKey());
+        return logger.traceExit(facade.generatePublicKeyAndPrivateKey(privateKey));
     }
 
-    PKSKPair generatePublicKeyFromPrivateKey(String privateKey) {
-        logger.traceEntry("params: {}", privateKey);
-        ElrondFacade facade = getFacade();
-        return logger.traceExit(facade.generatePublicKeyFromPrivateKey(privateKey));
-    }
-
-    private void setupRestoreDir(File sourceDir, File destinationDir) {
+    private void setupRestoreDir(File sourceDir, File destinationDir) throws IOException {
         logger.traceEntry("params: {} {}", sourceDir, destinationDir);
         if (!sourceDir.getAbsolutePath().equals(destinationDir.getAbsolutePath())) {
             logger.trace("source and destination paths are different!");
-            deleteDirectory(destinationDir);
+            Util.deleteDirectory(destinationDir);
             copyDirectory(sourceDir, destinationDir);
         }
         logger.traceExit();
@@ -121,15 +116,6 @@ class ElrondApiNode {
         logger.traceExit();
     }
 
-    private void deleteDirectory(File dir) {
-        logger.traceEntry("params: {}", dir);
-        try {
-            FileUtils.deleteDirectory(dir);
-            logger.trace("done");
-        } catch (IOException ex) {
-            logger.throwing(ex);
-        }
-        logger.traceExit();
-    }
+
 
 }

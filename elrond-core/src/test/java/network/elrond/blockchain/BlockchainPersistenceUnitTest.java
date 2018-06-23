@@ -12,21 +12,28 @@ import java.util.Random;
 
 public class BlockchainPersistenceUnitTest {
     Random r;
-
+    BlockchainPersistenceUnit<String, String> blockchainPersistenceUnit;
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
+
         r = new Random();
+        blockchainPersistenceUnit = new BlockchainPersistenceUnit<>("test", String.class);
     }
 
     @After
     public void TearDown() throws IOException, InterruptedException {
+        blockchainPersistenceUnit.close();
+        blockchainPersistenceUnit.destroy();
+    }
+    @Test(expected = IllegalArgumentException.class)
+    public void testBlockchainPersistenceUnitConstructorWithNullDatabasePathShouldThrowException() throws IOException {
+        blockchainPersistenceUnit.put(null, new byte[3]);
     }
 
-    //@Test(expected = IllegalArgumentException.class)
+
+    @Test(expected = IllegalArgumentException.class)
     public void testBlockchainPersistenceUnitWithNullPathShouldThrowException() throws IOException {
-        BlockchainPersistenceUnit<String, String> blockchainPersistenceUnit =
-                new BlockchainPersistenceUnit<>((String) null, String.class);
-        blockchainPersistenceUnit.close();
+        blockchainPersistenceUnit.put(null, new byte[3]);
     }
 
     @Test
@@ -35,8 +42,8 @@ public class BlockchainPersistenceUnitTest {
                 new BlockchainPersistenceUnit<>(BaseBlockchainTest.BLOCKCHAIN_BLOCK_DATA_TEST_PATH, String.class);
         byte[] key = new byte[] { (byte)r.nextInt()};
         byte[] value = new byte[] { (byte)r.nextInt()};
-         blockchainPersistenceUnit.put(key,value);
-         byte[] readValue = blockchainPersistenceUnit.get(key);
+        blockchainPersistenceUnit.put(key,value);
+        byte[] readValue = blockchainPersistenceUnit.get(key);
         Assert.assertArrayEquals(value, readValue);
         blockchainPersistenceUnit.close();
     }
