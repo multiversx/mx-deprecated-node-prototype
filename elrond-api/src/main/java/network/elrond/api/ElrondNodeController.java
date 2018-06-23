@@ -93,7 +93,7 @@ public class ElrondNodeController {
 
     @RequestMapping(path = "/node/send", method = RequestMethod.GET)
     public @ResponseBody
-    Object send(
+    Transaction send(
             HttpServletResponse response,
             @RequestParam(defaultValue = "0326e7875aadaba270ae93ec40ef4706934d070eb21c9acad4743e31289fa4ebc7")
                     String address,
@@ -102,7 +102,7 @@ public class ElrondNodeController {
 
         AccountAddress _add = AccountAddress.fromHexString(address);
         Transaction transaction = elrondApiNode.send(_add, value);
-        return logger.traceExit((transaction != null) ? AppServiceProvider.getSerializationService().getHashString(transaction) : null);
+        return logger.traceExit((transaction != null) ? transaction : null);
     }
 
 
