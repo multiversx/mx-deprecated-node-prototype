@@ -130,6 +130,21 @@ public class ElrondNodeController {
 
     }
 
+    @RequestMapping(path = "/node/sendMultipleTransactions", method = RequestMethod.GET)
+    public @ResponseBody
+    Object sendMultipleTransactions(
+            HttpServletResponse response,
+            @RequestParam(defaultValue = "0326e7875aadaba270ae93ec40ef4706934d070eb21c9acad4743e31289fa4ebc7")
+                    String address,
+            @RequestParam(defaultValue = "1") BigInteger value,
+            @RequestParam(defaultValue = "1") Integer nrTransactions) {
+        logger.traceEntry("params: {} {} {}", address, value, nrTransactions);
+
+        AccountAddress _add = AccountAddress.fromHexString(address);
+        return logger.traceExit(elrondApiNode.sendMultipleTransactions(_add, value, nrTransactions));
+    }
+
+
     @RequestMapping(path = "/node/bechmarkResult", method = RequestMethod.GET)
     public @ResponseBody
     Object getBenchmarkResult(
