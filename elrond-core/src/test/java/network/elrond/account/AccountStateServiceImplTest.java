@@ -1,5 +1,7 @@
 package network.elrond.account;
 
+import network.elrond.application.AppContext;
+import network.elrond.application.AppState;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
@@ -124,9 +126,16 @@ public class AccountStateServiceImplTest {
     @Test
     public void testGenerateGenesisBlock() throws IOException, ClassNotFoundException {
         AccountsContext accountsContext = new AccountsContext();
+        PrivateKey privateKey = new PrivateKey();
         PublicKey publicKey = new PublicKey(new PrivateKey());
         accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(""));
-        accountStateService.generateGenesisBlock(Util.byteArrayToHexString(publicKey.getValue()), BigInteger.TEN, accountsContext, new PrivateKey(), null);
+        String initialAddress = Util.byteArrayToHexString(publicKey.getValue());
+
+        AppState appState = new AppState();
+        AppContext appContext = new AppContext();
+        appContext.setPrivateKey(privateKey);
+
+        accountStateService.generateGenesisBlock(initialAddress, BigInteger.TEN, appState, appContext);
         AccountState state = accountStateService.getAccountState(AccountAddress.fromBytes(Util.PUBLIC_KEY_MINTING.getValue()), accounts);
         Assert.assertNotNull(state);
         Assert.assertTrue(state.getBalance().compareTo(Util.VALUE_MINTING) == 0);

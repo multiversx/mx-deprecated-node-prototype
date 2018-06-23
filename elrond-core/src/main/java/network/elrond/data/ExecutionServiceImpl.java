@@ -10,6 +10,8 @@ import network.elrond.chronology.Round;
 import network.elrond.core.Util;
 import network.elrond.crypto.MultiSignatureService;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
+import network.elrond.sharding.ShardOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongycastle.util.encoders.Base64;
@@ -70,7 +72,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         return logger.traceExit(signatureService.verifyAggregatedSignature(signersPublicKeys, signature, commitment, message, bitmap));
     }
 
-    private boolean validateBlockTimestampRound(Blockchain blockchain, Block block){
+    private boolean validateBlockTimestampRound(Blockchain blockchain, Block block) {
         logger.traceEntry("params: {} {}", blockchain, block);
         Util.check(blockchain.getGenesisBlock() != null, "genesis!=null");
 
@@ -114,20 +116,20 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         //check if the current block is genesis and save it in blockchain structure
-        if (block.getNonce().equals(BigInteger.ZERO)){
+        if (block.getNonce().equals(BigInteger.ZERO)) {
             logger.trace("The current block is genesis and we save it in blockchain structure");
             blockchain.setGenesisBlock(block);
         }
 
         //check genesis block existence
-        if (blockchain.getGenesisBlock() == null){
+        if (blockchain.getGenesisBlock() == null) {
             blockExecutionReport.ko("Genesis block missing!");
             logger.trace("Block process FAILED!");
             return logger.traceExit(blockExecutionReport);
         }
 
         //check timestamp and round
-        if (!validateBlockTimestampRound(blockchain, block)){
+        if (!validateBlockTimestampRound(blockchain, block)) {
             blockExecutionReport.ko(String.format("Timestamp and round mismatch! Block nonce: %d, round index: %d, timestamp %d, genesis timestamp: %d",
                     block.getNonce().longValue(), block.roundIndex, block.getTimestamp(), blockchain.getGenesisBlock().getTimestamp()));
             logger.trace("Block process FAILED!");
@@ -212,19 +214,33 @@ public class ExecutionServiceImpl implements ExecutionService {
             return logger.traceExit(ExecutionReport.create().ko("Invalid transaction! tx hash: " + strHash));
         }
 
+
+        Shard shard = accounts.getShard();
+        ShardOperation operation = AppServiceProvider.getShardingService().getShardOperation(shard, transaction);
+
+
+        String senderAddress = transaction.getSenderAddress();
+        String receiverAddress = transaction.getReceiverAddress();
+
         //We have to copy-construct the objects for sandbox mode
-        if (!AccountsManager.instance().hasFunds(accounts, transaction.getSendAddress(), transaction.getValue())) {
+        BigInteger value = transaction.getValue();
+        if (!AccountsManager.instance().hasFunds(accounts, senderAddress, value)) {
             return logger.traceExit(ExecutionReport.create().ko("Invalid transaction! Will result in negative balance! tx hash: " + strHash));
         }
 
-        if (!AccountsManager.instance().hasCorrectNonce(accounts, transaction.getSendAddress(), transaction.getNonce())) {
+        BigInteger nonce = transaction.getNonce();
+        if (!AccountsManager.instance().hasCorrectNonce(accounts, senderAddress, nonce)) {
             return logger.traceExit(ExecutionReport.create().ko("Invalid transaction! Nonce mismatch! tx hash: " + strHash));
         }
 
-        AccountsManager.instance().transferFunds(accounts,
-                transaction.getSendAddress(), transaction.getReceiverAddress(),
-                transaction.getValue(), transaction.getNonce());
+
+        AccountsManager.instance().transferFunds(accounts, senderAddress, receiverAddress, value, nonce);
 
         return logger.traceExit(ExecutionReport.create().ok());
+
+
     }
+
+
+
 }

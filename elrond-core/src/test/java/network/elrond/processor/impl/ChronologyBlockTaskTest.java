@@ -8,6 +8,8 @@ import network.elrond.chronology.ChronologyService;
 import network.elrond.core.ThreadUtil;
 import network.elrond.data.Block;
 import network.elrond.processor.AppTask;
+import network.elrond.processor.impl.executor.ChronologyBlockTask;
+import network.elrond.processor.impl.initialization.NtpClientInitializerProcessor;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 

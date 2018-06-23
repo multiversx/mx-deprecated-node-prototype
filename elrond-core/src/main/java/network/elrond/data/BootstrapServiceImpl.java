@@ -1,19 +1,18 @@
 package network.elrond.data;
 
 import network.elrond.account.Accounts;
-import network.elrond.account.AccountsContext;
 import network.elrond.application.AppContext;
+import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.blockchain.SettingsType;
 import network.elrond.chronology.NTPClient;
 import network.elrond.core.Util;
-import network.elrond.crypto.PrivateKey;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongycastle.util.encoders.Base64;
 import org.mapdb.Fun;
+import org.spongycastle.util.encoders.Base64;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -146,17 +145,18 @@ public class BootstrapServiceImpl implements BootstrapService {
 
 
     @Override
-    public ExecutionReport startFromGenesis(Accounts accounts, Blockchain blockchain, AppContext context, NTPClient ntpClient) {
-        logger.traceEntry("params: {} {} {} {}", accounts, blockchain, context, ntpClient);
+    public ExecutionReport startFromGenesis(AppState state, AppContext context) {
+        logger.traceEntry("params: {} {}", state, context);
         ExecutionReport result = new ExecutionReport().ok("Start from scratch...");
+
+
+        Accounts accounts = state.getAccounts();
+        Blockchain blockchain = state.getBlockchain();
 
         // Generate genesis block
         String addressMint = context.getStrAddressMint();
         BigInteger valueMint = context.getValueMint();
-        PrivateKey privateKey = context.getPrivateKey();
-        AccountsContext accountsContext = new AccountsContext();
-        Fun.Tuple2<Block, Transaction> genesisData = AppServiceProvider.getAccountStateService()
-                .generateGenesisBlock(addressMint, valueMint, accountsContext, privateKey, ntpClient);
+        Fun.Tuple2<Block, Transaction> genesisData = AppServiceProvider.getAccountStateService().generateGenesisBlock(addressMint, valueMint, state, context);
 
         Block genesisBlock = genesisData.a;
         String genesisBlockHash = AppServiceProvider.getSerializationService().getHashString(genesisBlock);
@@ -192,8 +192,14 @@ public class BootstrapServiceImpl implements BootstrapService {
 
 
     @Override
-    public ExecutionReport restoreFromDisk(BigInteger currentBlockIndex, Accounts accounts, Blockchain blockchain, AppContext context, NTPClient ntpClient) {
-        logger.traceEntry("params: {} {} {} {}", currentBlockIndex, accounts, blockchain, context, ntpClient);
+    public ExecutionReport restoreFromDisk(BigInteger currentBlockIndex, AppState state, AppContext context) {
+
+        logger.traceEntry("params: {} {}", currentBlockIndex, context);
+
+        Accounts accounts = state.getAccounts();
+        Blockchain blockchain = state.getBlockchain();
+        NTPClient ntpClient = state.getNtpClient();
+
 
         ExecutionReport result = new ExecutionReport().ok("Start bootstrapping by loading from disk...");
         BigInteger idx = BigInteger.valueOf(-1);
@@ -210,7 +216,7 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         if (idx.equals(BigInteger.valueOf(-1))) {
             logger.trace("no index stored on disk so need to create genesis");
-            return startFromGenesis(accounts, blockchain, context, ntpClient);
+            return startFromGenesis(state, context);
         }
 
         BigInteger genesisBlockIndex = BigInteger.valueOf(0);
@@ -258,8 +264,12 @@ public class BootstrapServiceImpl implements BootstrapService {
 
 
     @Override
-    public ExecutionReport synchronize(BigInteger localBlockIndex, BigInteger remoteBlockIndex, Blockchain blockchain, Accounts accounts) {
-        logger.traceEntry("params: {} {} {} {}", localBlockIndex, remoteBlockIndex, blockchain, accounts);
+    public ExecutionReport synchronize(BigInteger localBlockIndex, BigInteger remoteBlockIndex, AppState state) {
+        logger.traceEntry("params: {} {} {} {}", localBlockIndex, remoteBlockIndex, state);
+
+        Accounts accounts = state.getAccounts();
+        Blockchain blockchain = state.getBlockchain();
+
         ExecutionReport result = new ExecutionReport().ok("Bootstrapping... [local height: " + localBlockIndex + " > network height: " + remoteBlockIndex + "...");
 
         logger.trace("re-running stored blocks to update internal state...");
@@ -293,6 +303,7 @@ public class BootstrapServiceImpl implements BootstrapService {
 
                 result.ok("Added block in blockchain : " + blockHash + " # " + block);
                 blockchain.setCurrentBlockIndex(blockIndex);
+                blockchain.setCurrentBlock(block);
 
 
             } catch (Exception ex) {

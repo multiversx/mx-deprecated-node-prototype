@@ -1,15 +1,17 @@
 package network.elrond.account;
 
+import network.elrond.blockchain.PersistenceUnitContainer;
 import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
-
-import network.elrond.blockchain.PersistenceUnitContainer;
+import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Accounts implements Serializable, PersistenceUnitContainer {
 
@@ -29,6 +31,10 @@ public class Accounts implements Serializable, PersistenceUnitContainer {
         addresses = new HashSet<>();
         AppServiceProvider.getAccountStateService().initialMintingToKnownAddress(this);
         logger.traceExit();
+    }
+
+    public Shard getShard() {
+        return context.getShard();
     }
 
     public AccountsPersistenceUnit<AccountAddress, AccountState> getAccountsPersistenceUnit() {

@@ -1,4 +1,4 @@
-package network.elrond.processor.impl;
+package network.elrond.processor.impl.executor;
 
 import network.elrond.Application;
 import network.elrond.TimeWatch;
@@ -8,6 +8,9 @@ import network.elrond.core.ThreadUtil;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.data.AppBlockManager;
 import network.elrond.p2p.P2PChannelName;
+import network.elrond.processor.impl.AbstractChannelTask;
+import network.elrond.sharding.AppShardingManager;
+import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,14 +36,17 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
 
         ThreadUtil.sleep(4000);
 
-        AppContext context = application.getContext();
-        if (!context.isSeedNode()) {
-            logger.info("Not processing ...");
+        AppState state = application.getState();
+        Shard shard = state.getShard();
+
+        boolean isLeaderInShard = AppShardingManager.instance().isLeaderInShard(state);
+        if (!isLeaderInShard) {
+            logger.info("Node is not leader in shard {}", shard);
             return;
         }
 
+        logger.info("Node is leader in shard {}", shard);
 
-        AppState state = application.getState();
         if (state.isLock()) {
             // If sync is running stop
             logger.info("Can't execute, state locked!");
@@ -62,11 +68,12 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
 
 
         long time = watch.time(TimeUnit.MILLISECONDS);
-        long tps = (time > 0) ? ((size*1000) / time) : 0;
+        long tps = (time > 0) ? ((size * 1000) / time) : 0;
         logger.info(" ###### Executed " + size + " transactions in " + time + "ms  TPS:" + tps + "   ###### ");
 
         logger.traceExit();
     }
+
 
     private void proposeBlock(ArrayBlockingQueue<String> queue, Application application) {
         logger.traceEntry("params: {} {}", queue, application);
@@ -88,7 +95,6 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
 
         logger.traceExit();
     }
-
 
 
     @Override

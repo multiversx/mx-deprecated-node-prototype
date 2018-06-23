@@ -13,6 +13,7 @@ import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -49,12 +50,13 @@ public class AppBlockManagerTest {
         state = new AppState();
 
         if(connection == null) {
-            connection = AppServiceProvider.getP2PBroadcastService().createConnection(context);
+            connection = AppServiceProvider.getP2PConnectionService().createConnection(context);
         }
         state.setConnection(connection);
 
         BlockchainContext blockchainContext = new BlockchainContext();
         blockchainContext.setConnection(state.getConnection());
+        blockchainContext.setShard(new Shard(0));
         blockchain = new Blockchain(blockchainContext);
         blockchain.setCurrentBlock(blk0);
         state.setBlockchain(blockchain);

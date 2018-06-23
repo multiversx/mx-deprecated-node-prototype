@@ -1,6 +1,14 @@
 package network.elrond.processor;
 
-import network.elrond.processor.impl.*;
+import network.elrond.processor.impl.executor.BlockAssemblyProcessor;
+import network.elrond.processor.impl.executor.BootstrapBlockTask;
+import network.elrond.processor.impl.executor.ChronologyBlockTask;
+import network.elrond.processor.impl.executor.SynchronizationBlockTask;
+import network.elrond.processor.impl.initialization.*;
+import network.elrond.processor.impl.interceptor.P2PBlocksInterceptorProcessor;
+import network.elrond.processor.impl.interceptor.P2PReceiptInterceptorProcessor;
+import network.elrond.processor.impl.interceptor.P2PTransactionsInterceptorProcessor;
+import network.elrond.processor.impl.interceptor.P2PXTransactionsInterceptorProcessor;
 
 
 public class AppTasks {
@@ -18,6 +26,13 @@ public class AppTasks {
      */
     public static AppTask INTERCEPT_TRANSACTIONS = (application) -> {
         new P2PTransactionsInterceptorProcessor().process(application);
+    };
+
+    /**
+     * P2P transactions broadcast cross shards
+     */
+    public static AppTask INTERCEPT_XTRANSACTIONS = (application) -> {
+        new P2PXTransactionsInterceptorProcessor().process(application);
     };
 
     /**
@@ -57,6 +72,13 @@ public class AppTasks {
     };
 
     /**
+     * Init shard
+     */
+    public static AppTask INIT_SHARDING = (application) -> {
+        new ShardStarterProcessor().process(application);
+    };
+
+    /**
      * Init blockchain
      */
     public static AppTask INIT_ACCOUNTS = (application) -> {
@@ -82,7 +104,7 @@ public class AppTasks {
     /**
      * Init NTP client
      */
-    public static AppTask NTP_CLIENT_INITIALIZER = (application) ->{
+    public static AppTask NTP_CLIENT_INITIALIZER = (application) -> {
         new NtpClientInitializerProcessor().process(application);
     };
 

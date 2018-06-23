@@ -188,7 +188,7 @@ public class BootstrappingProcessorIT {
 //        AccountState acsSender = accountStateService.getOrCreateAccountState(AccountAddress.fromPublicKey(pbk1), state.getAccounts());
 //        //mint 100 ERDs
 //        acsSender.setBalance(BigInteger.TEN.pow(10));
-//        accountStateService.setAccountState(AccountAddress.fromHexString(trx1.getSendAddress()), acsSender, state.getAccounts()); // PMS
+//        accountStateService.setAccountState(AccountAddress.fromHexString(trx1.getSenderAddress()), acsSender, state.getAccounts()); // PMS
 //
 //        //Now network is loaded, try to synchronize
 //        executionReport = bootstrapService.synchronize(BigInteger.ZERO, bootstrapService.getCurrentBlockIndex(LocationType.NETWORK, state.getBlockchain()), app.getState().getBlockchain(), app.getState().getAccounts());

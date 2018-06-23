@@ -1,7 +1,7 @@
 package network.elrond.account;
 
-import network.elrond.chronology.NTPClient;
-import network.elrond.crypto.PrivateKey;
+import network.elrond.application.AppContext;
+import network.elrond.application.AppState;
 import network.elrond.data.Block;
 import network.elrond.data.Transaction;
 import org.mapdb.Fun;
@@ -27,7 +27,5 @@ public interface AccountStateService {
 
     void initialMintingToKnownAddress(Accounts accounts);
 
-    Fun.Tuple2<Block, Transaction> generateGenesisBlock(
-            String initialAddress, BigInteger initialValue,
-            AccountsContext accountsContextTemporary, PrivateKey privateKey, NTPClient ntpClient);
+    Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue, AppState state, AppContext context);
 }

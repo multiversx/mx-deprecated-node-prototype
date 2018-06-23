@@ -1,4 +1,4 @@
-package network.elrond.processor.impl;
+package network.elrond.processor.impl.executor;
 
 import network.elrond.Application;
 import network.elrond.application.AppState;
@@ -6,13 +6,11 @@ import network.elrond.chronology.*;
 import network.elrond.core.EventHandler;
 import network.elrond.core.ThreadUtil;
 import network.elrond.processor.AppTask;
-import network.elrond.processor.AppTasks;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ChronologyBlockTask implements AppTask {

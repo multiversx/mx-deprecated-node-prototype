@@ -5,6 +5,7 @@ import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
+import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,12 +18,16 @@ public class P2PObjectServiceImpl implements P2PObjectService {
 
     @Override
     public <T> T get(P2PConnection connection, String key, Class<T> clazz) throws ClassNotFoundException, IOException {
-        logger.traceEntry("params: {} {} {}", connection, key, clazz);
-        PeerDHT peer = connection.getDht();
-        String clazzName = clazz.getName();
 
-        FutureGet futureGet = peer.get(Number160.createHash(key + clazzName)).start();
+        logger.traceEntry("params: {} {} {}", connection, key, clazz);
+
+        PeerDHT peer = connection.getDht();
+
+        Number160 hash = getDHTHash(connection, key, clazz);
+
+        FutureGet futureGet = peer.get(hash).start();
         futureGet.awaitUninterruptibly();
+
         if (futureGet.isSuccess()) {
             Iterator<Data> iterator = futureGet.dataMap().values().iterator();
             if (!iterator.hasNext()) {
@@ -32,10 +37,12 @@ public class P2PObjectServiceImpl implements P2PObjectService {
             T object = (T) data.object();
             logger.trace("Retrieved key: {} => {}", key, object);
             return logger.traceExit(object);
+
         } else {
             logger.warn("Timeout getting data with hash {}", key);
         }
-        return logger.traceExit((T)null);
+
+        return logger.traceExit((T) null);
     }
 
     @Override
@@ -43,14 +50,26 @@ public class P2PObjectServiceImpl implements P2PObjectService {
         logger.traceEntry("params: {} {} {}", connection, key, value);
         PeerDHT peer = connection.getDht();
 
-        String clazzName = value.getClass().getName();
+        Number160 hash = getDHTHash(connection, key, value.getClass());
 
-        FuturePut fp = peer.put(Number160.createHash(key + clazzName)).data(new Data(value)).start();
-        logger.trace("Put object with key {}", key + clazzName);
+        FuturePut fp = peer.put(hash).data(new Data(value)).start();
+        logger.trace("Put object with key {}", key);
 
         fp.awaitUninterruptibly();
 
         return logger.traceExit(fp);
+    }
+
+    private <T> Number160 getDHTHash(P2PConnection connection, String key, Class<T> clazz) {
+
+        String clazzName = clazz.getName();
+        Shard shard = connection.getShard();
+        Integer shardIndex = shard.getIndex();
+
+        String string = key + "_#_" + clazzName + "_#_" + shardIndex;
+        logger.trace("Computing hash {} for key:{} class:{} shard:{}", string, key, clazzName, shardIndex);
+
+        return Number160.createHash(string);
     }
 
 }

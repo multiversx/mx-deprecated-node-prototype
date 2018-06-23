@@ -7,6 +7,7 @@ import network.elrond.crypto.PublicKey;
 import network.elrond.crypto.Signature;
 import network.elrond.crypto.SignatureService;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -93,7 +94,7 @@ public class TransactionServiceImpl implements TransactionService {
                 (transaction.getChallenge() == null) ||
                 (transaction.getSignature().length == 0) ||
                 (transaction.getChallenge().length == 0) ||
-                (transaction.getSendAddress().length() != Util.MAX_LEN_ADDR * 2) ||
+                (transaction.getSenderAddress().length() != Util.MAX_LEN_ADDR * 2) ||
                 (transaction.getReceiverAddress().length() != Util.MAX_LEN_ADDR * 2) ||
                 (transaction.getPubKey().length() != Util.MAX_LEN_PUB_KEY * 2)
                 ) {
@@ -102,7 +103,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         //test 2. verify if sender address is generated from public key used to sign tx
-        if (!transaction.getSendAddress().equals(Util.getAddressFromPublicKey(Util.hexStringToByteArray(transaction.getPubKey())))) {
+        if (!transaction.getSenderAddress().equals(Util.getAddressFromPublicKey(Util.hexStringToByteArray(transaction.getPubKey())))) {
             logger.trace("Failed at sender address not being generated (or equal) to public key");
             return (false);
         }
@@ -165,10 +166,16 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Transaction generateTransaction(PublicKey sender, PublicKey receiver, BigInteger value, BigInteger nonce) {
         logger.traceEntry("params: {} {} {} {}", sender, receiver, value, nonce);
+
+        Shard senderShard= AppServiceProvider.getShardingService().getShard(sender.getValue());
+        Shard receiverShard = AppServiceProvider.getShardingService().getShard(receiver.getValue());
+
         Transaction t = new Transaction(Util.getAddressFromPublicKey(sender.getValue()),
                 Util.getAddressFromPublicKey(receiver.getValue()),
                 value,
-                nonce);
+                nonce,
+                senderShard, receiverShard
+        );
         t.setPubKey(Util.getAddressFromPublicKey(sender.getValue()));
 
 

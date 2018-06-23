@@ -1,4 +1,4 @@
-package network.elrond.processor.impl;
+package network.elrond.processor.impl.interceptor;
 
 import network.elrond.Application;
 import network.elrond.application.AppState;
@@ -7,7 +7,7 @@ import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.data.Receipt;
 import network.elrond.p2p.P2PChannelName;
-import network.elrond.processor.AppTasks;
+import network.elrond.processor.impl.AbstractChannelTask;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

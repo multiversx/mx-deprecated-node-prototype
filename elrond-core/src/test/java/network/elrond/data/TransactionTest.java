@@ -5,11 +5,12 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.service.AppServiceProvider;
-import org.spongycastle.util.encoders.Base64;
+import network.elrond.sharding.Shard;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.spongycastle.util.encoders.Base64;
 
 import java.math.BigInteger;
 
@@ -22,6 +23,8 @@ public class TransactionTest {
     private String pubKey ;
     private BigInteger nonce;
     private BigInteger value;
+    private Shard senderShard;
+    private Shard receiverShard;
 
     @Before
     public void SetupTest(){
@@ -30,6 +33,8 @@ public class TransactionTest {
         pubKey = "025f37d20e5b18909361e0ead7ed17c69b417bee70746c9e9c2bcb1394d921d4ae";
         nonce = BigInteger.ZERO;
         value = BigInteger.TEN.pow(8);
+        senderShard = AppServiceProvider.getShardingService().getShard(sendAddress.getBytes());
+        receiverShard = AppServiceProvider.getShardingService().getShard(recvAddress.getBytes());
     }
 
     @After
@@ -39,61 +44,63 @@ public class TransactionTest {
 
     @Test
     public void testTransactionConstructorWithCorrectParametersShouldNotThrowException() {
-        Transaction tx = new Transaction(sendAddress, recvAddress, value, nonce);
+
+        Transaction tx = new Transaction(sendAddress, recvAddress, value, nonce, senderShard, receiverShard);
         Assert.assertNotNull(tx);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testSendAddressNullShouldThrowException(){
-        Transaction tx = new Transaction(null, recvAddress, value, nonce);
+        Transaction tx = new Transaction(null, recvAddress, value, nonce, null, receiverShard);
         Assert.fail();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testSendAddressEmptyShouldThrowException(){
-        Transaction tx = new Transaction("", recvAddress, value, nonce);
+        Transaction tx = new Transaction("", recvAddress, value, nonce, senderShard, null);
         Assert.fail();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testReceiveAddressNullShouldThrowException(){
-        Transaction tx = new Transaction(sendAddress, null, value, nonce);
+        Transaction tx = new Transaction(sendAddress, null, value, nonce, senderShard, null);
         Assert.fail();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testReceiveAddressEmptyShouldThrowException(){
-        Transaction tx = new Transaction(sendAddress, "", value, nonce);
+
+        Transaction tx = new Transaction(sendAddress, "", value, nonce, senderShard, null);
         Assert.fail();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testValueLessThanZeroShouldThrowException(){
-        Transaction tx = new Transaction(sendAddress, recvAddress, BigInteger.valueOf(-1), nonce);
+        Transaction tx = new Transaction(sendAddress, recvAddress, BigInteger.valueOf(-1), nonce, senderShard, receiverShard);
         Assert.fail();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testNonceLessThanZeroShouldThrowException(){
-        Transaction tx = new Transaction(sendAddress, recvAddress, value, BigInteger.valueOf(-1));
+        Transaction tx = new Transaction(sendAddress, recvAddress, value, BigInteger.valueOf(-1), senderShard, receiverShard);
         Assert.fail();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testValueNullShouldThrowException(){
-        Transaction tx = new Transaction(sendAddress, recvAddress, null, nonce);
+        Transaction tx = new Transaction(sendAddress, recvAddress, null, nonce, senderShard, receiverShard);
         Assert.fail();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testNonceNullZeroShouldThrowException(){
-        Transaction tx = new Transaction(sendAddress, recvAddress, value, null);
+        Transaction tx = new Transaction(sendAddress, recvAddress, value, null, senderShard, receiverShard);
         Assert.fail();
     }
 
     @Test
     public void testTransactionSerialization(){
-        Transaction tx = new Transaction(sendAddress, recvAddress, value, nonce);
+        Transaction tx = new Transaction(sendAddress, recvAddress, value, nonce, senderShard, receiverShard);
 
         byte[] buff = new byte[5];
         for (int i = 0; i < buff.length; i++) {
@@ -138,7 +145,8 @@ public class TransactionTest {
         PrivateKey pvKey = new PrivateKey();
         PublicKey pbKey = new PublicKey(pvKey);
 
-        Transaction tx = new Transaction(sendAddress, recvAddress, value, nonce);
+
+        Transaction tx = new Transaction(sendAddress, recvAddress, value, nonce,senderShard, receiverShard);
         byte[] buff = new byte[5];
         for (int i = 0; i < buff.length; i++) {
             buff[i] = (byte) i;

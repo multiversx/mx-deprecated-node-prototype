@@ -1,6 +1,7 @@
 package network.elrond.data;
 
 import network.elrond.core.Util;
+import network.elrond.sharding.Shard;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -28,7 +29,7 @@ public class Block implements Serializable {
     //list of transaction hashes included in block
     protected List<byte[]> listTXHashes;
     //int shard ID
-    protected int shard;
+    protected Shard shard;
     //app state hash
     protected byte[] appStateHash;
 
@@ -38,12 +39,9 @@ public class Block implements Serializable {
 
     public Block() {
         nonce = BigInteger.ZERO;
-//        hashNoSig = new byte[0];
-//        hash = new byte[0];
         listPubKeys = new ArrayList<String>();
         prevBlockHash = new byte[0];
         listTXHashes = new ArrayList<byte[]>();
-        shard = 0;
         appStateHash = new byte[0];
         signature = new byte[0];
         commitment = new byte[0];
@@ -132,18 +130,15 @@ public class Block implements Serializable {
     /**
      * Gets the shard's number
      *
-     * @return shard as int
      */
-    public int getShard() {
+    public Shard getShard() {
         return (shard);
     }
 
     /**
      * Sets the shard's number
-     *
-     * @param shard to be set
      */
-    public void setShard(int shard) {
+    public void setShard(Shard shard) {
         this.shard = shard;
     }
 
@@ -187,21 +182,21 @@ public class Block implements Serializable {
         return timestamp;
     }
 
-    public void setTimestamp(long timestamp){
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 
-    public long getRoundIndex(){
+    public long getRoundIndex() {
         return (roundIndex);
     }
 
-    public void setRoundIndex(long roundIndex){
+    public void setRoundIndex(long roundIndex) {
         this.roundIndex = roundIndex;
     }
 
     @Override
     public String toString() {
-        return (String.format("Block{nonce=%d, appStateHash='%s', listTXHashes.size=%d, roundIndex=%d, timestamp=%d}",
-                nonce, Util.byteArrayToHexString(appStateHash), listTXHashes.size(), roundIndex, timestamp));
+        return (String.format("Block{shard=%s,nonce=%d, appStateHash='%s', listTXHashes.size=%d, roundIndex=%d, timestamp=%d}",
+                shard, nonce, Util.byteArrayToHexString(appStateHash), listTXHashes.size(), roundIndex, timestamp));
     }
 }

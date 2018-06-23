@@ -3,7 +3,6 @@ package network.elrond.data;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
-import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.chronology.ChronologyService;
 import network.elrond.chronology.NTPClient;
@@ -17,12 +16,13 @@ import network.elrond.p2p.P2PChannelName;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import org.spongycastle.util.encoders.Base64;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class AppBlockManager {
     private static final Logger logger = LogManager.getLogger(AppBlockManager.class);
@@ -38,21 +38,38 @@ public class AppBlockManager {
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();
 
-        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
 
         try {
-            List<Transaction> transactions = blockchainService.getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
+            List<Transaction> transactions = AppServiceProvider.getBlockchainService().getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
             Block block = composeBlock(transactions, state);
 
             AppBlockManager.instance().signBlock(block, privateKey);
             ExecutionService executionService = AppServiceProvider.getExecutionService();
             ExecutionReport result = executionService.processBlock(block, accounts, blockchain);
 
+            List<String> acceptedTransactions = block.getListTXHashes().stream()
+                    .map(bytes -> new String(Base64.encode(bytes)))
+                    .collect(Collectors.toList());
+
+            List<Transaction> blockTransactions = AppServiceProvider.getBlockchainService()
+                    .getAll(acceptedTransactions,
+                            blockchain,
+                            BlockchainUnitType.TRANSACTION);
+            blockTransactions.stream()
+                    .filter(transaction -> transaction.isCrossShardTransaction())
+                    .forEach(transaction -> {
+                        P2PBroadcastChanel channel = state.getChanel(P2PChannelName.XTRANSACTION);
+                        AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, transaction);
+                    });
+
+
             if (result.isOk()) {
                 String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
                 AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
 
                 logger.info("New block proposed with hash {}", hashBlock);
+                logger.info("\n" + state.print());
+
             }
         } catch (IOException | ClassNotFoundException e) {
             logger.throwing(e);
@@ -63,6 +80,7 @@ public class AppBlockManager {
 
 
     public Block composeBlock(List<Transaction> transactions, AppState state) throws IOException {
+
         logger.traceEntry("params: {} {}", transactions, state);
         Util.check(state != null, "state!=null");
 
@@ -79,8 +97,9 @@ public class AppBlockManager {
         logger.trace("done generating blank new block as {}", block);
 
         ChronologyService chronologyService = AppServiceProvider.getChronologyService();
-        Round round = chronologyService.getRoundFromDateTime(blockchain.getGenesisBlock().getTimestamp(),
-                chronologyService.getSynchronizedTime(ntpClient));
+        long timestamp = blockchain.getGenesisBlock().getTimestamp();
+        long synchronizedTime = chronologyService.getSynchronizedTime(ntpClient);
+        Round round = chronologyService.getRoundFromDateTime(timestamp, synchronizedTime);
         block.setRoundIndex(round.getIndex());
         block.setTimestamp(round.getStartTimeStamp());
         logger.trace("done computing round and round start millis = calculated round start millis, round index = {}, time stamp = {}",
@@ -177,6 +196,7 @@ public class AppBlockManager {
         block.setPrevBlockHash(hash);
         BigInteger nonce = currentBlock.getNonce().add(BigInteger.ONE);
         block.setNonce(nonce);
+        block.setShard(currentBlock.getShard());
         return logger.traceExit(block);
     }
 
@@ -253,4 +273,6 @@ public class AppBlockManager {
         logger.trace("placed signature data on block!");
         logger.traceExit();
     }
+
+
 }

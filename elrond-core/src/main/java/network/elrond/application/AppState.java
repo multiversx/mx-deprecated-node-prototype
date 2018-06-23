@@ -1,19 +1,26 @@
 package network.elrond.application;
 
 
-import network.elrond.account.AccountStateServiceImpl;
+import network.elrond.AsciiTable;
 import network.elrond.account.Accounts;
 import network.elrond.blockchain.Blockchain;
+import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.chronology.NTPClient;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
+import network.elrond.data.Block;
+import network.elrond.data.Transaction;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.p2p.P2PConnection;
+import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongycastle.util.encoders.Base64;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +34,7 @@ public class AppState implements Serializable {
     private PublicKey publicKey;
     private PrivateKey privateKey;
     private P2PConnection connection;
+    private Shard shard;
     private Map<P2PChannelName, P2PBroadcastChanel> channels = new HashMap<>();
 
     private NTPClient ntpClient = null;
@@ -123,12 +131,46 @@ public class AppState implements Serializable {
         this.lock = false;
     }
 
-    public NTPClient getNtpClient(){
-        return(ntpClient);
+    public NTPClient getNtpClient() {
+        return (ntpClient);
     }
 
-    public void setNtpClient(NTPClient ntpClient){
+    public void setNtpClient(NTPClient ntpClient) {
         this.ntpClient = ntpClient;
+    }
+
+    public Shard getShard() {
+        return shard;
+    }
+
+    public void setShard(Shard shard) {
+        this.shard = shard;
+    }
+
+    public String print() throws IOException, ClassNotFoundException {
+
+        AsciiTable table = new AsciiTable();
+        table.setMaxColumnWidth(400);
+        Block block = blockchain.getCurrentBlock();
+
+        String hash = AppServiceProvider.getSerializationService().getHashString(block);
+
+        table.getColumns().add(new AsciiTable.Column("Block  " + block.getNonce() + " " + hash));
+
+        for (byte[] bytes : block.getListTXHashes()) {
+            AsciiTable.Row row1 = new AsciiTable.Row();
+            table.getData().add(row1);
+            String txHash = new String(Base64.encode(bytes));
+            row1.getValues().add(txHash);
+
+            AsciiTable.Row row2 = new AsciiTable.Row();
+            Transaction transaction = AppServiceProvider.getBlockchainService().get(txHash, blockchain, BlockchainUnitType.TRANSACTION);
+            table.getData().add(row2);
+            row2.getValues().add(transaction.toString());
+        }
+
+        table.calculateColumnWidth();
+        return table.render();
     }
 
 }

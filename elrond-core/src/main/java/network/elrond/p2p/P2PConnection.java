@@ -3,6 +3,7 @@ package network.elrond.p2p;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.rpc.ObjectDataReply;
+import network.elrond.sharding.Shard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,7 @@ public class P2PConnection {
     private String nodeName;
     private Peer peer;
     private PeerDHT dht;
+    private Shard shard;
 
     private ObjectDataReply dataReplyCallback;
     private List<P2PBroadcastChanel> channels = new ArrayList<>();
@@ -40,8 +42,6 @@ public class P2PConnection {
     }
 
 
-
-
     public Peer getPeer() {
         return peer;
     }
@@ -58,13 +58,21 @@ public class P2PConnection {
         this.dht = dht;
     }
 
+    public Shard getShard() {
+        return shard;
+    }
+
+    public void setShard(Shard shard) {
+        this.shard = shard;
+    }
+
     public ObjectDataReply registerChannel(P2PBroadcastChanel channel) {
         channels.add(channel);
         return dataReplyCallback;
     }
 
     @Override
-    public String toString(){
-        return(String.format("P2PConnection{MEM=%s, nodeName=%s}", (Object)dht, nodeName));
+    public String toString() {
+        return (String.format("P2PConnection{MEM=%s, nodeName=%s, shard=%s}", (Object) dht, nodeName, shard));
     }
 }

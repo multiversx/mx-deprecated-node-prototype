@@ -1,9 +1,8 @@
 package network.elrond.data;
 
-import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
+import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
-import network.elrond.chronology.NTPClient;
 
 import java.math.BigInteger;
 
@@ -21,11 +20,11 @@ public interface BootstrapService {
     //sets the hash for a block height in location
     void setBlockHashWithIndex(BigInteger blockIndex, String blockHash, Blockchain blockchain) throws Exception;
 
-    ExecutionReport startFromGenesis(Accounts accounts, Blockchain blockchain, AppContext context, NTPClient ntpClient);
+    ExecutionReport startFromGenesis(AppState state, AppContext context);
 
-    ExecutionReport synchronize(BigInteger localBlockIndex, BigInteger remoteBlockIndex, Blockchain blockchain, Accounts accounts);
+    ExecutionReport synchronize(BigInteger localBlockIndex, BigInteger remoteBlockIndex, AppState state);
 
-    ExecutionReport restoreFromDisk(BigInteger currentBlockIndex, Accounts accounts, Blockchain blockchain, AppContext context, NTPClient ntpClient);
+    ExecutionReport restoreFromDisk(BigInteger currentBlockIndex, AppState state, AppContext context);
 
     ExecutionReport commitBlock(Block blk, String blockHash, Blockchain blockchain);
 

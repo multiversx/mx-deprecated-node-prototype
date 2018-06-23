@@ -1,7 +1,6 @@
 package network.elrond.account;
 
 import network.elrond.core.Util;
-import network.elrond.data.AppBlockManager;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,36 +41,45 @@ public class AccountsManager {
 //        return senderAccountState.getNonce().equals(nonce);
     }
 
-    public void transferFunds(Accounts accounts, String senderAddressString, String receiverAddressString, BigInteger value, BigInteger nonce) throws IOException, ClassNotFoundException {
-        logger.traceEntry("params: {} {} {} {} {}", accounts, senderAddressString, receiverAddressString, value, nonce);
+    public void transferFunds(Accounts accounts, String senderAddress, String receiverAddress, BigInteger value, BigInteger nonce) throws IOException, ClassNotFoundException {
+
+        logger.traceEntry("params: {} {} {} {} {}", accounts, senderAddress, receiverAddress, value, nonce);
         Util.check(accounts!=null, "accounts!=null");
-        Util.check(!(senderAddressString == null || senderAddressString.isEmpty()), "senderAddressString!=null");
-        Util.check(!(receiverAddressString == null || receiverAddressString.isEmpty()), "receiverAddressString!=null");
+        Util.check(!(senderAddress == null || senderAddress.isEmpty()), "senderAddress!=null");
+        Util.check(!(receiverAddress == null || receiverAddress.isEmpty()), "receiverAddress!=null");
         Util.check(value.compareTo(BigInteger.ZERO) >= 0, "value>=0");
         Util.check(nonce.compareTo(BigInteger.ZERO) >= 0, "nonce>=0");
 
-        if(!(hasFunds(accounts, senderAddressString, value) && hasCorrectNonce(accounts, senderAddressString, nonce))){
+        if(!(hasFunds(accounts, senderAddress, value) && hasCorrectNonce(accounts, senderAddress, nonce))){
             IllegalArgumentException ex = new IllegalArgumentException("Validation of Sender Account failed!");
             logger.throwing(ex);
             throw ex;
         }
 
         logger.trace("Prefetching data...");
-        AccountAddress senderAddress = AccountAddress.fromHexString(senderAddressString);
-        AccountAddress receiverAddress = AccountAddress.fromHexString(receiverAddressString);
-        AccountState senderAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(senderAddress, accounts);
-        AccountState receiverAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(receiverAddress, accounts);
+        AccountAddress sender = AccountAddress.fromHexString(senderAddress);
+        AccountAddress receiver = AccountAddress.fromHexString(receiverAddress);
+        AccountState senderAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(sender, accounts);
+        AccountState receiverAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(receiver, accounts);
+
 
         logger.trace("Transfer asset > adding");
         receiverAccountState.setBalance(receiverAccountState.getBalance().add(value));
-        AppServiceProvider.getAccountStateService().setAccountState(receiverAddress, receiverAccountState, accounts); // PMS
+        AppServiceProvider.getAccountStateService().setAccountState(receiver, receiverAccountState, accounts); // PMS
+
+
         logger.trace("Transfer asset > substracting");
         senderAccountState.setBalance(senderAccountState.getBalance().subtract(value));
+
+
         //increase sender nonce
         logger.trace("Transfer asset > increasing sender nonce");
         senderAccountState.setNonce(senderAccountState.getNonce().add(BigInteger.ONE));
+
+
         logger.trace("Transfer asset > saving");
-        AppServiceProvider.getAccountStateService().setAccountState(senderAddress, senderAccountState, accounts); // PMS
+        AppServiceProvider.getAccountStateService().setAccountState(sender, senderAccountState, accounts); // PMS
+
 
         logger.traceExit();
     }

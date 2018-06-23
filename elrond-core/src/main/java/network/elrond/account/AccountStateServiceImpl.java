@@ -1,5 +1,7 @@
 package network.elrond.account;
 
+import network.elrond.application.AppContext;
+import network.elrond.application.AppState;
 import network.elrond.chronology.NTPClient;
 import network.elrond.core.RLP;
 import network.elrond.core.RLPList;
@@ -129,14 +131,13 @@ public class AccountStateServiceImpl implements AccountStateService {
         logger.traceExit();
     }
 
-    public Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue,
-                                                               AccountsContext accountsContextTemporary, PrivateKey privateKey,
-                                                               NTPClient ntpClient) {
-        logger.traceEntry("params: {} {} {} {} {}", initialAddress, initialValue, accountsContextTemporary, privateKey, ntpClient);
+    public Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue,  AppState state, AppContext context) {
+        logger.traceEntry("params: {} {} {} {}", initialAddress, initialValue, state, context);
+
+        PrivateKey privateKey = context.getPrivateKey();
 
         Util.check(!(initialAddress == null || initialAddress.isEmpty()), "initialAddress!=null");
         Util.check(!(initialValue.compareTo(BigInteger.ZERO) < 0), "initialValue is less than zero");
-        Util.check(accountsContextTemporary!= null, "accountsContextTemporary!=null");
         Util.check(privateKey!=null, "privateKey!=null");
 
         if (initialValue.compareTo(Util.VALUE_MINTING) > 0) {
@@ -151,15 +152,19 @@ public class AccountStateServiceImpl implements AccountStateService {
 
         logger.trace("Generating genesis block...");
         Block genesisBlock = new Block();
+        genesisBlock.setShard(state.getShard());
         genesisBlock.setNonce(BigInteger.ZERO);
         genesisBlock.getListTXHashes().add(AppServiceProvider.getSerializationService().getHash(transactionMint));
         logger.trace("Setting timestamp and round...");
+        NTPClient ntpClient = state.getNtpClient();
         genesisBlock.setTimestamp(AppServiceProvider.getChronologyService().getSynchronizedTime(ntpClient));
         genesisBlock.setRoundIndex(0);
 
         logger.trace("Computing state root hash...");
         try {
-            Accounts accountsTemp = new Accounts(accountsContextTemporary, new AccountsPersistenceUnit<>(accountsContextTemporary.getDatabasePath()));
+
+            AccountsContext accountsContext = new AccountsContext();
+            Accounts accountsTemp = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
 
             ExecutionService executionService = AppServiceProvider.getExecutionService();
             ExecutionReport executionReport = executionService.processTransaction(transactionMint, accountsTemp);
