@@ -1,6 +1,5 @@
 package network.elrond.chronology;
 
-import network.elrond.account.AbstractPersistenceUnit;
 import network.elrond.core.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,7 +12,7 @@ public class ChronologyServiceImpl implements ChronologyService {
     private static final Logger logger = LogManager.getLogger(ChronologyServiceImpl.class);
 
     public ChronologyServiceImpl(){
-        roundTimeDuration = 4000; //4 seconds
+        roundTimeDuration = 6000; //6 seconds
     }
 
     public ChronologyServiceImpl(long roundTimeDuration) throws IllegalArgumentException{

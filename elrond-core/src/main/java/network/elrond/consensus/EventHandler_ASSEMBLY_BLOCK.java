@@ -8,7 +8,6 @@ import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.chronology.SubRound;
 import network.elrond.core.EventHandler;
-import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.data.AppBlockManager;

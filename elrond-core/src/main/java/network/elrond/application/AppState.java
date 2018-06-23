@@ -4,7 +4,6 @@ import network.elrond.account.Accounts;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.chronology.NTPClient;
 import network.elrond.consensus.ConsensusStateHolder;
-import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
@@ -21,7 +20,6 @@ import java.util.Map;
 public class AppState implements Serializable {
 
     private boolean stillRunning = true;
-    //private boolean lock = false;
     private Accounts accounts;
     private Blockchain blockchain;
     private PublicKey publicKey;
@@ -114,11 +112,6 @@ public class AppState implements Serializable {
         return publicKey;
     }
 
-
-//    public synchronized boolean isLock() {
-//        return lock;
-//    }
-
     public NTPClient getNtpClient() {
         return (ntpClient);
     }
@@ -131,15 +124,4 @@ public class AppState implements Serializable {
         return (consensusStateHolder);
     }
 
-//    public synchronized void acquireLock() {
-//        while (lock) {
-//            ThreadUtil.sleep(50);
-//        }
-//
-//        lock = true;
-//    }
-//
-//    public synchronized void releaseLock() {
-//        lock = false;
-//    }
 }
