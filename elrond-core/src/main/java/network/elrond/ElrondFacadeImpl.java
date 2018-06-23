@@ -5,6 +5,7 @@ import network.elrond.account.AccountState;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
+import network.elrond.benchmark.BenchmarkResult;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.ThreadUtil;
@@ -21,9 +22,9 @@ import network.elrond.p2p.PingResponse;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.mapdb.Fun;
 
 import java.math.BigInteger;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
@@ -186,6 +187,20 @@ public class ElrondFacadeImpl implements ElrondFacade {
             logger.catching(ex);
             return logger.traceExit(new PKSKPair("Error", "Error"));
         }
+    }
+
+    @Override
+    public BenchmarkResult getBenchmarkResult(String benchmarkId, Application application) {
+        BenchmarkResult benchmarkResult = new BenchmarkResult();
+        Random rand = new Random();
+        benchmarkResult.setActiveNodes(10);
+        benchmarkResult.setAverageRoundTime(3.75);
+        benchmarkResult.setAverageTransactionsPerBlock(100.0);
+        benchmarkResult.setAverageTps(250.0);
+        benchmarkResult.setLiveTps(750.0);
+        benchmarkResult.setMaxTps(999.0);
+        benchmarkResult.setNrShards(2);
+        return benchmarkResult;
     }
 
 }

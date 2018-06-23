@@ -2,11 +2,11 @@ package network.elrond;
 
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
+import network.elrond.benchmark.BenchmarkResult;
 import network.elrond.crypto.PKSKPair;
 import network.elrond.data.Receipt;
 import network.elrond.data.Transaction;
 import network.elrond.p2p.PingResponse;
-import org.mapdb.Fun;
 
 import java.math.BigInteger;
 
@@ -73,4 +73,13 @@ public interface ElrondFacade {
      */
 
     PKSKPair generatePublicKeyAndPrivateKey(String strPrivateKey);
+
+    /**
+     * Get BenchmarkResult
+     *
+     * @param benchmarkId
+     * @param application
+     * @return
+     */
+    BenchmarkResult getBenchmarkResult(String benchmarkId, Application application);
 }
