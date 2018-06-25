@@ -1,6 +1,7 @@
 package network.elrond.core;
 
 import network.elrond.AsciiTable;
+import network.elrond.data.AsciiPrintable;
 
 import java.util.List;
 import java.util.function.Function;
@@ -9,6 +10,15 @@ import java.util.stream.Collectors;
 public class AsciiTableUtil {
 
 
+    public static String listToTables(List<? extends AsciiPrintable> tables) {
+
+        StringBuilder builder = new StringBuilder();
+        for (AsciiPrintable table : tables) {
+            builder.append(table.print().render());
+        }
+        return builder.toString();
+
+    }
 
     public static <E> AsciiTable listToTable(String title, List<E> list) {
         return listToTable(title, list, e -> e);

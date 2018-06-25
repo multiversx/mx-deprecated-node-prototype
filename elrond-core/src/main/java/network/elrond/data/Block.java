@@ -207,8 +207,8 @@ public class Block implements Serializable, AsciiPrintable {
         AsciiTable table = new AsciiTable();
         table.setMaxColumnWidth(200);
 
-        table.getColumns().add(new AsciiTable.Column("Block " + nonce));
-        table.getColumns().add(new AsciiTable.Column(""));
+        table.getColumns().add(new AsciiTable.Column("Block "));
+        table.getColumns().add(new AsciiTable.Column(nonce + ""));
 
         AsciiTable.Row row0 = new AsciiTable.Row();
         row0.getValues().add("Nonce");
@@ -231,14 +231,20 @@ public class Block implements Serializable, AsciiPrintable {
         table.getData().add(row3);
 
         AsciiTable.Row row4 = new AsciiTable.Row();
-        row4.getValues().add("Transactions in block");
-        row4.getValues().add(listTXHashes.size() + "");
+        row4.getValues().add("Prev block");
+        row4.getValues().add(Util.byteArrayToHexString(prevBlockHash));
         table.getData().add(row4);
+
 
         AsciiTable.Row row5 = new AsciiTable.Row();
         row5.getValues().add("Transactions in block");
-        row5.getValues().add(CollectionUtil.implode(listTXHashes, " | ", e -> Util.byteArrayToHexString(e)));
+        row5.getValues().add(listTXHashes.size() + "");
         table.getData().add(row5);
+
+        AsciiTable.Row row6 = new AsciiTable.Row();
+        row6.getValues().add("Transactions in block");
+        row6.getValues().add(CollectionUtil.implode(listTXHashes, " | ", e -> Util.byteArrayToHexString(e)));
+        table.getData().add(row6);
 
 
         table.calculateColumnWidth();

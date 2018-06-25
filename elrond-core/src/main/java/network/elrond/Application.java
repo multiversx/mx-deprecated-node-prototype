@@ -82,6 +82,8 @@ public class Application implements Serializable {
         logger.trace("Starting accounts...");
         AppTasks.INIT_ACCOUNTS.process(this);
 
+        logger.trace("Starting obect request mechanism...");
+        AppTasks.INIT_REQUEST_OBJECT.process(this);
 
 
 
