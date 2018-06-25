@@ -202,6 +202,8 @@ public class ConsensusTest01 {
 
     private Application startSeeder(){
         String nodeName = "elrond-seeder";
+        Util.changeLogsPath("logs-" + nodeName);
+
         Integer port = 4000;
         Integer masterPeerPort = 4000;
         String masterPeerIpAddress = "127.0.0.1";
@@ -221,6 +223,7 @@ public class ConsensusTest01 {
     }
 
     private Application startRunner(String name, int port, int masterPeerPort) {
+        Util.changeLogsPath("logs-" + name);
         String masterPeerIpAddress = "127.0.0.1";
         String nodeRunnerPrivateKey = Util.byteArrayToHexString(new PrivateKey(name).getValue());
         //Reuploaded
@@ -230,7 +233,7 @@ public class ConsensusTest01 {
         ElrondFacade facade = new ElrondFacadeImpl();
 
         Application application = facade.start(context);
-        sendToLog(Level.ERROR,"Started %s", name);
+        sendToLog(Level.ERROR,"Started {}", name);
         return (application);
     }
 
@@ -295,18 +298,29 @@ public class ConsensusTest01 {
 
         ElrondFacadeImpl facade = new ElrondFacadeImpl();
 
-        int value = 1;
+
+
+        Thread thrSeed = new Thread(()->{
+            int value = 1;
+            while (seeder.getState().isStillRunning()) {
+                ThreadUtil.sleep(10);
+
+                AccountAddress address = AccountAddress.fromHexString(Util.TEST_ADDRESS);
+                Transaction transaction = facade.send(address, BigInteger.valueOf(value), seeder);
+
+                sendToLog(Level.ERROR, "Sent tx ", transaction, " to ", Util.byteArrayToHexString(seeder.getContext().getPublicKey().getValue()));
+
+                value++;
+            }
+        });
+        thrSeed.setPriority(1);
+        thrSeed.start();
 
         while (true){
-            ThreadUtil.sleep(100);
-
-            AccountAddress address = AccountAddress.fromHexString(Util.TEST_ADDRESS);
-            Transaction transaction = facade.send(address, BigInteger.valueOf(value), seeder);
-
-            sendToLog(Level.ERROR, "Sent tx ", transaction, " to ", Util.byteArrayToHexString(seeder.getContext().getPublicKey().getValue()));
-
-            value++;
+            ThreadUtil.sleep(1000);
         }
+
+
     }
 
     @Test

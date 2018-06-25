@@ -82,7 +82,7 @@ public class ChronologyServiceImpl implements ChronologyService {
         return logger.traceExit((RoundState)null);
     }
 
-    public boolean isStillInRoundState(NTPClient ntpClient, long genesisTimeStamp, long targetRoundIndex, RoundState targetRoundState){
+    public synchronized boolean isStillInRoundState(NTPClient ntpClient, long genesisTimeStamp, long targetRoundIndex, RoundState targetRoundState){
         logger.traceEntry("params: {} {} {} {}", ntpClient, genesisTimeStamp, targetRoundIndex, targetRoundState);
         Util.check(ntpClient != null, "NTP client should not be null!");
 

@@ -40,6 +40,8 @@ public class AppBlockManager {
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();
 
+        state.getConsensusStateHolder().setStatisticsTransactionsProcessed(-1);
+
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
 
         try {
@@ -51,28 +53,51 @@ public class AppBlockManager {
             AppBlockManager.instance().signBlock(block, privateKey);
 
             //test whether the block should be published or not!
-            if (!AppServiceProvider.getChronologyService().isStillInRoundState(state.getNtpClient(),
-                    blockchain.getGenesisBlock().getTimestamp(), block.roundIndex, RoundState.PROPOSE_BLOCK)){
+            boolean blockArrivedToLate = !(AppServiceProvider.getChronologyService().isStillInRoundState(state.getNtpClient(),
+                    blockchain.getGenesisBlock().getTimestamp(), block.roundIndex, RoundState.PROPOSE_BLOCK) ||
+                    AppServiceProvider.getChronologyService().isStillInRoundState(state.getNtpClient(),
+                            blockchain.getGenesisBlock().getTimestamp(), block.roundIndex, RoundState.FINISH_PROPOSE_BLOCK));
+
+            if (blockArrivedToLate){
                 logger.debug("Proposed block arrived to late!");
                 logger.traceExit();
                 return;
             }
 
+            String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
+            AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
+
+            for (Receipt receipt : receipts) {
+                // add the blockHash to the receipt as the valid hash is only available after signing
+                receipt.setBlockHash(hashBlock);
+                sendReceipt(block, receipt, state);
+            }
+
+            logger.info("New block proposed with hash {}", hashBlock);
+
             ExecutionService executionService = AppServiceProvider.getExecutionService();
             ExecutionReport result = executionService.processBlock(block, accounts, blockchain);
 
-            if (result.isOk()) {
-                String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
-                AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
-
-                for (Receipt receipt : receipts) {
-                    // add the blockHash to the receipt as the valid hash is only available after signing
-                    receipt.setBlockHash(hashBlock);
-                    sendReceipt(block, receipt, state);
-                }
-
-                logger.info("New block proposed with hash {}", hashBlock);
+            if (!result.isOk()){
+                logger.fatal("Error while re-executing comited block! {}", result.toString());
+                return;
             }
+
+            state.getConsensusStateHolder().setStatisticsTransactionsProcessed(block.listTXHashes.size());
+
+            //if (result.isOk()) {
+//            {
+//                String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
+//                AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
+//
+//                for (Receipt receipt : receipts) {
+//                    // add the blockHash to the receipt as the valid hash is only available after signing
+//                    receipt.setBlockHash(hashBlock);
+//                    sendReceipt(block, receipt, state);
+//                }
+//
+//                logger.info("New block proposed with hash {}", hashBlock);
+//            }
         } catch (IOException | ClassNotFoundException e) {
             logger.throwing(e);
         }
@@ -144,6 +169,14 @@ public class AppBlockManager {
 
             logger.trace("added transaction {} in block", txHash);
             block.getListTXHashes().add(txHash);
+
+            //test whether the system should continue to add transactions or not
+            boolean forceFinishAddingTransactions = !AppServiceProvider.getChronologyService().isStillInRoundState(state.getNtpClient(), state.getBlockchain().getGenesisBlock().getTimestamp(),
+                    block.getRoundIndex(), RoundState.PROPOSE_BLOCK);
+            if (forceFinishAddingTransactions){
+                logger.debug("Force exit from add transactions method. Transactions added: {}", block.getListTXHashes().size());
+                break;
+            }
         }
 
         return logger.traceExit(receipts);

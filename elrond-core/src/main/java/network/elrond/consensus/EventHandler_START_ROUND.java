@@ -22,6 +22,7 @@ public class EventHandler_START_ROUND implements EventHandler<SubRound, ArrayBlo
         String nodeName = application.getContext().getNodeName();
 
         application.getState().getConsensusStateHolder().setSelectedLeaderPeerID(Number160.ZERO);
+        application.getState().getConsensusStateHolder().setStatisticsTransactionsProcessed(-1);
         logger.debug("{}, round: {}, subRound: {}> initialized!", nodeName, data.getRound().getIndex(), data.getRoundState().name());
 
         logger.traceExit();

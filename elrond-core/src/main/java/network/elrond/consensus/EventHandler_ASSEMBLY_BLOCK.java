@@ -6,6 +6,8 @@ import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
+import network.elrond.chronology.ChronologyServiceImpl;
+import network.elrond.chronology.Round;
 import network.elrond.chronology.SubRound;
 import network.elrond.core.EventHandler;
 import network.elrond.core.ThreadUtil;
@@ -51,15 +53,21 @@ public class EventHandler_ASSEMBLY_BLOCK implements EventHandler<SubRound, Array
             return;
         }
 
-        int size = queue.size();
-        TimeWatch watch = TimeWatch.start();
+
+        //TimeWatch watch = TimeWatch.start();
 
         proposeBlock(queue, application, data);
 
-        long time = watch.time(TimeUnit.MILLISECONDS);
-        long tps = (time > 0) ? ((size*1000) / time) : 0;
-        logger.info("{}, round: {}, subRound: {}> ###### Executed " + size + " transactions in " + time + "ms  TPS:" + tps + "   ###### ", nodeName,
-                data.getRound().getIndex(), data.getRoundState().name());
+        long size = state.getConsensusStateHolder().getStatisticsTransactionsProcessed();
+
+        //long time = watch.time(TimeUnit.MILLISECONDS);
+        //long tps = (time > 0) ? ((size*1000) / time) : 0;
+        if (size >= 0){
+            logger.info("{}, round: {}, subRound: {}> ###### Executed {} transactions in {} ms  TPS: {} ###### ", nodeName,
+                    data.getRound().getIndex(), data.getRoundState().name(), size, AppServiceProvider.getChronologyService().getRoundTimeDuration(),
+                    size * 1000 / AppServiceProvider.getChronologyService().getRoundTimeDuration());
+        }
+
 
         logger.traceExit();
     }

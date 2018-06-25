@@ -61,7 +61,7 @@ public class ChronologyBlockTask<T> implements AppTask {
                         continue;
                     } else{
                         genesisTimeStampCached = application.getState().getBlockchain().getGenesisBlock().getTimestamp();
-                        logger.trace(String.format("Cached genesis time stamp as: %d", genesisTimeStampCached));
+                        logger.trace(String.format("Cached genesis time stamp as: {}", genesisTimeStampCached));
                     }
                 }
 
@@ -88,6 +88,7 @@ public class ChronologyBlockTask<T> implements AppTask {
 
             logger.traceExit();
         });
+        thread.setPriority(7);
         thread.start();
     }
 
@@ -136,14 +137,17 @@ public class ChronologyBlockTask<T> implements AppTask {
         subRound.setRoundState(roundState);
         subRound.setTimeStamp(referenceTimeStamp);
 
-        logger.trace("ChronologyBlockTask event {}, {}", round.toString(), roundState.toString());
+        application.getState().getConsensusStateHolder().setCurrentRoundIndex(round.getIndex());
+        application.getState().getConsensusStateHolder().setCurrentRoundState(roundState);
+
+        logger.debug("notifyEventObjects event {}, {}, {}", round.toString(), roundState.toString(), referenceTimeStamp);
 
         if (roundState.getEventHandler() != null){
             logger.trace("calling default event handler object (from enum)...");
             roundState.getEventHandler().onEvent(application, this, subRound, queueTransactionHashes);
         }
 
-        logger.trace("calling %d registered objects...", MAIN_QUEUE.size());
+        logger.trace("calling {} registered objects...", MAIN_QUEUE.size());
         for (EventHandler eventHandler:MAIN_QUEUE){
             eventHandler.onEvent(application,this, subRound, queueTransactionHashes);
         }

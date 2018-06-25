@@ -22,6 +22,7 @@ public enum RoundState {
     START_ROUND(0, new EventHandler_START_ROUND()),
     COMPUTE_LEADER(200, new EventHandler_COMPUTE_LEADER()),
     PROPOSE_BLOCK(2000, new EventHandler_ASSEMBLY_BLOCK()),
+    FINISH_PROPOSE_BLOCK(200, null),
     BROADCAST_BLOCK(1800, null),
     END_ROUND(0, null);
 

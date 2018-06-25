@@ -4,6 +4,7 @@ import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.spongycastle.jcajce.provider.digest.SHA256;
 import org.spongycastle.jcajce.provider.digest.SHA3.DigestSHA3;
 import org.spongycastle.util.encoders.Base64;
@@ -150,5 +151,12 @@ public class Util {
             logger.throwing(ex);
             throw ex;
         }
+    }
+
+    public static void changeLogsPath(String newLogPath){
+        ThreadContext.put("LOG_FOLDER", newLogPath);
+        org.apache.logging.log4j.core.LoggerContext ctx =
+                (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false);
+        ctx.reconfigure();
     }
 }
