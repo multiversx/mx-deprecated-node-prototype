@@ -61,7 +61,7 @@ public class ElrondNodeController {
         logger.traceEntry();
         Application application = elrondApiNode.getApplication();
 
-        return logger.traceExit(application != null);
+        return logger.traceExit(application != null && application.getState().isStillRunning());
     }
 
 
