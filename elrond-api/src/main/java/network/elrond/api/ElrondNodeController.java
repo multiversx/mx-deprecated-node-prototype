@@ -142,13 +142,11 @@ public class ElrondNodeController {
     }
 
 
-    @RequestMapping(path = "/node/bechmarkResult", method = RequestMethod.GET)
+    @RequestMapping(path = "/node/getStats", method = RequestMethod.GET)
     public @ResponseBody
-    Object getBenchmarkResult(
-            HttpServletResponse response,
-            @RequestParam() String benchmarkId) {
-        logger.traceEntry("params: {}", benchmarkId);
-        return logger.traceExit(elrondApiNode.getBenchmarkResult(benchmarkId));
+    Object getStats(
+            HttpServletResponse response) {
+        return logger.traceExit(elrondApiNode.getBenchmarkResult(""));
 
     }
 
