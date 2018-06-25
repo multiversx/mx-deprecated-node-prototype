@@ -5,6 +5,8 @@ import network.elrond.account.AccountState;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
+import network.elrond.benchmark.BenchmarkResult;
+import network.elrond.benchmark.MultipleTransactionResult;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.ThreadUtil;
@@ -21,7 +23,6 @@ import network.elrond.p2p.PingResponse;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.mapdb.Fun;
 
 import java.math.BigInteger;
 import java.util.concurrent.ExecutionException;
@@ -106,6 +107,27 @@ public class ElrondFacadeImpl implements ElrondFacade {
     }
 
     @Override
+    public MultipleTransactionResult sendMultipleTransactions(AccountAddress receiver, BigInteger value, Integer nrTransactions, Application application) {
+        logger.traceEntry("params: {} {} {}", receiver, value, application);
+        if (application == null) {
+            logger.warn("Invalid application state, application is null");
+            return logger.traceExit((MultipleTransactionResult)null);
+        }
+
+        MultipleTransactionResult result = new MultipleTransactionResult();
+        for(int i = 0;i<nrTransactions;i++){
+            Transaction transaction = send(receiver, value, application);
+            if(transaction == null){
+                result.setFailedTransactionsNumber(result.getFailedTransactionsNumber()+1);
+            }
+            else{
+                result.setSuccessfulTransactionsNumber(result.getSuccessfulTransactionsNumber() +1);
+            }
+        }
+        return result;
+    }
+
+    @Override
     public Transaction send(AccountAddress receiver, BigInteger value, Application application) {
         logger.traceEntry("params: {} {} {}", receiver, value, application);
         if (application == null) {
@@ -145,7 +167,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
             AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, hash);
 
 
-            return logger.traceExit((Transaction)transaction);
+            return logger.traceExit(transaction);
 
         } catch (Exception ex) {
             logger.catching(ex);
@@ -186,6 +208,20 @@ public class ElrondFacadeImpl implements ElrondFacade {
             logger.catching(ex);
             return logger.traceExit(new PKSKPair("Error", "Error"));
         }
+    }
+
+    @Override
+    public BenchmarkResult getBenchmarkResult(String benchmarkId, Application application) {
+        BenchmarkResult benchmarkResult = new BenchmarkResult();
+        benchmarkResult.setActiveNodes(10);
+        benchmarkResult.setAverageRoundTime(3.75);
+        benchmarkResult.setLiveNrTransactionsPerBlock(application.getStatisticsManager().getCurrentStatistic().getNrTransactionsInBlock());
+        benchmarkResult.setAverageNrTransactionsPerBlock(application.getStatisticsManager().getAverageNrTransactionsInBlock());
+        benchmarkResult.setAverageTps(application.getStatisticsManager().getAverageTps());
+        benchmarkResult.setLiveTps(application.getStatisticsManager().getCurrentStatistic().getTps());
+        benchmarkResult.setMaxTps(application.getStatisticsManager().getMaxTps());
+        benchmarkResult.setNrShards(2);
+        return benchmarkResult;
     }
 
 }

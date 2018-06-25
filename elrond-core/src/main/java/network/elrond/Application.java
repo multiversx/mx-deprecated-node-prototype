@@ -2,8 +2,8 @@ package network.elrond;
 
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
+import network.elrond.benchmark.StatisticsManager;
 import network.elrond.processor.AppTasks;
-import network.elrond.processor.impl.SynchronizationBlockTask;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,6 +18,8 @@ public class Application implements Serializable {
     private AppContext context;
 
     private AppState state = new AppState();
+
+    private StatisticsManager statisticsManager = new StatisticsManager();
 
     public Application(AppContext context) {
         logger.traceEntry("params: {}", context);
@@ -114,5 +116,14 @@ public class Application implements Serializable {
         this.state.getConnection().getPeer().shutdown();
     }
 
+//    public void addStatistic(Statistic statistic){
+//        logger.traceEntry("params: {}", statistic);
+//        statisticsManager.addStatistic(statistic);
+//        logger.traceExit();
+//    }
+
+    public StatisticsManager getStatisticsManager(){
+        return statisticsManager;
+    }
 
 }

@@ -20,12 +20,14 @@ import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
+//TODO: remove from "data" package
 public class AppBlockManager {
     private static final Logger logger = LogManager.getLogger(AppBlockManager.class);
 
@@ -35,15 +37,21 @@ public class AppBlockManager {
         return instance;
     }
 
-    public void generateAndBroadcastBlock(List<String> hashes, PrivateKey privateKey, AppState state) {
-        logger.traceEntry("params: {} {} {}", hashes, privateKey, state);
+    public Block generateAndBroadcastBlock(ArrayBlockingQueue<String> queue, PrivateKey privateKey, AppState state) {
+        logger.traceEntry("params: {} {} {}", queue, privateKey, state);
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();
 
         state.getConsensusStateHolder().setStatisticsTransactionsProcessed(-1);
 
-        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
+        List<String> hashes = new ArrayList<>(queue);
 
+        if (hashes.isEmpty()) {
+            logger.info("Can't execute, no transaction!");
+            return logger.traceExit((Block) null);
+        }
+
+        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
         try {
             List<Transaction> transactions = blockchainService.getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
             Pair<Block, List<Receipt>> blockReceiptsPair = composeBlock(transactions, state);
@@ -61,17 +69,21 @@ public class AppBlockManager {
             if (blockArrivedToLate){
                 logger.debug("Proposed block arrived to late!");
                 logger.traceExit();
-                return;
+                return logger.traceExit((Block) null);
             }
 
             String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
             AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
 
+            List<String> txHashes  = new ArrayList<>();
             for (Receipt receipt : receipts) {
                 // add the blockHash to the receipt as the valid hash is only available after signing
                 receipt.setBlockHash(hashBlock);
                 sendReceipt(block, receipt, state);
+                txHashes.add(receipt.getTransactionHash());
             }
+
+            queue.removeAll(txHashes);
 
             logger.info("New block proposed with hash {}", hashBlock);
 
@@ -80,29 +92,18 @@ public class AppBlockManager {
 
             if (!result.isOk()){
                 logger.fatal("Error while re-executing comited block! {}", result.toString());
-                return;
+                return logger.traceExit((Block) null);
             }
 
             state.getConsensusStateHolder().setStatisticsTransactionsProcessed(block.listTXHashes.size());
 
-            //if (result.isOk()) {
-//            {
-//                String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
-//                AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
-//
-//                for (Receipt receipt : receipts) {
-//                    // add the blockHash to the receipt as the valid hash is only available after signing
-//                    receipt.setBlockHash(hashBlock);
-//                    sendReceipt(block, receipt, state);
-//                }
-//
-//                logger.info("New block proposed with hash {}", hashBlock);
-//            }
+            return logger.traceExit(block);
+
         } catch (IOException | ClassNotFoundException e) {
             logger.throwing(e);
         }
 
-        logger.traceExit();
+        return logger.traceExit((Block) null);
     }
 
 

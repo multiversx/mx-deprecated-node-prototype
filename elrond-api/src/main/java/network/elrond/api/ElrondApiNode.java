@@ -7,6 +7,8 @@ import network.elrond.account.AccountAddress;
 import network.elrond.api.log.WebSocketAppenderAdapter;
 import network.elrond.api.manager.ElrondWebSocketManager;
 import network.elrond.application.AppContext;
+import network.elrond.benchmark.BenchmarkResult;
+import network.elrond.benchmark.MultipleTransactionResult;
 import network.elrond.core.Util;
 import network.elrond.crypto.PKSKPair;
 import network.elrond.data.BootstrapType;
@@ -73,11 +75,21 @@ class ElrondApiNode {
         return logger.traceExit(facade.getBalance(address, application));
     }
 
+    BenchmarkResult getBenchmarkResult(String benchmarkId) {
+        logger.traceEntry("params: {}", benchmarkId);
+        ElrondFacade facade = getFacade();
+        return logger.traceExit(facade.getBenchmarkResult(benchmarkId, application));
+    }
+
+    MultipleTransactionResult sendMultipleTransactions(AccountAddress receiver, BigInteger value, Integer nrTransactions) {
+        logger.traceEntry("params: {} {}", receiver, value);
+        return logger.traceExit(getFacade().sendMultipleTransactions(receiver, value, nrTransactions, application));
+    }
+
     Transaction send(AccountAddress receiver, BigInteger value) {
         logger.traceEntry("params: {} {}", receiver, value);
         return logger.traceExit(getFacade().send(receiver, value, application));
     }
-
     Receipt getReceipt(String transactionHash) {
         logger.traceEntry("params: {}", transactionHash);
         return logger.traceExit(getFacade().getReceipt(transactionHash, application));

@@ -10,7 +10,6 @@ import network.elrond.crypto.PKSKPair;
 import network.elrond.data.BootstrapType;
 import network.elrond.data.Transaction;
 import network.elrond.p2p.PingResponse;
-import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +61,7 @@ public class ElrondNodeController {
         logger.traceEntry();
         Application application = elrondApiNode.getApplication();
 
-        return logger.traceExit(application != null);
+        return logger.traceExit(application != null && application.getState().isStillRunning());
     }
 
 
@@ -93,16 +92,15 @@ public class ElrondNodeController {
 
     @RequestMapping(path = "/node/send", method = RequestMethod.GET)
     public @ResponseBody
-    Object send(
+    Transaction send(
             HttpServletResponse response,
-            @RequestParam(defaultValue = "0326e7875aadaba270ae93ec40ef4706934d070eb21c9acad4743e31289fa4ebc7")
-                    String address,
+            @RequestParam  String address,
             @RequestParam(defaultValue = "1") BigInteger value) {
         logger.traceEntry("params: {} {}", address, value);
 
         AccountAddress _add = AccountAddress.fromHexString(address);
         Transaction transaction = elrondApiNode.send(_add, value);
-        return logger.traceExit((transaction != null) ? AppServiceProvider.getSerializationService().getHashString(transaction) : null);
+        return logger.traceExit((transaction != null) ? transaction : (Transaction)null);
     }
 
 
@@ -127,6 +125,30 @@ public class ElrondNodeController {
         logger.traceEntry("params: {}", address);
         AccountAddress _add = AccountAddress.fromHexString(address);
         return logger.traceExit(elrondApiNode.getBalance(_add));
+
+    }
+
+    @RequestMapping(path = "/node/sendMultipleTransactions", method = RequestMethod.GET)
+    public @ResponseBody
+    Object sendMultipleTransactions(
+            HttpServletResponse response,
+            @RequestParam String address,
+            @RequestParam(defaultValue = "1") BigInteger value,
+            @RequestParam(defaultValue = "1") Integer nrTransactions) {
+        logger.traceEntry("params: {} {} {}", address, value, nrTransactions);
+
+        AccountAddress _add = AccountAddress.fromHexString(address);
+        return logger.traceExit(elrondApiNode.sendMultipleTransactions(_add, value, nrTransactions));
+    }
+
+
+    @RequestMapping(path = "/node/bechmarkResult", method = RequestMethod.GET)
+    public @ResponseBody
+    Object getBenchmarkResult(
+            HttpServletResponse response,
+            @RequestParam() String benchmarkId) {
+        logger.traceEntry("params: {}", benchmarkId);
+        return logger.traceExit(elrondApiNode.getBenchmarkResult(benchmarkId));
 
     }
 
