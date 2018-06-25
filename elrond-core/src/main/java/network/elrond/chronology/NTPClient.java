@@ -179,5 +179,4 @@ public class NTPClient implements AutoCloseable{
             logger.throwing(ex);
         }
     }
-
 }

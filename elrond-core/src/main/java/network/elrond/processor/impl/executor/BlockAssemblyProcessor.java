@@ -17,6 +17,7 @@ import network.elrond.sharding.Shard;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,8 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         ThreadUtil.sleep(4000);
         AppState state = application.getState();
         Shard shard = state.getShard();
+
+        removeProcessedTransactions(queue, application);
 
         boolean isLeaderInShard = AppShardingManager.instance().isLeaderInShard(state);
         if (!isLeaderInShard) {

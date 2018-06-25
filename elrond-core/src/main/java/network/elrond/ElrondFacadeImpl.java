@@ -13,6 +13,7 @@ import network.elrond.crypto.PKSKPair;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.Receipt;
+import network.elrond.data.SecureObject;
 import network.elrond.data.Transaction;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PChannelName;
@@ -21,7 +22,6 @@ import network.elrond.p2p.PingResponse;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.mapdb.Fun;
 
 import java.math.BigInteger;
 import java.util.concurrent.ExecutionException;
@@ -43,7 +43,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
             return logger.traceExit(application);
         } catch (Exception e) {
             logger.catching(e);
-            return logger.traceExit((Application)null);
+            return logger.traceExit((Application) null);
         }
     }
 
@@ -80,7 +80,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
         } catch (Exception ex) {
             logger.throwing(ex);
-            return logger.traceExit((BigInteger)null);
+            return logger.traceExit((BigInteger) null);
         }
     }
 
@@ -89,20 +89,23 @@ public class ElrondFacadeImpl implements ElrondFacade {
         logger.traceEntry("params: {} {}", transactionHash, application);
         try {
             FutureTask<Receipt> timeoutTask = new FutureTask<Receipt>(() -> {
+                SecureObject<Receipt> secureReceipt;
                 Blockchain blockchain = application.getState().getBlockchain();
                 String receiptHash;
                 do {
                     receiptHash = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
                     ThreadUtil.sleep(200);
                 } while (receiptHash == null);
-                return logger.traceExit((Receipt)AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT));
+
+                secureReceipt = AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT);
+                return logger.traceExit(secureReceipt.getObject());
             });
             new Thread(timeoutTask).start();
             return logger.traceExit(timeoutTask.get(30L, TimeUnit.SECONDS));
         } catch (InterruptedException | TimeoutException | ExecutionException e) {
             logger.catching(e);
         }
-        return logger.traceExit((Receipt)null);
+        return logger.traceExit((Receipt) null);
     }
 
     @Override
@@ -110,7 +113,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
         logger.traceEntry("params: {} {} {}", receiver, value, application);
         if (application == null) {
             logger.warn("Invalid application state, application is null");
-            return logger.traceExit((Transaction)null);
+            return logger.traceExit((Transaction) null);
         }
 
         try {
@@ -128,7 +131,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
             if (senderAccount == null) {
                 // sender account is new, can't send
                 logger.warn("Sender account is new, can't send");
-                return logger.traceExit((Transaction)null);
+                return logger.traceExit((Transaction) null);
             }
 
             PublicKey receiverPublicKey = new PublicKey(receiver.getBytes());
@@ -145,13 +148,13 @@ public class ElrondFacadeImpl implements ElrondFacade {
             AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, hash);
 
 
-            return logger.traceExit((Transaction)null);
+            return logger.traceExit((Transaction) null);
 
         } catch (Exception ex) {
             logger.catching(ex);
         }
 
-        return logger.traceExit((Transaction)null);
+        return logger.traceExit((Transaction) null);
     }
 
     @Override
@@ -181,7 +184,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
             PublicKey publicKey = new PublicKey(privateKey);
 
-            return logger.traceExit(new PKSKPair(   Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue())));
+            return logger.traceExit(new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue())));
         } catch (Exception ex) {
             logger.catching(ex);
             return logger.traceExit(new PKSKPair("Error", "Error"));

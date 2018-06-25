@@ -76,13 +76,13 @@ public class AccountsManagerTest extends ExpectedExceptionTest {
 
     @Test
     public void testTransferFundsWithNullSenderAddressShouldThrowException() throws IOException, ClassNotFoundException {
-        expected(IllegalArgumentException.class, "senderAddressString!=null");
+        expected(IllegalArgumentException.class, "senderAddress!=null");
         accountsManager.transferFunds(accounts, null,"Receiver", BigInteger.TEN, BigInteger.TEN, operation);
     }
 
     @Test
     public void testTransferFundsWithNullReceiverAddressShouldThrowException() throws IOException, ClassNotFoundException {
-        expected(IllegalArgumentException.class, "receiverAddressString!=null");
+        expected(IllegalArgumentException.class, "receiverAddress!=null");
         accountsManager.transferFunds(accounts, "Sender","", BigInteger.TEN, BigInteger.TEN, operation);
     }
 

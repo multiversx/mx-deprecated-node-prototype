@@ -9,9 +9,7 @@ import network.elrond.chronology.ChronologyService;
 import network.elrond.chronology.NTPClient;
 import network.elrond.chronology.Round;
 import network.elrond.core.Util;
-import network.elrond.crypto.MultiSignatureService;
-import network.elrond.crypto.PrivateKey;
-import network.elrond.crypto.PublicKey;
+import network.elrond.crypto.*;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.service.AppServiceProvider;
@@ -36,6 +34,10 @@ public class AppBlockManager {
 
     public void generateAndBroadcastBlock(List<String> hashes, PrivateKey privateKey, AppState state) {
         logger.traceEntry("params: {} {} {}", hashes, privateKey, state);
+        Util.check(hashes != null, "hashes != null");
+        Util.check(privateKey != null, "privateKey != null");
+        Util.check(state != null, "state != null");
+
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();
 
@@ -127,6 +129,10 @@ public class AppBlockManager {
 
     private List<Receipt> addTransactions(List<Transaction> transactions, Block block, AppState state) throws IOException {
         logger.traceEntry("params: {} {} {}", transactions, block, state);
+        Util.check(transactions != null, "transactions != null");
+        Util.check(block != null, "block != null");
+        Util.check(state != null, "state != null");
+
         List<Receipt> receipts = new ArrayList<>();
 
         Accounts accounts = state.getAccounts();
@@ -158,6 +164,10 @@ public class AppBlockManager {
 
     private Receipt acceptTransaction(Block block, Transaction transaction, AppState state) throws IOException {
         logger.traceEntry("params: {} {} {}", block, transaction, state);
+        Util.check(block != null, "block != null");
+        Util.check(transaction != null, "transaction != null");
+        Util.check(state != null, "state != null");
+
         ReceiptStatus status = ReceiptStatus.ACCEPTED;
         String log = "Transaction processed";
         String transactionHash = AppServiceProvider.getSerializationService().getHashString(transaction);
@@ -168,6 +178,10 @@ public class AppBlockManager {
 
     private Receipt rejectTransaction(Block block, Transaction transaction, AppState state) throws IOException {
         logger.traceEntry("params: {} {} {}", block, transaction, state);
+        Util.check(block != null, "block != null");
+        Util.check(transaction != null, "transaction != null");
+        Util.check(state != null, "state != null");
+
         ReceiptStatus status = ReceiptStatus.REJECTED;
         String log = "Invalid transaction";
         String transactionHash = AppServiceProvider.getSerializationService().getHashString(transaction);
@@ -176,28 +190,48 @@ public class AppBlockManager {
         return logger.traceExit(receipt);
     }
 
+    private SecureObject<Receipt> signReceipt(Receipt receipt, String receiptHash, AppState state) {
+        logger.traceEntry("params: {} {} {}", receipt, receiptHash, state);
+        Util.check(receipt != null, "receipt != null");
+        Util.check(receiptHash != null, "receiptHash != null");
+        Util.check(state != null, "state != null");
+
+        SignatureService signatureService = AppServiceProvider.getSignatureService();
+        Signature signature = signatureService.signMessage(receiptHash, state.getPrivateKey().getValue(), state.getPublicKey().getValue());
+
+        return logger.traceExit(new SecureObject<>(receipt, signature, state.getPublicKey()));
+    }
+
     private void sendReceipt(Block block, Receipt receipt, AppState state) throws IOException {
         logger.traceEntry("params: {} {} {}", block, receipt, state);
+        Util.check(block != null, "block != null");
+        Util.check(receipt != null, "receipt != null");
+        Util.check(state != null, "state != null");
+
         String blockHash = AppServiceProvider.getSerializationService().getHashString(block);
         String receiptHash = AppServiceProvider.getSerializationService().getHashString(receipt);
         String transactionHash = receipt.getTransactionHash();
+        SecureObject<Receipt> secureReceipt = signReceipt(receipt, receiptHash, state);
+        String secureReceiptHash = AppServiceProvider.getSerializationService().getHashString(secureReceipt);
 
         // Store on blockchain
         Blockchain blockchain = state.getBlockchain();
-        AppServiceProvider.getBlockchainService().put(transactionHash, receiptHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
+        AppServiceProvider.getBlockchainService().put(transactionHash, secureReceiptHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
         AppServiceProvider.getBlockchainService().put(transactionHash, blockHash, blockchain, BlockchainUnitType.TRANSACTION_BLOCK);
-        AppServiceProvider.getBlockchainService().put(receiptHash, receipt, blockchain, BlockchainUnitType.RECEIPT);
-        logger.trace("placed on blockchain (TRANSACTION_RECEIPT, TRANSACTION_BLOCK and RECEIPT)");
+        AppServiceProvider.getBlockchainService().put(secureReceiptHash, secureReceipt, blockchain, BlockchainUnitType.RECEIPT);
+        logger.trace("placed on blockchain (TRANSACTION_RECEIPT, TRANSACTION_BLOCK and secure RECEIPT)");
 
         // Broadcast
         P2PBroadcastChanel channel = state.getChanel(P2PChannelName.RECEIPT);
-        AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, receiptHash);
+        AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, secureReceiptHash);
         logger.trace("broadcast the receipt hash");
         logger.traceExit();
     }
 
     private Block getNewBlockAndBindToPrevious(Block currentBlock) {
         logger.traceEntry("params: {}", currentBlock);
+        Util.check(currentBlock != null, "currentBlock != null");
+
         Block block = new Block();
         byte[] hash = AppServiceProvider.getSerializationService().getHash(currentBlock);
 
@@ -212,7 +246,7 @@ public class AppBlockManager {
     public void signBlock(Block block, PrivateKey privateKey) {
         logger.traceEntry("params: {} {}", block, privateKey);
         Util.check(block != null, "block != null");
-        Util.check(privateKey != null, "application != null");
+        Util.check(privateKey != null, "privateKey != null");
 
         //AppContext context = application.getContext();
 
