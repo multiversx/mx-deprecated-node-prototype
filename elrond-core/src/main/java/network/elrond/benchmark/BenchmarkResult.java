@@ -1,13 +1,14 @@
 package network.elrond.benchmark;
 
 public class BenchmarkResult {
-    private long liveTps;
-    private long maxTps;
-    private long averageTps;
     private long activeNodes;
     private long nrShards;
     private Double averageRoundTime;
-    private long averageNrTransactionsPerBlock;
+    private long averageNrTxPerBlock;
+
+    private long liveTps;
+    private long peakTps;
+    private long averageTps;
     private long liveNrTransactionsPerBlock;
 
     public long getLiveTps() {
@@ -18,12 +19,12 @@ public class BenchmarkResult {
         this.liveTps = liveTps;
     }
 
-    public long getMaxTps() {
-        return maxTps;
+    public long getPeakTps() {
+        return peakTps;
     }
 
-    public void setMaxTps(long maxTps) {
-        this.maxTps = maxTps;
+    public void setPeakTps(long peakTps) {
+        this.peakTps = peakTps;
     }
 
     public long getAverageTps() {
@@ -58,12 +59,12 @@ public class BenchmarkResult {
         this.averageRoundTime = averageRoundTime;
     }
 
-    public long getAverageNrTransactionsPerBlock() {
-        return averageNrTransactionsPerBlock;
+    public long getAverageNrTxPerBlock() {
+        return averageNrTxPerBlock;
     }
 
-    public void setAverageNrTransactionsPerBlock(long averageNrTransactionsPerBlock) {
-        this.averageNrTransactionsPerBlock = averageNrTransactionsPerBlock;
+    public void setAverageNrTxPerBlock(long averageNrTxPerBlock) {
+        this.averageNrTxPerBlock = averageNrTxPerBlock;
     }
 
     public long getLiveNrTransactionsPerBlock() {
