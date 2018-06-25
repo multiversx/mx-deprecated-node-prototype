@@ -1,5 +1,7 @@
 package network.elrond.data;
 
+import network.elrond.AsciiTable;
+import network.elrond.core.CollectionUtil;
 import network.elrond.core.Util;
 import network.elrond.sharding.Shard;
 
@@ -15,18 +17,18 @@ import java.util.List;
  * @version 1.0
  * @since 2018-05-14
  */
-public class Block implements Serializable {
+public class Block implements Serializable, AsciiPrintable {
     //block counter
     protected BigInteger nonce;
     //blob of data containing first part of sig
     private byte[] signature;
     //blob of data containing second part of sig
     private byte[] commitment;
-    //list of public keys used in signing. First is the leader that proposed the block
+    //listToTable of public keys used in signing. First is the leader that proposed the block
     protected List<String> listPubKeys;
     //previus block hash
     protected byte[] prevBlockHash;
-    //list of transaction hashes included in block
+    //listToTable of transaction hashes included in block
     protected List<byte[]> listTXHashes;
     //int shard ID
     protected Shard shard;
@@ -66,9 +68,9 @@ public class Block implements Serializable {
     }
 
     /**
-     * Gets the list of transaction hashes
+     * Gets the listToTable of transaction hashes
      *
-     * @return list of tx hashes
+     * @return listToTable of tx hashes
      */
     public List<byte[]> getListTXHashes() {
         return (listTXHashes);
@@ -81,7 +83,7 @@ public class Block implements Serializable {
     /**
      * Gets te public keys used in signing process of the block
      *
-     * @return the list of public keys
+     * @return the listToTable of public keys
      */
     public List<String> getListPublicKeys() {
         return (listPubKeys);
@@ -129,7 +131,6 @@ public class Block implements Serializable {
 
     /**
      * Gets the shard's number
-     *
      */
     public Shard getShard() {
         return (shard);
@@ -198,5 +199,49 @@ public class Block implements Serializable {
     public String toString() {
         return (String.format("Block{shard=%s,nonce=%d, appStateHash='%s', listTXHashes.size=%d, roundIndex=%d, timestamp=%d}",
                 shard, nonce, Util.byteArrayToHexString(appStateHash), listTXHashes.size(), roundIndex, timestamp));
+    }
+
+    @Override
+    public AsciiTable print() {
+
+        AsciiTable table = new AsciiTable();
+        table.setMaxColumnWidth(200);
+
+        table.getColumns().add(new AsciiTable.Column("Block " + nonce));
+        table.getColumns().add(new AsciiTable.Column(""));
+
+        AsciiTable.Row row0 = new AsciiTable.Row();
+        row0.getValues().add("Nonce");
+        row0.getValues().add(nonce.toString());
+        table.getData().add(row0);
+
+        AsciiTable.Row row1 = new AsciiTable.Row();
+        row1.getValues().add("State Hash");
+        row1.getValues().add(Util.byteArrayToHexString(appStateHash));
+        table.getData().add(row1);
+
+        AsciiTable.Row row2 = new AsciiTable.Row();
+        row2.getValues().add("Signature");
+        row2.getValues().add(Util.byteArrayToHexString(signature));
+        table.getData().add(row2);
+
+        AsciiTable.Row row3 = new AsciiTable.Row();
+        row3.getValues().add("Commitment");
+        row3.getValues().add(Util.byteArrayToHexString(commitment));
+        table.getData().add(row3);
+
+        AsciiTable.Row row4 = new AsciiTable.Row();
+        row4.getValues().add("Transactions in block");
+        row4.getValues().add(listTXHashes.size() + "");
+        table.getData().add(row4);
+
+        AsciiTable.Row row5 = new AsciiTable.Row();
+        row5.getValues().add("Transactions in block");
+        row5.getValues().add(CollectionUtil.implode(listTXHashes, " | ", e -> Util.byteArrayToHexString(e)));
+        table.getData().add(row5);
+
+
+        table.calculateColumnWidth();
+        return table;
     }
 }

@@ -49,8 +49,9 @@ public class AccountStateServiceImpl implements AccountStateService {
 
         AccountsPersistenceUnit<AccountAddress, AccountState> unit = accounts.getAccountsPersistenceUnit();
         byte[] bytes = address.getBytes();
+        byte[] data = unit.get(bytes);
 
-        return logger.traceExit((bytes != null) ? convertToAccountStateFromRLP(unit.get(bytes)) : null);
+        return logger.traceExit((bytes != null) ? convertToAccountStateFromRLP(data) : null);
     }
 
     @Override
@@ -164,12 +165,13 @@ public class AccountStateServiceImpl implements AccountStateService {
         try {
 
             AccountsContext accountsContext = new AccountsContext();
+            accountsContext.setShard(state.getShard());
             Accounts accountsTemp = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
 
             ExecutionService executionService = AppServiceProvider.getExecutionService();
             ExecutionReport executionReport = executionService.processTransaction(transactionMint, accountsTemp);
             if (!executionReport.isOk()) {
-                logger.traceExit((Fun.Tuple2<Block, Transaction>)null);
+                return logger.traceExit((Fun.Tuple2<Block, Transaction>)null);
             }
             genesisBlock.setAppStateHash(accountsTemp.getAccountsPersistenceUnit().getRootHash());
             AppBlockManager.instance().signBlock(genesisBlock, privateKey);

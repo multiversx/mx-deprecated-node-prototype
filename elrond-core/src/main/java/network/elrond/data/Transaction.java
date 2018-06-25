@@ -1,6 +1,7 @@
 package network.elrond.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import network.elrond.AsciiTable;
 import network.elrond.sharding.Shard;
 
 import java.beans.Transient;
@@ -14,7 +15,7 @@ import java.math.BigInteger;
  * @version 1.0
  * @since 2018-05-11
  */
-public class Transaction implements Serializable {
+public class Transaction implements Serializable, AsciiPrintable {
     //tx counter
     private BigInteger nonce;
     //value used in transaction in sERDs see core.Util
@@ -318,4 +319,44 @@ public class Transaction implements Serializable {
                 nonce, value, senderAddress, receiverAddress, senderShard, receiverShard));
     }
 
+    @Override
+    public AsciiTable print() {
+        AsciiTable table = new AsciiTable();
+        table.setMaxColumnWidth(30);
+
+        table.getColumns().add(new AsciiTable.Column("Transaction" + nonce));
+
+        AsciiTable.Row row0 = new AsciiTable.Row();
+        row0.getValues().add("Value");
+        row0.getValues().add(value.toString());
+
+        AsciiTable.Row row1 = new AsciiTable.Row();
+        row1.getValues().add("From");
+        row1.getValues().add(senderAddress);
+        table.getData().add(row1);
+
+        AsciiTable.Row row2 = new AsciiTable.Row();
+        row2.getValues().add("To");
+        row2.getValues().add(receiverAddress);
+        table.getData().add(row2);
+
+        AsciiTable.Row row3 = new AsciiTable.Row();
+        row3.getValues().add("To Shard");
+        row3.getValues().add(receiverShard.print().render());
+        table.getData().add(row3);
+
+        AsciiTable.Row row4 = new AsciiTable.Row();
+        row4.getValues().add("To Shard");
+        row4.getValues().add(receiverShard.print().render());
+        table.getData().add(row4);
+
+        AsciiTable.Row row5 = new AsciiTable.Row();
+        row5.getValues().add("Nonce");
+        row5.getValues().add(nonce.toString());
+        table.getData().add(row5);
+
+
+        table.calculateColumnWidth();
+        return table;
+    }
 }

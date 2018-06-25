@@ -52,7 +52,7 @@ public class NTPClient implements AutoCloseable{
                     this.setTimeInfo(ti);
                     offline = false;
                 } catch (SocketTimeoutException ste) {
-                    logger.trace("Failed to reach NTPServer {}, trying next server from list!", getCurrentHostName());
+                    logger.trace("Failed to reach NTPServer {}, trying nex server from listToTable!", getCurrentHostName());
                     currentHost++;
                     currentHost = currentHost % listHostsAddr.size();
                     offline = true;

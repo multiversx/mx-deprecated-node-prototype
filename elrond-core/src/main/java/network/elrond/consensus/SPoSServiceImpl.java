@@ -18,9 +18,9 @@ import java.util.List;
 public class SPoSServiceImpl implements SPoSService {
     /**
      * The method creates a node result of type EligibleListValidators that contains a clean-up version of the
-     * whole eligible list validators (no negative ratings, stake equal or higher of minim stake, etc) and
+     * whole eligible listToTable validators (no negative ratings, stake equal or higher of minim stake, etc) and
      * computes minimum/maximum ratings, maximum stake.
-     * @param eligibleList that contain validators to be included in cleaned up list
+     * @param eligibleList that contain validators to be included in cleaned up listToTable
      * @return the node that holds the data
      */
     public EligibleListValidators generateCleanupList(List<Validator> eligibleList) {
@@ -36,7 +36,7 @@ public class SPoSServiceImpl implements SPoSService {
             Validator v = eligibleList.get(i);
 
             //no double adds - JLS, performance issue detected 2018.09.05 18:30
-//            if (result.list.contains(v))
+//            if (result.listToTable.contains(v))
 //            {
 //                continue;
 //            }
@@ -70,11 +70,11 @@ public class SPoSServiceImpl implements SPoSService {
     }
 
     /**
-     * The method computes the score for each validator and multiply its entrance in the output list
-     * The score is an integer from 0 to Util.MAX_SCORE and 0 means it appears once in the list, 1 twice and so on
-     * @param cleanedUpListObject the objcet that holds the input data of the cleaned up list
+     * The method computes the score for each validator and multiply its entrance in the output listToTable
+     * The score is an integer from 0 to Util.MAX_SCORE and 0 means it appears once in the listToTable, 1 twice and so on
+     * @param cleanedUpListObject the objcet that holds the input data of the cleaned up listToTable
      *                            (call method generateCleanupList first)
-     * @return the weighted validators list
+     * @return the weighted validators listToTable
      */
     public List<Validator> generateWeightedEligibleList(EligibleListValidators cleanedUpListObject) {
 
@@ -86,7 +86,7 @@ public class SPoSServiceImpl implements SPoSService {
 
         List<Validator> tempList = copyList(cleanedUpListObject.list);
 
-        //compute stake and rating score for each validator from temp list
+        //compute stake and rating score for each validator from temp listToTable
         //and multiply temp table instances
         int tempSize = tempList.size();
         for (int i = 0; i < tempSize; i++) {
@@ -120,15 +120,15 @@ public class SPoSServiceImpl implements SPoSService {
     }
 
     /**
-     * The method returns a list of maximum Util.VERIFIER_GROUP_SIZE validators that will start the consensus process
-     * The first validator in the list is the leader!!!
-     * @param strRandomSource a String that will be used to select Util.VERIFIER_GROUP_SIZE from a weighted list
-     * @param eligibleList the input weighted list (call first method generateWeightedEligibleList)
+     * The method returns a listToTable of maximum Util.VERIFIER_GROUP_SIZE validators that will start the consensus process
+     * The first validator in the listToTable is the leader!!!
+     * @param strRandomSource a String that will be used to select Util.VERIFIER_GROUP_SIZE from a weighted listToTable
+     * @param eligibleList the input weighted listToTable (call first method generateWeightedEligibleList)
      * @param roundHeight the round height (ID)
-     * @return the list of selected validator, first item being the leader
+     * @return the listToTable of selected validator, first item being the leader
      */
     public List<Validator> generateValidatorsList(String strRandomSource, List<Validator> eligibleList, BigInteger roundHeight) {
-        //pick max Util.VERIFIER_GROUP_SIZE from eligible list
+        //pick max Util.VERIFIER_GROUP_SIZE from eligible listToTable
         //based on their stake, rating. Round r will rotate the lead
 
         List<Validator> tempList = new ArrayList<Validator>();
@@ -170,7 +170,7 @@ public class SPoSServiceImpl implements SPoSService {
 
                 if (tempList.contains(v)) {
                     startIdx++;
-                    //prevent getting outside the list limits
+                    //prevent getting outside the listToTable limits
                     startIdx = startIdx % size;
                     continue;
                 }
@@ -194,9 +194,9 @@ public class SPoSServiceImpl implements SPoSService {
     }
 
     /**
-     * Method used vor copying Lists of Validators. Method creates a new Validator for each item in the source list
-     * @param src list to be copied
-     * @return new list of Validators
+     * Method used vor copying Lists of Validators. Method creates a new Validator for each item in the source listToTable
+     * @param src listToTable to be copied
+     * @return new listToTable of Validators
      */
     public List<Validator> copyList(List<Validator> src) {
         List<Validator> tempList = new ArrayList<Validator>();

@@ -14,7 +14,7 @@ public class ConsensusTest {
 //
 //        Util.CRT_PUB_KEY = "0xA8";
 //
-//        //testing if list has been loaded 2 times
+//        //testing if listToTable has been loaded 2 times
 //        pbftb1.setValidators(arlValidators);
 //        TestCase.assertEquals(20, pbftb1.getListValidators().size());
 //        pbftb1.setValidators(arlValidators);
@@ -59,14 +59,14 @@ public class ConsensusTest {
 //        Round r = e.createRound();
 //        TestCase.assertEquals(BigInteger.valueOf(2), r.roundIndex());
 //
-//        //test for eligible list size = 3 => plain copy
+//        //test for eligible listToTable size = 3 => plain copy
 //        for (int i = 0; i < 3; i++) {
 //            e.getEligibleList().add(new Validator("0xA" + Integer.toString(i)));
 //        }
 //
 //        r.rebuildValidatorsList("RANDOM_SOURCE_1");
 //
-//        System.out.printf("1. Original epoch list [%d]:", e.getEligibleList().size());
+//        System.out.printf("1. Original epoch listToTable [%d]:", e.getEligibleList().size());
 //        System.out.println();
 //        System.out.println("==========================================================");
 //        displayListValidators(e.getEligibleList());
@@ -76,14 +76,14 @@ public class ConsensusTest {
 //        System.out.println("==========================================================");
 //        displayListValidators(r.getListValidators());
 //
-//        //test for eligible list size = 100 => random chosen
+//        //test for eligible listToTable size = 100 => random chosen
 //        for (int i = 0; i < 100; i++) {
 //            e.getEligibleList().add(new Validator("0xA" + Integer.toString(i)));
 //        }
 //
 //        r.rebuildValidatorsList("RANDOM_SOURCE_2");
 //
-//        System.out.printf("2. Original epoch list [%d]:", e.getEligibleList().size());
+//        System.out.printf("2. Original epoch listToTable [%d]:", e.getEligibleList().size());
 //        System.out.println();
 //        System.out.println("==========================================================");
 //        displayListValidators(e.getEligibleList());
@@ -129,7 +129,7 @@ public class ConsensusTest {
 //        lResult = r.generateWeightedEligibleList();
 //
 //
-//        System.out.printf("1. Original epoch list [%d]:", e.getEligibleList().size());
+//        System.out.printf("1. Original epoch listToTable [%d]:", e.getEligibleList().size());
 //        System.out.println();
 //        System.out.println("==========================================================");
 //        displayListValidators(e.getEligibleList());
@@ -142,9 +142,9 @@ public class ConsensusTest {
 //
 //    }
 //
-//    private void displayListValidators(List<Validator> list) {
-//        for (int i = 0; i < list.size(); i++) {
-//            Validator v = list.getAccountState(i);
+//    private void displayListValidators(List<Validator> listToTable) {
+//        for (int i = 0; i < listToTable.size(); i++) {
+//            Validator v = listToTable.getAccountState(i);
 //
 //            System.out.println(v.getPubKey() + ", S: " + v.getStake().toString(10) + ", R: " + v.getRating());
 //        }

@@ -15,13 +15,13 @@ import java.util.List;
  */
 
 public class EligibleListValidators {
-    //the validators list
+    //the validators listToTable
     public List<Validator> list;
-    //minim rating found in the list
+    //minim rating found in the listToTable
     public int minRating;
-    //maximum rating found in the list
+    //maximum rating found in the listToTable
     public int maxRating;
-    //maximum stake found in the list
+    //maximum stake found in the listToTable
     public BigInteger maxStake;
 
     /**
