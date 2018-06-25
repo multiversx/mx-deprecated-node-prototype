@@ -7,6 +7,7 @@ import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
+import network.elrond.core.ObjectUtil;
 import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.PKSKPair;
@@ -15,11 +16,9 @@ import network.elrond.crypto.PublicKey;
 import network.elrond.data.Receipt;
 import network.elrond.data.SecureObject;
 import network.elrond.data.Transaction;
-import network.elrond.p2p.P2PBroadcastChanel;
-import network.elrond.p2p.P2PChannelName;
-import network.elrond.p2p.P2PConnection;
-import network.elrond.p2p.PingResponse;
+import network.elrond.p2p.*;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -70,11 +69,30 @@ public class ElrondFacadeImpl implements ElrondFacade {
             return BigInteger.ZERO;
         }
 
-        try {
-            AppState state = application.getState();
-            Accounts accounts = state.getAccounts();
 
-            AccountState account = AppServiceProvider.getAccountStateService().getAccountState(address, accounts);
+        AppState state = application.getState();
+        Shard currentShard = application.getState().getShard();
+        Shard addressShard = AppServiceProvider.getShardingService().getShard(address.getBytes());
+
+        if (ObjectUtil.isEqual(addressShard, currentShard)) {
+            try {
+
+                Accounts accounts = state.getAccounts();
+
+                AccountState account = AppServiceProvider.getAccountStateService().getAccountState(address, accounts);
+
+                return logger.traceExit((account == null) ? BigInteger.ZERO : account.getBalance());
+
+            } catch (Exception ex) {
+                logger.throwing(ex);
+                return logger.traceExit((BigInteger) null);
+            }
+        }
+
+        try {
+
+            P2PRequestChannel channel = state.getChanel(P2PRequestChannelName.ACCOUNT);
+            AccountState account = AppServiceProvider.getP2PRequestService().get(channel, addressShard, P2PRequestChannelName.ACCOUNT, address);
 
             return logger.traceExit((account == null) ? BigInteger.ZERO : account.getBalance());
 
@@ -82,6 +100,8 @@ public class ElrondFacadeImpl implements ElrondFacade {
             logger.throwing(ex);
             return logger.traceExit((BigInteger) null);
         }
+
+
     }
 
     @Override

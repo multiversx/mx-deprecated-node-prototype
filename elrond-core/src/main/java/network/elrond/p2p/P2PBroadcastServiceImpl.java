@@ -60,7 +60,6 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
 
         try {
             P2PConnection connection = channel.getConnection();
-            P2PChannelName channelName = channel.getName();
             PeerDHT dht = connection.getDht();
             logger.trace("got connection...");
 
@@ -102,7 +101,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
                 HashSet<PeerAddress> peersOnChannel;
                 peersOnChannel = (HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object();
                 return logger.traceExit(peersOnChannel);
-            }else{
+            } else {
                 logger.warn(futureGet.failedReason());
             }
         } catch (Exception e) {

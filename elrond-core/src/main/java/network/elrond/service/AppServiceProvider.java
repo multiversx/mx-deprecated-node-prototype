@@ -59,6 +59,7 @@ public class AppServiceProvider {
         putService(ChronologyService.class, new ChronologyServiceImpl());
         putService(ShardingService.class, new ShardingServiceImpl());
         putService(P2PConnectionService.class, new P2PConnectionServiceImpl());
+        putService(P2PRequestService.class, new P2PRequestServiceImpl());
     }
 
     public static P2PBroadcastService getP2PBroadcastService() {
@@ -117,16 +118,19 @@ public class AppServiceProvider {
         return getService(P2PConnectionService.class);
     }
 
+    public static P2PRequestService getP2PRequestService() {
+        return getService(P2PRequestService.class);
+    }
+
     public static BootstrapService getBootstrapService() {
-        return getService(BootstrapService.class
-        );
+        return getService(BootstrapService.class);
     }
 
-    public static P2PCommunicationService getP2PCommunicationService(){
-        return((P2PCommunicationService)getService(P2PCommunicationService.class));
+    public static P2PCommunicationService getP2PCommunicationService() {
+        return getService(P2PCommunicationService.class);
     }
 
-    public static ChronologyService getChronologyService(){
-        return ((ChronologyService)getService(ChronologyService.class));
+    public static ChronologyService getChronologyService() {
+        return getService(ChronologyService.class);
     }
 }

@@ -324,7 +324,8 @@ public class Transaction implements Serializable, AsciiPrintable {
         AsciiTable table = new AsciiTable();
         table.setMaxColumnWidth(30);
 
-        table.getColumns().add(new AsciiTable.Column("Transaction" + nonce));
+        table.getColumns().add(new AsciiTable.Column("Transaction"));
+        table.getColumns().add(new AsciiTable.Column(nonce + ""));
 
         AsciiTable.Row row0 = new AsciiTable.Row();
         row0.getValues().add("Value");
@@ -342,12 +343,12 @@ public class Transaction implements Serializable, AsciiPrintable {
 
         AsciiTable.Row row3 = new AsciiTable.Row();
         row3.getValues().add("To Shard");
-        row3.getValues().add(receiverShard.print().render());
+        row3.getValues().add(receiverShard.getIndex() + "");
         table.getData().add(row3);
 
         AsciiTable.Row row4 = new AsciiTable.Row();
         row4.getValues().add("To Shard");
-        row4.getValues().add(receiverShard.print().render());
+        row4.getValues().add(receiverShard.getIndex() + "");
         table.getData().add(row4);
 
         AsciiTable.Row row5 = new AsciiTable.Row();

@@ -8,6 +8,7 @@ import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.chronology.ChronologyService;
 import network.elrond.chronology.NTPClient;
 import network.elrond.chronology.Round;
+import network.elrond.core.AsciiTableUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.*;
 import network.elrond.p2p.P2PBroadcastChanel;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class AppBlockManager {
@@ -79,6 +81,19 @@ public class AppBlockManager {
 
                 logger.info("New block proposed with hash {}", hashBlock);
                 logger.info("\n" + block.print().render());
+                logger.info("\n" + AsciiTableUtil.listToTables(transactions));
+                logger.info("\n" + AsciiTableUtil.listToTables(accounts.getAddresses()
+                        .stream()
+                        .map(accountAddress -> {
+                            try {
+                                return AppServiceProvider.getAccountStateService().getAccountState(accountAddress, accounts);
+                            } catch (IOException | ClassNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                            return null;
+                        })
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList())));
 
 
             }
