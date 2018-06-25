@@ -3,7 +3,7 @@ package network.elrond.benchmark;
 public class BenchmarkResult {
     private long activeNodes;
     private long nrShards;
-    private Double averageRoundTime;
+    private long averageRoundTime;
     private long averageNrTxPerBlock;
 
     private long liveTps;
@@ -51,11 +51,11 @@ public class BenchmarkResult {
         this.nrShards = nrShards;
     }
 
-    public Double getAverageRoundTime() {
+    public long getAverageRoundTime() {
         return averageRoundTime;
     }
 
-    public void setAverageRoundTime(Double averageRoundTime) {
+    public void setAverageRoundTime(long averageRoundTime) {
         this.averageRoundTime = averageRoundTime;
     }
 

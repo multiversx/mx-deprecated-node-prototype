@@ -80,6 +80,7 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
 
         stats.setNrTransactionsInBlock(size);
         stats.setTps(tps);
+        stats.setCurrentTimeMillis(System.currentTimeMillis());
 
         application.getStatisticsManager().addStatistic(stats);
 

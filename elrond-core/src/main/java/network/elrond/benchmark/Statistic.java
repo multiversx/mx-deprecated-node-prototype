@@ -3,6 +3,7 @@ package network.elrond.benchmark;
 public class Statistic {
     private long nrTransactionsInBlock;
     private long tps;
+    private long currentTimeMillis;
 
     public long getNrTransactionsInBlock() {
         return nrTransactionsInBlock;
@@ -18,5 +19,13 @@ public class Statistic {
 
     public void setTps(long tps) {
         this.tps = tps;
+    }
+
+    public long getCurrentTimeMillis() {
+        return currentTimeMillis;
+    }
+
+    public void setCurrentTimeMillis(long currentTimeMillis) {
+        this.currentTimeMillis = currentTimeMillis;
     }
 }

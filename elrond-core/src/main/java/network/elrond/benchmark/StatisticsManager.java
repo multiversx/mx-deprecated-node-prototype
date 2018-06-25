@@ -12,8 +12,6 @@ public class StatisticsManager {
     private static final int maxStatistics = 100;
     private List<Statistic> statistics = new ArrayList<>();
 
-
-
     private long currentIndex = 0;
     private Statistic currentStatistic;
 
@@ -25,8 +23,11 @@ public class StatisticsManager {
     private long maxNrTransactionsInBlock = 0;
     private long minNrTransactionsInBlock = Integer.MAX_VALUE;
 
+    private long averageRoundTime = 0;
+
     public void addStatistic(Statistic statistic) {
         logger.traceEntry("params: {}", statistic);
+        long timeDifference = statistic.getCurrentTimeMillis() - currentStatistic.getCurrentTimeMillis();
 
         currentStatistic = statistic;
 
@@ -42,7 +43,15 @@ public class StatisticsManager {
         long currentNrTransactionsInBlock = statistic.getNrTransactionsInBlock();
         computeNrTransactionsInBlock(currentNrTransactionsInBlock);
 
+        computeAverageRoundTime(timeDifference);
+
+        currentIndex++;
         logger.traceExit();
+    }
+
+    private void computeAverageRoundTime(long timeDifference) {
+        averageRoundTime = (averageRoundTime *currentIndex + timeDifference) / (currentIndex+1);
+        logger.trace("averageNrTransactionsInBlock is " + averageNrTransactionsInBlock);
     }
 
     public void ComputeTps(long currentTps) {
@@ -54,7 +63,7 @@ public class StatisticsManager {
             minTps = currentTps;
         }
 
-        averageTps = (averageTps*currentIndex + currentTps) / ++currentIndex;
+        averageTps = (averageTps*currentIndex + currentTps) / (currentIndex+1);
         logger.trace("averageTps is " + averageTps);
     }
 
@@ -67,7 +76,7 @@ public class StatisticsManager {
             minNrTransactionsInBlock = currentNrTransactionsInBlock;
         }
 
-        averageNrTransactionsInBlock = (averageNrTransactionsInBlock *currentIndex + currentNrTransactionsInBlock) / ++currentIndex;
+        averageNrTransactionsInBlock = (averageNrTransactionsInBlock *currentIndex + currentNrTransactionsInBlock) /(currentIndex+1);
         logger.trace("averageNrTransactionsInBlock is " + averageNrTransactionsInBlock);
     }
 
@@ -97,5 +106,9 @@ public class StatisticsManager {
 
     public Statistic getCurrentStatistic() {
         return currentStatistic;
+    }
+
+    public long getAverageRoundTime() {
+        return averageRoundTime;
     }
 }
