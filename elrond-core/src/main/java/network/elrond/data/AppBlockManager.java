@@ -199,7 +199,7 @@ public class AppBlockManager {
         SignatureService signatureService = AppServiceProvider.getSignatureService();
         Signature signature = signatureService.signMessage(receiptHash, state.getPrivateKey().getValue(), state.getPublicKey().getValue());
 
-        return logger.traceExit(new SecureObject<>(receipt, signature, state.getPublicKey()));
+        return logger.traceExit(new SecureObject<>(receipt, signature, state.getPublicKey().getValue()));
     }
 
     private void sendReceipt(Block block, Receipt receipt, AppState state) throws IOException {

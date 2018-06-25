@@ -1,7 +1,6 @@
 package network.elrond.data;
 
 import network.elrond.core.Util;
-import network.elrond.crypto.PublicKey;
 import network.elrond.crypto.Signature;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,9 +12,9 @@ public class SecureObject<T> implements Serializable {
 
     private T object;
     private Signature signature;
-    private PublicKey publicKey;
+    private byte[] publicKey;
 
-    public SecureObject(T object, Signature signature, PublicKey publicKey) {
+    public SecureObject(T object, Signature signature, byte[] publicKey) {
         logger.traceEntry("params: {} {} {}", object, signature, publicKey);
         Util.check(object != null, "object != null");
         Util.check(signature != null, "signature != null");
@@ -35,7 +34,7 @@ public class SecureObject<T> implements Serializable {
         return signature;
     }
 
-    public PublicKey getPublicKey() {
+    public byte[] getPublicKey() {
         return publicKey;
     }
 }
