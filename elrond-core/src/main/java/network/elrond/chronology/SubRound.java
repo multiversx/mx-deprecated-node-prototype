@@ -1,7 +1,5 @@
 package network.elrond.chronology;
 
-import network.elrond.Application;
-
 public class SubRound {
     private RoundState roundState;
     private Round round;

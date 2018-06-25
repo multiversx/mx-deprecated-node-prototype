@@ -36,59 +36,29 @@ public class PublicKey {
      */
     public PublicKey(byte[] publicPointQEncoding) {
         logger.traceEntry("params: {}", publicPointQEncoding);
-        if(publicPointQEncoding == null){
+        if (publicPointQEncoding == null) {
             IllegalArgumentException ex = new IllegalArgumentException("publicPointQEncoding cannot be null");
             logger.throwing(ex);
             throw ex;
         }
-
-        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
-        ECParameterSpec ecParameterSpec = new ECParameterSpec(
-                ecCryptoService.getCurve(),
-                ecCryptoService.getG(),
-                ecCryptoService.getN(),
-                ecCryptoService.getH(),
-                ecCryptoService.getSeed());
-        ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(ecCryptoService.getCurve().decodePoint(publicPointQEncoding), ecParameterSpec);
-        KeyFactory keyFactory;
-        try {
-            keyFactory = KeyFactory.getInstance(ecCryptoService.getAlgorithm(), ecCryptoService.getProvider());
-            q = ((ECPublicKey) keyFactory.generatePublic(publicKeySpec)).getQ();
-            initialized = true;
-            logger.trace("done initializing public key = {}", q);
-        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
-            logger.catching(e);
-        }
-
+        createPublicKey(publicPointQEncoding);
         logger.traceExit();
     }
 
+    /**
+     * Copy Constructor
+     * Generates a new public key from the given public key
+     *
+     * @param publicKey the public point Q encoding, as a byte array
+     */
     public PublicKey(PublicKey publicKey) {
         logger.traceEntry("params: {}", publicKey);
-        if(publicKey == null){
+        if (publicKey == null) {
             IllegalArgumentException ex = new IllegalArgumentException();
             logger.throwing(ex);
             throw ex;
         }
-
-        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
-        ECParameterSpec ecParameterSpec = new ECParameterSpec(
-                ecCryptoService.getCurve(),
-                ecCryptoService.getG(),
-                ecCryptoService.getN(),
-                ecCryptoService.getH(),
-                ecCryptoService.getSeed());
-        ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(ecCryptoService.getCurve().decodePoint(publicKey.getValue()), ecParameterSpec);
-        KeyFactory keyFactory;
-        try {
-            keyFactory = KeyFactory.getInstance(ecCryptoService.getAlgorithm(), ecCryptoService.getProvider());
-            q = ((ECPublicKey) keyFactory.generatePublic(publicKeySpec)).getQ();
-            initialized = true;
-            logger.trace("done initializing public key = {}", q);
-        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
-            logger.catching(e);
-        }
-
+        createPublicKey(publicKey.getValue());
         logger.traceExit();
     }
 
@@ -100,7 +70,7 @@ public class PublicKey {
      */
     public PublicKey(PrivateKey privateKey) {
         logger.traceEntry("params: {}", privateKey);
-        if(privateKey == null){
+        if (privateKey == null) {
             IllegalArgumentException ex = new IllegalArgumentException("PrivateKey cannot be null");
             logger.throwing(ex);
             throw ex;
@@ -121,36 +91,22 @@ public class PublicKey {
         logger.traceExit();
     }
 
-    /**
-     * Setter for public key
-     *
-     * @param point the elliptic curve point
-     */
-//    public void setPublicKey(ECPoint point) {
-//        q = point;
-//    }
 
-    /**
-     * Sets the public key from a byte stream
-     *
-     * @param key the encoded byte stream representation of the public key (obtained through getEncoded call)
-     * @throws NoSuchAlgorithmException
-     * @throws NoSuchProviderException
-     * @throws InvalidKeySpecException
-     */
-//    public void setPublicKey(byte[] key) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
-//        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
-//        ECParameterSpec ecParameterSpec = new ECParameterSpec(
-//                ecCryptoService.getCurve(),
-//                ecCryptoService.getG(),
-//                ecCryptoService.getN(),
-//                ecCryptoService.getH(),
-//                ecCryptoService.getSeed());
-//        ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(ecCryptoService.getCurve().decodePoint(key), ecParameterSpec);
-//        KeyFactory keyFactory = KeyFactory.getInstance(ecCryptoService.getAlgorithm(), ecCryptoService.getProvider());
-//        q = ((ECPublicKey) keyFactory.generatePublic(publicKeySpec)).getQ();
-//        initialized = true;
-//    }
+    private void createPublicKey(byte[] publicPointQEncoding) {
+        logger.traceEntry("params: {}", publicPointQEncoding);
+        if (publicPointQEncoding == null) {
+            throw new IllegalArgumentException("publicPointQEncoding cannot be null");
+        }
+
+        ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
+        try {
+            q = ecCryptoService.getCurve().decodePoint(publicPointQEncoding);
+            initialized = true;
+        } catch (IllegalArgumentException e) {
+            logger.catching(e);
+        }
+        logger.traceExit();
+    }
 
     /**
      * Get the encoded form of public key as a byte array
@@ -192,9 +148,7 @@ public class PublicKey {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return String.format("PublicKey{%s}", Util.byteArrayToHexString(this.getValue()));
     }
-
-
 }

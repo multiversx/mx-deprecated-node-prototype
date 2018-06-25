@@ -10,7 +10,6 @@ import network.elrond.chronology.ChronologyServiceImpl;
 import network.elrond.chronology.Round;
 import network.elrond.chronology.SubRound;
 import network.elrond.core.EventHandler;
-import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.data.AppBlockManager;

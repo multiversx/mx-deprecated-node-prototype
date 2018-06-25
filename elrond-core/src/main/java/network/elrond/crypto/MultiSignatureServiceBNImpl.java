@@ -1,6 +1,5 @@
 package network.elrond.crypto;
 
-import network.elrond.core.PrintlnEventHandler;
 import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;

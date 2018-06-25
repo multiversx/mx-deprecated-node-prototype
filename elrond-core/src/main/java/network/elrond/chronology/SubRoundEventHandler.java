@@ -14,7 +14,7 @@ public class SubRoundEventHandler implements EventHandler<SubRound, ArrayBlockin
 
 
     public void onEvent(Application application, Object sender, SubRound data, ArrayBlockingQueue<String> queue) {
-        //just display data for now
+        // just display data for now
         StringBuilder stringBuilder = new StringBuilder();
 
         String strSender = "[NULL SENDER]";
@@ -45,12 +45,5 @@ public class SubRoundEventHandler implements EventHandler<SubRound, ArrayBlockin
         }
 
         logger.trace(stringBuilder.toString());
-
-        //logger.info(stringBuilder.toString());
-
-        //System.out.println(stringBuilder.toString());
     }
-
-
-
 }

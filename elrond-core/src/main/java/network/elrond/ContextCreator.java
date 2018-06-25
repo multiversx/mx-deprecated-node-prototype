@@ -5,7 +5,6 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.BootstrapType;
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,12 +18,12 @@ public class ContextCreator {
 
     public static AppContext createAppContext(String nodeName, String nodePrivateKeyString, String masterPeerIpAddress,
                                               Integer masterPeerPort, Integer port, BootstrapType bootstrapType,
-                                              String blockchainPath) {
+                                              String blockchainPath) throws IOException {
         logger.traceEntry("params: {} {} {} {} {} {} {}", nodeName, nodePrivateKeyString, masterPeerIpAddress,
                 masterPeerPort, port, bootstrapType, blockchainPath);
 
         if(bootstrapType == BootstrapType.START_FROM_SCRATCH){
-            deleteDirectory(new File(blockchainPath));
+            Util.deleteDirectory(new File(blockchainPath));
         }
 
         AppContext context = new AppContext();
@@ -45,17 +44,6 @@ public class ContextCreator {
         context.setStrAddressMint(mintAddress);
 
         return logger.traceExit(context);
-    }
-
-    private static void deleteDirectory(File dir) {
-        logger.traceEntry("params: {}", dir);
-        try {
-            FileUtils.deleteDirectory(dir);
-            logger.trace("done");
-        } catch (IOException ex) {
-            logger.throwing(ex);
-        }
-        logger.traceExit();
     }
 
 }

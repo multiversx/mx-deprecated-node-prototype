@@ -1,6 +1,7 @@
 package network.elrond.blockchain;
 
 import network.elrond.core.LRUMap;
+import network.elrond.core.Util;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
@@ -26,6 +27,8 @@ public class BlockchainServiceImpl implements BlockchainService {
     @Override
     public synchronized <H extends Object, B extends Serializable> boolean contains(H hash, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
         logger.traceEntry("params: {} {} {}", hash, blockchain, type);
+        Util.check(hash!=null, "hash!=null");
+        Util.check(blockchain!=null, "blockchain!=null");
         BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
         P2PConnection connection = blockchain.getConnection();
         LRUMap<H, B> cache = unit.getCache();
@@ -50,11 +53,15 @@ public class BlockchainServiceImpl implements BlockchainService {
     public synchronized <H extends Object, B extends Serializable> void put(H hash, B object, Blockchain blockchain, BlockchainUnitType type) throws IOException {
         logger.traceEntry("params: {} {} {} {}", hash, object, blockchain, type);
 
-        if (object == null || hash == null) {
-            logger.trace("object or hash is null");
-            logger.traceExit();
-            return;
-        }
+        Util.check(hash!=null, "hash!=null");
+        Util.check(object!=null, "object!=null");
+        Util.check(blockchain!=null, "blockchain!=null");
+
+//        if (object == null || hash == null) {
+//            logger.trace("object or hash is null");
+//            logger.traceExit();
+//            return;
+//        }
 
         BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
         P2PConnection connection = blockchain.getConnection();
@@ -76,6 +83,10 @@ public class BlockchainServiceImpl implements BlockchainService {
     @Override
     public <H extends Object, B extends Serializable> List<B> getAll(List<H> hashes, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
         logger.traceEntry("params: {} {} {}", hashes, blockchain, type);
+
+        Util.check(hashes!=null, "hashes!=null");
+        Util.check(blockchain!=null, "blockchain!=null");
+
         List<B> list = new ArrayList<>();
 
         for (H hash : hashes) {
@@ -96,6 +107,9 @@ public class BlockchainServiceImpl implements BlockchainService {
     @Override
     public synchronized <H extends Object, B extends Serializable> B get(H hash, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
         logger.traceEntry("params: {} {} {}", hash, blockchain, type);
+
+        Util.check(hash!=null, "hash!=null");
+        Util.check(blockchain!=null, "blockchain!=null");
 
         BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
         P2PConnection connection = blockchain.getConnection();
