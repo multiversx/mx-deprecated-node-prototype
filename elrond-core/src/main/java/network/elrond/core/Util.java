@@ -2,6 +2,7 @@ package network.elrond.core;
 
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -10,6 +11,7 @@ import org.spongycastle.jcajce.provider.digest.SHA3.DigestSHA3;
 import org.spongycastle.util.encoders.Base64;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 
@@ -158,5 +160,17 @@ public class Util {
         org.apache.logging.log4j.core.LoggerContext ctx =
                 (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false);
         ctx.reconfigure();
+    }
+
+    public static void deleteDirectory(File dir) throws IOException {
+        logger.traceEntry("params: {}", dir);
+        try {
+            FileUtils.deleteDirectory(dir);
+            logger.trace("done");
+        } catch (IOException ex) {
+            logger.throwing(ex);
+            throw ex;
+        }
+        logger.traceExit();
     }
 }
