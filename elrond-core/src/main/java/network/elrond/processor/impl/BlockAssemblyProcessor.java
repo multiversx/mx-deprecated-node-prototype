@@ -91,18 +91,10 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
 
         AppState state = application.getState();
 
-        List<String> hashes = new ArrayList<>(queue);
-        queue.clear();
-
-        if (hashes.isEmpty()) {
-            logger.info("Can't execute, no transaction!");
-            return null;
-        }
-
         AppContext context = application.getContext();
         PrivateKey privateKey = context.getPrivateKey();
 
-        Block block = AppBlockManager.instance().generateAndBroadcastBlock(hashes, privateKey, state);
+        Block block = AppBlockManager.instance().generateAndBroadcastBlock(queue, privateKey, state);
 
         return logger.traceExit(block);
     }
@@ -119,8 +111,8 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
             localBlockIndex = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.LOCAL, blockchain);
 
             // TODO: take the number of blocks to check from a config file
-            BigInteger earliestBlockToCheck = (localBlockIndex.subtract(BigInteger.valueOf(50)).compareTo(BigInteger.ZERO) < 0) ?
-                    BigInteger.ZERO : localBlockIndex.subtract(BigInteger.valueOf(50));
+            BigInteger earliestBlockToCheck = (localBlockIndex.subtract(BigInteger.valueOf(5)).compareTo(BigInteger.ZERO) < 0) ?
+                    BigInteger.ZERO : localBlockIndex.subtract(BigInteger.valueOf(5));
 
             for (BigInteger i = localBlockIndex; i.compareTo(earliestBlockToCheck) >= 0; i = i.subtract(BigInteger.ONE)) {
                 lastBlockHashes.add(AppServiceProvider.getBootstrapService().getBlockHashFromIndex(i, blockchain));

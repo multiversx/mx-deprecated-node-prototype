@@ -1,6 +1,7 @@
 package network.elrond.data;
 
 import javafx.util.Pair;
+import network.elrond.TimeWatch;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
@@ -19,11 +20,12 @@ import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 //TODO: remove from "data" package
 public class AppBlockManager {
@@ -35,10 +37,17 @@ public class AppBlockManager {
         return instance;
     }
 
-    public Block generateAndBroadcastBlock(List<String> hashes, PrivateKey privateKey, AppState state) {
-        logger.traceEntry("params: {} {} {}", hashes, privateKey, state);
+    public Block generateAndBroadcastBlock(ArrayBlockingQueue<String> queue, PrivateKey privateKey, AppState state) {
+        logger.traceEntry("params: {} {} {}", queue, privateKey, state);
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();
+
+        List<String> hashes = new ArrayList<>(queue);
+
+        if (hashes.isEmpty()) {
+            logger.info("Can't execute, no transaction!");
+            return null;
+        }
 
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
         try {
@@ -55,11 +64,15 @@ public class AppBlockManager {
                 String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
                 AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
 
+                List<String> txHashes  = new ArrayList<>();
                 for (Receipt receipt : receipts) {
                     // add the blockHash to the receipt as the valid hash is only available after signing
                     receipt.setBlockHash(hashBlock);
                     sendReceipt(block, receipt, state);
+                    txHashes.add(receipt.getTransactionHash());
                 }
+
+                queue.removeAll(txHashes);
 
                 logger.info("New block proposed with hash {}", hashBlock);
                 return logger.traceExit(block);
@@ -114,7 +127,7 @@ public class AppBlockManager {
         List<Receipt> receipts = new ArrayList<>();
 
         Accounts accounts = state.getAccounts();
-
+        TimeWatch tw = TimeWatch.start();
         for (Transaction transaction : transactions) {
             boolean valid = AppServiceProvider.getTransactionService().verifyTransaction(transaction);
             if (!valid) {
@@ -135,6 +148,10 @@ public class AppBlockManager {
 
             logger.trace("added transaction {} in block", txHash);
             block.getListTXHashes().add(txHash);
+
+            if(tw.time(TimeUnit.MILLISECONDS) > 1000){
+                break;
+            }
         }
 
         return logger.traceExit(receipts);
