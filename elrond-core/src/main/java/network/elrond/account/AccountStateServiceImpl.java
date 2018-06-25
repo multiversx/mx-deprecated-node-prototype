@@ -157,8 +157,7 @@ public class AccountStateServiceImpl implements AccountStateService {
         genesisBlock.setNonce(BigInteger.ZERO);
         genesisBlock.getListTXHashes().add(AppServiceProvider.getSerializationService().getHash(transactionMint));
         logger.trace("Setting timestamp and round...");
-        NTPClient ntpClient = state.getNtpClient();
-        genesisBlock.setTimestamp(AppServiceProvider.getChronologyService().getSynchronizedTime(ntpClient));
+        genesisBlock.setTimestamp(AppServiceProvider.getChronologyService().getSynchronizedTime());
         genesisBlock.setRoundIndex(0);
 
         logger.trace("Computing state root hash...");

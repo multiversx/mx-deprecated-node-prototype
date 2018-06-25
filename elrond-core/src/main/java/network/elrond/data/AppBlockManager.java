@@ -96,7 +96,6 @@ public class AppBlockManager {
 
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();
-        NTPClient ntpClient = state.getNtpClient();
 
         Util.check(transactions != null, "transactions!=null");
         Util.check(blockchain != null, "blockchain!=null");
@@ -108,7 +107,8 @@ public class AppBlockManager {
 
         ChronologyService chronologyService = AppServiceProvider.getChronologyService();
         long timestamp = blockchain.getGenesisBlock().getTimestamp();
-        long synchronizedTime = chronologyService.getSynchronizedTime(ntpClient);
+        long synchronizedTime = chronologyService.getSynchronizedTime();
+
         Round round = chronologyService.getRoundFromDateTime(timestamp, synchronizedTime);
         block.setRoundIndex(round.getIndex());
         block.setTimestamp(round.getStartTimeStamp());

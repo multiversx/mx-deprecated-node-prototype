@@ -18,11 +18,11 @@ import java.util.Random;
 public class DelayingEventHandler implements EventHandler<SubRound> {
     private static Random rdm = null;
 
-    public void onEvent(Application application, Object sender, SubRound data){
+    public void onEvent(Object sender, SubRound data){
         ChronologyService chronologyService = AppServiceProvider.getChronologyService();
-        NTPClient ntpClient = application.getState().getNtpClient();
+        NTPClient ntpClient = chronologyService.getNtpClient();
         TestCase.assertNotNull(ntpClient);
-        long currentTimeStamp = chronologyService.getSynchronizedTime(ntpClient);
+        long currentTimeStamp = chronologyService.getSynchronizedTime();
 
         System.out.println(String.format("Time %s %b [%d] - onEvent called", getTimeStamp(currentTimeStamp),
                 ntpClient.isOffline(), currentTimeStamp));
@@ -31,13 +31,10 @@ public class DelayingEventHandler implements EventHandler<SubRound> {
             rdm = new Random(System.currentTimeMillis());
         }
 
-        TestCase.assertNotNull(application);
         TestCase.assertNotNull(sender);
         TestCase.assertNotNull(data);
 
-        TestCase.assertNotNull(application.getState().getBlockchain().getGenesisBlock());
-
-        currentTimeStamp = chronologyService.getSynchronizedTime(ntpClient);
+        currentTimeStamp = chronologyService.getSynchronizedTime();
         System.out.println(String.format("Time %s %b [%d] - %s @ %d [round timestamp %d, delta %d]", getTimeStamp(currentTimeStamp),
                 ntpClient.isOffline(), currentTimeStamp, data.getRoundState().name(), data.getTimeStamp(), data.getRound().getStartTimeStamp(),
                 data.getRound().getStartTimeStamp() - data.getTimeStamp()));
@@ -47,8 +44,6 @@ public class DelayingEventHandler implements EventHandler<SubRound> {
             return;
         }
 
-        long genesisTime = application.getState().getBlockchain().getGenesisBlock().getTimestamp();
-
         boolean isRoundOK = chronologyService.isDateTimeInRound(data.getRound(), data.getTimeStamp());
         boolean isRoundStateOK = chronologyService.computeRoundState(data.getRound().getStartTimeStamp(), data.getTimeStamp()) == data.getRoundState();
 
@@ -57,12 +52,12 @@ public class DelayingEventHandler implements EventHandler<SubRound> {
 
         int millisecondsToWaitUseless = rdm.nextInt((int)chronologyService.getRoundTimeDuration()) / 2;
 
-        currentTimeStamp = chronologyService.getSynchronizedTime(ntpClient);
+        currentTimeStamp = chronologyService.getSynchronizedTime();
         System.out.println(String.format("Time %s %b [%d] - Waiting %d ms...", getTimeStamp(currentTimeStamp), ntpClient.isOffline(), currentTimeStamp, millisecondsToWaitUseless));
 
         ThreadUtil.sleep(millisecondsToWaitUseless);
 
-        currentTimeStamp = chronologyService.getSynchronizedTime(ntpClient);
+        currentTimeStamp = chronologyService.getSynchronizedTime();
         System.out.println(String.format("Time %s %b [%d] - Done waiting %d ms...", getTimeStamp(currentTimeStamp), ntpClient.isOffline(), currentTimeStamp, millisecondsToWaitUseless));
     }
 

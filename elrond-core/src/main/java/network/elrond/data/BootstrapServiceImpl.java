@@ -198,8 +198,6 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();
-        NTPClient ntpClient = state.getNtpClient();
-
 
         ExecutionReport result = new ExecutionReport().ok("Start bootstrapping by loading from disk...");
         BigInteger idx = BigInteger.valueOf(-1);

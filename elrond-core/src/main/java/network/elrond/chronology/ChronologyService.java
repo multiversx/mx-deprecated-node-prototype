@@ -10,8 +10,12 @@ public interface ChronologyService {
 
     Round getRoundFromDateTime(long genesisRoundTimeStamp, long timeStamp) throws IllegalArgumentException;
 
-    long getSynchronizedTime(NTPClient ntpClient);
+    long getSynchronizedTime();
 
     RoundState computeRoundState(long roundStartTimeStamp, long currentTimeStamp);
+
+    void setNtpClient(NTPClient ntpClient);
+
+    NTPClient getNtpClient();
 
 }

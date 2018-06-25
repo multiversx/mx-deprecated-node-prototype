@@ -18,8 +18,8 @@ public class ChronologyServiceTest {
         chronologyService.getRoundFromDateTime(0, 0);
     }
 
-    @Test (expected = IllegalArgumentException.class)
-    public void testGetRoundFromDateTimeShouldThrowExceptionOnBadArguments(){
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetRoundFromDateTimeShouldThrowExceptionOnBadArguments() {
         ChronologyService chronologyService = new ChronologyServiceImpl(4000);
         chronologyService.getRoundFromDateTime(10000, 9999);
     }
@@ -31,7 +31,7 @@ public class ChronologyServiceTest {
     }
 
     @Test
-    public void testIsDateTimeInRound(){
+    public void testIsDateTimeInRound() {
         ChronologyService chronologyService = new ChronologyServiceImpl(4000);
 
         Round r = new Round();
@@ -88,7 +88,7 @@ public class ChronologyServiceTest {
     }
 
     @Test
-    public void testGetNtpTime() throws Exception{
+    public void testGetNtpTime() throws Exception {
         Application application = new Application(new AppContext());
 
         AppTasks.NTP_CLIENT_INITIALIZER.process(application);
@@ -97,34 +97,34 @@ public class ChronologyServiceTest {
 
         ChronologyService chronologyService = AppServiceProvider.getChronologyService();
 
-        TestCase.assertNotNull(application.getState().getNtpClient());
+        TestCase.assertNotNull(chronologyService.getNtpClient());
 
-        application.getState().getNtpClient().setPollMs(100);
+        chronologyService.getNtpClient().setPollMs(100);
 
         ThreadUtil.sleep(2000);
 
-        long currentDateNTP = chronologyService.getSynchronizedTime(application.getState().getNtpClient());
+        long currentDateNTP = chronologyService.getSynchronizedTime();
         long currentDateLocal = System.currentTimeMillis();
 
         System.out.println(String.format("NTP time: %d", currentDateNTP));
         System.out.println(String.format("Local time: %d", currentDateLocal));
         System.out.println(String.format("Difference: %d ms", currentDateNTP - currentDateLocal));
 
-        TestCase.assertFalse(application.getState().getNtpClient().isOffline());
+        TestCase.assertFalse(chronologyService.getNtpClient().isOffline());
 
-        System.out.println("Host: " + application.getState().getNtpClient().getCurrentHostName());
+        System.out.println("Host: " + chronologyService.getNtpClient().getCurrentHostName());
     }
 
     @Test
-    public void testGetCurrentSubRoundType(){
+    public void testGetCurrentSubRoundType() {
         ChronologyService chronologyService = AppServiceProvider.getChronologyService();
 
         List<RoundState> listFound = new ArrayList<>();
 
-        for (long i = 0; i < chronologyService.getRoundTimeDuration(); i++){
+        for (long i = 0; i < chronologyService.getRoundTimeDuration(); i++) {
             RoundState subRoundsType = chronologyService.computeRoundState(0, i);
 
-            if (!listFound.contains(subRoundsType)){
+            if (!listFound.contains(subRoundsType)) {
                 System.out.println(String.format("Found %s @ %d", subRoundsType, i));
                 listFound.add(subRoundsType);
             }

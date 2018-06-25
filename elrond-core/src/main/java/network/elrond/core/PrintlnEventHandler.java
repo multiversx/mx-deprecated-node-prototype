@@ -10,7 +10,7 @@ import java.util.Date;
 public class PrintlnEventHandler implements EventHandler<String> {
     private static final Logger logger = LogManager.getLogger(PrintlnEventHandler.class);
 
-    public void onEvent(Application application, Object sender, String data){
+    public void onEvent(Object sender, String data){
         StringBuilder stringBuilder = new StringBuilder();
 
         String strSender = "[NULL SENDER]";

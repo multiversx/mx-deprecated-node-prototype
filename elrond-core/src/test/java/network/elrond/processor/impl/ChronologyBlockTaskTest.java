@@ -66,9 +66,9 @@ public class ChronologyBlockTaskTest {
             Block blk = new Block();
             blk.setRoundIndex(0);
 
-            long currentTimeStamp = chronologyService.getSynchronizedTime(application.getState().getNtpClient());
+            long currentTimeStamp = chronologyService.getSynchronizedTime();
 
-            System.out.println(String.format("Genesis @ [%d] %b", currentTimeStamp, application.getState().getNtpClient().isOffline()));
+            System.out.println(String.format("Genesis @ [%d] %b", currentTimeStamp, chronologyService.getNtpClient().isOffline()));
 
             blk.setTimestamp(currentTimeStamp);
 
@@ -86,5 +86,4 @@ public class ChronologyBlockTaskTest {
             ThreadUtil.sleep(1000);
         }
     }
-
 }

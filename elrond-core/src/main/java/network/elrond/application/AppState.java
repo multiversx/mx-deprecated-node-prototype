@@ -30,8 +30,6 @@ public class AppState implements Serializable {
     private Shard shard;
     private Map<P2PChannelName, P2PBroadcastChanel> channels = new HashMap<>();
 
-    private NTPClient ntpClient = null;
-
     private static final Logger logger = LogManager.getLogger(AppState.class);
 
     public P2PBroadcastChanel getChanel(P2PChannelName channelName) {
@@ -122,14 +120,6 @@ public class AppState implements Serializable {
 
     public synchronized void clearLock() {
         this.lock = false;
-    }
-
-    public NTPClient getNtpClient() {
-        return (ntpClient);
-    }
-
-    public void setNtpClient(NTPClient ntpClient) {
-        this.ntpClient = ntpClient;
     }
 
     public Shard getShard() {
