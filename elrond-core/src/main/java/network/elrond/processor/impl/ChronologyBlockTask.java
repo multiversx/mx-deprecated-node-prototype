@@ -88,7 +88,6 @@ public class ChronologyBlockTask<T> implements AppTask {
 
             logger.traceExit();
         });
-        thread.setPriority(7);
         thread.start();
     }
 

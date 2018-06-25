@@ -37,7 +37,7 @@ public class AppBlockManager {
         return instance;
     }
 
-    public Block generateAndBroadcastBlock(ArrayBlockingQueue<String> queue, PrivateKey privateKey, AppState state) {
+    public Block generateAndBroadcastBlock(List<String> queue, PrivateKey privateKey, AppState state) {
         logger.traceEntry("params: {} {} {}", queue, privateKey, state);
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();

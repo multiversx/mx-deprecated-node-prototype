@@ -200,7 +200,7 @@ public class ConsensusTest01 {
         }
     }
 
-    private Application startSeeder(){
+    private Application startSeeder() throws Exception{
         String nodeName = "elrond-seeder";
         Util.changeLogsPath("logs-" + nodeName);
 
@@ -222,7 +222,7 @@ public class ConsensusTest01 {
         return(application);
     }
 
-    private Application startRunner(String name, int port, int masterPeerPort) {
+    private Application startRunner(String name, int port, int masterPeerPort) throws Exception {
         Util.changeLogsPath("logs-" + name);
         String masterPeerIpAddress = "127.0.0.1";
         String nodeRunnerPrivateKey = Util.byteArrayToHexString(new PrivateKey(name).getValue());
@@ -293,7 +293,7 @@ public class ConsensusTest01 {
     }
 
     @Test
-    public void testStartSeeder(){
+    public void testStartSeeder() throws Exception{
         Application seeder = startSeeder();
 
         ElrondFacadeImpl facade = new ElrondFacadeImpl();
@@ -324,7 +324,7 @@ public class ConsensusTest01 {
     }
 
     @Test
-    public void testStartNode1(){
+    public void testStartNode1() throws Exception{
         Application seeder = startRunner("runner-1", 4001, 4000);
         while (true){
             ThreadUtil.sleep(100);
@@ -332,7 +332,7 @@ public class ConsensusTest01 {
     }
 
     @Test
-    public void testStartNode2(){
+    public void testStartNode2() throws Exception{
         Application seeder = startRunner("runner-2", 4002, 4000);
         while (true){
             ThreadUtil.sleep(100);
