@@ -8,12 +8,14 @@ public class ConsensusStateHolder {
     RoundState currentRoundState;
     long currentRoundIndex;
     long statisticsTransactionsProcessed;
+    public String nodeName;
 
     public ConsensusStateHolder(){
         selectedLeaderPeerID = Number160.ZERO;
         currentRoundIndex = 0;
         currentRoundState = null;
         statisticsTransactionsProcessed = -1;
+        nodeName = "";
     }
 
     public Number160 getSelectedLeaderPeerID(){

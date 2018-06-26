@@ -295,6 +295,7 @@ public class ConsensusTest01 {
     @Test
     public void testStartSeeder() throws Exception{
         Application seeder = startSeeder();
+        seeder.getState().getConsensusStateHolder().nodeName = seeder.getContext().getNodeName();
 
         ElrondFacadeImpl facade = new ElrondFacadeImpl();
 
@@ -303,7 +304,7 @@ public class ConsensusTest01 {
         Thread thrSeed = new Thread(()->{
             int value = 1;
             while (seeder.getState().isStillRunning()) {
-                ThreadUtil.sleep(10);
+                ThreadUtil.sleep(100);
 
                 AccountAddress address = AccountAddress.fromHexString(Util.TEST_ADDRESS);
                 Transaction transaction = facade.send(address, BigInteger.valueOf(value), seeder);
@@ -326,6 +327,7 @@ public class ConsensusTest01 {
     @Test
     public void testStartNode1() throws Exception{
         Application seeder = startRunner("runner-1", 4001, 4000);
+        seeder.getState().getConsensusStateHolder().nodeName = seeder.getContext().getNodeName();
         while (true){
             ThreadUtil.sleep(100);
         }
@@ -334,6 +336,7 @@ public class ConsensusTest01 {
     @Test
     public void testStartNode2() throws Exception{
         Application seeder = startRunner("runner-2", 4002, 4000);
+        seeder.getState().getConsensusStateHolder().nodeName = seeder.getContext().getNodeName();
         while (true){
             ThreadUtil.sleep(100);
         }

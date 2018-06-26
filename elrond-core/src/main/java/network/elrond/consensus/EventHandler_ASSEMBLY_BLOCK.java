@@ -83,8 +83,8 @@ public class EventHandler_ASSEMBLY_BLOCK implements EventHandler<SubRound, Array
             localBlockIndex = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.LOCAL, blockchain);
 
             // TODO: take the number of blocks to check from a config file
-            BigInteger earliestBlockToCheck = (localBlockIndex.subtract(BigInteger.valueOf(50)).compareTo(BigInteger.ZERO) < 0) ?
-                    BigInteger.ZERO : localBlockIndex.subtract(BigInteger.valueOf(50));
+            BigInteger earliestBlockToCheck = (localBlockIndex.subtract(BigInteger.valueOf(5)).compareTo(BigInteger.ZERO) < 0) ?
+                    BigInteger.ZERO : localBlockIndex.subtract(BigInteger.valueOf(5));
 
             for (BigInteger i = localBlockIndex; i.compareTo(earliestBlockToCheck) >= 0; i = i.subtract(BigInteger.ONE)) {
                 lastBlockHashes.add(AppServiceProvider.getBootstrapService().getBlockHashFromIndex(i, blockchain));

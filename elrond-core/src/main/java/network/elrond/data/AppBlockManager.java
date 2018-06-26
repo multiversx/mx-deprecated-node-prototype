@@ -10,6 +10,7 @@ import network.elrond.chronology.ChronologyService;
 import network.elrond.chronology.NTPClient;
 import network.elrond.chronology.Round;
 import network.elrond.chronology.RoundState;
+import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.MultiSignatureService;
 import network.elrond.crypto.PrivateKey;
@@ -59,6 +60,9 @@ public class AppBlockManager {
             List<Receipt> receipts = blockReceiptsPair.getValue();
 
             AppBlockManager.instance().signBlock(block, privateKey);
+            String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
+
+            logger.debug("Signed block with hash {}", hashBlock);
 
             //test whether the block should be published or not!
             boolean blockArrivedToLate = !(AppServiceProvider.getChronologyService().isStillInRoundState(state.getNtpClient(),
@@ -72,8 +76,20 @@ public class AppBlockManager {
                 return logger.traceExit((Block) null);
             }
 
-            String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
-            AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
+            logger.debug("Can publish block with hash {}", hashBlock);
+
+            if ((block.getNonce().compareTo(BigInteger.valueOf(10)) > 0) && (state.getConsensusStateHolder().nodeName.equals("runner-1"))) {
+                ThreadUtil.sleep(6000);
+                logger.debug("Dummy sleep {}", hashBlock);
+            }
+
+            hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
+            ExecutionReport executionReport = AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
+            if (!executionReport.isOk()){
+                logger.debug("Could not commit block with hash {}", hashBlock);
+                return logger.traceExit((Block) null);
+            }
+            logger.debug("Broadcast block with hash {}", hashBlock);
 
             List<String> txHashes  = new ArrayList<>();
             for (Receipt receipt : receipts) {

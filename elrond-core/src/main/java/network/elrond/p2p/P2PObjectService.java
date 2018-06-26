@@ -11,4 +11,6 @@ public interface P2PObjectService {
 
     <T extends Serializable> FuturePut put(P2PConnection connection, String key, T value) throws IOException;
 
+    <T extends Serializable> FuturePut putIfAbsent(P2PConnection connection, String key, T value) throws Exception;
+
 }

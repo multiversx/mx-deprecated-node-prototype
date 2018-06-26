@@ -170,14 +170,16 @@ public class ExecutionServiceImpl implements ExecutionService {
         if (blockExecutionReport.isOk()) {
             // check state merkle patricia trie root is the same with what was stored in block
             if (!Arrays.equals(block.getAppStateHash(), accounts.getAccountsPersistenceUnit().getRootHash())) {
-                blockExecutionReport.ko("Application state root hash does not match");
+                blockExecutionReport.ko(String.format("Application state root hash does not match. Generated: %s, block: %s",
+                        Util.getDataEncoded64(accounts.getAccountsPersistenceUnit().getRootHash()),
+                        Util.getDataEncoded64(block.getAppStateHash())));
                 AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
                 logger.trace("Block process FAILED!");
                 return logger.traceExit(blockExecutionReport);
             }
 
             AppServiceProvider.getAccountStateService().commitAccountStates(accounts);
-            blockExecutionReport.ok("Commit account state changes");
+            blockExecutionReport.ok(String.format("Commit account state changes, state root hash: %s", Util.getDataEncoded64(accounts.getAccountsPersistenceUnit().getRootHash())));
             logger.trace("Block process was SUCCESSFUL!");
         } else {
             AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);

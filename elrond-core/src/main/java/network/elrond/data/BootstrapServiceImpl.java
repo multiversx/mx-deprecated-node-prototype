@@ -106,13 +106,13 @@ public class BootstrapServiceImpl implements BootstrapService {
         ExecutionReport result = new ExecutionReport();
 
         try {
+            // Put index <=> hash mapping
+            AppServiceProvider.getBlockchainService().putIfAbsent(block.getNonce(), blockHash, blockchain, BlockchainUnitType.BLOCK_INDEX);
+            logger.trace("stored block index {}", block.getNonce());
+
             AppServiceProvider.getBlockchainService().put(blockHash, block, blockchain, BlockchainUnitType.BLOCK);
             setBlockHashWithIndex(block.getNonce(), blockHash, blockchain);
             logger.trace("stored block {}", blockHash);
-
-            // Put index <=> hash mapping
-            AppServiceProvider.getBlockchainService().put(block.getNonce(), blockHash, blockchain, BlockchainUnitType.BLOCK_INDEX);
-            logger.trace("stored block index {}", block.getNonce());
 
             // Update max index
             setCurrentBlockIndex(LocationType.BOTH, block.getNonce(), blockchain);

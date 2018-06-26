@@ -60,4 +60,9 @@ public class NTPClientTest {
                 ntpClient.isOffline(), ntpClient.currentTimeMillis()));
 
     }
+
+    @Test
+    public void testNTPClient(){
+
+    }
 }

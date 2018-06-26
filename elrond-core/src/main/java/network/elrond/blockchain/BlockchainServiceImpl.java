@@ -80,6 +80,36 @@ public class BlockchainServiceImpl implements BlockchainService {
         logger.traceExit();
     }
 
+    public synchronized <H extends Object, B extends Serializable> void putIfAbsent(H hash, B object, Blockchain blockchain, BlockchainUnitType type) throws Exception {
+        logger.traceEntry("params: {} {} {} {}", hash, object, blockchain, type);
+
+        Util.check(hash!=null, "hash!=null");
+        Util.check(object!=null, "object!=null");
+        Util.check(blockchain!=null, "blockchain!=null");
+
+//        if (object == null || hash == null) {
+//            logger.trace("object or hash is null");
+//            logger.traceExit();
+//            return;
+//        }
+
+        P2PConnection connection = blockchain.getConnection();
+        if (!isOffline(connection)) {
+            AppServiceProvider.getP2PObjectService().putIfAbsent(connection, hash.toString(), object);
+            logger.trace("DHT stored!");
+        }
+
+        BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
+
+        unit.getCache().put(hash, object);
+        String strJSONData = AppServiceProvider.getSerializationService().encodeJSON(object);
+        unit.put(bytes(hash.toString()), bytes(strJSONData));
+
+        logger.trace("Locally stored!");
+
+        logger.traceExit();
+    }
+
     @Override
     public <H extends Object, B extends Serializable> List<B> getAll(List<H> hashes, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
         logger.traceEntry("params: {} {} {}", hashes, blockchain, type);
