@@ -224,7 +224,7 @@ public class ConsensusTest01 {
 
     private Application startRunner(String name, int port, int masterPeerPort) throws Exception {
         Util.changeLogsPath("logs-" + name);
-        String masterPeerIpAddress = "192.168.11.37";
+        String masterPeerIpAddress = "127.0.0.1";
         String nodeRunnerPrivateKey = Util.byteArrayToHexString(new PrivateKey(name).getValue());
         //Reuploaded
         AppContext context = ContextCreator.createAppContext(name, nodeRunnerPrivateKey, masterPeerIpAddress, masterPeerPort, port,

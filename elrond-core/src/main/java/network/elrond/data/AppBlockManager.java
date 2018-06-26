@@ -217,6 +217,12 @@ public class AppBlockManager {
         String transactionHash = AppServiceProvider.getSerializationService().getHashString(transaction);
         Receipt receipt = new Receipt(null, transactionHash, status, log);
 
+        //remove transaction from pool
+        if (state.getBlockchain().getTransactionPool().contains(transactionHash)){
+            logger.debug("Found rejected transaction with hash {} in pool, removing", transactionHash);
+            state.getBlockchain().getTransactionPool().remove(transactionHash);
+        }
+
         return logger.traceExit(receipt);
     }
 
