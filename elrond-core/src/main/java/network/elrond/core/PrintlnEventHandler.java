@@ -8,27 +8,27 @@ import org.apache.logging.log4j.Logger;
 import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
 
-public class PrintlnEventHandler implements EventHandler<String, ArrayBlockingQueue<String>> {
-    private static final Logger logger = LogManager.getLogger(PrintlnEventHandler.class);
-
-    public void onEvent(Application application, Object sender, String data, ArrayBlockingQueue<String> queue){
-        StringBuilder stringBuilder = new StringBuilder();
-
-        String strSender = "[NULL SENDER]";
-        if (sender != null){
-            strSender = sender.toString();
-        }
-
-        long currentMillis = System.currentTimeMillis();
-
-        stringBuilder.append(String.format("Event from %1$s, time: %2$tY.%2$tm.%2$td %2$tT.%3$03d: ", strSender, new Date(currentMillis), currentMillis % 1000));
-
-        if (data == null){
-            stringBuilder.append("[NULL DATA]");
-        } else {
-            stringBuilder.append(data);
-        }
-
-        logger.trace(stringBuilder.toString());
-    }
-}
+//public class PrintlnEventHandler implements EventHandler<String, ArrayBlockingQueue<String>> {
+//    private static final Logger logger = LogManager.getLogger(PrintlnEventHandler.class);
+//
+//    public void onEvent(Application application, Object sender, String data, ArrayBlockingQueue<String> queue){
+//        StringBuilder stringBuilder = new StringBuilder();
+//
+//        String strSender = "[NULL SENDER]";
+//        if (sender != null){
+//            strSender = sender.toString();
+//        }
+//
+//        long currentMillis = System.currentTimeMillis();
+//
+//        stringBuilder.append(String.format("Event from %1$s, time: %2$tY.%2$tm.%2$td %2$tT.%3$03d: ", strSender, new Date(currentMillis), currentMillis % 1000));
+//
+//        if (data == null){
+//            stringBuilder.append("[NULL DATA]");
+//        } else {
+//            stringBuilder.append(data);
+//        }
+//
+//        logger.trace(stringBuilder.toString());
+//    }
+//}

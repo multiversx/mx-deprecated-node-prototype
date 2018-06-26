@@ -180,6 +180,17 @@ public class ExecutionServiceImpl implements ExecutionService {
 
             AppServiceProvider.getAccountStateService().commitAccountStates(accounts);
             blockExecutionReport.ok(String.format("Commit account state changes, state root hash: %s", Util.getDataEncoded64(accounts.getAccountsPersistenceUnit().getRootHash())));
+
+            //remove processed transactions from transaction pool
+            List<String> listHashes = new ArrayList<>();
+            List<byte[]> hashes = block.getListTXHashes();
+            for (byte[] hash : hashes) {
+                listHashes.add(Util.getDataEncoded64(hash));
+            }
+            blockchain.getTransactionPool().removeAll(listHashes);
+
+            logger.debug("Removed {} transactions from pool, remaining: {}", listHashes.size(),  blockchain.getTransactionPool().size());
+
             logger.trace("Block process was SUCCESSFUL!");
         } else {
             AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);

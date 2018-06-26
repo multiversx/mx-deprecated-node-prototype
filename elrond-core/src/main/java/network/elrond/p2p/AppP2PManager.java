@@ -2,6 +2,7 @@ package network.elrond.p2p;
 
 import network.elrond.Application;
 import network.elrond.application.AppState;
+import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,5 +57,24 @@ public class AppP2PManager {
         return logger.traceExit(queue);
     }
 
+    public <T> void subscribeTransactionPoolToTransactionChannel(Application application, P2PChannelName channelName) {
+        logger.traceEntry("params: {} {}", application, channelName);
+
+        Util.check(application != null, "application != null");
+        Util.check(application.getState() != null, "state != null");
+        Util.check(application.getState().getBlockchain() != null, "blockchain != null");
+
+        subscribeToChannel(application, channelName, (sender, request) -> {
+            if (request == null) {
+                logger.trace("request == null");
+                return;
+            }
+            T object = (T) request.getPayload();
+            application.getState().getBlockchain().getTransactionPool().put(object.toString());
+
+        });
+
+        logger.traceExit();
+    }
 
 }

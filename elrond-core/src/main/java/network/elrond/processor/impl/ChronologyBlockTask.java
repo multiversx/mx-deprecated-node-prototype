@@ -6,6 +6,7 @@ import network.elrond.blockchain.Blockchain;
 import network.elrond.chronology.*;
 import network.elrond.core.EventHandler;
 import network.elrond.core.ThreadUtil;
+import network.elrond.core.Util;
 import network.elrond.data.SynchronizationRequirement;
 import network.elrond.p2p.AppP2PManager;
 import network.elrond.p2p.P2PChannelName;
@@ -28,7 +29,12 @@ public class ChronologyBlockTask<T> implements AppTask {
 
     @Override
     public void process(Application application) {
-        ArrayBlockingQueue<T> queueTransactionHashes = AppP2PManager.instance().subscribeToChannel(application, P2PChannelName.TRANSACTION);
+        //ArrayBlockingQueue<T> queueTransactionHashes = AppP2PManager.instance().subscribeToChannel(application, P2PChannelName.TRANSACTION);
+
+        Util.check(application.getState() != null, "state != null");
+        Util.check(application.getState().getBlockchain() != null, "blockchain != null");
+
+        AppP2PManager.instance().subscribeTransactionPoolToTransactionChannel(application, P2PChannelName.TRANSACTION);
 
         AppState state = application.getState();
         Blockchain blockchain = state.getBlockchain();
@@ -77,9 +83,10 @@ public class ChronologyBlockTask<T> implements AppTask {
 
                         currentRound = chronologyService.getRoundFromDateTime(genesisTimeStampCached, currentTimeStamp);
 
-                        computeAndCallStartEndRounds(application, currentRound, currentTimeStamp, queueTransactionHashes);
-                        computeAndCallRoundState(application, currentRound, currentTimeStamp, queueTransactionHashes);
-
+                        //computeAndCallStartEndRounds(application, currentRound, currentTimeStamp, queueTransactionHashes);
+                        //computeAndCallRoundState(application, currentRound, currentTimeStamp, queueTransactionHashes);
+                        computeAndCallStartEndRounds(application, currentRound, currentTimeStamp);
+                        computeAndCallRoundState(application, currentRound, currentTimeStamp);
                     }
                 } catch (Exception ex){
                     logger.catching(ex);
@@ -91,7 +98,67 @@ public class ChronologyBlockTask<T> implements AppTask {
         thread.start();
     }
 
-    private void computeAndCallStartEndRounds(Application application, Round currentRound, long referenceTimeStamp, ArrayBlockingQueue<T> queueTransactionHashes){
+//    private void computeAndCallStartEndRounds(Application application, Round currentRound, long referenceTimeStamp, ArrayBlockingQueue<T> queueTransactionHashes){
+//        boolean isFirstRoundTransition = (previousRound == null);
+//        boolean isRoundTransition = isFirstRoundTransition || (previousRound.getIndex() != currentRound.getIndex());
+//        boolean existsPreviousRound = (previousRound != null);
+//
+//        if (isRoundTransition){
+//            logger.trace("round transition detected!");
+//            if (existsPreviousRound){
+//                notifyEventObjects(application, previousRound, RoundState.END_ROUND, referenceTimeStamp, queueTransactionHashes);
+//            }
+//
+//            //start new round
+//            notifyEventObjects(application, currentRound, RoundState.START_ROUND, referenceTimeStamp, queueTransactionHashes);
+//        }
+//
+//        previousRound = currentRound;
+//    }
+//
+//    private void computeAndCallRoundState(Application application, Round currentRound, long currentTime, ArrayBlockingQueue<T> queueTransactionHashes){
+//        RoundState currentRoundState = AppServiceProvider.getChronologyService().computeRoundState(currentRound.getStartTimeStamp(), currentTime);
+//
+//        boolean isCurrentRoundStateNotDefined = (currentRoundState == null);
+//
+//        if (isCurrentRoundStateNotDefined){
+//            return;
+//        }
+//
+//        boolean isFirstRoundStateTransition = (previousRoundState == null);
+//        boolean isRoundStateTransition = isFirstRoundStateTransition || (previousRoundState != currentRoundState);
+//
+//        if (isRoundStateTransition) {
+//            logger.trace("round state transition detected!");
+//            notifyEventObjects(application, currentRound, currentRoundState, currentTime, queueTransactionHashes);
+//        }
+//
+//        previousRoundState = currentRoundState;
+//    }
+
+//    private void notifyEventObjects(Application application, Round round, RoundState roundState, long referenceTimeStamp, ArrayBlockingQueue<T> queueTransactionHashes){
+//        SubRound subRound = new SubRound();
+//        subRound.setRound(round);
+//        subRound.setRoundState(roundState);
+//        subRound.setTimeStamp(referenceTimeStamp);
+//
+//        application.getState().getConsensusStateHolder().setCurrentRoundIndex(round.getIndex());
+//        application.getState().getConsensusStateHolder().setCurrentRoundState(roundState);
+//
+//        logger.debug("notifyEventObjects event {}, {}, {}", round.toString(), roundState.toString(), referenceTimeStamp);
+//
+//        if (roundState.getEventHandler() != null){
+//            logger.trace("calling default event handler object (from enum)...");
+//            roundState.getEventHandler().onEvent(application, this, subRound, queueTransactionHashes);
+//        }
+//
+//        logger.trace("calling {} registered objects...", MAIN_QUEUE.size());
+//        for (EventHandler eventHandler:MAIN_QUEUE){
+//            eventHandler.onEvent(application,this, subRound, queueTransactionHashes);
+//        }
+//    }
+
+    private void computeAndCallStartEndRounds(Application application, Round currentRound, long referenceTimeStamp){
         boolean isFirstRoundTransition = (previousRound == null);
         boolean isRoundTransition = isFirstRoundTransition || (previousRound.getIndex() != currentRound.getIndex());
         boolean existsPreviousRound = (previousRound != null);
@@ -99,17 +166,17 @@ public class ChronologyBlockTask<T> implements AppTask {
         if (isRoundTransition){
             logger.trace("round transition detected!");
             if (existsPreviousRound){
-                notifyEventObjects(application, previousRound, RoundState.END_ROUND, referenceTimeStamp, queueTransactionHashes);
+                notifyEventObjects(application, previousRound, RoundState.END_ROUND, referenceTimeStamp);
             }
 
             //start new round
-            notifyEventObjects(application, currentRound, RoundState.START_ROUND, referenceTimeStamp, queueTransactionHashes);
+            notifyEventObjects(application, currentRound, RoundState.START_ROUND, referenceTimeStamp);
         }
 
         previousRound = currentRound;
     }
 
-    private void computeAndCallRoundState(Application application, Round currentRound, long currentTime, ArrayBlockingQueue<T> queueTransactionHashes){
+    private void computeAndCallRoundState(Application application, Round currentRound, long currentTime){
         RoundState currentRoundState = AppServiceProvider.getChronologyService().computeRoundState(currentRound.getStartTimeStamp(), currentTime);
 
         boolean isCurrentRoundStateNotDefined = (currentRoundState == null);
@@ -123,14 +190,14 @@ public class ChronologyBlockTask<T> implements AppTask {
 
         if (isRoundStateTransition) {
             logger.trace("round state transition detected!");
-            notifyEventObjects(application, currentRound, currentRoundState, currentTime, queueTransactionHashes);
+            notifyEventObjects(application, currentRound, currentRoundState, currentTime);
         }
 
         previousRoundState = currentRoundState;
     }
 
 
-    private void notifyEventObjects(Application application, Round round, RoundState roundState, long referenceTimeStamp, ArrayBlockingQueue<T> queueTransactionHashes){
+    private void notifyEventObjects(Application application, Round round, RoundState roundState, long referenceTimeStamp){
         SubRound subRound = new SubRound();
         subRound.setRound(round);
         subRound.setRoundState(roundState);
@@ -143,12 +210,12 @@ public class ChronologyBlockTask<T> implements AppTask {
 
         if (roundState.getEventHandler() != null){
             logger.trace("calling default event handler object (from enum)...");
-            roundState.getEventHandler().onEvent(application, this, subRound, queueTransactionHashes);
+            roundState.getEventHandler().onEvent(application, this, subRound);
         }
 
         logger.trace("calling {} registered objects...", MAIN_QUEUE.size());
         for (EventHandler eventHandler:MAIN_QUEUE){
-            eventHandler.onEvent(application,this, subRound, queueTransactionHashes);
+            eventHandler.onEvent(application,this, subRound);
         }
     }
 

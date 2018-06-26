@@ -10,12 +10,30 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
+//public class EventHandler_START_ROUND implements EventHandler<SubRound, ArrayBlockingQueue<String>> {
+//    private static final Logger logger = LogManager.getLogger(EventHandler_START_ROUND.class);
+//
+//    public void onEvent(Application application, Object sender, SubRound data, ArrayBlockingQueue<String> queue) {
+//        logger.traceEntry("params: {} {} {} {}", application, sender, data, queue);
+//
+//        Util.check(application.getState() != null, "application state is null");
+//
+//        String nodeName = application.getContext().getNodeName();
+//
+//        application.getState().getConsensusStateHolder().setSelectedLeaderPeerID(Number160.ZERO);
+//        application.getState().getConsensusStateHolder().setStatisticsTransactionsProcessed(-1);
+//        logger.debug("{}, round: {}, subRound: {}> initialized!", nodeName, data.getRound().getIndex(), data.getRoundState().name());
+//
+//        logger.traceExit();
+//    }
+//}
 
-public class EventHandler_START_ROUND implements EventHandler<SubRound, ArrayBlockingQueue<String>> {
+
+public class EventHandler_START_ROUND implements EventHandler<SubRound> {
     private static final Logger logger = LogManager.getLogger(EventHandler_START_ROUND.class);
 
-    public void onEvent(Application application, Object sender, SubRound data, ArrayBlockingQueue<String> queue) {
-        logger.traceEntry("params: {} {} {} {}", application, sender, data, queue);
+    public void onEvent(Application application, Object sender, SubRound data) {
+        logger.traceEntry("params: {} {} {}", application, sender, data);
 
         Util.check(application.getState() != null, "application state is null");
 

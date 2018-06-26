@@ -73,7 +73,7 @@ public class ChronologyBlockTaskTest {
             application.getState().getBlockchain().setGenesisBlock(blk);
         }
 
-        chronologyBlockTask.MAIN_QUEUE.add(new DelayingEventHandler());
+        //chronologyBlockTask.MAIN_QUEUE.add(new DelayingEventHandler());
 
         chronologyBlockTask.process(application);
 

@@ -3,6 +3,7 @@ package network.elrond.blockchain;
 import network.elrond.account.AbstractPersistenceUnit;
 import network.elrond.core.Util;
 import network.elrond.data.Block;
+import network.elrond.data.Transaction;
 import network.elrond.p2p.P2PConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,6 +13,9 @@ import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 
 public class Blockchain implements Serializable, PersistenceUnitContainer {
@@ -27,12 +31,15 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
 
     private static final Logger logger = LogManager.getLogger(Blockchain.class);
 
+    protected final ArrayBlockingQueue<String> transactionsPool;
+
     public Blockchain(BlockchainContext context) throws IOException {
         Util.check(context != null, "context!=null");
         this.context = context;
 
         generatePersistenceUnitMap(context);
 
+        transactionsPool = new ArrayBlockingQueue<String>(50000, true);
     }
 
     public void generatePersistenceUnitMap(BlockchainContext context) throws IOException {
@@ -111,6 +118,10 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
             }
         }
         logger.traceExit();
+    }
+
+    public ArrayBlockingQueue<String> getTransactionPool(){
+        return (transactionsPool);
     }
 
     @Override
