@@ -49,7 +49,7 @@ public class P2PObjectServiceImpl implements P2PObjectService {
         FuturePut fp = peer.put(Number160.createHash(key + clazzName)).data(new Data(value)).start();
         logger.trace("Put object with key {}", key + clazzName);
 
-        fp.awaitUninterruptibly();
+        //fp;//.awaitUninterruptibly();
 
         return logger.traceExit(fp);
     }

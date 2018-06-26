@@ -78,10 +78,10 @@ public class AppBlockManager {
 
             logger.debug("Can publish block with hash {}", hashBlock);
 
-            if ((block.getNonce().compareTo(BigInteger.valueOf(10)) > 0) && (state.getConsensusStateHolder().nodeName.equals("runner-1"))) {
-                ThreadUtil.sleep(6000);
-                logger.debug("Dummy sleep {}", hashBlock);
-            }
+//            if ((block.getNonce().compareTo(BigInteger.valueOf(10)) > 0) && (state.getConsensusStateHolder().nodeName.equals("runner-1"))) {
+//                ThreadUtil.sleep(6000);
+//                logger.debug("Dummy sleep {}", hashBlock);
+//            }
 
             hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
             ExecutionReport executionReport = AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
@@ -95,9 +95,10 @@ public class AppBlockManager {
             for (Receipt receipt : receipts) {
                 // add the blockHash to the receipt as the valid hash is only available after signing
                 receipt.setBlockHash(hashBlock);
-                sendReceipt(block, receipt, state);
+                sendReceipt(hashBlock, receipt, state);
                 txHashes.add(receipt.getTransactionHash());
             }
+            logger.debug("Sent {} receipts of block with hash {}", hashBlock, receipts.size());
 
             queue.removeAll(txHashes);
 
@@ -219,9 +220,8 @@ public class AppBlockManager {
         return logger.traceExit(receipt);
     }
 
-    private void sendReceipt(Block block, Receipt receipt, AppState state) throws IOException {
-        logger.traceEntry("params: {} {} {}", block, receipt, state);
-        String blockHash = AppServiceProvider.getSerializationService().getHashString(block);
+    private void sendReceipt(String blockHash, Receipt receipt, AppState state) throws IOException {
+        logger.traceEntry("params: {} {} {}", blockHash, receipt, state);
         String receiptHash = AppServiceProvider.getSerializationService().getHashString(receipt);
         String transactionHash = receipt.getTransactionHash();
 

@@ -134,7 +134,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
                             .sendDirect(peer)
                             .object(new P2PBroadcastMessage(channelName, object))
                             .start();
-                    futureDirect.awaitUninterruptibly();
+                    //futureDirect.awaitUninterruptibly();
                 }
                 logger.trace("published to channel!");
                 return logger.traceExit(true);
