@@ -54,8 +54,9 @@ public class AppBlockManager {
 
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
         try {
-            List<Transaction> transactions = blockchainService.getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
-            Pair<Block, List<Receipt>> blockReceiptsPair = composeBlock(transactions, state);
+            //List<Transaction> transactions = blockchainService.getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
+            //Pair<Block, List<Receipt>> blockReceiptsPair = composeBlock(transactions, state);
+            Pair<Block, List<Receipt>> blockReceiptsPair = composeBlock(hashes, state);
             Block block = blockReceiptsPair.getKey();
             List<Receipt> receipts = blockReceiptsPair.getValue();
 
@@ -124,8 +125,45 @@ public class AppBlockManager {
     }
 
 
-    public Pair<Block, List<Receipt>> composeBlock(List<Transaction> transactions, AppState state) throws IOException {
-        logger.traceEntry("params: {} {}", transactions, state);
+//    public Pair<Block, List<Receipt>> composeBlock(List<Transaction> transactions, AppState state) throws IOException {
+//        logger.traceEntry("params: {} {}", transactions, state);
+//        Util.check(state != null, "state!=null");
+//        List<Receipt> receipts;
+//
+//        Accounts accounts = state.getAccounts();
+//        Blockchain blockchain = state.getBlockchain();
+//        NTPClient ntpClient = state.getNtpClient();
+//
+//        Util.check(transactions != null, "transactions!=null");
+//        Util.check(blockchain != null, "blockchain!=null");
+//        Util.check(accounts != null, "accounts!=null");
+//        Util.check(blockchain.getGenesisBlock() != null, "genesisBlock!=null");
+//
+//        Block block = getNewBlockAndBindToPrevious(blockchain.getCurrentBlock());
+//        logger.trace("done generating blank new block as {}", block);
+//
+//        ChronologyService chronologyService = AppServiceProvider.getChronologyService();
+//        Round round = chronologyService.getRoundFromDateTime(blockchain.getGenesisBlock().getTimestamp(),
+//                chronologyService.getSynchronizedTime(ntpClient));
+//        block.setRoundIndex(round.getIndex());
+//        block.setTimestamp(round.getStartTimeStamp());
+//        logger.trace("done computing round and round start millis = calculated round start millis, round index = {}, time stamp = {}",
+//                block.roundIndex, block.timestamp);
+//
+//        receipts = addTransactions(transactions, block, state);
+//        logger.trace("done added {} transactions to block", transactions.size());
+//
+//        block.setAppStateHash(accounts.getAccountsPersistenceUnit().getRootHash());
+//        logger.trace("done added state root hash to block as {}", block.getAppStateHash());
+//
+//        AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
+//        logger.trace("reverted app state to original form");
+//
+//        return logger.traceExit(new Pair<>(block, receipts));
+//    }
+
+    public Pair<Block, List<Receipt>> composeBlock(List<String> hashes, AppState state) throws IOException, ClassNotFoundException {
+        logger.traceEntry("params: {} {}", hashes, state);
         Util.check(state != null, "state!=null");
         List<Receipt> receipts;
 
@@ -133,7 +171,7 @@ public class AppBlockManager {
         Blockchain blockchain = state.getBlockchain();
         NTPClient ntpClient = state.getNtpClient();
 
-        Util.check(transactions != null, "transactions!=null");
+        Util.check(hashes != null, "hashes!=null");
         Util.check(blockchain != null, "blockchain!=null");
         Util.check(accounts != null, "accounts!=null");
         Util.check(blockchain.getGenesisBlock() != null, "genesisBlock!=null");
@@ -149,8 +187,8 @@ public class AppBlockManager {
         logger.trace("done computing round and round start millis = calculated round start millis, round index = {}, time stamp = {}",
                 block.roundIndex, block.timestamp);
 
-        receipts = addTransactions(transactions, block, state);
-        logger.trace("done added {} transactions to block", transactions.size());
+        receipts = addTransactions(hashes, block, state);
+        logger.trace("done added {} transactions to block", hashes.size());
 
         block.setAppStateHash(accounts.getAccountsPersistenceUnit().getRootHash());
         logger.trace("done added state root hash to block as {}", block.getAppStateHash());
@@ -161,13 +199,55 @@ public class AppBlockManager {
         return logger.traceExit(new Pair<>(block, receipts));
     }
 
-    private List<Receipt> addTransactions(List<Transaction> transactions, Block block, AppState state) throws IOException {
-        logger.traceEntry("params: {} {} {}", transactions, block, state);
-        List<Receipt> receipts = new ArrayList<>();
+//    private List<Receipt> addTransactions(List<Transaction> transactions, Block block, AppState state) throws IOException {
+//        logger.traceEntry("params: {} {} {}", transactions, block, state);
+//        List<Receipt> receipts = new ArrayList<>();
+//
+//        Accounts accounts = state.getAccounts();
+//
+//        for (Transaction transaction : transactions) {
+//            boolean valid = AppServiceProvider.getTransactionService().verifyTransaction(transaction);
+//            if (!valid) {
+//                receipts.add(rejectTransaction(block, transaction, state));
+//                logger.info("Invalid transaction discarded [verify] {}", transaction);
+//                continue;
+//            }
+//
+//            ExecutionReport executionReport = AppServiceProvider.getExecutionService().processTransaction(transaction, accounts);
+//            if (!executionReport.isOk()) {
+//                receipts.add(rejectTransaction(block, transaction, state));
+//                logger.info("Invalid transaction discarded [exec] {}", transaction);
+//                continue;
+//            }
+//
+//            byte[] txHash = AppServiceProvider.getSerializationService().getHash(transaction);
+//            receipts.add(acceptTransaction(block, transaction, state));
+//
+//            logger.trace("added transaction {} in block", txHash);
+//            block.getListTXHashes().add(txHash);
+//
+//            //test whether the system should continue to add transactions or not
+//            boolean forceFinishAddingTransactions = !AppServiceProvider.getChronologyService().isStillInRoundState(state.getNtpClient(), state.getBlockchain().getGenesisBlock().getTimestamp(),
+//                    block.getRoundIndex(), RoundState.PROPOSE_BLOCK);
+//            if (forceFinishAddingTransactions){
+//                logger.debug("Force exit from add transactions method. Transactions added: {}", block.getListTXHashes().size());
+//                break;
+//            }
+//        }
+//
+//        return logger.traceExit(receipts);
+//    }
 
+    private List<Receipt> addTransactions(List<String> hashes, Block block, AppState state) throws IOException, ClassNotFoundException {
+        logger.traceEntry("params: {} {} {}", hashes, block, state);
+        List<Receipt> receipts = new ArrayList<>();
         Accounts accounts = state.getAccounts();
 
-        for (Transaction transaction : transactions) {
+        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
+
+        for (String transactionHash : hashes) {
+            Transaction transaction = blockchainService.get(transactionHash, state.getBlockchain(), BlockchainUnitType.TRANSACTION);
+
             boolean valid = AppServiceProvider.getTransactionService().verifyTransaction(transaction);
             if (!valid) {
                 receipts.add(rejectTransaction(block, transaction, state));

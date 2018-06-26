@@ -224,11 +224,11 @@ public class ConsensusTest01 {
 
     private Application startRunner(String name, int port, int masterPeerPort) throws Exception {
         Util.changeLogsPath("logs-" + name);
-        String masterPeerIpAddress = "127.0.0.1";
+        String masterPeerIpAddress = "192.168.11.30";
         String nodeRunnerPrivateKey = Util.byteArrayToHexString(new PrivateKey(name).getValue());
         //Reuploaded
         AppContext context = ContextCreator.createAppContext(name, nodeRunnerPrivateKey, masterPeerIpAddress, masterPeerPort, port,
-                BootstrapType.START_FROM_SCRATCH, name);
+                BootstrapType.REBUILD_FROM_DISK, name);
 
         ElrondFacade facade = new ElrondFacadeImpl();
 
