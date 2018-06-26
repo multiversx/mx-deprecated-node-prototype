@@ -304,17 +304,25 @@ public class ConsensusTest01 {
         Thread thrSeed = new Thread(()->{
             int value = 1;
             while (seeder.getState().isStillRunning()) {
-                ThreadUtil.sleep(100);
 
-                AccountAddress address = AccountAddress.fromHexString(Util.TEST_ADDRESS);
-                Transaction transaction = facade.send(address, BigInteger.valueOf(value), seeder);
+                if (seeder.getState().getBlockchain().getTransactionPool().size() > 2000) {
+                    ThreadUtil.sleep(1);
+                    continue;
+                }
 
-                sendToLog(Level.ERROR, "Sent tx ", transaction, " to ", Util.byteArrayToHexString(seeder.getContext().getPublicKey().getValue()));
+                sendToLog(Level.ERROR, "Generating...");
 
-                value++;
+                for (int i = 0; i < 1000; i++) {
+                    AccountAddress address = AccountAddress.fromHexString(Util.TEST_ADDRESS);
+                    Transaction transaction = facade.send(address, BigInteger.valueOf(value), seeder);
+
+                    //sendToLog(Level.ERROR, "Sent tx ", transaction, " to ", Util.byteArrayToHexString(seeder.getContext().getPublicKey().getValue()));
+
+                    value++;
+                }
             }
         });
-        thrSeed.setPriority(1);
+        //thrSeed.setPriority(2);
         thrSeed.start();
 
         while (true){
