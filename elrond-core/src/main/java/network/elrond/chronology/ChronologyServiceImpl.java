@@ -99,6 +99,12 @@ public class ChronologyServiceImpl implements ChronologyService {
 
         RoundState computedRoundState = computeRoundState(computedRound.getStartTimeStamp(), currentTimeStamp);
 
+        if (computedRoundState == null){
+            logger.debug("State round mismatch roundStartTimeStamp: {}, currentTimeStamp: {}, target roundState: {}, computed roundState: {} ",
+                    computedRound.getStartTimeStamp(), currentTimeStamp, targetRoundState.name(), null);
+            return logger.traceExit(false);
+        }
+
         boolean isRoundStateMismatch = !computedRoundState.equals(targetRoundState);
 
         if (isRoundStateMismatch){
