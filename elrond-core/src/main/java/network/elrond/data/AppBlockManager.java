@@ -63,7 +63,6 @@ public class AppBlockManager {
             AppBlockManager.instance().signBlock(block, privateKey);
             ExecutionService executionService = AppServiceProvider.getExecutionService();
             ExecutionReport result = executionService.processBlock(block, accounts, blockchain, state.getStatisticsManager());
-            ExecutionReport result = executionService.processBlock(block, accounts, blockchain);
             Shard shard = blockchain.getShard();
 
             if (result.isOk()) {
