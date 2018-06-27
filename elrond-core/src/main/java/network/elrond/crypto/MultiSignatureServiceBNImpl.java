@@ -123,8 +123,8 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
     /**
      * Calculate the aggregated commitment
      *
-     * @param commitments       an array list of commitments from each signer
-     * @param bitmapCommitments the bitmap of considered commitments from the whole list
+     * @param commitments       an array listToTable of commitments from each signer
+     * @param bitmapCommitments the bitmap of considered commitments from the whole listToTable
      * @return the aggregated commitment
      */
     @Override
@@ -162,7 +162,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
     /**
      * Concatenates the specified pubic keys
      *
-     * @param publicKeys        the list of signers's (consensus group's) public keys
+     * @param publicKeys        the listToTable of signers's (consensus group's) public keys
      * @param bitmapCommitments bitmap showing which elements from publicKeys to concatenate
      * @return a byte array holding the concatenation of public keys
      */
@@ -191,7 +191,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
      * H1(<L'>||Xi||R||m), where H1 is a Hashing function, e.g Sha3, Xi is the public key,
      * R is the aggregated commitment, and m is the message.
      *
-     * @param signers              the list of signers's (consensus group's) public keys
+     * @param signers              the listToTable of signers's (consensus group's) public keys
      * @param publicKey            own public key
      * @param aggregatedCommitment the aggregated commitment from all signers as a byte array
      * @param message              the message to be signed
@@ -288,13 +288,13 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
      * 4. if R2 = O, return false
      * 5. return R2 == R
      *
-     * @param publicKeys    array list of signer's public keys
+     * @param publicKeys    array listToTable of signer's public keys
      * @param publicKey     public key for the signature share
      * @param signature     signature share to verify
      * @param aggCommitment aggregated commitment
      * @param commitment    commitment for signature share
      * @param message       message for which the signature was computed
-     * @param bitmap        bitmap of participating signers out of all signers list
+     * @param bitmap        bitmap of participating signers out of all signers listToTable
      * @return true if signature is verified, false otherwise
      */
     @Override
@@ -347,7 +347,7 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
     /**
      * Aggregates the signature shares according to the participating signers
      *
-     * @param signatureShares the list of signature shares
+     * @param signatureShares the listToTable of signature shares
      * @param bitmapSigners   the participating signers as a bitmap (byte)
      * @return the aggregated signature
      */

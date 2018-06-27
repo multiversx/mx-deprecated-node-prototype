@@ -1,4 +1,4 @@
-package network.elrond.processor.impl;
+package network.elrond.processor.impl.initialization;
 
 import network.elrond.Application;
 import network.elrond.application.AppContext;

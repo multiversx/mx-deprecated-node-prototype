@@ -26,10 +26,10 @@ import java.util.List;
  *
  * The RLP encoding function takes in an item. An item is defined as follows:
  *
- * - A string (ie. byte array) is an item - A list of items is an item
+ * - A string (ie. byte array) is an item - A listToTable of items is an item
  *
  * For example, an empty string is an item, as is the string containing the word
- * "cat", a list containing any number of strings, as well as more complex data
+ * "cat", a listToTable containing any number of strings, as well as more complex data
  * structures like ["cat",["puppy","cow"],"horse",[[]],"pig",[""],"sheep"]. Note
  * that in the context of the rest of this article, "string" will be used as a
  * synonym for "a certain number of bytes of binary data"; no special encodings
@@ -108,9 +108,9 @@ public class RLP {
 
     /**
      * [0xc0]
-     * If the total payload of a list (i.e. the combined length of all its
+     * If the total payload of a listToTable (i.e. the combined length of all its
      * items) is 0-55 bytes long, the RLP encoding consists of a single byte
-     * with value 0xc0 plus the length of the list followed by the concatenation
+     * with value 0xc0 plus the length of the listToTable followed by the concatenation
      * of the RLP encodings of the items. The range of the first byte is thus
      * [0xc0, 0xf7].
      */
@@ -118,9 +118,9 @@ public class RLP {
 
     /**
      * [0xf7]
-     * If the total payload of a list is more than 55 bytes long, the RLP
+     * If the total payload of a listToTable is more than 55 bytes long, the RLP
      * encoding consists of a single byte with value 0xf7 plus the length of the
-     * length of the list in binary form, followed by the length of the list,
+     * length of the listToTable in binary form, followed by the length of the listToTable,
      * followed by the concatenation of the RLP encodings of the items. The
      * range of the first byte is thus [0xf8, 0xff].
      */
@@ -131,7 +131,7 @@ public class RLP {
      * ******************************************************/
 
     /**
-     * Reads any RLP encoded byte-array and returns all objects as byte-array or list of byte-arrays
+     * Reads any RLP encoded byte-array and returns all objects as byte-array or listToTable of byte-arrays
      *
      * @param data RLP encoded byte-array
      * @param pos position in the array to start reading
@@ -154,13 +154,13 @@ public class RLP {
             int lenbytes = byteArrayToInt(copyOfRange(data, pos+1, pos+1+lenlen)); // length of encoded bytes
             return new DecodeResult(pos+1+lenlen+lenbytes, copyOfRange(data, pos+1+lenlen, pos+1+lenlen+lenbytes));
         } else if (prefix <= OFFSET_LONG_LIST) {
-            int len = prefix - OFFSET_SHORT_LIST; // length of the encoded list
+            int len = prefix - OFFSET_SHORT_LIST; // length of the encoded listToTable
             int prevPos = pos; pos++;
             return decodeList(data, pos, prevPos, len);
         } else if (prefix < 0xFF) {
-            int lenlen = prefix - OFFSET_LONG_LIST; // length of length the encoded list
+            int lenlen = prefix - OFFSET_LONG_LIST; // length of length the encoded listToTable
             int lenlist = byteArrayToInt(copyOfRange(data, pos+1, pos+1+lenlen)); // length of encoded bytes
-            pos = pos + lenlen + 1; // start at position of first element in list
+            pos = pos + lenlen + 1; // start at position of first element in listToTable
             int prevPos = lenlist;
             return decodeList(data, pos, prevPos, lenlist);
         } else {
@@ -171,7 +171,7 @@ public class RLP {
     private static DecodeResult decodeList(byte[] data, int pos, int prevPos, int len) {
         List<Object> slice = new ArrayList<>();
         for (int i = 0; i < len;) {
-            // Get the next item in the data list and append it
+            // Get the next item in the data listToTable and append it
             DecodeResult result = decode(data, pos);
             slice.add(result.getDecoded());
             // Increment pos by the amount bytes in the previous read
@@ -382,9 +382,9 @@ public class RLP {
             int pos = startPos;
 
             while (pos < endPos) {
-                // It's a list with a payload more than 55 bytes
+                // It's a listToTable with a payload more than 55 bytes
                 // data[0] - 0xF7 = how many next bytes allocated
-                // for the length of the list
+                // for the length of the listToTable
                 if ((msgData[pos] & 0xFF) > OFFSET_LONG_LIST) {
 
                     byte lengthOfLength = (byte) (msgData[pos] - OFFSET_LONG_LIST);
@@ -405,7 +405,7 @@ public class RLP {
                     pos += lengthOfLength + length + 1;
                     continue;
                 }
-                // It's a list with a payload less than 55 bytes
+                // It's a listToTable with a payload less than 55 bytes
                 if ((msgData[pos] & 0xFF) >= OFFSET_SHORT_LIST
                         && (msgData[pos] & 0xFF) <= OFFSET_LONG_LIST) {
 

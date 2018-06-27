@@ -2,6 +2,7 @@ package network.elrond.account;
 
 import network.elrond.ExpectedExceptionTest;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.ShardOperation;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,12 +13,14 @@ import java.math.BigInteger;
 public class AccountsManagerTest extends ExpectedExceptionTest {
     AccountsManager accountsManager = null;
     Accounts accounts = null;
+    ShardOperation operation = null;
 
 
     @Before
     public void SetUp() throws IOException {
         accountsManager = new AccountsManager();
         accounts = new Accounts(new AccountsContext(), new AccountsPersistenceUnit<>(""));
+        operation = ShardOperation.INTRA_SHARD;
     }
 
     @Test
@@ -68,31 +71,31 @@ public class AccountsManagerTest extends ExpectedExceptionTest {
     @Test
     public void testTransferFundsWithNullAccountsShouldThrowException() throws IOException, ClassNotFoundException {
         expected(IllegalArgumentException.class, "accounts!=null");
-        accountsManager.transferFunds(null, "Sender", "Receiver", BigInteger.TEN, BigInteger.TEN);
+        accountsManager.transferFunds(null, "Sender", "Receiver", BigInteger.TEN, BigInteger.TEN, operation);
     }
 
     @Test
     public void testTransferFundsWithNullSenderAddressShouldThrowException() throws IOException, ClassNotFoundException {
-        expected(IllegalArgumentException.class, "senderAddressString!=null");
-        accountsManager.transferFunds(accounts, null,"Receiver", BigInteger.TEN, BigInteger.TEN);
+        expected(IllegalArgumentException.class, "senderAddress!=null");
+        accountsManager.transferFunds(accounts, null,"Receiver", BigInteger.TEN, BigInteger.TEN, operation);
     }
 
     @Test
     public void testTransferFundsWithNullReceiverAddressShouldThrowException() throws IOException, ClassNotFoundException {
-        expected(IllegalArgumentException.class, "receiverAddressString!=null");
-        accountsManager.transferFunds(accounts, "Sender","", BigInteger.TEN, BigInteger.TEN);
+        expected(IllegalArgumentException.class, "receiverAddress!=null");
+        accountsManager.transferFunds(accounts, "Sender","", BigInteger.TEN, BigInteger.TEN, operation);
     }
 
     @Test
     public void testTransferFundsWithNegativeValueShouldThrowException() throws IOException, ClassNotFoundException {
         expected(IllegalArgumentException.class, "value>=0");
-        accountsManager.transferFunds(accounts, "Sender","Receiver", BigInteger.valueOf(-1), BigInteger.TEN);
+        accountsManager.transferFunds(accounts, "Sender","Receiver", BigInteger.valueOf(-1), BigInteger.TEN, operation);
     }
 
     @Test
     public void testTransferFundsWithNegativeNonceShouldThrowException() throws IOException, ClassNotFoundException {
         expected(IllegalArgumentException.class, "nonce>=0");
-        accountsManager.transferFunds(accounts, "Sender","Receiver", BigInteger.TEN, BigInteger.valueOf(-1));
+        accountsManager.transferFunds(accounts, "Sender","Receiver", BigInteger.TEN, BigInteger.valueOf(-1), operation);
     }
 
     @Test
@@ -102,7 +105,7 @@ public class AccountsManagerTest extends ExpectedExceptionTest {
         AccountAddress receiverAddress = AccountAddress.fromHexString("Receiver");
         senderAccountState.setBalance(BigInteger.TEN);
         AppServiceProvider.getAccountStateService().setAccountState(senderAddress, senderAccountState, accounts);
-        accountsManager.transferFunds(accounts, "Sender", "Receiver", BigInteger.ONE, BigInteger.ZERO);
+        accountsManager.transferFunds(accounts, "Sender", "Receiver", BigInteger.ONE, BigInteger.ZERO, operation);
         senderAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(senderAddress, accounts);
         Assert.assertTrue(senderAccountState.getBalance().longValue()  == 9);
         AccountState receiverAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(receiverAddress, accounts);

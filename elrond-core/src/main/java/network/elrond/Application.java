@@ -70,32 +70,47 @@ public class Application implements Serializable {
     public void start() throws IOException {
         logger.traceEntry();
 
+        logger.trace("Starting private-public keys processor...");
+        AppTasks.INITIALIZE_PUBLIC_PRIVATE_KEYS.process(this);
+
+        logger.trace("Starting sharding...");
+        AppTasks.INIT_SHARDING.process(this);
+
         logger.trace("Starting P2P communications...");
         AppTasks.INIT_P2P_CONNECTION.process(this);
 
         logger.trace("Starting blockchain...");
         AppTasks.INIT_BLOCKCHAIN.process(this);
 
-        logger.trace("Starting private-public keys processor...");
-        AppTasks.INITIALIZE_PUBLIC_PRIVATE_KEYS.process(this);
-
         logger.trace("Starting accounts...");
         AppTasks.INIT_ACCOUNTS.process(this);
 
-        logger.trace("Starting bootstrapping processor...");
-        AppTasks.BLOCKCHAIN_BOOTSTRAP.process(this);
+        logger.trace("Starting obect request mechanism...");
+        AppTasks.INIT_REQUEST_OBJECT.process(this);
 
-        logger.trace("Starting blockchain synchronization...");
-        AppTasks.BLOCKCHAIN_SYNCRONIZATION.process(this);
+
 
         logger.trace("Intercept P2P transactions...");
         AppTasks.INTERCEPT_TRANSACTIONS.process(this);
+
+        logger.trace("Intercept P2P cross shard transactions...");
+        AppTasks.INTERCEPT_XTRANSACTIONS.process(this);
 
         logger.trace("Intercept P2P receipts...");
         AppTasks.INTERCEPT_RECEIPTS.process(this);
 
         logger.trace("Intercept P2P blocks...");
         AppTasks.INTERCEPT_BLOCKS.process(this);
+
+
+
+
+
+        logger.trace("Starting bootstrapping processor...");
+        AppTasks.BLOCKCHAIN_BOOTSTRAP.process(this);
+
+        logger.trace("Starting blockchain synchronization...");
+        AppTasks.BLOCKCHAIN_SYNCRONIZATION.process(this);
 
         logger.trace("Execute transactions and emit blocks...");
         AppTasks.BLOCK_ASSEMBLY_PROCESSOR.process(this);

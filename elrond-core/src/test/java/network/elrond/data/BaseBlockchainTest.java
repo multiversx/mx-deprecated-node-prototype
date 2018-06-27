@@ -2,6 +2,7 @@ package network.elrond.data;
 
 import network.elrond.blockchain.BlockchainContext;
 import network.elrond.blockchain.BlockchainUnitType;
+import network.elrond.sharding.Shard;
 
 import java.io.IOException;
 import java.util.Random;
@@ -15,13 +16,16 @@ public abstract class BaseBlockchainTest {
 
     public BlockchainContext getDefaultTestBlockchainContext() throws IOException {
         Random r = new Random(System.currentTimeMillis());
-        String currentDir = r.nextInt()+"";
+        String currentDir = r.nextInt() + "";
 
         BlockchainContext context = new BlockchainContext();
+
+        context.setShard(new Shard(0));
+
         context.setDatabasePath(BlockchainUnitType.BLOCK, BLOCKCHAIN_BLOCK_DATA_TEST_PATH + currentDir);
-        context.setDatabasePath(BlockchainUnitType.TRANSACTION, BLOCKCHAIN_TRANSACTION_DATA_TEST_PATH+ currentDir);
-        context.setDatabasePath(BlockchainUnitType.SETTINGS, BLOCKCHAIN_SETTINGS_DATA_TEST_PATH+ currentDir);
-        context.setDatabasePath(BlockchainUnitType.BLOCK_INDEX, BLOCKCHAIN_BLOCKIDX_DATA_TEST_PATH+ currentDir);
+        context.setDatabasePath(BlockchainUnitType.TRANSACTION, BLOCKCHAIN_TRANSACTION_DATA_TEST_PATH + currentDir);
+        context.setDatabasePath(BlockchainUnitType.SETTINGS, BLOCKCHAIN_SETTINGS_DATA_TEST_PATH + currentDir);
+        context.setDatabasePath(BlockchainUnitType.BLOCK_INDEX, BLOCKCHAIN_BLOCKIDX_DATA_TEST_PATH + currentDir);
         return context;
     }
 

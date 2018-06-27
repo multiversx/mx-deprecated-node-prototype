@@ -2,6 +2,7 @@ package network.elrond.data;
 
 import junit.framework.TestCase;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -11,7 +12,7 @@ public class DataBlockTest {
     public void testBlock() {
         Block db = new Block();
         db.nonce = BigInteger.ONE;
-        db.shard = 0;
+        db.shard = new Shard(0);
         db.appStateHash = new byte[]{0, 45, 22, -10, 23, -123};
 
         db.listTXHashes.add(new byte[]{1, 2, 3, 4, 5});

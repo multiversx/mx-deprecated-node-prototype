@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
 import org.spongycastle.util.encoders.Base64;
 import org.junit.After;
 import org.junit.Assert;
@@ -135,7 +136,7 @@ public class SerializationServiceTest {
         Block blk = new Block();
         blk.setNonce(BigInteger.ONE);
         blk.setPrevBlockHash(new byte[]{0, 1, 2});
-        blk.setShard(2);
+        blk.setShard(new Shard(0));
         blk.setAppStateHash(new byte[]{3, 4, 5});
         blk.setSignature(new byte[]{6, 7, 8});
         blk.setCommitment(new byte[]{9, 10, 11});

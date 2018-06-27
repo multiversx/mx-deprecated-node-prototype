@@ -221,7 +221,7 @@ public class AccountStateTest {
 //        tx1.setNonce(BigInteger.ZERO);
 //        //2 ERDs
 //        tx1.setValue(BigInteger.valueOf(10).pow(8).multiply(BigInteger.valueOf(2)));
-//        tx1.setSendAddress(Util.getAddressFromPublicKey(pb1.getEncoded()));
+//        tx1.setSenderAddress(Util.getAddressFromPublicKey(pb1.getEncoded()));
 //        tx1.setReceiverAddress(Util.getAddressFromPublicKey(pb2.getEncoded()));
 //        tx1.setPubKey(Util.byteArrayToHexString(pb1.getEncoded()));
 //        transactionService.signTransaction(tx1, pv1.getValue());
@@ -230,7 +230,7 @@ public class AccountStateTest {
 //        tx2.setNonce(BigInteger.ZERO);
 //        //3 ERDs
 //        tx2.setValue(BigInteger.valueOf(10).pow(8).multiply(BigInteger.valueOf(3)));
-//        tx2.setSendAddress(Util.getAddressFromPublicKey(pb3.getEncoded()));
+//        tx2.setSenderAddress(Util.getAddressFromPublicKey(pb3.getEncoded()));
 //        tx2.setReceiverAddress(Util.getAddressFromPublicKey(pb4.getEncoded()));
 //        tx2.setPubKey(Util.byteArrayToHexString(pb3.getEncoded()));
 //        transactionService.signTransaction(tx2, pv3.getValue());

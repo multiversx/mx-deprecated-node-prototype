@@ -1,4 +1,4 @@
-package network.elrond.processor.impl;
+package network.elrond.processor.impl.initialization;
 
 import network.elrond.Application;
 import network.elrond.application.AppContext;
@@ -10,7 +10,6 @@ import network.elrond.p2p.P2PConnection;
 import network.elrond.processor.AppTask;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -33,6 +32,8 @@ public class BlockchainStarterProcessor implements AppTask {
         BlockchainContext blockContext = new BlockchainContext();
         P2PConnection connection = state.getConnection();
         blockContext.setConnection(connection);
+
+        blockContext.setShard(state.getShard());
 
         for (BlockchainUnitType type : BlockchainUnitType.values()) {
             Path path = Paths.get(workingDirectory, blockchainBasePath, type.name().toLowerCase());

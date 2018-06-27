@@ -2,10 +2,6 @@ package network.elrond.data;
 
 import junit.framework.TestCase;
 import network.elrond.UtilTest;
-import network.elrond.account.AccountAddress;
-import network.elrond.account.AccountState;
-import network.elrond.account.Accounts;
-import network.elrond.account.AccountsContext;
 import network.elrond.account.*;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainService;
@@ -15,6 +11,7 @@ import network.elrond.crypto.MultiSignatureService;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -80,8 +77,12 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         addressReceiver = Util.getAddressFromPublicKey(publicKeyReceiver.getValue());
         accountsSandbox = initAccounts(accountsSandbox, publicKeysWallets, publicKeyMint, mintValue);
 
+        Shard senderShard= AppServiceProvider.getShardingService().getShard(addressSender.getBytes());
+        Shard receiverShard = AppServiceProvider.getShardingService().getShard(addressReceiver.getBytes());
+
+
         for (int i = 0; i < numberOfTransactions; i++) {
-            tx = new Transaction(addressSender, addressReceiver, BigInteger.valueOf(valuePerTransaction), BigInteger.valueOf(i));
+            tx = new Transaction(addressSender, addressReceiver, BigInteger.valueOf(valuePerTransaction), BigInteger.valueOf(i), senderShard, receiverShard);
             tx.setPubKey(Util.byteArrayToHexString(publicKeyMint.getValue()));
             tx.setData(new byte[0]);
             transactionService.signTransaction(tx, privateKeyMint.getValue(), publicKeyMint.getValue());

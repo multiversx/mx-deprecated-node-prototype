@@ -1,23 +1,25 @@
-package network.elrond.processor.impl;
+package network.elrond.processor.impl.interceptor;
 
 import network.elrond.Application;
+import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
-import network.elrond.application.AppState;
-import network.elrond.data.Transaction;
+import network.elrond.data.Receipt;
+import network.elrond.data.SecureObject;
 import network.elrond.p2p.P2PChannelName;
-import network.elrond.processor.AppTasks;
+import network.elrond.processor.impl.AbstractChannelTask;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class P2PTransactionsInterceptorProcessor extends AbstractChannelTask<String> {
-    private static final Logger logger = LogManager.getLogger(P2PTransactionsInterceptorProcessor.class);
+public class P2PReceiptInterceptorProcessor extends AbstractChannelTask<String> {
+
+    private static final Logger logger = LogManager.getLogger(P2PReceiptInterceptorProcessor.class);
 
     @Override
     protected P2PChannelName getChannelName() {
-        return P2PChannelName.TRANSACTION;
+        return P2PChannelName.RECEIPT;
     }
 
     @Override
@@ -28,20 +30,20 @@ public class P2PTransactionsInterceptorProcessor extends AbstractChannelTask<Str
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
 
         try {
+            // This will retrieve receipt from network if required
+            SecureObject<Receipt> secureReceipt = blockchainService.get(hash, blockchain, BlockchainUnitType.RECEIPT);
 
-            // This will retrieve transaction from network if required
-            Transaction transaction = blockchainService.get(hash, blockchain, BlockchainUnitType.TRANSACTION);
-
-            if (transaction == null) {
-                logger.info("Transaction with hash {} was not found!", hash);
+            if (secureReceipt == null) {
+                logger.warn("Receipt with hash {} was not found!", hash);
+                logger.traceExit();
                 return;
             }
 
-            logger.trace("Got new transaction with hash {}", hash);
+            logger.trace("Got new receipt with hash {}", hash);
+
         } catch (Exception ex) {
             logger.catching(ex);
         }
-
         logger.traceExit();
     }
 }

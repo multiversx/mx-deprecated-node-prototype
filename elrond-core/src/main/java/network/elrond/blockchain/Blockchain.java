@@ -4,6 +4,7 @@ import network.elrond.account.AbstractPersistenceUnit;
 import network.elrond.core.Util;
 import network.elrond.data.Block;
 import network.elrond.p2p.P2PConnection;
+import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -62,6 +63,7 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
         return context.getConnection();
     }
 
+
     public Block getCurrentBlock() {
         return currentBlock;
     }
@@ -90,6 +92,10 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
         Util.check(currentBlockIndex!=null, "currentBlockIndex!=null");
         Util.check(currentBlockIndex.compareTo(BigInteger.ZERO) >= 0, "currentBlockIndex!=null");
         this.currentBlockIndex = currentBlockIndex;
+    }
+
+    public Shard getShard() {
+        return context.getShard();
     }
 
     public void flush() {

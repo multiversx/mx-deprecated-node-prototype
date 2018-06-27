@@ -83,13 +83,6 @@ public class AppContextTest {
         Assert.assertEquals(BootstrapType.REBUILD_FROM_DISK, context.getBootstrapType());
     }
 
-    @Test
-    public void testGetIsSeedNode(){
-        context.setMasterPeerPort(50);
-        context.setPort(50);
-        Assert.assertTrue(context.isSeedNode());
-    }
-
     @Test(expected = IllegalArgumentException.class)
     public void testSetStrAddressMintWithNullValueShouldThrowException(){
         context.setStrAddressMint("");

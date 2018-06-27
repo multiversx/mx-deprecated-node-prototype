@@ -27,7 +27,7 @@ public class AppStateTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testGetChannelWithNullChannelNameShouldThrowException(){
-        appState.getChanel(null);
+        appState.getChanel((P2PChannelName) null);
     }
 
     @Test
@@ -38,7 +38,7 @@ public class AppStateTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testAddChannelWithNullChannelShouldThrowException(){
-        appState.addChanel(null);
+        appState.addChanel((P2PBroadcastChanel) null);
     }
 
     @Test

@@ -1,4 +1,4 @@
-package network.elrond.processor.impl;
+package network.elrond.processor.impl.executor;
 
 import network.elrond.Application;
 import network.elrond.TimeWatch;
@@ -13,6 +13,9 @@ import network.elrond.data.AppBlockManager;
 import network.elrond.data.Block;
 import network.elrond.data.LocationType;
 import network.elrond.p2p.P2PChannelName;
+import network.elrond.processor.impl.AbstractChannelTask;
+import network.elrond.sharding.AppShardingManager;
+import network.elrond.sharding.Shard;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,17 +42,19 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         logger.traceEntry("params: {} {}", queue, application);
 
         ThreadUtil.sleep(4000);
-
-        AppContext context = application.getContext();
+        AppState state = application.getState();
+        Shard shard = state.getShard();
 
         removeProcessedTransactions(queue, application);
 
-        if (!context.isSeedNode()) {
-            logger.info("Not processing ...");
+        boolean isLeaderInShard = AppShardingManager.instance().isLeaderInShard(state);
+        if (!isLeaderInShard) {
+            logger.info("Node is not leader in shard {}", shard);
             return;
         }
 
-        AppState state = application.getState();
+        logger.info("Node is leader in shard {}", shard);
+
         if (state.isLock()) {
             // If sync is running stop
             logger.info("Can't execute, state locked!");
@@ -67,8 +72,8 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         int size = 0;
         state.setLock();
         Block block = proposeBlock(queue, application);
-        if(block!=null && block.getListTXHashes()!=null){
-            size  = block.getListTXHashes().size();
+        if (block != null && block.getListTXHashes() != null) {
+            size = block.getListTXHashes().size();
         }
 
         state.clearLock();
@@ -87,7 +92,9 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         logger.traceExit();
     }
 
+
     private Block proposeBlock(ArrayBlockingQueue<String> queue, Application application) {
+
         logger.traceEntry("params: {} {}", queue, application);
 
         AppState state = application.getState();
@@ -133,7 +140,6 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         }
         logger.traceExit();
     }
-
 
     @Override
     protected void process(String hash, Application application) {

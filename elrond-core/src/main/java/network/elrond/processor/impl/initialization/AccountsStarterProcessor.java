@@ -1,4 +1,4 @@
-package network.elrond.processor.impl;
+package network.elrond.processor.impl.initialization;
 
 import network.elrond.Application;
 import network.elrond.account.Accounts;
@@ -32,6 +32,7 @@ public class AccountsStarterProcessor implements AppTask {
 
         AccountsContext accountContext = new AccountsContext();
         accountContext.setDatabasePath(databasePath.toString());
+        accountContext.setShard(state.getShard());
 
         Accounts accounts = new Accounts(accountContext, new AccountsPersistenceUnit<>(accountContext.getDatabasePath()));
         state.setAccounts(accounts);

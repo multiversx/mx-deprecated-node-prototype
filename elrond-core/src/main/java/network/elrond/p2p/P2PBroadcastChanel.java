@@ -38,8 +38,16 @@ public class P2PBroadcastChanel {
         this.listeners = listeners;
     }
 
+    public String getChannelIdentifier() {
+        String indent = name.toString();
+        if (P2PChannelType.SHARD_LEVEL.equals(name.getType())) {
+            indent += connection.getShard().getIndex();
+        }
+        return indent;
+    }
+
     @Override
-    public String toString(){
+    public String toString() {
         return String.format("P2PBroadcastChannel{name=%s, listeners.size()=%d}", name, listeners.size());
     }
 }

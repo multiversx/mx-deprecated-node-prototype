@@ -1,8 +1,9 @@
 package network.elrond.crypto;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 
-public class Signature {
+public class Signature implements Serializable {
     private byte[] signature;
     private byte[] commitment;
     private byte[] challenge;

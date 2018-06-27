@@ -77,9 +77,6 @@ public class AppContext implements Serializable {
         this.bootstrapType = bootstrapType;
     }
 
-    public boolean isSeedNode() {
-        return masterPeerPort.equals(port);
-    }
 
     public String getStrAddressMint() {
         return strAddressMint;

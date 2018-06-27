@@ -9,18 +9,18 @@ import network.elrond.benchmark.BenchmarkResult;
 import network.elrond.benchmark.MultipleTransactionResult;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
+import network.elrond.core.ObjectUtil;
 import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.PKSKPair;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.Receipt;
+import network.elrond.data.SecureObject;
 import network.elrond.data.Transaction;
-import network.elrond.p2p.P2PBroadcastChanel;
-import network.elrond.p2p.P2PChannelName;
-import network.elrond.p2p.P2PConnection;
-import network.elrond.p2p.PingResponse;
+import network.elrond.p2p.*;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,7 +44,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
             return logger.traceExit(application);
         } catch (Exception e) {
             logger.catching(e);
-            return logger.traceExit((Application)null);
+            return logger.traceExit((Application) null);
         }
     }
 
@@ -71,18 +71,39 @@ public class ElrondFacadeImpl implements ElrondFacade {
             return BigInteger.ZERO;
         }
 
-        try {
-            AppState state = application.getState();
-            Accounts accounts = state.getAccounts();
 
-            AccountState account = AppServiceProvider.getAccountStateService().getAccountState(address, accounts);
+        AppState state = application.getState();
+        Shard currentShard = application.getState().getShard();
+        Shard addressShard = AppServiceProvider.getShardingService().getShard(address.getBytes());
+
+        if (ObjectUtil.isEqual(addressShard, currentShard)) {
+
+            try {
+
+                Accounts accounts = state.getAccounts();
+                AccountState account = AppServiceProvider.getAccountStateService().getAccountState(address, accounts);
+
+                return logger.traceExit((account == null) ? BigInteger.ZERO : account.getBalance());
+
+            } catch (Exception ex) {
+                logger.throwing(ex);
+                return logger.traceExit((BigInteger) null);
+            }
+        }
+
+        try {
+
+            P2PRequestChannel channel = state.getChanel(P2PRequestChannelName.ACCOUNT);
+            AccountState account = AppServiceProvider.getP2PRequestService().get(channel, addressShard, P2PRequestChannelName.ACCOUNT, address);
 
             return logger.traceExit((account == null) ? BigInteger.ZERO : account.getBalance());
 
         } catch (Exception ex) {
             logger.throwing(ex);
-            return logger.traceExit((BigInteger)null);
+            return logger.traceExit((BigInteger) null);
         }
+
+
     }
 
     @Override
@@ -90,20 +111,23 @@ public class ElrondFacadeImpl implements ElrondFacade {
         logger.traceEntry("params: {} {}", transactionHash, application);
         try {
             FutureTask<Receipt> timeoutTask = new FutureTask<Receipt>(() -> {
+                SecureObject<Receipt> secureReceipt;
                 Blockchain blockchain = application.getState().getBlockchain();
                 String receiptHash;
                 do {
                     receiptHash = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
                     ThreadUtil.sleep(200);
                 } while (receiptHash == null);
-                return logger.traceExit((Receipt)AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT));
+
+                secureReceipt = AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT);
+                return logger.traceExit(secureReceipt.getObject());
             });
             new Thread(timeoutTask).start();
             return logger.traceExit(timeoutTask.get(30L, TimeUnit.SECONDS));
         } catch (InterruptedException | TimeoutException | ExecutionException e) {
             logger.catching(e);
         }
-        return logger.traceExit((Receipt)null);
+        return logger.traceExit((Receipt) null);
     }
 
     @Override
@@ -111,17 +135,16 @@ public class ElrondFacadeImpl implements ElrondFacade {
         logger.traceEntry("params: {} {} {}", receiver, value, application);
         if (application == null) {
             logger.warn("Invalid application state, application is null");
-            return logger.traceExit((MultipleTransactionResult)null);
+            return logger.traceExit((MultipleTransactionResult) null);
         }
 
         MultipleTransactionResult result = new MultipleTransactionResult();
-        for(int i = 0;i<nrTransactions;i++){
+        for (int i = 0; i < nrTransactions; i++) {
             Transaction transaction = send(receiver, value, application);
-            if(transaction == null){
-                result.setFailedTransactionsNumber(result.getFailedTransactionsNumber()+1);
-            }
-            else{
-                result.setSuccessfulTransactionsNumber(result.getSuccessfulTransactionsNumber() +1);
+            if (transaction == null) {
+                result.setFailedTransactionsNumber(result.getFailedTransactionsNumber() + 1);
+            } else {
+                result.setSuccessfulTransactionsNumber(result.getSuccessfulTransactionsNumber() + 1);
             }
         }
         return result;
@@ -132,7 +155,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
         logger.traceEntry("params: {} {} {}", receiver, value, application);
         if (application == null) {
             logger.warn("Invalid application state, application is null");
-            return logger.traceExit((Transaction)null);
+            return logger.traceExit((Transaction) null);
         }
 
         try {
@@ -150,7 +173,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
             if (senderAccount == null) {
                 // sender account is new, can't send
                 logger.warn("Sender account is new, can't send");
-                return logger.traceExit((Transaction)null);
+                return logger.traceExit((Transaction) null);
             }
 
             PublicKey receiverPublicKey = new PublicKey(receiver.getBytes());
@@ -169,11 +192,12 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
             return logger.traceExit(transaction);
 
+
         } catch (Exception ex) {
             logger.catching(ex);
         }
 
-        return logger.traceExit((Transaction)null);
+        return logger.traceExit((Transaction) null);
     }
 
     @Override
@@ -203,7 +227,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
             PublicKey publicKey = new PublicKey(privateKey);
 
-            return logger.traceExit(new PKSKPair(   Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue())));
+            return logger.traceExit(new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue())));
         } catch (Exception ex) {
             logger.catching(ex);
             return logger.traceExit(new PKSKPair("Error", "Error"));
