@@ -11,11 +11,13 @@ import network.elrond.chronology.NTPClient;
 import network.elrond.chronology.Round;
 import network.elrond.chronology.RoundState;
 import network.elrond.core.AsciiTableUtil;
+import network.elrond.core.ObjectUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.*;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongycastle.util.encoders.Base64;
@@ -59,6 +61,7 @@ public class AppBlockManager {
             AppBlockManager.instance().signBlock(block, privateKey);
             ExecutionService executionService = AppServiceProvider.getExecutionService();
             ExecutionReport result = executionService.processBlock(block, accounts, blockchain);
+            Shard shard = blockchain.getShard();
 
             if (result.isOk()) {
                 removeAlreadyProcessedTransactionsFromPool(state, block);
@@ -73,6 +76,7 @@ public class AppBlockManager {
                             BlockchainUnitType.TRANSACTION);
                 blockTransactions.stream()
                     .filter(transaction -> transaction.isCrossShardTransaction())
+                        .filter(transaction -> !ObjectUtil.isEqual(shard, transaction.getReceiverShard()))
                     .forEach(transaction -> {
                         P2PBroadcastChanel channel = state.getChanel(P2PChannelName.XTRANSACTION);
                         AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, transaction);
