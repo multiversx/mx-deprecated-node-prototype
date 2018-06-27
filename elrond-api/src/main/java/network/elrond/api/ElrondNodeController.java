@@ -176,7 +176,7 @@ public class ElrondNodeController {
             HttpServletResponse response,
             @RequestParam() String address) {
 
-        BigInteger index = new BigInteger(Util.byteArrayToHexString(address.getBytes()));
+        BigInteger index = new BigInteger(Util.hexStringToByteArray(address));
         int nrShards = 2;
         int ShardNr = index.mod(BigInteger.valueOf(nrShards)).intValue();
 
