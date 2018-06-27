@@ -47,18 +47,18 @@ public class P2PObjectServiceImpl implements P2PObjectService {
 
     @Override
     public <T extends Serializable> FuturePut put(P2PConnection connection, String key, T value) throws IOException {
-        return put(connection, key, value, false, false);
+        return put(connection, key, value, false, true);
     }
 
     @Override
-    public <T extends Serializable> FuturePut put(P2PConnection connection, String key, T value, boolean await, boolean override) throws IOException {
+    public <T extends Serializable> FuturePut put(P2PConnection connection, String key, T value, boolean await, boolean canOverwrite) throws IOException {
         logger.traceEntry("params: {} {} {}", connection, key, value);
         PeerDHT peer = connection.getDht();
 
         Number160 hash = getDHTHash(connection, key, value.getClass());
 
         PutBuilder builder = peer.put(hash);
-        if (override){
+        if (!canOverwrite){
             builder.putIfAbsent();
         }
 

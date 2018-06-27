@@ -110,7 +110,7 @@ public class BootstrapServiceImpl implements BootstrapService {
             // Put index <=> hash mapping only on DHT
             P2PConnection connection = blockchain.getConnection();
             String blockNonce = block.getNonce().toString();
-            FuturePut futurePut = AppServiceProvider.getP2PObjectService().put(connection, blockNonce, blockHash, true, true);
+            FuturePut futurePut = AppServiceProvider.getP2PObjectService().put(connection, blockNonce, blockHash, true, false);
             if (!futurePut.isSuccess()){
                 result.combine(new ExecutionReport().ko("Not allowed to override block index " + blockNonce));
                 return result;
