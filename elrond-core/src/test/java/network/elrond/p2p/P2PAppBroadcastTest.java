@@ -25,7 +25,7 @@ public class P2PAppBroadcastTest {
         Application app = new Application(context);
         AppTasks.INIT_P2P_CONNECTION.process(app);
 
-        P2PBroadcastChanel channel = AppP2PManager.instance().subscribeToChannel(app, P2PChannelName.TRANSACTION, new P2PChannelListener() {
+        P2PBroadcastChanel channel = AppP2PManager.instance().subscribeToChannel(app, P2PBroadcastChannelName.TRANSACTION, new P2PChannelListener() {
             @Override
             public void onReceiveMessage(PeerAddress sender, P2PBroadcastMessage request) throws InterruptedException {
                 if ((request.getPayload().equals("###"))) {
@@ -51,7 +51,7 @@ public class P2PAppBroadcastTest {
         Application app = new Application(context);
         AppTasks.INIT_P2P_CONNECTION.process(app);
 
-        ArrayBlockingQueue<Object> queue = AppP2PManager.instance().subscribeToChannel(app, P2PChannelName.TRANSACTION);
+        ArrayBlockingQueue<Object> queue = AppP2PManager.instance().subscribeToChannel(app, P2PBroadcastChannelName.TRANSACTION);
 
         Thread thread = new Thread(() -> {
             while (app.getState().isStillRunning()) {
@@ -65,7 +65,7 @@ public class P2PAppBroadcastTest {
         });
         thread.start();
 
-        P2PBroadcastChanel channel = app.getState().getChanel(P2PChannelName.TRANSACTION);
+        P2PBroadcastChanel channel = app.getState().getChanel(P2PBroadcastChannelName.TRANSACTION);
         AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, "###");
         Thread.sleep(3000);
         Assert.assertEquals(1, messagesCount.get());

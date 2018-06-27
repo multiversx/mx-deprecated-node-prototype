@@ -7,7 +7,7 @@ import network.elrond.blockchain.BlockchainService;
 import network.elrond.core.ObjectUtil;
 import network.elrond.data.Transaction;
 import network.elrond.p2p.P2PBroadcastChanel;
-import network.elrond.p2p.P2PChannelName;
+import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.processor.impl.AbstractChannelTask;
 import network.elrond.service.AppServiceProvider;
@@ -20,8 +20,8 @@ public class P2PXTransactionsInterceptorProcessor extends AbstractChannelTask<Tr
     private static final Logger logger = LogManager.getLogger(P2PXTransactionsInterceptorProcessor.class);
 
     @Override
-    protected P2PChannelName getChannelName() {
-        return P2PChannelName.XTRANSACTION;
+    protected P2PBroadcastChannelName getChannelName() {
+        return P2PBroadcastChannelName.XTRANSACTION;
     }
 
     @Override
@@ -51,7 +51,7 @@ public class P2PXTransactionsInterceptorProcessor extends AbstractChannelTask<Tr
             P2PConnection connection = state.getConnection();
             AppServiceProvider.getP2PObjectService().put(connection, hash, transaction);
 
-            P2PBroadcastChanel channel = state.getChanel(P2PChannelName.TRANSACTION);
+            P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.TRANSACTION);
             AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, hash);
 
 

@@ -20,26 +20,31 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 public class AppState implements Serializable {
 
-    private boolean stillRunning = true;
-    private Accounts accounts;
-    private Blockchain blockchain;
-    private PublicKey publicKey;
-    private PrivateKey privateKey;
-    private P2PConnection connection;
-    private NTPClient ntpClient;
-
-    private Shard shard;
-    private Map<P2PChannelName, P2PBroadcastChanel> broadcastChannels = new HashMap<>();
-    private Map<P2PRequestChannelName, P2PRequestChannel> requestChannels = new HashMap<>();
-
-    protected final ArrayBlockingQueue<String> transactionsPool = new ArrayBlockingQueue<>(50000, true);
-    private ConsensusState consensusState = new ConsensusState();
-
     private static final Logger logger = LogManager.getLogger(AppState.class);
 
-    public final Object lockerSyncPropose = new Object();
+    private boolean stillRunning = true;
+    public Object lockerSyncPropose = new Object();
+
+    private Shard shard;
+    private Accounts accounts;
+    private Blockchain blockchain;
+
+    private PublicKey publicKey;
+    private PrivateKey privateKey;
+
+    private NTPClient ntpClient;
+    private P2PConnection connection;
+
+
+    private Map<P2PBroadcastChannelName, P2PBroadcastChanel> broadcastChannels = new HashMap<>();
+    private Map<P2PRequestChannelName, P2PRequestChannel> requestChannels = new HashMap<>();
+
+    private ConsensusState consensusState = new ConsensusState();
 
     private StatisticsManager statisticsManager = new StatisticsManager();
+
+    private ArrayBlockingQueue<String> transactionsPool = new ArrayBlockingQueue<>(50000, true);
+
 
     public P2PRequestChannel getChanel(P2PRequestChannelName channelName) {
         logger.traceEntry("params: {}", channelName);
@@ -54,7 +59,7 @@ public class AppState implements Serializable {
         logger.traceExit();
     }
 
-    public P2PBroadcastChanel getChanel(P2PChannelName channelName) {
+    public P2PBroadcastChanel getChanel(P2PBroadcastChannelName channelName) {
         logger.traceEntry("params: {}", channelName);
         Util.check(channelName != null, "channelName!=null");
         return logger.traceExit(broadcastChannels.get(channelName));
@@ -151,15 +156,15 @@ public class AppState implements Serializable {
         this.shard = shard;
     }
 
-    public ArrayBlockingQueue<String> getTransactionPool(){
+    public ArrayBlockingQueue<String> getTransactionPool() {
         return (transactionsPool);
     }
 
-    public void addTransactionToPool(String hash){
+    public void addTransactionToPool(String hash) {
         transactionsPool.add(hash);
     }
 
-    public StatisticsManager getStatisticsManager(){
+    public StatisticsManager getStatisticsManager() {
         return statisticsManager;
     }
 }

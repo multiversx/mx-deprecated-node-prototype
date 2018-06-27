@@ -20,7 +20,7 @@ public class AppContext implements Serializable {
 
     private String strAddressMint = "000000000000000000000000000000000000000000000000000000000000000000";
     private BootstrapType bootstrapType = BootstrapType.REBUILD_FROM_DISK;//BootstrapType.START_FROM_SCRATCH;
-    private BigInteger valueMint = BigInteger.ZERO;
+    
 
     private List<String> listNTPServers = Arrays.asList("time.google.com", "pool.ntp.org", "time.windows.com");
 

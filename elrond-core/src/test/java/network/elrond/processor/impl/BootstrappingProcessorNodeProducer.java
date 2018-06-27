@@ -12,7 +12,7 @@ import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.*;
 import network.elrond.p2p.P2PBroadcastChanel;
-import network.elrond.p2p.P2PChannelName;
+import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.service.AppServiceProvider;
 import org.spongycastle.util.encoders.Base64;
 
@@ -74,7 +74,7 @@ public class BootstrappingProcessorNodeProducer {
                     Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(pbKeyInitial, pbKeyRecv, BigInteger.ONE, nonceTransaction);
                     AppServiceProvider.getTransactionService().signTransaction(tx, pvKeyInitial.getValue(), pbKeyInitial.getValue());
 
-                    P2PBroadcastChanel channel = state.getChanel(P2PChannelName.TRANSACTION);
+                    P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.TRANSACTION);
 
                     System.out.println("Put tx hash: " + AppServiceProvider.getSerializationService().getHashString(tx));
                     System.out.println(AppServiceProvider.getSerializationService().encodeJSON(tx));

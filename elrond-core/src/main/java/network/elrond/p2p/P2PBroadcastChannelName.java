@@ -1,6 +1,6 @@
 package network.elrond.p2p;
 
-public enum P2PChannelName {
+public enum P2PBroadcastChannelName {
 
     BLOCK("BLOCK", P2PChannelType.SHARD_LEVEL),
     TRANSACTION("TRANSACTION", P2PChannelType.SHARD_LEVEL),
@@ -14,7 +14,7 @@ public enum P2PChannelName {
     private final String _name;
     private final P2PChannelType _type;
 
-    P2PChannelName(String name, P2PChannelType type) {
+    P2PBroadcastChannelName(String name, P2PChannelType type) {
         this._name = name;
         this._type = type;
     }
