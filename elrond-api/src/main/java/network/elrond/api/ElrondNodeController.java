@@ -147,7 +147,6 @@ public class ElrondNodeController {
     Object getStats(
             HttpServletResponse response) {
         return logger.traceExit(elrondApiNode.getBenchmarkResult(""));
-
     }
 
     @RequestMapping(path = "/node/ping", method = RequestMethod.GET)

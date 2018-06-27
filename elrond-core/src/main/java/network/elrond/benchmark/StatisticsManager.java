@@ -27,8 +27,8 @@ public class StatisticsManager {
 
     public void addStatistic(Statistic statistic) {
         logger.traceEntry("params: {}", statistic);
-        long timeDifference = statistic.getCurrentTimeMillis() - currentStatistic.getCurrentTimeMillis();
-
+        //long timeDifference = statistic.getCurrentTimeMillis() - currentStatistic.getCurrentTimeMillis();
+        long timeDifference = 0;
         currentStatistic = statistic;
 
         statistics.add(statistic);
