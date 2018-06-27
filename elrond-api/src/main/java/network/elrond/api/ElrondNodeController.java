@@ -147,7 +147,6 @@ public class ElrondNodeController {
     Object getStats(
             HttpServletResponse response) {
         return logger.traceExit(elrondApiNode.getBenchmarkResult(""));
-
     }
 
     @RequestMapping(path = "/node/ping", method = RequestMethod.GET)
@@ -176,7 +175,7 @@ public class ElrondNodeController {
             HttpServletResponse response,
             @RequestParam() String address) {
 
-        BigInteger index = new BigInteger(Util.byteArrayToHexString(address.getBytes()));
+        BigInteger index = new BigInteger(Util.hexStringToByteArray(address));
         int nrShards = 2;
         int ShardNr = index.mod(BigInteger.valueOf(nrShards)).intValue();
 
