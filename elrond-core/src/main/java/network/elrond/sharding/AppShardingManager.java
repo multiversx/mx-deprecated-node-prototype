@@ -4,7 +4,7 @@ import net.tomp2p.peers.PeerAddress;
 import network.elrond.application.AppState;
 import network.elrond.core.CollectionUtil;
 import network.elrond.p2p.P2PBroadcastChanel;
-import network.elrond.p2p.P2PChannelName;
+import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,7 +29,7 @@ public class AppShardingManager {
     public boolean isLeaderInShard(AppState state) {
 
         if (isSeedNode == null) {
-            P2PBroadcastChanel chanel = state.getChanel(P2PChannelName.BLOCK);
+            P2PBroadcastChanel chanel = state.getChanel(P2PBroadcastChannelName.BLOCK);
             HashSet<PeerAddress> peers = AppServiceProvider.getP2PBroadcastService().getPeersOnChannel(chanel);
             isSeedNode = CollectionUtil.size(peers) <= 1;
         }
@@ -38,7 +38,7 @@ public class AppShardingManager {
     }
 
     public List<String> getPeersOnShard(AppState state){
-        P2PBroadcastChanel chanel = state.getChanel(P2PChannelName.BLOCK);
+        P2PBroadcastChanel chanel = state.getChanel(P2PBroadcastChannelName.BLOCK);
         return AppServiceProvider.getP2PBroadcastService().getPeersOnChannel(chanel)
                 .stream()
                 .filter(Objects::nonNull)

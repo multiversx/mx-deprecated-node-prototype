@@ -20,7 +20,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
     private static final Logger logger = LogManager.getLogger(P2PBroadcastServiceImpl.class);
 
 
-    public P2PBroadcastChanel createChannel(P2PConnection connection, P2PChannelName channelName) {
+    public P2PBroadcastChanel createChannel(P2PConnection connection, P2PBroadcastChannelName channelName) {
         logger.traceEntry("params: {} {}", connection, channelName);
         try {
             PeerDHT dht = connection.getDht();
@@ -118,7 +118,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         logger.traceEntry("params: {} {}", channel, object);
         try {
             P2PConnection connection = channel.getConnection();
-            P2PChannelName channelName = channel.getName();
+            P2PBroadcastChannelName channelName = channel.getName();
 
             PeerDHT dht = connection.getDht();
             logger.trace("got connection...");

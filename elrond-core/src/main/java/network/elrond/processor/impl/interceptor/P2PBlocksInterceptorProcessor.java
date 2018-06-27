@@ -7,7 +7,7 @@ import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.data.Block;
-import network.elrond.p2p.P2PChannelName;
+import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.processor.impl.AbstractChannelTask;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
@@ -20,8 +20,8 @@ public class P2PBlocksInterceptorProcessor extends AbstractChannelTask<String> {
     private static final Logger logger = LogManager.getLogger(P2PBlocksInterceptorProcessor.class);
 
     @Override
-    protected P2PChannelName getChannelName() {
-        return P2PChannelName.BLOCK;
+    protected P2PBroadcastChannelName getChannelName() {
+        return P2PBroadcastChannelName.BLOCK;
     }
 
     @Override

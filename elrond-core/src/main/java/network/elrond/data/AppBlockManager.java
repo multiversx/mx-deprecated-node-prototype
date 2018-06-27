@@ -15,7 +15,7 @@ import network.elrond.core.ObjectUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.*;
 import network.elrond.p2p.P2PBroadcastChanel;
-import network.elrond.p2p.P2PChannelName;
+import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
@@ -78,7 +78,7 @@ public class AppBlockManager {
                     .filter(transaction -> transaction.isCrossShardTransaction())
                         .filter(transaction -> !ObjectUtil.isEqual(shard, transaction.getReceiverShard()))
                     .forEach(transaction -> {
-                        P2PBroadcastChanel channel = state.getChanel(P2PChannelName.XTRANSACTION);
+                        P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.XTRANSACTION);
                         AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, transaction);
                     });
 
@@ -277,7 +277,7 @@ public class AppBlockManager {
         logger.trace("placed on blockchain (TRANSACTION_RECEIPT, TRANSACTION_BLOCK and secure RECEIPT)");
 
         // Broadcast
-        P2PBroadcastChanel channel = state.getChanel(P2PChannelName.RECEIPT);
+        P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.RECEIPT);
         AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, secureReceiptHash);
         logger.trace("broadcast the receipt hash");
         logger.traceExit();

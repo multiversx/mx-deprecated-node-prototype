@@ -5,9 +5,9 @@ import java.io.Serializable;
 public class P2PBroadcastMessage implements Serializable {
 
     private Object payload;
-    private P2PChannelName channelName;
+    private P2PBroadcastChannelName channelName;
 
-    public P2PBroadcastMessage(P2PChannelName channelName, Object payload) {
+    public P2PBroadcastMessage(P2PBroadcastChannelName channelName, Object payload) {
         this.payload = payload;
         this.channelName = channelName;
     }
@@ -20,15 +20,15 @@ public class P2PBroadcastMessage implements Serializable {
         this.payload = payload;
     }
 
-    public P2PChannelName getChannelName() {
+    public P2PBroadcastChannelName getChannelName() {
         return channelName;
     }
 
-    public void setChannelName(P2PChannelName channelName) {
+    public void setChannelName(P2PBroadcastChannelName channelName) {
         this.channelName = channelName;
     }
 
-    public boolean isForChannel(P2PChannelName channelName) {
+    public boolean isForChannel(P2PBroadcastChannelName channelName) {
         return this.channelName.equals(channelName);
     }
 

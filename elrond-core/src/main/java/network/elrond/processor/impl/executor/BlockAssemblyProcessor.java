@@ -12,7 +12,7 @@ import network.elrond.crypto.PrivateKey;
 import network.elrond.data.AppBlockManager;
 import network.elrond.data.Block;
 import network.elrond.data.LocationType;
-import network.elrond.p2p.P2PChannelName;
+import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.processor.impl.AbstractChannelTask;
 import network.elrond.sharding.AppShardingManager;
 import network.elrond.sharding.Shard;
@@ -33,8 +33,8 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
     private static final Logger logger = LogManager.getLogger(BlockAssemblyProcessor.class);
 
     @Override
-    protected P2PChannelName getChannelName() {
-        return P2PChannelName.TRANSACTION;
+    protected P2PBroadcastChannelName getChannelName() {
+        return P2PBroadcastChannelName.TRANSACTION;
     }
 
     @Override
