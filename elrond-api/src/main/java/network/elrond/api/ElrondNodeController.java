@@ -10,6 +10,8 @@ import network.elrond.crypto.PKSKPair;
 import network.elrond.data.BootstrapType;
 import network.elrond.data.Transaction;
 import network.elrond.p2p.PingResponse;
+import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.ShardingService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -176,12 +178,18 @@ public class ElrondNodeController {
             HttpServletResponse response,
             @RequestParam() String address) {
 
-        BigInteger index = new BigInteger(Util.byteArrayToHexString(address.getBytes()));
-        int nrShards = 2;
-        int ShardNr = index.mod(BigInteger.valueOf(nrShards)).intValue();
-
         logger.traceEntry("params: {}", address);
-        return logger.traceExit(ShardNr);
+
+        try {
+
+            ShardingService shardingService = AppServiceProvider.getShardingService();
+            byte[] publicKeyBytes = Util.hexStringToByteArray(address);
+            return logger.traceExit(shardingService.getShard(publicKeyBytes).getIndex());
+        } catch (Exception ex){
+            logger.throwing(ex);
+        }
+
+        return logger.traceExit(0);
     }
 
     @RequestMapping(path = "/node/exit", method = RequestMethod.GET)

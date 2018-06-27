@@ -5,6 +5,9 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.BootstrapType;
+import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
+import network.elrond.sharding.ShardingService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,6 +45,11 @@ public class ContextCreator {
         PublicKey mintPublicKey = new PublicKey(nodePrivateKey);
         String mintAddress = Util.getAddressFromPublicKey(mintPublicKey.getValue());
         context.setStrAddressMint(mintAddress);
+
+        ShardingService shardingService = AppServiceProvider.getShardingService();
+        PublicKey preGeneratedPublicKey = new PublicKey(context.getPrivateKey());
+        Shard shard = shardingService.getShard(preGeneratedPublicKey.getValue());
+        logger.info("Allocated to shard: {}", shard.getIndex());
 
         return logger.traceExit(context);
     }
