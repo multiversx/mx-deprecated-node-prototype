@@ -9,7 +9,9 @@ public enum P2PChannelName {
     TRANSACTION_RECEIPT("TRANSACTION_RECEIPT", P2PChannelType.SHARD_LEVEL),
 
     XTRANSACTION("XTRANSACTION", P2PChannelType.GLOBAL_LEVEL),
-    XRECEIPT("XRECEIPT", P2PChannelType.GLOBAL_LEVEL),;
+    XRECEIPT("XRECEIPT", P2PChannelType.GLOBAL_LEVEL),
+
+    CONSENSUS("CONSENSUS", P2PChannelType.SHARD_LEVEL);
 
     private final String _name;
     private final P2PChannelType _type;

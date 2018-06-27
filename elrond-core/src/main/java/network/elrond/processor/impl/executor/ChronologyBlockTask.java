@@ -51,13 +51,13 @@ public class ChronologyBlockTask implements AppTask {
                         continue;
                     } else{
                         genesisTimeStampCached = application.getState().getBlockchain().getGenesisBlock().getTimestamp();
+                        chronologyService.setReferenceRound(genesisTimeStampCached, 0);
                         logger.trace(String.format("Cached genesis time stamp as: %d", genesisTimeStampCached));
                     }
                 }
 
                 long currentTimeStamp = chronologyService.getSynchronizedTime();
-
-                currentRound = chronologyService.getRoundFromDateTime(genesisTimeStampCached, currentTimeStamp);
+                currentRound = chronologyService.getRoundFromDateTime(currentTimeStamp);
 
                 computeAndCallStartEndRounds(currentRound, currentTimeStamp);
                 computeAndCallRoundState(currentRound, currentTimeStamp);

@@ -43,7 +43,6 @@ public class AppBlockManager {
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();
 
-
         try {
             List<Transaction> transactions = AppServiceProvider.getBlockchainService().getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
             Pair<Block, List<Receipt>> blockReceiptsPair = composeBlock(transactions, state);
@@ -121,10 +120,10 @@ public class AppBlockManager {
         logger.trace("done generating blank new block as {}", block);
 
         ChronologyService chronologyService = AppServiceProvider.getChronologyService();
-        long timestamp = blockchain.getGenesisBlock().getTimestamp();
+        //long timestamp = blockchain.getGenesisBlock().getTimestamp();
         long synchronizedTime = chronologyService.getSynchronizedTime();
 
-        Round round = chronologyService.getRoundFromDateTime(timestamp, synchronizedTime);
+        Round round = chronologyService.getRoundFromDateTime(synchronizedTime);
         block.setRoundIndex(round.getIndex());
         block.setTimestamp(round.getStartTimeStamp());
         logger.trace("done computing round and round start millis = calculated round start millis, round index = {}, time stamp = {}",

@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class P2PRequestServiceImpl implements P2PRequestService {
@@ -65,7 +66,9 @@ public class P2PRequestServiceImpl implements P2PRequestService {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <K extends Serializable, R extends Serializable> R get(P2PRequestChannel channel, Shard shard, P2PRequestChannelName channelName, K key) {
+    public <K extends Serializable, R extends Serializable> ArrayList<R> get(P2PRequestChannel channel, Shard shard, P2PRequestChannelName channelName, K key) {
+
+        ArrayList<R> result = new ArrayList<>();
 
         logger.traceEntry("params: {} {} {} {}", channel, shard, channelName, key);
         try {
@@ -89,16 +92,14 @@ public class P2PRequestServiceImpl implements P2PRequestService {
                     FutureDirect fd = futureDirect.awaitUninterruptibly();
 
                     if (fd.isCompleted() && fd.isSuccess()) {
-                        return logger.traceExit((R) fd.object());
+                        result.add((R) fd.object());
                     }
                 }
-
+                return result;
             }
         } catch (Exception e) {
             logger.catching(e);
         }
-        return logger.traceExit((R) null);
+        return logger.traceExit(result);
     }
-
-
 }

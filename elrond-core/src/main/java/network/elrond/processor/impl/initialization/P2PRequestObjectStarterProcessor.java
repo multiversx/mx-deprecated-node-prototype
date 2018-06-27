@@ -1,9 +1,12 @@
 package network.elrond.processor.impl.initialization;
 
+import javafx.util.Pair;
+import net.tomp2p.peers.PeerAddress;
 import network.elrond.Application;
 import network.elrond.account.AccountAddress;
 import network.elrond.account.AccountState;
 import network.elrond.application.AppState;
+import network.elrond.crypto.PublicKey;
 import network.elrond.p2p.*;
 import network.elrond.processor.AppTask;
 import network.elrond.processor.impl.AbstractChannelTask;
@@ -34,7 +37,14 @@ public class P2PRequestObjectStarterProcessor implements AppTask {
             } catch (IOException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
+        });
 
+        state.addChanel(channel);
+
+        channel = AppServiceProvider.getP2PRequestService().createChannel(connection, shard, P2PRequestChannelName.PUBLIC_KEY);
+        channel.setHandler((P2PRequestObjectHandler<Pair<PeerAddress, byte[]>>) request -> {
+            Pair<PeerAddress, byte[]> pair = new Pair(state.getConnection().getPeer().peerAddress(), state.getPublicKey().getValue());
+            return pair;
         });
 
         state.addChanel(channel);

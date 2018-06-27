@@ -51,6 +51,4 @@ public abstract class AbstractChannelTask<T> implements AppTask {
     protected abstract void process(T object, Application application);
 
     protected abstract P2PChannelName getChannelName();
-
-
 }

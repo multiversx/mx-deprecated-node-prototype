@@ -1,14 +1,11 @@
 package network.elrond.processor;
 
-import network.elrond.processor.impl.executor.BlockAssemblyProcessor;
+import network.elrond.processor.impl.executor.ConsensusProcessor;
 import network.elrond.processor.impl.executor.BootstrapBlockTask;
 import network.elrond.processor.impl.executor.ChronologyBlockTask;
 import network.elrond.processor.impl.executor.SynchronizationBlockTask;
 import network.elrond.processor.impl.initialization.*;
-import network.elrond.processor.impl.interceptor.P2PBlocksInterceptorProcessor;
-import network.elrond.processor.impl.interceptor.P2PReceiptInterceptorProcessor;
-import network.elrond.processor.impl.interceptor.P2PTransactionsInterceptorProcessor;
-import network.elrond.processor.impl.interceptor.P2PXTransactionsInterceptorProcessor;
+import network.elrond.processor.impl.interceptor.*;
 
 
 public class AppTasks {
@@ -42,11 +39,16 @@ public class AppTasks {
         new P2PReceiptInterceptorProcessor().process(application);
     };
 
+
+    public static AppTask INTERCEPT_CONSENSUS = (application) -> {
+        new P2PConsensusInterceptorProcessor().process(application);
+    };
+
     /**
      * P2P transactions broadcast
      */
     public static AppTask BLOCK_ASSEMBLY_PROCESSOR = (application) -> {
-        new BlockAssemblyProcessor().process(application);
+        new ConsensusProcessor().process(application);
     };
 
 

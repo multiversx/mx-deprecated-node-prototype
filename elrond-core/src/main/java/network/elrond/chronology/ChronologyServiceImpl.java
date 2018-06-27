@@ -28,10 +28,8 @@ public class ChronologyServiceImpl implements ChronologyService {
     }
 
     public void setReferenceRound(long referenceRoundTimestamp, long referenceRoundIndex) {
-        if (this.referenceRoundIndex == -1) {
-            this.referenceRoundTimestamp = referenceRoundTimestamp;
-            this.referenceRoundIndex = referenceRoundIndex;
-        }
+        this.referenceRoundTimestamp = referenceRoundTimestamp;
+        this.referenceRoundIndex = referenceRoundIndex;
     }
 
     public boolean isDateTimeInRound(Round round, long timeStamp) throws IllegalArgumentException {
@@ -40,15 +38,25 @@ public class ChronologyServiceImpl implements ChronologyService {
         return ((round.getStartTimeStamp() <= timeStamp) && (timeStamp < round.getStartTimeStamp() + roundTimeDuration));
     }
 
-    public Round getRoundFromDateTime(long genesisRoundTimeStamp, long timeStamp) throws IllegalArgumentException {
-        logger.traceEntry("params: {} {}", genesisRoundTimeStamp, timeStamp);
-        long delta = timeStamp - genesisRoundTimeStamp;
+    public Round getRoundFromDateTime(long timeStamp) throws IllegalArgumentException {
+        logger.traceEntry("params:{}", timeStamp);
+        Round r;
+        Util.check(timeStamp >= referenceRoundTimestamp, "referenceRoundTimestamp should be lower or equal to dateMillis!");
 
-        Util.check(timeStamp >= genesisRoundTimeStamp, "genesisRoundTimeStamp should be lower or equal to dateMillis!");
+        if (referenceRoundIndex != -1) {
+            long delta = timeStamp - referenceRoundTimestamp;
 
-        Round r = new Round();
-        r.setIndex(delta / roundTimeDuration);
-        r.setStartTimeStamp(genesisRoundTimeStamp + r.getIndex() * roundTimeDuration);
+            r = new Round();
+            r.setIndex((delta / roundTimeDuration) + referenceRoundIndex);
+            r.setStartTimeStamp(referenceRoundTimestamp + (r.getIndex() - referenceRoundIndex) * roundTimeDuration);
+        } else {
+            // in case referenceRoundTimestamp not yet set
+            r = new Round();
+            r.setStartTimeStamp(timeStamp);
+            r.setIndex(0);
+            referenceRoundTimestamp = timeStamp;
+            referenceRoundIndex = 0;
+        }
 
         return logger.traceExit(r);
     }

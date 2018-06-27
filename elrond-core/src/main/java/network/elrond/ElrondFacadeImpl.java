@@ -23,6 +23,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
@@ -76,13 +77,10 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
         if (ObjectUtil.isEqual(addressShard, currentShard)) {
             try {
-
                 Accounts accounts = state.getAccounts();
-
                 AccountState account = AppServiceProvider.getAccountStateService().getAccountState(address, accounts);
 
                 return logger.traceExit((account == null) ? BigInteger.ZERO : account.getBalance());
-
             } catch (Exception ex) {
                 logger.throwing(ex);
                 return logger.traceExit((BigInteger) null);
@@ -90,18 +88,16 @@ public class ElrondFacadeImpl implements ElrondFacade {
         }
 
         try {
-
             P2PRequestChannel channel = state.getChanel(P2PRequestChannelName.ACCOUNT);
-            AccountState account = AppServiceProvider.getP2PRequestService().get(channel, addressShard, P2PRequestChannelName.ACCOUNT, address);
+            // TODO: maybe check consensus on value among resulted elements
+            ArrayList resultList = AppServiceProvider.getP2PRequestService().get(channel, addressShard, P2PRequestChannelName.ACCOUNT, address);
+            AccountState account = (resultList.size() > 0) ? (AccountState) resultList.get(0) : null;
 
             return logger.traceExit((account == null) ? BigInteger.ZERO : account.getBalance());
-
         } catch (Exception ex) {
             logger.throwing(ex);
             return logger.traceExit((BigInteger) null);
         }
-
-
     }
 
     @Override

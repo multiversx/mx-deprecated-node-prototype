@@ -21,14 +21,15 @@ import org.apache.logging.log4j.Logger;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * Collect new transactions and put them into new block
  */
-public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
-    private static final Logger logger = LogManager.getLogger(BlockAssemblyProcessor.class);
+public class ConsensusProcessor extends AbstractChannelTask<String> {
+    private static final Logger logger = LogManager.getLogger(ConsensusProcessor.class);
+    // TODO: take the number of blocks to check from a config file
+    private final int blocksToCheck = 5;
 
     @Override
     protected P2PChannelName getChannelName() {
@@ -44,14 +45,20 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         Shard shard = state.getShard();
 
         removeProcessedTransactions(queue, application);
+        AppShardingManager appManager = AppShardingManager.instance();
 
-        boolean isLeaderInShard = AppShardingManager.instance().isLeaderInShard(state);
-        if (!isLeaderInShard) {
-            logger.info("Node is not leader in shard {}", shard);
+        appManager.calculateAndSetRole(state);
+
+        logger.info("is node leader: {} or validator: {}", appManager.isLeader(), appManager.isValidator());
+
+        boolean notPartOfConsensus = !(appManager.isLeader() || appManager.isValidator());
+
+        if (!appManager.isLeader()/*notPartOfConsensus*/) {
+            logger.info("Node is not part of consensus in shard {}", shard);
             return;
         }
 
-        logger.info("Node is leader in shard {}", shard);
+        logger.info("Node is part of consensus in shard {} as {}", shard, appManager.isLeader() ? "leader" : "validator");
 
         if (state.isLock()) {
             // If sync is running stop
@@ -69,7 +76,11 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         TimeWatch watch = TimeWatch.start();
 
         state.setLock();
-        proposeBlock(queue, application);
+        if (appManager.isLeader()) {
+            leaderProcess(queue, application);
+        } else {
+            validatorProcess(application);
+        }
         state.clearLock();
 
 
@@ -80,12 +91,39 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         logger.traceExit();
     }
 
+    private boolean validatorProcess(Application application) {
+        logger.traceEntry("params: {}", application);
+
+//        ExecutorService executor = Executors.newSingleThreadExecutor();
+//
+//
+//        Future future;// = executor.submit(new )
+//
+//        try {
+//            // Commitment HASH
+//            future.get(10000, TimeUnit.MILLISECONDS);
+//        } catch (InterruptedException | ExecutionException | TimeoutException ex) {
+//            future.cancel(true);
+//            logger.catching(ex);
+//        }
+
+        // subscribe to consensus channel
+        return logger.traceExit(true);
+    }
+
+    private boolean leaderProcess(ArrayBlockingQueue queue, Application application) {
+        proposeBlock(queue, application);
+
+        // subscribe to consensus channel
+
+        return true;
+    }
+
 
     private void proposeBlock(ArrayBlockingQueue<String> queue, Application application) {
         logger.traceEntry("params: {} {}", queue, application);
 
         AppState state = application.getState();
-
         List<String> hashes = new ArrayList<>(queue);
         queue.clear();
 
@@ -113,9 +151,8 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         try {
             localBlockIndex = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.LOCAL, blockchain);
 
-            // TODO: take the number of blocks to check from a config file
-            BigInteger earliestBlockToCheck = (localBlockIndex.subtract(BigInteger.valueOf(50)).compareTo(BigInteger.ZERO) < 0) ?
-                    BigInteger.ZERO : localBlockIndex.subtract(BigInteger.valueOf(50));
+            BigInteger earliestBlockToCheck = (localBlockIndex.subtract(BigInteger.valueOf(blocksToCheck)).compareTo(BigInteger.ZERO) < 0) ?
+                    BigInteger.ZERO : localBlockIndex.subtract(BigInteger.valueOf(blocksToCheck));
 
             for (BigInteger i = localBlockIndex; i.compareTo(earliestBlockToCheck) >= 0; i = i.subtract(BigInteger.ONE)) {
                 lastBlockHashes.add(AppServiceProvider.getBootstrapService().getBlockHashFromIndex(i, blockchain));

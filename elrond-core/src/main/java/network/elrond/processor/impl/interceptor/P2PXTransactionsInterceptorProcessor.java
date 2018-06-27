@@ -28,13 +28,10 @@ public class P2PXTransactionsInterceptorProcessor extends AbstractChannelTask<Tr
     protected void process(Transaction transaction, Application application) {
         logger.traceEntry("params: {} {}", transaction, application);
         AppState state = application.getState();
-        Blockchain blockchain = state.getBlockchain();
-        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
-
         try {
 
-
-            boolean isLeaderInShard = AppShardingManager.instance().isLeaderInShard(state);
+            AppShardingManager.instance().calculateAndSetRole(state);
+            boolean isLeaderInShard = AppShardingManager.instance().isLeader();
             if (!isLeaderInShard) {
                 return;
             }

@@ -8,7 +8,7 @@ public interface ChronologyService {
 
     boolean isDateTimeInRound(Round round, long timeStamp) throws IllegalArgumentException;
 
-    Round getRoundFromDateTime(long genesisRoundTimeStamp, long timeStamp) throws IllegalArgumentException;
+    Round getRoundFromDateTime(long timeStamp) throws IllegalArgumentException;
 
     long getSynchronizedTime();
 
@@ -17,5 +17,7 @@ public interface ChronologyService {
     void setNtpClient(NTPClient ntpClient);
 
     NTPClient getNtpClient();
+
+    void setReferenceRound(long referenceRoundTimestamp, long referenceRoundIndex);
 
 }

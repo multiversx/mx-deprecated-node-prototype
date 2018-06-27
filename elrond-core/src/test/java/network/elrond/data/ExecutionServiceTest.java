@@ -77,7 +77,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         addressReceiver = Util.getAddressFromPublicKey(publicKeyReceiver.getValue());
         accountsSandbox = initAccounts(accountsSandbox, publicKeysWallets, publicKeyMint, mintValue);
 
-        Shard senderShard= AppServiceProvider.getShardingService().getShard(addressSender.getBytes());
+        Shard senderShard = AppServiceProvider.getShardingService().getShard(addressSender.getBytes());
         Shard receiverShard = AppServiceProvider.getShardingService().getShard(addressReceiver.getBytes());
 
 
@@ -237,7 +237,8 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         //timestamp and round information
         long crtTimeStamp = System.currentTimeMillis();
         block.setTimestamp(crtTimeStamp);
-        block.setRoundIndex(AppServiceProvider.getChronologyService().getRoundFromDateTime(blockchain.getGenesisBlock().getTimestamp(), crtTimeStamp).getIndex());
+        AppServiceProvider.getChronologyService().setReferenceRound(blockchain.getGenesisBlock().getTimestamp(), 0);
+        block.setRoundIndex(AppServiceProvider.getChronologyService().getRoundFromDateTime(crtTimeStamp).getIndex());
 
         // get new block hash
         blockHash = serializationService.getHash(block);

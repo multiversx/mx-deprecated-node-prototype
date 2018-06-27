@@ -8,10 +8,7 @@ import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainServiceImpl;
 import network.elrond.chronology.ChronologyService;
 import network.elrond.chronology.ChronologyServiceImpl;
-import network.elrond.consensus.SPoSService;
-import network.elrond.consensus.SPoSServiceImpl;
-import network.elrond.consensus.ValidatorService;
-import network.elrond.consensus.ValidatorServiceImpl;
+import network.elrond.consensus.*;
 import network.elrond.crypto.*;
 import network.elrond.data.*;
 import network.elrond.p2p.*;
@@ -60,6 +57,7 @@ public class AppServiceProvider {
         putService(ShardingService.class, new ShardingServiceImpl());
         putService(P2PConnectionService.class, new P2PConnectionServiceImpl());
         putService(P2PRequestService.class, new P2PRequestServiceImpl());
+        putService(ConsensusService.class, new ConsensusServiceImpl());
     }
 
     public static P2PBroadcastService getP2PBroadcastService() {
@@ -132,5 +130,9 @@ public class AppServiceProvider {
 
     public static ChronologyService getChronologyService() {
         return getService(ChronologyService.class);
+    }
+
+    public static ConsensusService getConsensusService() {
+        return getService(ConsensusService.class);
     }
 }

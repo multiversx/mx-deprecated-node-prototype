@@ -15,13 +15,15 @@ public class ChronologyServiceTest {
     @Test(expected = IllegalArgumentException.class)
     public void testGetRoundFromDateTimeBadConfigShouldThrowException() {
         ChronologyService chronologyService = new ChronologyServiceImpl(0);
-        chronologyService.getRoundFromDateTime(0, 0);
+        chronologyService.setReferenceRound(0, 0);
+        chronologyService.getRoundFromDateTime(0);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testGetRoundFromDateTimeShouldThrowExceptionOnBadArguments() {
         ChronologyService chronologyService = new ChronologyServiceImpl(4000);
-        chronologyService.getRoundFromDateTime(10000, 9999);
+        chronologyService.setReferenceRound(10000, 0);
+        chronologyService.getRoundFromDateTime(9999);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -48,38 +50,44 @@ public class ChronologyServiceTest {
     @Test
     public void testGetRoundFromDateTime() {
         ChronologyService chronologyService = new ChronologyServiceImpl(4000);
-
-        Round r = chronologyService.getRoundFromDateTime(10000, 10000);
+        chronologyService.setReferenceRound(10000, 0);
+        Round r = chronologyService.getRoundFromDateTime(10000);
 
         TestCase.assertEquals(0, r.getIndex());
         TestCase.assertEquals(10000, r.getStartTimeStamp());
 
-        r = chronologyService.getRoundFromDateTime(10001, 10002);
+        chronologyService.setReferenceRound(10001, 0);
+        r = chronologyService.getRoundFromDateTime(10002);
 
         TestCase.assertEquals(0, r.getIndex());
         TestCase.assertEquals(10001, r.getStartTimeStamp());
 
-        r = chronologyService.getRoundFromDateTime(10001, 13002);
+        chronologyService.setReferenceRound(10001, 0);
+        r = chronologyService.getRoundFromDateTime( 13002);
 
         TestCase.assertEquals(0, r.getIndex());
         TestCase.assertEquals(10001, r.getStartTimeStamp());
 
-        r = chronologyService.getRoundFromDateTime(10001, 14000);
+        chronologyService.setReferenceRound(10001, 0);
+        r = chronologyService.getRoundFromDateTime( 14000);
 
         TestCase.assertEquals(0, r.getIndex());
         TestCase.assertEquals(10001, r.getStartTimeStamp());
 
-        r = chronologyService.getRoundFromDateTime(10001, 14001);
+        chronologyService.setReferenceRound(10001, 0);
+        r = chronologyService.getRoundFromDateTime(14001);
 
         TestCase.assertEquals(1, r.getIndex());
         TestCase.assertEquals(14001, r.getStartTimeStamp());
 
-        r = chronologyService.getRoundFromDateTime(10001, 18000);
+        chronologyService.setReferenceRound(10001, 0);
+        r = chronologyService.getRoundFromDateTime(18000);
 
         TestCase.assertEquals(1, r.getIndex());
         TestCase.assertEquals(14001, r.getStartTimeStamp());
 
-        r = chronologyService.getRoundFromDateTime(10001, 18001);
+        chronologyService.setReferenceRound(10001, 0);
+        r = chronologyService.getRoundFromDateTime(18001);
 
         TestCase.assertEquals(2, r.getIndex());
         TestCase.assertEquals(18001, r.getStartTimeStamp());

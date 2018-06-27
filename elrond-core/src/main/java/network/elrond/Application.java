@@ -86,7 +86,6 @@ public class Application implements Serializable {
         AppTasks.INIT_REQUEST_OBJECT.process(this);
 
 
-
         logger.trace("Intercept P2P transactions...");
         AppTasks.INTERCEPT_TRANSACTIONS.process(this);
 
@@ -99,8 +98,8 @@ public class Application implements Serializable {
         logger.trace("Intercept P2P blocks...");
         AppTasks.INTERCEPT_BLOCKS.process(this);
 
-
-
+        logger.trace("Intercept Consensus messages...");
+        AppTasks.INTERCEPT_CONSENSUS.process(this);
 
 
         logger.trace("Starting bootstrapping processor...");
@@ -114,7 +113,7 @@ public class Application implements Serializable {
 
         logger.trace("Init NTP client...");
         AppTasks.NTP_CLIENT_INITIALIZER.process(this);
-        
+
         logger.trace("Start chronology processor...");
         AppTasks.CHRONOLOGY.process(this);
     }
