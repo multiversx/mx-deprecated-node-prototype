@@ -10,6 +10,7 @@ import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.chronology.ChronologyService;
 import network.elrond.chronology.NTPClient;
 import network.elrond.chronology.Round;
+import network.elrond.chronology.RoundState;
 import network.elrond.core.AsciiTableUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.*;
@@ -26,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -40,7 +40,7 @@ public class AppBlockManager {
         return instance;
     }
 
-    public Block generateAndBroadcastBlock(ArrayBlockingQueue<String> queue, PrivateKey privateKey, AppState state) {
+    public Block generateAndBroadcastBlock(List<String> queue, PrivateKey privateKey, AppState state) {
         logger.traceEntry("params: {} {} {}", queue, privateKey, state);
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();
@@ -62,40 +62,35 @@ public class AppBlockManager {
             ExecutionService executionService = AppServiceProvider.getExecutionService();
             ExecutionReport result = executionService.processBlock(block, accounts, blockchain);
 
-            List<String> acceptedTransactions = block.getListTXHashes().stream()
+            if (result.isOk()) {
+                removeAlreadyProcessedTransactionsFromPool(state, block);
+
+                List<String> acceptedTransactions = block.getListTXHashes().stream()
                     .map(bytes -> new String(Base64.encode(bytes)))
                     .collect(Collectors.toList());
 
-            List<Transaction> blockTransactions = AppServiceProvider.getBlockchainService()
+                List<Transaction> blockTransactions = AppServiceProvider.getBlockchainService()
                     .getAll(acceptedTransactions,
                             blockchain,
                             BlockchainUnitType.TRANSACTION);
-            blockTransactions.stream()
+                blockTransactions.stream()
                     .filter(transaction -> transaction.isCrossShardTransaction())
                     .forEach(transaction -> {
                         P2PBroadcastChanel channel = state.getChanel(P2PChannelName.XTRANSACTION);
                         AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, transaction);
                     });
 
-
-            if (result.isOk()) {
                 String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
                 AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
 
-                List<String> txHashes = new ArrayList<>();
-                for (Receipt receipt : receipts) {
-                    // add the blockHash to the receipt as the valid hash is only available after signing
-                    receipt.setBlockHash(hashBlock);
-                    sendReceipt(block, receipt, state);
-                    txHashes.add(receipt.getTransactionHash());
-                }
 
-                queue.removeAll(txHashes);
+                sendReceipts(state, block, receipts);
+
 
                 logger.info("New block proposed with hash {}", hashBlock);
 
                 logger.info("\n" + block.print().render());
-                logger.info("\n" + AsciiTableUtil.listToTables(transactions));
+                //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
                 logger.info("\n" + AsciiTableUtil.listToTables(accounts.getAddresses()
                         .stream()
                         .map(accountAddress -> {
@@ -114,6 +109,25 @@ public class AppBlockManager {
         }
 
         return logger.traceExit((Block) null);
+    }
+
+    private void sendReceipts(AppState state, Block block, List<Receipt> receipts) throws IOException {
+        Thread threadSend = new Thread(() -> {
+            String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
+            List<String> txHashes = new ArrayList<>();
+            for (Receipt receipt : receipts) {
+                // add the blockHash to the receipt as the valid hash is only available after signing
+                receipt.setBlockHash(hashBlock);
+
+                try {
+                    sendReceipt(block, receipt, state);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                txHashes.add(receipt.getTransactionHash());
+            }
+        });
+        threadSend.start();
     }
 
     public Pair<Block, List<Receipt>> composeBlock(List<Transaction> transactions, AppState state) throws
@@ -187,7 +201,11 @@ public class AppBlockManager {
             logger.trace("added transaction {} in block", txHash);
             block.getListTXHashes().add(txHash);
 
-            if (tw.time(TimeUnit.MILLISECONDS) > 1000) {
+            //test whether the system should continue to add transactions or not
+            boolean forceFinishAddingTransactions = !AppServiceProvider.getChronologyService().isStillInRoundState(state.getNtpClient(), state.getBlockchain().getGenesisBlock().getTimestamp(),
+                    block.getRoundIndex(), RoundState.PROPOSE_BLOCK);
+            if (forceFinishAddingTransactions){
+                logger.debug("Force exit from add transactions method. Transactions added: {}", block.getListTXHashes().size());
                 break;
             }
         }
@@ -348,5 +366,21 @@ public class AppBlockManager {
         block.setCommitment(aggregatedCommitment);
         logger.trace("placed signature data on block!");
         logger.traceExit();
+    }
+
+    public void removeAlreadyProcessedTransactionsFromPool(AppState state, Block block){
+        Util.check(state != null, "state != null");
+        Util.check(block != null, "block != null");
+
+        List<String> toBeRemoved = block.getListTXHashes().stream()
+                .filter(Objects::nonNull)
+                .map(transactionHash -> Util.byteArrayToHexString(transactionHash))
+                .collect(Collectors.toList());
+
+        ArrayBlockingQueue<String> transactionPool = state.getTransactionPool();
+        transactionPool.removeAll(toBeRemoved);
+
+        logger.debug("Removed {} transactions from pool, remaining: {}", toBeRemoved.size(),  transactionPool.size());
+
     }
 }

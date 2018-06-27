@@ -7,6 +7,7 @@ import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.benchmark.BenchmarkResult;
 import network.elrond.benchmark.MultipleTransactionResult;
+import network.elrond.benchmark.StatisticsManager;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.ObjectUtil;
@@ -238,12 +239,14 @@ public class ElrondFacadeImpl implements ElrondFacade {
     public BenchmarkResult getBenchmarkResult(String benchmarkId, Application application) {
         BenchmarkResult benchmarkResult = new BenchmarkResult();
         benchmarkResult.setActiveNodes(10);
-        benchmarkResult.setAverageRoundTime(application.getStatisticsManager().getAverageRoundTime());
-        benchmarkResult.setLiveNrTransactionsPerBlock(application.getStatisticsManager().getCurrentStatistic().getNrTransactionsInBlock());
-        benchmarkResult.setAverageNrTxPerBlock(application.getStatisticsManager().getAverageNrTransactionsInBlock());
-        benchmarkResult.setAverageTps(application.getStatisticsManager().getAverageTps());
-        benchmarkResult.setLiveTps(application.getStatisticsManager().getCurrentStatistic().getTps());
-        benchmarkResult.setPeakTps(application.getStatisticsManager().getMaxTps());
+        StatisticsManager statisticsManager = application.getState().getStatisticsManager();
+
+        benchmarkResult.setAverageRoundTime(statisticsManager.getAverageRoundTime());
+        //benchmarkResult.setLiveNrTransactionsPerBlock(statisticsManager.getNrTransactionsInBlock());
+        benchmarkResult.setAverageNrTxPerBlock(statisticsManager.getAverageNrTransactionsInBlock());
+        benchmarkResult.setAverageTps(statisticsManager.getAverageTps());
+        benchmarkResult.setLiveTps(statisticsManager.getCurrentStatistic().getTps());
+        benchmarkResult.setPeakTps(statisticsManager.getMaxTps());
         benchmarkResult.setNrShards(2);
         return benchmarkResult;
     }

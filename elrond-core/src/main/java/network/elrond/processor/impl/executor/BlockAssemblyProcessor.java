@@ -55,12 +55,6 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
 
         logger.info("Node is leader in shard {}", shard);
 
-        if (state.isLock()) {
-            // If sync is running stop
-            logger.info("Can't execute, state locked!");
-            return;
-        }
-
         if (state.getBlockchain().getCurrentBlock() == null) {
             // Require synchronize
             logger.info("Can't execute, synchronize required!");
@@ -70,13 +64,12 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
 
         TimeWatch watch = TimeWatch.start();
         int size = 0;
-        state.setLock();
-        Block block = proposeBlock(queue, application);
-        if (block != null && block.getListTXHashes() != null) {
-            size = block.getListTXHashes().size();
+        synchronized (state.lockerSyncPropose) {
+            Block block = proposeBlock(queue, application);
+            if (block != null && block.getListTXHashes() != null) {
+                size = block.getListTXHashes().size();
+            }
         }
-
-        state.clearLock();
 
         long time = watch.time(TimeUnit.MILLISECONDS);
         long tps = (time > 0) ? ((size * 1000) / time) : 0;
@@ -87,7 +80,7 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         stats.setTps(tps);
         stats.setCurrentTimeMillis(System.currentTimeMillis());
 
-        application.getStatisticsManager().addStatistic(stats);
+        state.getStatisticsManager().addStatistic(stats);
 
         logger.traceExit();
     }
@@ -102,7 +95,7 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         AppContext context = application.getContext();
         PrivateKey privateKey = context.getPrivateKey();
 
-        Block block = AppBlockManager.instance().generateAndBroadcastBlock(queue, privateKey, state);
+        Block block = AppBlockManager.instance().generateAndBroadcastBlock(new ArrayList<>(queue), privateKey, state);
 
         return logger.traceExit(block);
     }

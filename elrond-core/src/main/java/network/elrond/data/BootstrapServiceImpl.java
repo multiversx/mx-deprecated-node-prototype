@@ -1,5 +1,6 @@
 package network.elrond.data;
 
+import net.tomp2p.dht.FuturePut;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
@@ -8,6 +9,7 @@ import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.blockchain.SettingsType;
 import network.elrond.chronology.NTPClient;
 import network.elrond.core.Util;
+import network.elrond.p2p.P2PConnection;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -105,13 +107,19 @@ public class BootstrapServiceImpl implements BootstrapService {
         ExecutionReport result = new ExecutionReport();
 
         try {
+            // Put index <=> hash mapping only on DHT
+            P2PConnection connection = blockchain.getConnection();
+            String blockNonce = block.getNonce().toString();
+            FuturePut futurePut = AppServiceProvider.getP2PObjectService().put(connection, blockNonce, blockHash, true, true);
+            if (!futurePut.isSuccess()){
+                result.combine(new ExecutionReport().ko("Not allowed to override block index " + blockNonce));
+                return result;
+            }
+            logger.trace("stored block index {}", block.getNonce());
+
             AppServiceProvider.getBlockchainService().put(blockHash, block, blockchain, BlockchainUnitType.BLOCK);
             setBlockHashWithIndex(block.getNonce(), blockHash, blockchain);
             logger.trace("stored block {}", blockHash);
-
-            // Put index <=> hash mapping
-            AppServiceProvider.getBlockchainService().put(block.getNonce(), blockHash, blockchain, BlockchainUnitType.BLOCK_INDEX);
-            logger.trace("stored block index {}", block.getNonce());
 
             // Update max index
             setCurrentBlockIndex(LocationType.BOTH, block.getNonce(), blockchain);
@@ -238,7 +246,9 @@ public class BootstrapServiceImpl implements BootstrapService {
 
                 commitBlock(block, blockHash, blockchain);
                 commitBlockTransactions(block, blockchain);
-
+                // Update current block
+                blockchain.setCurrentBlock(block);
+                logger.trace("done updating current block");
 
             } catch (Exception ex) {
                 result.ko(ex);
@@ -301,9 +311,15 @@ public class BootstrapServiceImpl implements BootstrapService {
                     return logger.traceExit(result);
                 }
 
+                AppBlockManager.instance().removeAlreadyProcessedTransactionsFromPool(state, block);
+
                 result.ok("Added block in blockchain : " + blockHash + " # " + block);
                 blockchain.setCurrentBlockIndex(blockIndex);
                 blockchain.setCurrentBlock(block);
+
+                // Update current block
+                blockchain.setCurrentBlock(block);
+                logger.trace("done updating current block");
 
 
             } catch (Exception ex) {
@@ -315,6 +331,20 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         logger.trace("Synchronized was SUCCESSFUL!");
         return logger.traceExit(result);
+    }
+
+    @Override
+    public SyncState getSyncState(Blockchain blockchain) throws Exception{
+        SyncState syncState = new SyncState();
+
+        syncState.setRemoteBlockIndex(AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.NETWORK, blockchain));
+        syncState.setLocalBlockIndex(AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.LOCAL, blockchain));
+
+        boolean isBlocAvailable = syncState.getRemoteBlockIndex().compareTo(BigInteger.ZERO) >= 0;
+        boolean isNewBlockRemote = syncState.getRemoteBlockIndex().compareTo(syncState.getLocalBlockIndex()) > 0;
+        syncState.setSyncRequired(isBlocAvailable && isNewBlockRemote);
+
+        return(syncState);
     }
 
 

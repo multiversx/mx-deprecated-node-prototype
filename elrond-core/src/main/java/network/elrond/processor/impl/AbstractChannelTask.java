@@ -26,7 +26,7 @@ public abstract class AbstractChannelTask<T> implements AppTask {
                     logger.trace("processing...");
                     process(queue, application);
                     logger.trace("waiting...");
-                    ThreadUtil.sleep(500);
+                    ThreadUtil.sleep(getWaitingTime());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -52,5 +52,7 @@ public abstract class AbstractChannelTask<T> implements AppTask {
 
     protected abstract P2PChannelName getChannelName();
 
-
+    protected int getWaitingTime(){
+        return 500;
+    }
 }

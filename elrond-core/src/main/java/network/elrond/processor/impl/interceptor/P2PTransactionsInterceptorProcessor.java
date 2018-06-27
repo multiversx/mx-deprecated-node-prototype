@@ -31,6 +31,7 @@ public class P2PTransactionsInterceptorProcessor extends AbstractChannelTask<Str
 
             // This will retrieve transaction from network if required
             Transaction transaction = blockchainService.get(hash, blockchain, BlockchainUnitType.TRANSACTION);
+            state.addTransactionToPool(hash);
 
             if (transaction == null) {
                 logger.info("Transaction with hash {} was not found!", hash);
@@ -43,5 +44,10 @@ public class P2PTransactionsInterceptorProcessor extends AbstractChannelTask<Str
         }
 
         logger.traceExit();
+    }
+
+    @Override
+    protected int getWaitingTime() {
+        return 100;
     }
 }

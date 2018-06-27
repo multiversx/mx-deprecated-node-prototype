@@ -30,4 +30,5 @@ public interface BootstrapService {
 
     ExecutionReport commitTransaction(Transaction transaction, String transactionHash, Blockchain blockchain);
 
+    SyncState getSyncState(Blockchain blockchain) throws Exception;
 }

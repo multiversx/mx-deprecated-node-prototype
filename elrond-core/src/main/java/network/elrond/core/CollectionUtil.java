@@ -33,5 +33,9 @@ public class CollectionUtil {
 
     }
 
+    public static <E> boolean isEmpty(Collection<E> collection) {
+        return size(collection) == 0;
+    }
+
 
 }

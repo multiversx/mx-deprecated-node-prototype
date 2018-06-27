@@ -56,5 +56,4 @@ public class AppP2PManager {
         return logger.traceExit(queue);
     }
 
-
 }

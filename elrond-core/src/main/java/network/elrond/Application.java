@@ -2,7 +2,6 @@ package network.elrond;
 
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
-import network.elrond.benchmark.StatisticsManager;
 import network.elrond.processor.AppTasks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,8 +17,6 @@ public class Application implements Serializable {
     private AppContext context;
 
     private AppState state = new AppState();
-
-    private StatisticsManager statisticsManager = new StatisticsManager();
 
     public Application(AppContext context) {
         logger.traceEntry("params: {}", context);
@@ -70,55 +67,57 @@ public class Application implements Serializable {
     public void start() throws IOException {
         logger.traceEntry();
 
-        logger.trace("Starting private-public keys processor...");
+        logger.debug("Starting private-public keys processor...");
         AppTasks.INITIALIZE_PUBLIC_PRIVATE_KEYS.process(this);
 
-        logger.trace("Starting sharding...");
+        logger.debug("Starting sharding...");
         AppTasks.INIT_SHARDING.process(this);
 
-        logger.trace("Starting P2P communications...");
+        logger.debug("Starting P2P communications...");
         AppTasks.INIT_P2P_CONNECTION.process(this);
 
-        logger.trace("Starting blockchain...");
+        logger.debug("Starting blockchain...");
         AppTasks.INIT_BLOCKCHAIN.process(this);
 
-        logger.trace("Starting accounts...");
+        logger.debug("Starting accounts...");
         AppTasks.INIT_ACCOUNTS.process(this);
 
-        logger.trace("Starting obect request mechanism...");
+        logger.debug("Starting obect request mechanism...");
         AppTasks.INIT_REQUEST_OBJECT.process(this);
 
 
 
-        logger.trace("Intercept P2P transactions...");
+
+        logger.debug("Intercept P2P transactions...");
         AppTasks.INTERCEPT_TRANSACTIONS.process(this);
 
-        logger.trace("Intercept P2P cross shard transactions...");
+        logger.debug("Intercept P2P cross shard transactions...");
         AppTasks.INTERCEPT_XTRANSACTIONS.process(this);
 
-        logger.trace("Intercept P2P receipts...");
+        logger.debug("Intercept P2P receipts...");
         AppTasks.INTERCEPT_RECEIPTS.process(this);
 
-        logger.trace("Intercept P2P blocks...");
+        logger.debug("Intercept P2P blocks...");
         AppTasks.INTERCEPT_BLOCKS.process(this);
 
 
 
 
 
-        logger.trace("Starting bootstrapping processor...");
+        logger.debug("Starting bootstrapping processor...");
         AppTasks.BLOCKCHAIN_BOOTSTRAP.process(this);
 
-        logger.trace("Starting blockchain synchronization...");
+        logger.debug("Starting blockchain synchronization...");
         AppTasks.BLOCKCHAIN_SYNCRONIZATION.process(this);
 
-        logger.trace("Execute transactions and emit blocks...");
-        AppTasks.BLOCK_ASSEMBLY_PROCESSOR.process(this);
+        //logger.debug("Execute transactions and emit blocks...");
+        //AppTasks.BLOCK_ASSEMBLY_PROCESSOR.process(this);
 
-        logger.trace("Init NTP client...");
+
+        logger.debug("Init NTP client...");
         AppTasks.NTP_CLIENT_INITIALIZER.process(this);
         
-        logger.trace("Start chronology processor...");
+        logger.debug("Start chronology processor...");
         AppTasks.CHRONOLOGY.process(this);
     }
 
@@ -137,8 +136,6 @@ public class Application implements Serializable {
 //        logger.traceExit();
 //    }
 
-    public StatisticsManager getStatisticsManager(){
-        return statisticsManager;
-    }
+
 
 }

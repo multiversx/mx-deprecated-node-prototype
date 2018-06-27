@@ -1,9 +1,10 @@
 package network.elrond.application;
 
-
 import network.elrond.account.Accounts;
+import network.elrond.benchmark.StatisticsManager;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.chronology.NTPClient;
+import network.elrond.consensus.ConsensusState;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
@@ -15,23 +16,30 @@ import org.apache.logging.log4j.Logger;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
 
 public class AppState implements Serializable {
 
     private boolean stillRunning = true;
-    private boolean lock = false;
     private Accounts accounts;
     private Blockchain blockchain;
     private PublicKey publicKey;
     private PrivateKey privateKey;
     private P2PConnection connection;
+    private NTPClient ntpClient;
+
     private Shard shard;
     private Map<P2PChannelName, P2PBroadcastChanel> broadcastChannels = new HashMap<>();
     private Map<P2PRequestChannelName, P2PRequestChannel> requestChannels = new HashMap<>();
 
-    private NTPClient ntpClient = null;
+    protected final ArrayBlockingQueue<String> transactionsPool = new ArrayBlockingQueue<>(50000, true);
+    private ConsensusState consensusState = new ConsensusState();
 
     private static final Logger logger = LogManager.getLogger(AppState.class);
+
+    public final Object lockerSyncPropose = new Object();
+
+    private StatisticsManager statisticsManager = new StatisticsManager();
 
     public P2PRequestChannel getChanel(P2PRequestChannelName channelName) {
         logger.traceEntry("params: {}", channelName);
@@ -45,7 +53,6 @@ public class AppState implements Serializable {
         this.requestChannels.put(requestChanel.getName(), requestChanel);
         logger.traceExit();
     }
-
 
     public P2PBroadcastChanel getChanel(P2PChannelName channelName) {
         logger.traceEntry("params: {}", channelName);
@@ -124,25 +131,16 @@ public class AppState implements Serializable {
         return publicKey;
     }
 
-
-    public synchronized boolean isLock() {
-        return lock;
-    }
-
-    public synchronized void setLock() {
-        this.lock = true;
-    }
-
-    public synchronized void clearLock() {
-        this.lock = false;
-    }
-
     public NTPClient getNtpClient() {
-        return (ntpClient);
+        return ntpClient;
     }
 
     public void setNtpClient(NTPClient ntpClient) {
         this.ntpClient = ntpClient;
+    }
+
+    public ConsensusState getConsensusState() {
+        return consensusState;
     }
 
     public Shard getShard() {
@@ -153,5 +151,15 @@ public class AppState implements Serializable {
         this.shard = shard;
     }
 
+    public ArrayBlockingQueue<String> getTransactionPool(){
+        return (transactionsPool);
+    }
 
+    public void addTransactionToPool(String hash){
+        transactionsPool.add(hash);
+    }
+
+    public StatisticsManager getStatisticsManager(){
+        return statisticsManager;
+    }
 }

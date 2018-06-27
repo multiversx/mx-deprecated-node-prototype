@@ -3,6 +3,7 @@ package network.elrond.p2p;
 import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.PeerDHT;
+import net.tomp2p.dht.PutBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
 import network.elrond.sharding.Shard;
@@ -18,7 +19,6 @@ public class P2PObjectServiceImpl implements P2PObjectService {
 
     @Override
     public <T> T get(P2PConnection connection, String key, Class<T> clazz) throws ClassNotFoundException, IOException {
-
         logger.traceEntry("params: {} {} {}", connection, key, clazz);
 
         PeerDHT peer = connection.getDht();
@@ -47,18 +47,32 @@ public class P2PObjectServiceImpl implements P2PObjectService {
 
     @Override
     public <T extends Serializable> FuturePut put(P2PConnection connection, String key, T value) throws IOException {
+        return put(connection, key, value, false, false);
+    }
+
+    @Override
+    public <T extends Serializable> FuturePut put(P2PConnection connection, String key, T value, boolean await, boolean override) throws IOException {
         logger.traceEntry("params: {} {} {}", connection, key, value);
         PeerDHT peer = connection.getDht();
 
         Number160 hash = getDHTHash(connection, key, value.getClass());
 
-        FuturePut fp = peer.put(hash).data(new Data(value)).start();
+        PutBuilder builder = peer.put(hash);
+        if (override){
+            builder.putIfAbsent();
+        }
+
+        FuturePut fp = builder.data(new Data(value)).start();
         logger.trace("Put object with key {}", key);
 
-        fp.awaitUninterruptibly();
+        if (await) {
+            logger.trace("awaiting");
+            fp.awaitUninterruptibly();
+        }
 
         return logger.traceExit(fp);
     }
+
 
     private <T> Number160 getDHTHash(P2PConnection connection, String key, Class<T> clazz) {
 

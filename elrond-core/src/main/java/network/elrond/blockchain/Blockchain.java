@@ -28,12 +28,13 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
 
     private static final Logger logger = LogManager.getLogger(Blockchain.class);
 
+
+
     public Blockchain(BlockchainContext context) throws IOException {
         Util.check(context != null, "context!=null");
         this.context = context;
 
         generatePersistenceUnitMap(context);
-
     }
 
     public void generatePersistenceUnitMap(BlockchainContext context) throws IOException {
@@ -118,6 +119,8 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
         }
         logger.traceExit();
     }
+
+
 
     @Override
     public String toString() {

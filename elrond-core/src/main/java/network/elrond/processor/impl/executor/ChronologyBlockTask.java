@@ -2,20 +2,18 @@ package network.elrond.processor.impl.executor;
 
 import network.elrond.Application;
 import network.elrond.application.AppState;
+import network.elrond.blockchain.Blockchain;
 import network.elrond.chronology.*;
 import network.elrond.core.EventHandler;
 import network.elrond.core.ThreadUtil;
+import network.elrond.core.Util;
+import network.elrond.data.SyncState;
 import network.elrond.processor.AppTask;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 public class ChronologyBlockTask implements AppTask {
-
-    public static Queue<EventHandler> MAIN_QUEUE = new ConcurrentLinkedQueue<>();
     private static final Logger logger = LogManager.getLogger(ChronologyBlockTask.class);
 
     private Round previousRound = null;
@@ -23,6 +21,13 @@ public class ChronologyBlockTask implements AppTask {
 
     @Override
     public void process(Application application) {
+        AppState state = application.getState();
+        Util.check(state != null, "state != null");
+        Util.check(state.getBlockchain() != null, "blockchain != null");
+
+        Blockchain blockchain = state.getBlockchain();
+        String nodeName = application.getContext().getNodeName();
+
         Thread thread = new Thread(() -> {
             logger.traceEntry();
             Round currentRound = null;
@@ -31,7 +36,6 @@ public class ChronologyBlockTask implements AppTask {
 
             long genesisTimeStampCached = Long.MIN_VALUE;
 
-            AppState state = application.getState();
             while (state.isStillRunning()) {
                 ThreadUtil.sleep(1);
 
@@ -39,8 +43,7 @@ public class ChronologyBlockTask implements AppTask {
                 if (genesisTimeStampCached == Long.MIN_VALUE) {
                     logger.trace("genesis timestamp is not initialized...");
 
-                    boolean isGenesisBlockAbsent = (application == null) || (application.getState() == null) ||
-                            (application.getState().getBlockchain() == null) || (application.getState().getBlockchain().getGenesisBlock() == null);
+                    boolean isGenesisBlockAbsent = blockchain.getGenesisBlock() == null;
 
                     if (isGenesisBlockAbsent) {
                         //Periodically (but not to often) push a log message
@@ -50,17 +53,29 @@ public class ChronologyBlockTask implements AppTask {
 
                         continue;
                     } else{
-                        genesisTimeStampCached = application.getState().getBlockchain().getGenesisBlock().getTimestamp();
-                        logger.trace(String.format("Cached genesis time stamp as: %d", genesisTimeStampCached));
+                        genesisTimeStampCached = state.getBlockchain().getGenesisBlock().getTimestamp();
+                        logger.trace("Cached genesis time stamp as: {}", genesisTimeStampCached);
                     }
                 }
 
-                long currentTimeStamp = chronologyService.getSynchronizedTime(state.getNtpClient());
+                try {
+                    SyncState syncState = AppServiceProvider.getBootstrapService().getSyncState(blockchain);
 
-                currentRound = chronologyService.getRoundFromDateTime(genesisTimeStampCached, currentTimeStamp);
+                    if (syncState.isSyncRequired()){
+                        continue;
+                    }
 
-                computeAndCallStartEndRounds(application, currentRound, currentTimeStamp);
-                computeAndCallRoundState(application, currentRound, currentTimeStamp);
+                    synchronized (state.lockerSyncPropose) {
+                        long globalTimeStamp = chronologyService.getSynchronizedTime(state.getNtpClient());
+
+                        currentRound = chronologyService.getRoundFromDateTime(genesisTimeStampCached, globalTimeStamp);
+
+                        computeAndCallStartEndRounds(application, currentRound, globalTimeStamp);
+                        computeAndCallRoundState(application, currentRound, globalTimeStamp);
+                    }
+                } catch (Exception ex){
+                    logger.catching(ex);
+                }
             }
 
             logger.traceExit();
@@ -68,7 +83,7 @@ public class ChronologyBlockTask implements AppTask {
         thread.start();
     }
 
-    private void computeAndCallStartEndRounds(Application application, Round currentRound, long referenceTimeStamp){
+    private void computeAndCallStartEndRounds(Application application, Round currentRound, long globalTimeStamp){
         boolean isFirstRoundTransition = (previousRound == null);
         boolean isRoundTransition = isFirstRoundTransition || (previousRound.getIndex() != currentRound.getIndex());
         boolean existsPreviousRound = (previousRound != null);
@@ -76,18 +91,20 @@ public class ChronologyBlockTask implements AppTask {
         if (isRoundTransition){
             logger.trace("round transition detected!");
             if (existsPreviousRound){
-                notifyEventObjects(application, previousRound, RoundState.END_ROUND, referenceTimeStamp);
+                notifyEventObjects(application, previousRound, RoundState.END_ROUND, globalTimeStamp);
             }
 
             //start new round
-            notifyEventObjects(application, currentRound, RoundState.START_ROUND, referenceTimeStamp);
+            notifyEventObjects(application, currentRound, RoundState.START_ROUND, globalTimeStamp);
         }
 
         previousRound = currentRound;
     }
 
-    private void computeAndCallRoundState(Application application, Round currentRound, long currentTime){
-        RoundState currentRoundState = AppServiceProvider.getChronologyService().computeRoundState(currentRound.getStartTimeStamp(), currentTime);
+    private void computeAndCallRoundState(Application application, Round currentRound, long globalTimeStamp){
+        long startTimeStamp = currentRound.getStartTimeStamp();
+
+        RoundState currentRoundState = AppServiceProvider.getChronologyService().computeRoundState(startTimeStamp, globalTimeStamp);
 
         boolean isCurrentRoundStateNotDefined = (currentRoundState == null);
 
@@ -100,31 +117,29 @@ public class ChronologyBlockTask implements AppTask {
 
         if (isRoundStateTransition) {
             logger.trace("round state transition detected!");
-            notifyEventObjects(application, currentRound, currentRoundState, currentTime);
+            notifyEventObjects(application, currentRound, currentRoundState, globalTimeStamp);
         }
 
         previousRoundState = currentRoundState;
     }
 
 
-    private void notifyEventObjects(Application application, Round round, RoundState roundState, long referenceTimeStamp){
+    private void notifyEventObjects(Application application, Round round, RoundState roundState, long globalTimeStamp){
         SubRound subRound = new SubRound();
         subRound.setRound(round);
         subRound.setRoundState(roundState);
-        subRound.setTimeStamp(referenceTimeStamp);
+        subRound.setTimeStamp(globalTimeStamp);
 
-        logger.trace("ChronologyBlockTask event {}, {}", round.toString(), roundState.toString());
+        AppState state= application.getState();
 
-        if (roundState.getEventHandler() != null){
+        logger.debug("notifyEventObjects event {}, {}, {}", round.toString(), roundState.toString(), globalTimeStamp);
+
+        EventHandler eventHandler = roundState.getEventHandler();
+        if (eventHandler != null){
             logger.trace("calling default event handler object (from enum)...");
-            roundState.getEventHandler().onEvent(application, this, subRound);
-        }
-
-        logger.trace("calling %d registered objects...", MAIN_QUEUE.size());
-        for (EventHandler eventHandler:MAIN_QUEUE){
-            eventHandler.onEvent(application,this, subRound);
+            eventHandler.onEvent(state, subRound);
+        } else {
+            logger.warn("{} does not have an associated event handler!", roundState);
         }
     }
-
-
 }

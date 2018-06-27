@@ -10,6 +10,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class AppShardingManager {
 
@@ -32,5 +35,18 @@ public class AppShardingManager {
         }
 
         return isSeedNode;
+    }
+
+    public List<String> getPeersOnShard(AppState state){
+        P2PBroadcastChanel chanel = state.getChanel(P2PChannelName.BLOCK);
+        return AppServiceProvider.getP2PBroadcastService().getPeersOnChannel(chanel)
+                .stream()
+                .filter(Objects::nonNull)
+                .map(peerAddress -> peerAddress.peerId().toString())
+                .collect(Collectors.toList());
+    }
+
+    public String getCurrentPeerID(AppState state){
+        return state.getConnection().getPeer().peerID().toString();
     }
 }

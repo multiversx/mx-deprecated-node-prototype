@@ -99,12 +99,6 @@ public class ExecutionServiceImpl implements ExecutionService {
         ArrayList<String> signers;
         String blockHash = serializationService.getHashString(block);
 
-        // check that block is not already processed
-//        if (blockchainService.contains(blockHash, blockchain, BlockchainUnitType.BLOCK)) {
-//            blockExecutionReport.ko("Block already in blockchain");
-//            return blockExecutionReport;
-//        }
-
         // check if previous block hash is in blockchain, otherwise can't add it yet
         // do the check only if nonce is not 0
         if (!block.getNonce().equals(BigInteger.ZERO) &&
@@ -172,14 +166,17 @@ public class ExecutionServiceImpl implements ExecutionService {
         if (blockExecutionReport.isOk()) {
             // check state merkle patricia trie root is the same with what was stored in block
             if (!Arrays.equals(block.getAppStateHash(), accounts.getAccountsPersistenceUnit().getRootHash())) {
-                blockExecutionReport.ko("Application state root hash does not match");
+                blockExecutionReport.ko(String.format("Application state root hash does not match. Generated: %s, block: %s",
+                        Util.getDataEncoded64(accounts.getAccountsPersistenceUnit().getRootHash()),
+                        Util.getDataEncoded64(block.getAppStateHash())));
                 AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
                 logger.trace("Block process FAILED!");
                 return logger.traceExit(blockExecutionReport);
             }
 
             AppServiceProvider.getAccountStateService().commitAccountStates(accounts);
-            blockExecutionReport.ok("Commit account state changes");
+            blockExecutionReport.ok(String.format("Commit account state changes, state root hash: %s", Util.getDataEncoded64(accounts.getAccountsPersistenceUnit().getRootHash())));
+
             logger.trace("Block process was SUCCESSFUL!");
         } else {
             AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);

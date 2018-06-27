@@ -116,12 +116,4 @@ public class AppStateTest {
         verify(accounts, times(1)).stopPersistenceUnit();
     }
 
-    @Test
-    public void testLock(){
-        Assert.assertFalse(appState.isLock());
-        appState.setLock();
-        Assert.assertTrue(appState.isLock());
-        appState.clearLock();
-        Assert.assertFalse(appState.isLock());
-    }
 }

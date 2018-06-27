@@ -1,6 +1,5 @@
 package network.elrond.processor;
 
-import network.elrond.processor.impl.executor.BlockAssemblyProcessor;
 import network.elrond.processor.impl.executor.BootstrapBlockTask;
 import network.elrond.processor.impl.executor.ChronologyBlockTask;
 import network.elrond.processor.impl.executor.SynchronizationBlockTask;
@@ -45,9 +44,9 @@ public class AppTasks {
     /**
      * P2P transactions broadcast
      */
-    public static AppTask BLOCK_ASSEMBLY_PROCESSOR = (application) -> {
-        new BlockAssemblyProcessor().process(application);
-    };
+//    public static AppTask BLOCK_ASSEMBLY_PROCESSOR = (application) -> {
+//        new BlockAssemblyProcessor().process(application);
+//    };
 
 
     /**
@@ -119,5 +118,7 @@ public class AppTasks {
     public static AppTask CHRONOLOGY = (application) -> {
         new ChronologyBlockTask().process(application);
     };
+
+
 
 }

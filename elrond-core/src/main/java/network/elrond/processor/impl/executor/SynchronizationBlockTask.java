@@ -4,8 +4,8 @@ import network.elrond.Application;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.data.ExecutionReport;
-import network.elrond.data.LocationType;
 import network.elrond.processor.impl.AbstractBlockTask;
+import network.elrond.data.SyncState;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,32 +23,26 @@ public class SynchronizationBlockTask extends AbstractBlockTask {
 
         try {
 
-            BigInteger remoteBlockIndex = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.NETWORK, blockchain);
-            BigInteger localBlockIndex = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.LOCAL, blockchain);
+            SyncState syncState = AppServiceProvider.getBootstrapService().getSyncState(blockchain);
 
-            ExecutionReport exReport = new ExecutionReport();
-
-            boolean isBlocAvailable = remoteBlockIndex.compareTo(BigInteger.ZERO) >= 0;
-            boolean isNewBlockRemote = remoteBlockIndex.compareTo(localBlockIndex) > 0;
-            boolean isSyncRequired = isBlocAvailable && isNewBlockRemote;
-
-            logger.info("Current bloc index " + localBlockIndex + " | remote block index " + remoteBlockIndex);
-
-            if (!isSyncRequired) {
+            if (!syncState.isSyncRequired()) {
                 logger.trace("is not sync required!");
                 return;
             }
 
-            logger.trace("Starting to synchronize...");
-            ExecutionReport report = AppServiceProvider.getBootstrapService().synchronize(localBlockIndex, remoteBlockIndex, state);
-            exReport.combine(report);
+            BigInteger localBlockIndex = syncState.getLocalBlockIndex();
+            BigInteger remoteBlockIndex = syncState.getRemoteBlockIndex();
 
-            logger.trace("Sync result: {}", report);
+            logger.info("{}, Starting to synchronize > Current bloc index {} | remote block index {}",
+                    application.getContext().getNodeName(), localBlockIndex,
+                    remoteBlockIndex);
+
+            ExecutionReport report = AppServiceProvider.getBootstrapService().synchronize(localBlockIndex, remoteBlockIndex, state);
+
+            logger.debug("Sync result: {}", report);
         } catch (Exception ex) {
             logger.catching(ex);
         }
     }
-
-
 }
 

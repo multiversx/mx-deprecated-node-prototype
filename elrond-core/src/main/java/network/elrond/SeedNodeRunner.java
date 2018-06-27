@@ -35,9 +35,9 @@ public class SeedNodeRunner {
             do {
                 AccountAddress address = AccountAddress.fromHexString(Util.TEST_ADDRESS);
                 Transaction transaction = facade.send(address, BigInteger.TEN, application);
-                logger.info("Sender Balance: {}", facade.getBalance(AccountAddress.fromBytes(application.getState().getPublicKey().getValue()), application));
+                //logger.info("Sender Balance: {}", facade.getBalance(AccountAddress.fromBytes(application.getState().getPublicKey().getValue()), application));
 
-                logger.info("Receiver  Balance: {}", facade.getBalance(address, application));
+                //logger.info("Receiver  Balance: {}", facade.getBalance(address, application));
 
 //                if (transaction != null) {
 //                    String hash = AppServiceProvider.getSerializationService().getHashString(transaction);
@@ -45,7 +45,7 @@ public class SeedNodeRunner {
 //                    logger.info(receipt);
 //                }
 
-                ThreadUtil.sleep(10);
+                ThreadUtil.sleep(1);
             } while (true);
 
         });

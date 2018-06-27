@@ -9,6 +9,7 @@ import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ChronologyServiceTest {
@@ -28,6 +29,12 @@ public class ChronologyServiceTest {
     public void testIsDateTimeInRoundWithNullShouldThrowException() {
         ChronologyService chronologyService = new ChronologyServiceImpl();
         chronologyService.isDateTimeInRound(null, 1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testIsStillInRoundStateWithNullShouldThrowException() {
+        ChronologyService chronologyService = new ChronologyServiceImpl();
+        chronologyService.isStillInRoundState(null, -1, -1, RoundState.START_ROUND);
     }
 
     @Test
@@ -129,5 +136,22 @@ public class ChronologyServiceTest {
                 listFound.add(subRoundsType);
             }
         }
+    }
+
+    @Test
+    public void testIsStillInRoundState() throws Exception{
+        ChronologyService chronologyService = AppServiceProvider.getChronologyService();
+
+        NTPClient ntpClient = new NTPClient(Arrays.asList("time.google.com"), 100);
+
+        ThreadUtil.sleep(1000);
+
+        long genesisTimeStamp = 10001;
+
+        TestCase.assertFalse(chronologyService.isStillInRoundState(ntpClient, genesisTimeStamp, 0, RoundState.START_ROUND));
+
+        //genesisTimeStamp = ntpClient.currentTimeMillis() - RoundState.
+
+
     }
 }

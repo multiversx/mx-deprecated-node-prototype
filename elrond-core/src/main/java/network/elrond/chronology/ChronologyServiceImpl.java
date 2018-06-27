@@ -1,6 +1,5 @@
 package network.elrond.chronology;
 
-import network.elrond.account.AbstractPersistenceUnit;
 import network.elrond.core.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -80,5 +79,34 @@ public class ChronologyServiceImpl implements ChronologyService {
 
         logger.trace("Round state not found!");
         return logger.traceExit((RoundState)null);
+    }
+
+    public synchronized boolean isStillInRoundState(NTPClient ntpClient, long genesisTimeStamp, long targetRoundIndex, RoundState targetRoundState){
+        logger.traceEntry("params: {} {} {} {}", ntpClient, genesisTimeStamp, targetRoundIndex, targetRoundState);
+        Util.check(ntpClient != null, "NTP client should not be null!");
+
+        long currentTimeStamp = ntpClient.currentTimeMillis();
+
+        Round computedRound = getRoundFromDateTime(genesisTimeStamp, currentTimeStamp);
+
+        boolean isRoundMismatch = computedRound.getIndex() != targetRoundIndex;
+
+        if (isRoundMismatch){
+            logger.debug("Round mismatch genesisTimeStamp: {}, currentTimeStamp: {}, target roundIndex: {}, computed roundIndex: {} ",
+                    genesisTimeStamp, currentTimeStamp, targetRoundIndex, computedRound.getIndex());
+            return logger.traceExit(false);
+        }
+
+        RoundState computedRoundState = computeRoundState(computedRound.getStartTimeStamp(), currentTimeStamp);
+
+        boolean isRoundStateMismatch = !computedRoundState.equals(targetRoundState);
+
+        if (isRoundStateMismatch){
+            logger.debug("State round mismatch roundStartTimeStamp: {}, currentTimeStamp: {}, target roundState: {}, computed roundState: {} ",
+                    computedRound.getStartTimeStamp(), currentTimeStamp, targetRoundState.name(), computedRoundState.name());
+            return logger.traceExit(false);
+        }
+
+        return (logger.traceExit(true));
     }
 }
