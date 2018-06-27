@@ -128,7 +128,7 @@ public class AppBlockManagerTest {
         TestCase.assertEquals(Util.VALUE_MINTING, getBalance(Util.PUBLIC_KEY_MINTING));
         TestCase.assertEquals(BigInteger.ZERO, getNonce(Util.PUBLIC_KEY_MINTING));
 
-        ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(blk, state.getAccounts(), state.getBlockchain());
+        ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(blk, state.getAccounts(), state.getBlockchain(), state.getStatisticsManager());
 
         TestCase.assertTrue("Should have executed!", executionReport.isOk());
         TestCase.assertEquals(Util.VALUE_MINTING.subtract(BigInteger.TEN), getBalance(Util.PUBLIC_KEY_MINTING));
@@ -172,7 +172,7 @@ public class AppBlockManagerTest {
         TestCase.assertEquals(Util.VALUE_MINTING, getBalance(Util.PUBLIC_KEY_MINTING));
         TestCase.assertEquals(BigInteger.ZERO, getNonce(Util.PUBLIC_KEY_MINTING));
 
-        ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(blk, state.getAccounts(), state.getBlockchain());
+        ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(blk, state.getAccounts(), state.getBlockchain(), state.getStatisticsManager());
 
         TestCase.assertTrue("Should have executed!", executionReport.isOk());
         TestCase.assertEquals(Util.VALUE_MINTING.subtract(BigInteger.TEN), getBalance(Util.PUBLIC_KEY_MINTING));
@@ -227,7 +227,7 @@ public class AppBlockManagerTest {
         TestCase.assertEquals(Util.VALUE_MINTING, getBalance(Util.PUBLIC_KEY_MINTING));
         TestCase.assertEquals(BigInteger.ZERO, getNonce(Util.PUBLIC_KEY_MINTING));
 
-        ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(blk, state.getAccounts(), state.getBlockchain());
+        ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(blk, state.getAccounts(), state.getBlockchain(), state.getStatisticsManager());
 
         TestCase.assertTrue("Should have executed!", executionReport.isOk());
 

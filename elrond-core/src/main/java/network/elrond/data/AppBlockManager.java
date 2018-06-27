@@ -4,6 +4,7 @@ import javafx.util.Pair;
 import network.elrond.TimeWatch;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppState;
+import network.elrond.benchmark.Statistic;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
@@ -49,6 +50,7 @@ public class AppBlockManager {
 
         if (hashes.isEmpty()) {
             logger.info("Can't execute, no transaction!");
+            state.getStatisticsManager().addStatistic(new Statistic(0));
             return null;
         }
 
@@ -60,7 +62,7 @@ public class AppBlockManager {
             List<Receipt> receipts = blockReceiptsPair.getValue();
             AppBlockManager.instance().signBlock(block, privateKey);
             ExecutionService executionService = AppServiceProvider.getExecutionService();
-            ExecutionReport result = executionService.processBlock(block, accounts, blockchain);
+            ExecutionReport result = executionService.processBlock(block, accounts, blockchain, state.getStatisticsManager());
 
             if (result.isOk()) {
                 removeAlreadyProcessedTransactionsFromPool(state, block);

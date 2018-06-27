@@ -181,7 +181,7 @@ public class BootstrapServiceImpl implements BootstrapService {
             ExecutionReport reportTransaction = commitTransaction(genesisTransaction, genesisTransactionHash, blockchain);
             result.combine(reportTransaction);
 
-            ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(genesisBlock, accounts, blockchain);
+            ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(genesisBlock, accounts, blockchain,  state.getStatisticsManager());
             result.combine(executionReport);
 
             if (result.isOk()) {
@@ -236,7 +236,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                 Block block = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK);
 
                 logger.trace("re-running block to update internal state...");
-                ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain);
+                ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain,  state.getStatisticsManager());
                 result.combine(executionReport);
 
                 if (!result.isOk()) {
@@ -303,7 +303,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                 }
 
 
-                ExecutionReport executionReport = executionService.processBlock(block, accounts, blockchain);
+                ExecutionReport executionReport = executionService.processBlock(block, accounts, blockchain,  state.getStatisticsManager());
                 result.combine(executionReport);
 
                 if (!result.isOk()) {

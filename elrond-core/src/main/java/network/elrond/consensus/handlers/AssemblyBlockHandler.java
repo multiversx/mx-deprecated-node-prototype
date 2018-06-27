@@ -53,6 +53,7 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
         if (transactionPool.isEmpty()) {
             logger.info("Round: {}, subRound: {}> Can't execute, no transactions!",
                     data.getRound().getIndex(), data.getRoundState().name());
+            state.getStatisticsManager().addStatistic(new Statistic(0));
             return;
         }
 
@@ -72,13 +73,13 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
         logger.info(" ###### Executed {} transactions in {}ms  TPS:{}   ###### ",
                 size, time, tps);
 
-        Statistic stats = new Statistic();
-
-        stats.setNrTransactionsInBlock(size);
-        stats.setTps(tps);
-        stats.setCurrentTimeMillis(System.currentTimeMillis());
-
-        state.getStatisticsManager().addStatistic(stats);
+//        Statistic stats = new Statistic();
+//
+//        stats.setNrTransactionsInBlock(size);
+//        stats.setTps(tps);
+//        stats.setCurrentTimeMillis(System.currentTimeMillis());
+//
+//        state.getStatisticsManager().addStatistic(stats);
 
         logger.traceExit();
     }

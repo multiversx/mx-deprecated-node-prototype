@@ -39,7 +39,7 @@ public class AppState implements Serializable {
 
     public final Object lockerSyncPropose = new Object();
 
-    private StatisticsManager statisticsManager = new StatisticsManager();
+    private StatisticsManager statisticsManager = new StatisticsManager(System.currentTimeMillis());
 
     public P2PRequestChannel getChanel(P2PRequestChannelName channelName) {
         logger.traceEntry("params: {}", channelName);

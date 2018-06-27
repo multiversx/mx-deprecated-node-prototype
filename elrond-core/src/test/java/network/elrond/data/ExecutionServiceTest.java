@@ -255,7 +255,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         Accounts accounts = null;
         Block block = new Block();
         ExecutionService executionService = AppServiceProvider.getExecutionService();
-        executionService.processBlock(block, accounts, blockchain);
+        executionService.processBlock(block, accounts, blockchain, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -263,14 +263,14 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         Block block = new Block();
         Blockchain blockchain = null;
         ExecutionService executionService = AppServiceProvider.getExecutionService();
-        executionService.processBlock(block, accounts, blockchain);
+        executionService.processBlock(block, accounts, blockchain, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testProcessBlockNullBlock() {
         Block block = null;
         ExecutionService executionService = AppServiceProvider.getExecutionService();
-        executionService.processBlock(block, accounts, blockchain);
+        executionService.processBlock(block, accounts, blockchain, null);
     }
 
     @Test
@@ -295,7 +295,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         }
 
         ExecutionService executionService = AppServiceProvider.getExecutionService();
-        ExecutionReport report = executionService.processBlock(block, accounts, blockchain);
+        ExecutionReport report = executionService.processBlock(block, accounts, blockchain, null);
 
         // waiting for failure due to block already present in blockchain
         if (report.isOk()) {
@@ -314,7 +314,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         block.setNonce(BigInteger.valueOf(10));
 
         ExecutionService executionService = AppServiceProvider.getExecutionService();
-        ExecutionReport report = executionService.processBlock(block, accounts, blockchain);
+        ExecutionReport report = executionService.processBlock(block, accounts, blockchain, null);
 
         // waiting for failure due to missing previous block in blockchain
         if (report.isOk()) {
@@ -341,7 +341,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         Block block = generateSignedBlockWithTransactions(100, 3, 50);
         //execute
         ExecutionService executionService = AppServiceProvider.getExecutionService();
-        ExecutionReport report = executionService.processBlock(block, accounts, blockchain);
+        ExecutionReport report = executionService.processBlock(block, accounts, blockchain, null);
 
         // waiting for failure due to missing previous block in blockchain
         if (report.isOk()) {
@@ -356,7 +356,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         Block block = generateSignedBlockWithTransactions(100000, 100, 100);
         //execute
         ExecutionService executionService = AppServiceProvider.getExecutionService();
-        ExecutionReport report = executionService.processBlock(block, accounts, blockchain);
+        ExecutionReport report = executionService.processBlock(block, accounts, blockchain, null);
 
         // waiting for failure due to missing previous block in blockchain
         if (!report.isOk()) {

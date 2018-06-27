@@ -4,34 +4,37 @@ public class BenchmarkResult {
     private long activeNodes;
     private long nrShards;
     private long averageRoundTime;
+    private long liveRoundTime;
     private long averageNrTxPerBlock;
 
-    private long liveTps;
-    private long peakTps;
-    private long averageTps;
-    private long liveNrTransactionsPerBlock;
+    private Double liveTps;
+    private Double peakTps;
+    private Double averageTps;
 
-    public long getLiveTps() {
+    private long liveNrTransactionsPerBlock;
+    private long totalNrProcessedTransactions;
+
+    public Double getLiveTps() {
         return liveTps;
     }
 
-    public void setLiveTps(long liveTps) {
+    public void setLiveTps(Double liveTps) {
         this.liveTps = liveTps;
     }
 
-    public long getPeakTps() {
+    public Double getPeakTps() {
         return peakTps;
     }
 
-    public void setPeakTps(long peakTps) {
+    public void setPeakTps(Double peakTps) {
         this.peakTps = peakTps;
     }
 
-    public long getAverageTps() {
+    public Double getAverageTps() {
         return averageTps;
     }
 
-    public void setAverageTps(long averageTps) {
+    public void setAverageTps(Double averageTps) {
         this.averageTps = averageTps;
     }
 
@@ -73,5 +76,21 @@ public class BenchmarkResult {
 
     public void setLiveNrTransactionsPerBlock(long liveNrTransactionsPerBlock) {
         this.liveNrTransactionsPerBlock = liveNrTransactionsPerBlock;
+    }
+
+    public long getLiveRoundTime() {
+        return liveRoundTime;
+    }
+
+    public void setLiveRoundTime(long liveRoundTime) {
+        this.liveRoundTime = liveRoundTime;
+    }
+
+    public long getTotalNrProcessedTransactions() {
+        return totalNrProcessedTransactions;
+    }
+
+    public void setTotalNrProcessedTransactions(long totalNrProcessedTransactions) {
+        this.totalNrProcessedTransactions = totalNrProcessedTransactions;
     }
 }

@@ -4,7 +4,6 @@ import network.elrond.Application;
 import network.elrond.TimeWatch;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
-import network.elrond.benchmark.Statistic;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.ThreadUtil;
@@ -14,9 +13,9 @@ import network.elrond.data.Block;
 import network.elrond.data.LocationType;
 import network.elrond.p2p.P2PChannelName;
 import network.elrond.processor.impl.AbstractChannelTask;
+import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.AppShardingManager;
 import network.elrond.sharding.Shard;
-import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -74,13 +73,7 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         long time = watch.time(TimeUnit.MILLISECONDS);
         long tps = (time > 0) ? ((size * 1000) / time) : 0;
         logger.info(" ###### Executed " + size + " transactions in " + time + "ms  TPS:" + tps + "   ###### ");
-        Statistic stats = new Statistic();
 
-        stats.setNrTransactionsInBlock(size);
-        stats.setTps(tps);
-        stats.setCurrentTimeMillis(System.currentTimeMillis());
-
-        state.getStatisticsManager().addStatistic(stats);
 
         logger.traceExit();
     }
