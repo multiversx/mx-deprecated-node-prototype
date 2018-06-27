@@ -7,6 +7,7 @@ import network.elrond.ElrondFacade;
 import network.elrond.ElrondFacadeImpl;
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
+import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
@@ -224,11 +225,11 @@ public class ConsensusTest01 {
 
     private Application startRunner(String name, int port, int masterPeerPort) throws Exception {
         Util.changeLogsPath("logs-" + name);
-        String masterPeerIpAddress = "192.168.11.30";
+        String masterPeerIpAddress = "127.0.0.1";
         String nodeRunnerPrivateKey = Util.byteArrayToHexString(new PrivateKey(name).getValue());
         //Reuploaded
         AppContext context = ContextCreator.createAppContext(name, nodeRunnerPrivateKey, masterPeerIpAddress, masterPeerPort, port,
-                BootstrapType.REBUILD_FROM_DISK, name);
+                BootstrapType.START_FROM_SCRATCH, name);
 
         ElrondFacade facade = new ElrondFacadeImpl();
 
@@ -302,25 +303,59 @@ public class ConsensusTest01 {
 
 
         Thread thrSeed = new Thread(()->{
+
+
             int value = 1;
+
+            List<String> listTransactionsGenerated = new ArrayList<String>();
+            List<String> listTransactionsProcessed = new ArrayList<String>();
+            Block lastBlock = null;
             while (seeder.getState().isStillRunning()) {
 
-                if (seeder.getState().getBlockchain().getTransactionPool().size() > 2000) {
+                Block blk = seeder.getState().getBlockchain().getCurrentBlock();
+
+                if (lastBlock != blk){
+                    List<byte[]> listTx = blk.getListTXHashes();
+
+                    for (int i = 0; i < listTx.size(); i++){
+                        String hash = Util.getDataEncoded64(listTx.get(i));
+
+                        if (listTransactionsGenerated.contains(hash)){
+                            listTransactionsGenerated.remove(hash);
+                            listTransactionsProcessed.add(hash);
+                        }
+                    }
+
+                    lastBlock = blk;
+                }
+
+                if ((listTransactionsProcessed.size() >= 3000) && (listTransactionsGenerated.size() == 0)){
+                    logger.log(Level.ERROR, "Tx generated: {}, tx processed: {}", listTransactionsGenerated.size(), listTransactionsProcessed.size());
+                    break;
+                }
+
+                if ((seeder.getState().getBlockchain().getTransactionPool().size() > 2000) ||
+                        (listTransactionsProcessed.size() >= 3000)){
                     ThreadUtil.sleep(1);
                     continue;
                 }
 
-                sendToLog(Level.ERROR, "Generating...");
-
-                for (int i = 0; i < 1000; i++) {
-                    AccountAddress address = AccountAddress.fromHexString(Util.TEST_ADDRESS);
-                    Transaction transaction = facade.send(address, BigInteger.valueOf(value), seeder);
-
-                    //sendToLog(Level.ERROR, "Sent tx ", transaction, " to ", Util.byteArrayToHexString(seeder.getContext().getPublicKey().getValue()));
-
-                    value++;
+                if (value % 100 == 0) {
+                    logger.log(Level.ERROR, "Generating...Tx generated: {}, tx processed: {}", listTransactionsGenerated.size(), listTransactionsProcessed.size());
                 }
+
+                AccountAddress address = AccountAddress.fromHexString(Util.TEST_ADDRESS);
+                Transaction transaction = facade.send(address, BigInteger.valueOf(value), seeder);
+
+                if (transaction == null) {
+                    continue;
+                }
+
+                String hash = AppServiceProvider.getSerializationService().getHashString(transaction);
+                listTransactionsGenerated.add(hash);
+                value++;
             }
+            logger.log(Level.ERROR, "dOnE...Tx generated: {}, tx processed: {}", listTransactionsGenerated.size(), listTransactionsProcessed.size());
         });
         //thrSeed.setPriority(2);
         thrSeed.start();
@@ -345,6 +380,8 @@ public class ConsensusTest01 {
     public void testStartNode2() throws Exception{
         Application seeder = startRunner("runner-2", 4002, 4000);
         seeder.getState().getConsensusStateHolder().nodeName = seeder.getContext().getNodeName();
+
+        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
         while (true){
             ThreadUtil.sleep(100);
         }

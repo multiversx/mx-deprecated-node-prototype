@@ -92,16 +92,16 @@ public class AppBlockManager {
             }
             logger.debug("Broadcast block with hash {}", hashBlock);
 
-            List<String> txHashes  = new ArrayList<>();
-            for (Receipt receipt : receipts) {
-                // add the blockHash to the receipt as the valid hash is only available after signing
-                receipt.setBlockHash(hashBlock);
-                sendReceipt(hashBlock, receipt, state);
-                txHashes.add(receipt.getTransactionHash());
-            }
-            logger.debug("Sent {} receipts of block with hash {}", hashBlock, receipts.size());
-
-            queue.removeAll(txHashes);
+//            List<String> txHashes  = new ArrayList<>();
+////            for (Receipt receipt : receipts) {
+//                // add the blockHash to the receipt as the valid hash is only available after signing
+//                receipt.setBlockHash(hashBlock);
+//                sendReceipt(hashBlock, receipt, state);
+//                txHashes.add(receipt.getTransactionHash());
+//            }
+//            logger.debug("Sent {} receipts of block with hash {}", hashBlock, receipts.size());
+//
+//            queue.removeAll(txHashes);
 
             logger.info("New block proposed with hash {}", hashBlock);
 

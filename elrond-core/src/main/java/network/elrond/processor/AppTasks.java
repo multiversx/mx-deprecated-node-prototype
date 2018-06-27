@@ -90,4 +90,8 @@ public class AppTasks {
         new ChronologyBlockTask().process(application);
     };
 
+    public static AppTask TRANSACTION_FETCHER = (application) -> {
+        new TransactionFetcherTask().process(application);
+    };
+
 }

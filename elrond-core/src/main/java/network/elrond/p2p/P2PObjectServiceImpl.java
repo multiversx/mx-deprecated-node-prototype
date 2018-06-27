@@ -17,7 +17,7 @@ public class P2PObjectServiceImpl implements P2PObjectService {
     private static final Logger logger = LogManager.getLogger(P2PObjectServiceImpl.class);
 
     @Override
-    public <T> T get(P2PConnection connection, String key, Class<T> clazz) throws ClassNotFoundException, IOException {
+    public synchronized <T> T get(P2PConnection connection, String key, Class<T> clazz) throws ClassNotFoundException, IOException {
         logger.traceEntry("params: {} {} {}", connection, key, clazz);
         PeerDHT peer = connection.getDht();
         String clazzName = clazz.getName();
@@ -40,7 +40,7 @@ public class P2PObjectServiceImpl implements P2PObjectService {
     }
 
     @Override
-    public <T extends Serializable> FuturePut put(P2PConnection connection, String key, T value) throws IOException {
+    public synchronized <T extends Serializable> FuturePut put(P2PConnection connection, String key, T value) throws IOException {
         logger.traceEntry("params: {} {} {}", connection, key, value);
         PeerDHT peer = connection.getDht();
 
@@ -54,7 +54,7 @@ public class P2PObjectServiceImpl implements P2PObjectService {
         return logger.traceExit(fp);
     }
 
-    public <T extends Serializable> FuturePut putIfAbsent(P2PConnection connection, String key, T value) throws Exception {
+    public synchronized <T extends Serializable> FuturePut putIfAbsent(P2PConnection connection, String key, T value) throws Exception {
         logger.traceEntry("params: {} {} {}", connection, key, value);
         PeerDHT peer = connection.getDht();
 

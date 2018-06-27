@@ -158,7 +158,7 @@ public class BlockchainServiceImpl implements BlockchainService {
                 cache.put(hash, object);
                 String strJSONData = AppServiceProvider.getSerializationService().encodeJSON(object);
                 unit.put(bytes(hash.toString()), bytes(strJSONData));
-                logger.trace("Got from local storace, placed on DHT!");
+                logger.trace("Got from local storage, placed on DHT!");
             }
         }
 

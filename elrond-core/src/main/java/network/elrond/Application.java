@@ -70,41 +70,44 @@ public class Application implements Serializable {
     public void start() throws IOException {
         logger.traceEntry();
 
-        logger.trace("Starting P2P communications...");
+        logger.debug("Starting P2P communications...");
         AppTasks.INIT_P2P_CONNECTION.process(this);
 
-        logger.trace("Starting blockchain...");
+        logger.debug("Starting blockchain...");
         AppTasks.INIT_BLOCKCHAIN.process(this);
 
-        logger.trace("Starting private-public keys processor...");
+        logger.debug("Starting private-public keys processor...");
         AppTasks.INITIALIZE_PUBLIC_PRIVATE_KEYS.process(this);
 
-        logger.trace("Starting accounts...");
+        logger.debug("Starting accounts...");
         AppTasks.INIT_ACCOUNTS.process(this);
 
-        logger.trace("Starting bootstrapping processor...");
+        logger.debug("Starting bootstrapping processor...");
         AppTasks.BLOCKCHAIN_BOOTSTRAP.process(this);
 
-        logger.trace("Starting blockchain synchronization...");
+        logger.debug("Starting blockchain synchronization...");
         AppTasks.BLOCKCHAIN_SYNCRONIZATION.process(this);
 
-        logger.trace("Intercept P2P transactions...");
+        logger.debug("Intercept P2P transactions...");
         AppTasks.INTERCEPT_TRANSACTIONS.process(this);
 
-        logger.trace("Intercept P2P receipts...");
+        logger.debug("Intercept P2P receipts...");
         AppTasks.INTERCEPT_RECEIPTS.process(this);
 
-        logger.trace("Intercept P2P blocks...");
+        logger.debug("Intercept P2P blocks...");
         AppTasks.INTERCEPT_BLOCKS.process(this);
 
         //logger.trace("Execute transactions and emit blocks...");
         //AppTasks.BLOCK_ASSEMBLY_PROCESSOR.process(this);
 
-        logger.trace("Init NTP client...");
+        logger.debug("Init NTP client...");
         AppTasks.NTP_CLIENT_INITIALIZER.process(this);
         
-        logger.trace("Start chronology processor...");
+        logger.debug("Start chronology processor...");
         AppTasks.CHRONOLOGY.process(this);
+
+        logger.debug("Start transaction fetcher...");
+        AppTasks.TRANSACTION_FETCHER.process(this);
     }
 
     /**
