@@ -2,6 +2,8 @@ package network.elrond.service;
 
 import network.elrond.account.AccountStateService;
 import network.elrond.account.AccountStateServiceImpl;
+import network.elrond.benchmark.StatisticService;
+import network.elrond.benchmark.StatisticServiceImpl;
 import network.elrond.blockchain.AppPersistenceService;
 import network.elrond.blockchain.AppPersistenceServiceImpl;
 import network.elrond.blockchain.BlockchainService;
@@ -55,6 +57,7 @@ public class AppServiceProvider {
         putService(BootstrapService.class, new BootstrapServiceImpl());
         putService(P2PCommunicationService.class, new P2PCommunicationServiceImpl());
         putService(ChronologyService.class, new ChronologyServiceImpl());
+        putService(StatisticService.class, new StatisticServiceImpl(System.currentTimeMillis()));
     }
 
     public static P2PBroadcastService getP2PBroadcastService() {
@@ -99,6 +102,10 @@ public class AppServiceProvider {
 
     public static AccountStateService getAccountStateService() {
         return getService(AccountStateService.class);
+    }
+
+    public static StatisticService getStatisticService() {
+        return getService(StatisticService.class);
     }
 
     public static ExecutionService getExecutionService() {

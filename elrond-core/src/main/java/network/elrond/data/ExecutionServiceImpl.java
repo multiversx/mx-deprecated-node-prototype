@@ -2,6 +2,7 @@ package network.elrond.data;
 
 import network.elrond.account.Accounts;
 import network.elrond.account.AccountsManager;
+import network.elrond.benchmark.Statistic;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
@@ -92,100 +93,109 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     private ExecutionReport _processBlock(Accounts accounts, Blockchain blockchain, Block block) throws IOException, ClassNotFoundException {
         logger.traceEntry("params: {} {}", accounts, blockchain, block);
-        ExecutionReport blockExecutionReport = ExecutionReport.create();
-        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
-        ArrayList<String> signers;
-        String blockHash = serializationService.getHashString(block);
+        long transactionsProcessed = 0 ;
+        try {
+            ExecutionReport blockExecutionReport = ExecutionReport.create();
+            BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
+            ArrayList<String> signers;
+            String blockHash = serializationService.getHashString(block);
 
-        // check that block is not already processed
+            // check that block is not already processed
 //        if (blockchainService.contains(blockHash, blockchain, BlockchainUnitType.BLOCK)) {
 //            blockExecutionReport.ko("Block already in blockchain");
 //            return blockExecutionReport;
 //        }
 
-        // check if previous block hash is in blockchain, otherwise can't add it yet
-        // do the check only if nonce is not 0
-        if (!block.getNonce().equals(BigInteger.ZERO) &&
-                !blockchainService.contains(Util.getDataEncoded64(block.getPrevBlockHash()), blockchain, BlockchainUnitType.BLOCK)) {
+            // check if previous block hash is in blockchain, otherwise can't add it yet
+            // do the check only if nonce is not 0
+            if (!block.getNonce().equals(BigInteger.ZERO) &&
+                    !blockchainService.contains(Util.getDataEncoded64(block.getPrevBlockHash()), blockchain, BlockchainUnitType.BLOCK)) {
 
-            blockExecutionReport.ko("Previous block not in blockchain");
-            logger.trace("Block process FAILED!");
-            return logger.traceExit(blockExecutionReport);
-        }
-
-        //check if the current block is genesis and save it in blockchain structure
-        if (block.getNonce().equals(BigInteger.ZERO)){
-            logger.trace("The current block is genesis and we save it in blockchain structure");
-            blockchain.setGenesisBlock(block);
-        }
-
-        //check genesis block existence
-        if (blockchain.getGenesisBlock() == null){
-            blockExecutionReport.ko("Genesis block missing!");
-            logger.trace("Block process FAILED!");
-            return logger.traceExit(blockExecutionReport);
-        }
-
-        //check timestamp and round
-        if (!validateBlockTimestampRound(blockchain, block)){
-            blockExecutionReport.ko(String.format("Timestamp and round mismatch! Block nonce: %d, round index: %d, timestamp %d, genesis timestamp: %d",
-                    block.getNonce().longValue(), block.roundIndex, block.getTimestamp(), blockchain.getGenesisBlock().getTimestamp()));
-            logger.trace("Block process FAILED!");
-            return logger.traceExit(blockExecutionReport);
-        }
-
-        // check block signers are valid for the round
-        if (!validateBlockSigners(accounts, blockchain, block)) {
-            blockExecutionReport.ko("Signers not ok for epoch/round");
-            logger.trace("Block process FAILED!");
-            return logger.traceExit(blockExecutionReport);
-        }
-
-        // get signature parts from block
-        signers = (ArrayList<String>) block.getListPublicKeys();
-
-        // check multi-signature is valid
-        if (!validateBlockSignature(signers, block)) {
-            blockExecutionReport.ko("Signature not valid");
-            logger.trace("Block process FAILED!");
-            return logger.traceExit(blockExecutionReport);
-        }
-
-        // TODO: split the block processing for the two usecases
-        // there are two usecases for processing blocks
-        // 1. when part of the consensus group, the node needs to validate and sign the block and add it to it's blockchain if pBFT OK otherwise rollback
-        // 2. when not part of the consensus validate block and add it to it's blockchain if valid
-
-        logger.trace("Processing transactions...");
-        List<Transaction> transactions = AppServiceProvider.getTransactionService().getTransactions(blockchain, block);
-        for (Transaction transaction : transactions) {
-            ExecutionReport transactionExecutionReport = processTransaction(transaction, accounts);
-            if (!transactionExecutionReport.isOk()) {
-                blockExecutionReport.combine(transactionExecutionReport);
-                logger.trace("Block process FAILED!");
-                break;
-            }
-        }
-
-        if (blockExecutionReport.isOk()) {
-            // check state merkle patricia trie root is the same with what was stored in block
-            if (!Arrays.equals(block.getAppStateHash(), accounts.getAccountsPersistenceUnit().getRootHash())) {
-                blockExecutionReport.ko("Application state root hash does not match");
-                AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
+                blockExecutionReport.ko("Previous block not in blockchain");
                 logger.trace("Block process FAILED!");
                 return logger.traceExit(blockExecutionReport);
             }
 
-            AppServiceProvider.getAccountStateService().commitAccountStates(accounts);
-            blockExecutionReport.ok("Commit account state changes");
-            logger.trace("Block process was SUCCESSFUL!");
-        } else {
-            AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
-            blockExecutionReport.ko("Rollback account state changes");
-            logger.trace("Block process FAILED!");
-        }
+            //check if the current block is genesis and save it in blockchain structure
+            if (block.getNonce().equals(BigInteger.ZERO)) {
+                logger.trace("The current block is genesis and we save it in blockchain structure");
+                blockchain.setGenesisBlock(block);
+            }
 
-        return logger.traceExit(blockExecutionReport);
+            //check genesis block existence
+            if (blockchain.getGenesisBlock() == null) {
+                blockExecutionReport.ko("Genesis block missing!");
+                logger.trace("Block process FAILED!");
+                return logger.traceExit(blockExecutionReport);
+            }
+
+            //check timestamp and round
+            if (!validateBlockTimestampRound(blockchain, block)) {
+                blockExecutionReport.ko(String.format("Timestamp and round mismatch! Block nonce: %d, round index: %d, timestamp %d, genesis timestamp: %d",
+                        block.getNonce().longValue(), block.roundIndex, block.getTimestamp(), blockchain.getGenesisBlock().getTimestamp()));
+                logger.trace("Block process FAILED!");
+                return logger.traceExit(blockExecutionReport);
+            }
+
+            // check block signers are valid for the round
+            if (!validateBlockSigners(accounts, blockchain, block)) {
+                blockExecutionReport.ko("Signers not ok for epoch/round");
+                logger.trace("Block process FAILED!");
+                return logger.traceExit(blockExecutionReport);
+            }
+
+            // get signature parts from block
+            signers = (ArrayList<String>) block.getListPublicKeys();
+
+            // check multi-signature is valid
+            if (!validateBlockSignature(signers, block)) {
+                blockExecutionReport.ko("Signature not valid");
+                logger.trace("Block process FAILED!");
+                return logger.traceExit(blockExecutionReport);
+            }
+
+            // TODO: split the block processing for the two usecases
+            // there are two usecases for processing blocks
+            // 1. when part of the consensus group, the node needs to validate and sign the block and add it to it's blockchain if pBFT OK otherwise rollback
+            // 2. when not part of the consensus validate block and add it to it's blockchain if valid
+
+            logger.trace("Processing transactions...");
+            List<Transaction> transactions = AppServiceProvider.getTransactionService().getTransactions(blockchain, block);
+            for (Transaction transaction : transactions) {
+                ExecutionReport transactionExecutionReport = processTransaction(transaction, accounts);
+                if (!transactionExecutionReport.isOk()) {
+                    blockExecutionReport.combine(transactionExecutionReport);
+                    logger.trace("Block process FAILED!");
+                    break;
+                }
+            }
+
+            if (blockExecutionReport.isOk()) {
+                // check state merkle patricia trie root is the same with what was stored in block
+                if (!Arrays.equals(block.getAppStateHash(), accounts.getAccountsPersistenceUnit().getRootHash())) {
+                    blockExecutionReport.ko("Application state root hash does not match");
+                    AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
+                    logger.trace("Block process FAILED!");
+                    return logger.traceExit(blockExecutionReport);
+                }
+
+                AppServiceProvider.getAccountStateService().commitAccountStates(accounts);
+                blockExecutionReport.ok("Commit account state changes");
+                transactionsProcessed = block.getListTXHashes() != null ? block.getListTXHashes().size() : 0;
+
+                logger.trace("Block process was SUCCESSFUL!");
+            } else {
+                AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
+                blockExecutionReport.ko("Rollback account state changes");
+                AppServiceProvider.getStatisticService().addStatistic(new Statistic(0));
+                logger.trace("Block process FAILED!");
+            }
+
+            return logger.traceExit(blockExecutionReport);
+        }
+        finally {
+            AppServiceProvider.getStatisticService().addStatistic(new Statistic(transactionsProcessed));
+        }
     }
 
     @Override

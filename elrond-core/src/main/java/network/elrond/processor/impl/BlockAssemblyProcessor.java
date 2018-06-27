@@ -4,7 +4,6 @@ import network.elrond.Application;
 import network.elrond.TimeWatch;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
-import network.elrond.benchmark.Statistic;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.ThreadUtil;
@@ -76,13 +75,7 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         long time = watch.time(TimeUnit.MILLISECONDS);
         long tps = (time > 0) ? ((size * 1000) / time) : 0;
         logger.info(" ###### Executed " + size + " transactions in " + time + "ms  TPS:" + tps + "   ###### ");
-        Statistic stats = new Statistic();
 
-        stats.setNrTransactionsInBlock(size);
-        stats.setTps(tps);
-        stats.setCurrentTimeMillis(System.currentTimeMillis());
-
-        application.getStatisticsManager().addStatistic(stats);
 
         logger.traceExit();
     }

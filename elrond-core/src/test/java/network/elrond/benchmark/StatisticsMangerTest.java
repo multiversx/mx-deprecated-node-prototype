@@ -4,44 +4,48 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 public class StatisticsMangerTest {
-    private StatisticsManager statisticsManager;
+    private StatisticService statisticService;
 
     @Before
     public void SetUp(){
-        statisticsManager = new StatisticsManager();
+        statisticService = new StatisticServiceImpl(1000);
     }
 
     @Test
     public void TestHappyPathStatisticsManager(){
-        Statistic statistic = new Statistic();
-        statistic.setTps(100);
-        statistic.setNrTransactionsInBlock(1000);
 
-        statisticsManager.addStatistic(statistic);
+        Statistic statistic = mock(Statistic.class);
+        when(statistic.getCurrentTimeMillis()).thenReturn((long)2000);
+        when(statistic.getNrTransactionsInBlock()).thenReturn((long)100);
 
-        Assert.assertEquals(100, statisticsManager.getAverageTps());
-        Assert.assertEquals(100, statisticsManager.getMaxTps());
-        Assert.assertEquals(100, statisticsManager.getMinTps());
+        statisticService.addStatistic(statistic);
 
-        Statistic statistic2= new Statistic();
-        statistic2.setTps(200);
-        statistic2.setNrTransactionsInBlock(2000);
+        Assert.assertEquals((Double)100.0, statisticService.getAverageTps());
+        Assert.assertEquals((Double)100.0, statisticService.getMaxTps());
+        Assert.assertEquals((Double)100.0, statisticService.getMinTps());
 
-        statisticsManager.addStatistic(statistic2);
+        Statistic statistic2= mock(Statistic.class);
+        when(statistic.getCurrentTimeMillis()).thenReturn((long)3000);
+        when(statistic.getNrTransactionsInBlock()).thenReturn((long)200);
 
-        Assert.assertEquals(150, statisticsManager.getAverageTps());
-        Assert.assertEquals(200, statisticsManager.getMaxTps());
-        Assert.assertEquals(100, statisticsManager.getMinTps());
+        statisticService.addStatistic(statistic2);
 
-        Statistic statistic3= new Statistic();
-        statistic3.setTps(300);
-        statistic3.setNrTransactionsInBlock(3000);
+        Assert.assertEquals((Double)150.0, statisticService.getAverageTps());
+        Assert.assertEquals((Double)200.0, statisticService.getMaxTps());
+        Assert.assertEquals((Double)100.0, statisticService.getMinTps());
 
-        statisticsManager.addStatistic(statistic3);
+        Statistic statistic3= mock(Statistic.class);
+        when(statistic.getCurrentTimeMillis()).thenReturn((long)4000);
+        when(statistic.getNrTransactionsInBlock()).thenReturn((long)300);
 
-        Assert.assertEquals(200, statisticsManager.getAverageTps());
-        Assert.assertEquals(300, statisticsManager.getMaxTps());
-        Assert.assertEquals(100, statisticsManager.getMinTps());
+        statisticService.addStatistic(statistic3);
+
+        Assert.assertEquals((Double)200.0, statisticService.getAverageTps());
+        Assert.assertEquals((Double)300.0, statisticService.getMaxTps());
+        Assert.assertEquals((Double)100.0, statisticService.getMinTps());
     }
 }

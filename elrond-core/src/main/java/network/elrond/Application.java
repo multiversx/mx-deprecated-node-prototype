@@ -2,8 +2,9 @@ package network.elrond;
 
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
-import network.elrond.benchmark.StatisticsManager;
+import network.elrond.benchmark.StatisticService;
 import network.elrond.processor.AppTasks;
+import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,8 +19,6 @@ public class Application implements Serializable {
     private AppContext context;
 
     private AppState state = new AppState();
-
-    private StatisticsManager statisticsManager = new StatisticsManager();
 
     public Application(AppContext context) {
         logger.traceEntry("params: {}", context);
@@ -122,8 +121,8 @@ public class Application implements Serializable {
 //        logger.traceExit();
 //    }
 
-    public StatisticsManager getStatisticsManager(){
-        return statisticsManager;
+    public StatisticService getStatisticsManager(){
+        return AppServiceProvider.getStatisticService();
     }
 
 }
