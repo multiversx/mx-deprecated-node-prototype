@@ -104,6 +104,8 @@ public class AppBlockManager {
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList())));
             }
+
+            return logger.traceExit(block);
         } catch (IOException | ClassNotFoundException e) {
             logger.throwing(e);
         }
@@ -374,7 +376,7 @@ public class AppBlockManager {
 
         List<String> toBeRemoved = block.getListTXHashes().stream()
                 .filter(Objects::nonNull)
-                .map(transactionHash -> Util.byteArrayToHexString(transactionHash))
+                .map(transactionHash -> Util.getDataEncoded64(transactionHash))
                 .collect(Collectors.toList());
 
         ArrayBlockingQueue<String> transactionPool = state.getTransactionPool();
