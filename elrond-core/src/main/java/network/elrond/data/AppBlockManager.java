@@ -5,7 +5,6 @@ import network.elrond.TimeWatch;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
-import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.chronology.ChronologyService;
 import network.elrond.chronology.NTPClient;
@@ -52,7 +51,6 @@ public class AppBlockManager {
             return null;
         }
 
-        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
         try {
             List<Transaction> transactions = AppServiceProvider.getBlockchainService().getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
             Pair<Block, List<Receipt>> blockReceiptsPair = composeBlock(transactions, state);
