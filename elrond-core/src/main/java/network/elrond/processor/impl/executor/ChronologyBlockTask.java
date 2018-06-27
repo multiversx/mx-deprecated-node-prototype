@@ -96,6 +96,8 @@ public class ChronologyBlockTask implements AppTask {
 
             //start new round
             notifyEventObjects(application, currentRound, RoundState.START_ROUND, globalTimeStamp);
+
+            previousRoundState = RoundState.START_ROUND;
         }
 
         previousRound = currentRound;
