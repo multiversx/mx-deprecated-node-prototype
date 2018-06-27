@@ -45,7 +45,7 @@ public class SeedNodeRunner {
 //                    logger.info(receipt);
 //                }
 
-                ThreadUtil.sleep(1000);
+                ThreadUtil.sleep(10);
             } while (true);
 
         });
