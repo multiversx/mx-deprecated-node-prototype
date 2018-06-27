@@ -61,12 +61,27 @@ public class AppBlockManager {
             Block block = blockReceiptsPair.getKey();
             List<Receipt> receipts = blockReceiptsPair.getValue();
             AppBlockManager.instance().signBlock(block, privateKey);
+
+            String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
+
+            logger.debug("signed block with hash: {}", hashBlock);
             ExecutionService executionService = AppServiceProvider.getExecutionService();
-            ExecutionReport result = executionService.processBlock(block, accounts, blockchain, state.getStatisticsManager());
+
+            ExecutionReport result = AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
+
+            if (!result.isOk()){
+                logger.debug("Could not commit block with hash {}", hashBlock);
+                return logger.traceExit((Block) null);
+            }
+
+            result = executionService.processBlock(block, accounts, blockchain, state.getStatisticsManager());
             Shard shard = blockchain.getShard();
+            logger.debug("executed block with hash: {}", hashBlock);
 
             if (result.isOk()) {
                 removeAlreadyProcessedTransactionsFromPool(state, block);
+
+                logger.debug("removed {} transaction from pool", block.getListTXHashes().size());
 
                 List<String> acceptedTransactions = block.getListTXHashes().stream()
                     .map(bytes -> new String(Base64.encode(bytes)))
@@ -84,12 +99,9 @@ public class AppBlockManager {
                         AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, transaction);
                     });
 
-                String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
-                AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
-
+                logger.debug("sent Xtransactions");
 
                 sendReceipts(state, block, receipts);
-
 
                 logger.info("New block proposed with hash {}", hashBlock);
 
