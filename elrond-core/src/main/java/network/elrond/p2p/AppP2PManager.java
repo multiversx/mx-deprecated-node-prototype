@@ -19,7 +19,7 @@ public class AppP2PManager {
     }
 
 
-    public P2PBroadcastChanel subscribeToChannel(Application application, P2PChannelName channelName, P2PChannelListener listener) {
+    public P2PBroadcastChanel subscribeToChannel(Application application, P2PBroadcastChannelName channelName, P2PChannelListener listener) {
         logger.traceEntry("params: {} {} {}", application, channelName, listener);
 
         AppState state = application.getState();
@@ -38,7 +38,7 @@ public class AppP2PManager {
         return logger.traceExit(channel);
     }
 
-    public <T> ArrayBlockingQueue<T> subscribeToChannel(Application application, P2PChannelName channelName) {
+    public <T> ArrayBlockingQueue<T> subscribeToChannel(Application application, P2PBroadcastChannelName channelName) {
         logger.traceEntry("params: {} {}", application, channelName);
 
         ArrayBlockingQueue<T> queue = new ArrayBlockingQueue<>(50000, true);

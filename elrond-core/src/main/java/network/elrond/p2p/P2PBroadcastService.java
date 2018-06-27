@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface P2PBroadcastService {
 
-    P2PBroadcastChanel createChannel(P2PConnection connection, P2PChannelName chanelName);
+    P2PBroadcastChanel createChannel(P2PConnection connection, P2PBroadcastChannelName chanelName);
 
     boolean subscribeToChannel(P2PBroadcastChanel chanel);
 

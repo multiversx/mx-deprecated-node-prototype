@@ -187,7 +187,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
             P2PConnection connection = state.getConnection();
             AppServiceProvider.getP2PObjectService().put(connection, hash, transaction);
 
-            P2PBroadcastChanel channel = state.getChanel(P2PChannelName.TRANSACTION);
+            P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.TRANSACTION);
             AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, hash);
 
 
