@@ -41,7 +41,7 @@ public class AppState implements Serializable {
 
     private ConsensusState consensusState = new ConsensusState();
 
-    private StatisticsManager statisticsManager = new StatisticsManager();
+    private StatisticsManager statisticsManager = new StatisticsManager(System.currentTimeMillis());
 
     private ArrayBlockingQueue<String> transactionsPool = new ArrayBlockingQueue<>(50000, true);
 

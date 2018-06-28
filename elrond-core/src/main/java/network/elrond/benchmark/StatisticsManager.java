@@ -13,37 +13,50 @@ public class StatisticsManager {
     private List<Statistic> statistics = new ArrayList<>();
 
     private long currentIndex = 0;
-    private Statistic currentStatistic;
+    private long currentMillis = 0;
+    private long startMillis = 0;
 
-    private long averageTps = 0;
-    private long maxTps = 0;
-    private long minTps = Integer.MAX_VALUE;
+    private Double averageTps = 0.0;
+    private Double maxTps = 0.0;
+    private Double minTps = Double.MAX_VALUE;
+    private Double liveTps = 0.0;
 
     private long averageNrTransactionsInBlock = 0;
     private long maxNrTransactionsInBlock = 0;
     private long minNrTransactionsInBlock = Integer.MAX_VALUE;
+    private long liveNrTransactionsInBlock = 0;
 
     private long averageRoundTime = 0;
+    private long liveRoundTime = 0;
+
+    private long totalProcessedTransactions = 0;
+
+    public StatisticsManager(long startMillis){
+        this.startMillis = startMillis;
+        currentMillis = startMillis;
+    }
 
     public void addStatistic(Statistic statistic) {
         logger.traceEntry("params: {}", statistic);
-        //long timeDifference = statistic.getCurrentTimeMillis() - currentStatistic.getCurrentTimeMillis();
-        long timeDifference = 0;
-        currentStatistic = statistic;
+
+        long ellapsedMillis = statistic.getCurrentTimeMillis() - currentMillis;
+        liveRoundTime = ellapsedMillis;
+        currentMillis = statistic.getCurrentTimeMillis();
 
         statistics.add(statistic);
         if (statistics.size() > maxStatistics){
             statistics.remove(0);
         }
 
-        long currentTps = statistic.getTps();
-        logger.trace("currentTps is " + currentTps);
-        ComputeTps(currentTps);
+        totalProcessedTransactions += statistic.getNrTransactionsInBlock();
+        liveTps  = statistic.getNrTransactionsInBlock() * 1000.0 / ellapsedMillis;
+        logger.trace("currentTps is " + liveTps);
+        ComputeTps(liveTps);
 
-        long currentNrTransactionsInBlock = statistic.getNrTransactionsInBlock();
-        computeNrTransactionsInBlock(currentNrTransactionsInBlock);
+        liveNrTransactionsInBlock = statistic.getNrTransactionsInBlock();
+        computeNrTransactionsInBlock(liveNrTransactionsInBlock);
 
-        computeAverageRoundTime(timeDifference);
+        computeAverageRoundTime(ellapsedMillis);
 
         currentIndex++;
         logger.traceExit();
@@ -54,7 +67,7 @@ public class StatisticsManager {
         logger.trace("averageNrTransactionsInBlock is " + averageNrTransactionsInBlock);
     }
 
-    public void ComputeTps(long currentTps) {
+    private void ComputeTps(Double currentTps) {
         if(maxTps <currentTps){
             maxTps = currentTps;
         }
@@ -63,11 +76,11 @@ public class StatisticsManager {
             minTps = currentTps;
         }
 
-        averageTps = (averageTps*currentIndex + currentTps) / (currentIndex+1);
+        averageTps = (totalProcessedTransactions * 1000.0) / (System.currentTimeMillis() - startMillis);
         logger.trace("averageTps is " + averageTps);
     }
 
-    public void computeNrTransactionsInBlock(long currentNrTransactionsInBlock) {
+    private void computeNrTransactionsInBlock(long currentNrTransactionsInBlock) {
         if(maxNrTransactionsInBlock <currentNrTransactionsInBlock){
             maxNrTransactionsInBlock = currentNrTransactionsInBlock;
         }
@@ -80,16 +93,20 @@ public class StatisticsManager {
         logger.trace("averageNrTransactionsInBlock is " + averageNrTransactionsInBlock);
     }
 
-    public long getAverageTps() {
+    public Double getAverageTps() {
         return averageTps;
     }
 
-    public long getMaxTps() {
+    public Double getMaxTps() {
         return maxTps;
     }
 
-    public long getMinTps() {
+    public Double getMinTps() {
         return minTps;
+    }
+
+    public Double getLiveTps() {
+        return liveTps;
     }
 
     public long getAverageNrTransactionsInBlock() {
@@ -104,11 +121,19 @@ public class StatisticsManager {
         return minNrTransactionsInBlock;
     }
 
-    public Statistic getCurrentStatistic() {
-        return currentStatistic;
+    public long getLiveNrTransactionsInBlock() {
+        return liveNrTransactionsInBlock;
     }
 
     public long getAverageRoundTime() {
         return averageRoundTime;
+    }
+
+    public long getLiveRoundTime() {
+        return liveRoundTime;
+    }
+
+    public long getTotalNrProcessedTransactions() {
+        return totalProcessedTransactions;
     }
 }

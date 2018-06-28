@@ -110,7 +110,7 @@ public class BootstrapServiceImpl implements BootstrapService {
             // Put index <=> hash mapping only on DHT
             P2PConnection connection = blockchain.getConnection();
             String blockNonce = block.getNonce().toString();
-            FuturePut futurePut = AppServiceProvider.getP2PObjectService().put(connection, blockNonce, blockHash, true, true);
+            FuturePut futurePut = AppServiceProvider.getP2PObjectService().put(connection, blockNonce, blockHash, true, false);
             if (!futurePut.isSuccess()){
                 result.combine(new ExecutionReport().ko("Not allowed to override block index " + blockNonce));
                 return result;
@@ -181,7 +181,7 @@ public class BootstrapServiceImpl implements BootstrapService {
             ExecutionReport reportTransaction = commitTransaction(genesisTransaction, genesisTransactionHash, blockchain);
             result.combine(reportTransaction);
 
-            ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(genesisBlock, accounts, blockchain);
+            ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(genesisBlock, accounts, blockchain,  state.getStatisticsManager());
             result.combine(executionReport);
 
             if (result.isOk()) {
@@ -236,7 +236,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                 Block block = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK);
 
                 logger.trace("re-running block to update internal state...");
-                ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain);
+                ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain,  state.getStatisticsManager());
                 result.combine(executionReport);
 
                 if (!result.isOk()) {
@@ -303,7 +303,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                 }
 
 
-                ExecutionReport executionReport = executionService.processBlock(block, accounts, blockchain);
+                ExecutionReport executionReport = executionService.processBlock(block, accounts, blockchain,  state.getStatisticsManager());
                 result.combine(executionReport);
 
                 if (!result.isOk()) {

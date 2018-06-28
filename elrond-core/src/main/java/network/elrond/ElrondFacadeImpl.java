@@ -241,12 +241,15 @@ public class ElrondFacadeImpl implements ElrondFacade {
         benchmarkResult.setActiveNodes(10);
         StatisticsManager statisticsManager = application.getState().getStatisticsManager();
 
+
         benchmarkResult.setAverageRoundTime(statisticsManager.getAverageRoundTime());
-        //benchmarkResult.setLiveNrTransactionsPerBlock(statisticsManager.getNrTransactionsInBlock());
+        benchmarkResult.setLiveNrTransactionsPerBlock(statisticsManager.getLiveNrTransactionsInBlock());
         benchmarkResult.setAverageNrTxPerBlock(statisticsManager.getAverageNrTransactionsInBlock());
         benchmarkResult.setAverageTps(statisticsManager.getAverageTps());
-        benchmarkResult.setLiveTps(statisticsManager.getCurrentStatistic().getTps());
+        benchmarkResult.setLiveTps(statisticsManager.getLiveTps());
         benchmarkResult.setPeakTps(statisticsManager.getMaxTps());
+        benchmarkResult.setLiveRoundTime(statisticsManager.getLiveRoundTime());
+        benchmarkResult.setTotalNrProcessedTransactions(statisticsManager.getTotalNrProcessedTransactions());
         benchmarkResult.setNrShards(2);
         return benchmarkResult;
     }
