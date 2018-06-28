@@ -22,10 +22,10 @@ public class Accounts implements Serializable, PersistenceUnitContainer {
     private final Set<AccountAddress> addresses;
     private static final Logger logger = LogManager.getLogger(Accounts.class);
 
-    public Accounts(AccountsContext context, AccountsPersistenceUnit<AccountAddress, AccountState> unit) throws IOException {
+    public Accounts(AccountsContext context, AccountsPersistenceUnit<AccountAddress, AccountState> unit) {
         logger.traceEntry();
-        Util.check(context!=null, "context!=null");
-        Util.check(unit!=null, "unit!=null");
+        Util.check(context != null, "context!=null");
+        Util.check(unit != null, "unit!=null");
         this.context = context;
         this.unit = unit;
         addresses = new HashSet<>();

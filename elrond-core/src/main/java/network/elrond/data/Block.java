@@ -1,7 +1,6 @@
 package network.elrond.data;
 
 import network.elrond.AsciiTable;
-import network.elrond.core.CollectionUtil;
 import network.elrond.core.Util;
 import network.elrond.sharding.Shard;
 
@@ -242,9 +241,18 @@ public class Block implements Serializable, AsciiPrintable {
         table.getData().add(row5);
 
         AsciiTable.Row row6 = new AsciiTable.Row();
-        row6.getValues().add("Transactions in block");
-        row6.getValues().add(CollectionUtil.implode(listTXHashes, " | ", e -> Util.byteArrayToHexString(e)));
+        row6.getValues().add("----------------------");
+        row6.getValues().add("----------------------------------------------------------------");
         table.getData().add(row6);
+
+
+        for (int index = 0; index < listTXHashes.size(); index++) {
+            byte[] tx = listTXHashes.get(index);
+            AsciiTable.Row row7 = new AsciiTable.Row();
+            row7.getValues().add("#" + index);
+            row7.getValues().add(Util.byteArrayToHexString(tx));
+            table.getData().add(row7);
+        }
 
 
         table.calculateColumnWidth();
