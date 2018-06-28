@@ -342,8 +342,8 @@ public class Transaction implements Serializable, AsciiPrintable {
         table.getData().add(row2);
 
         AsciiTable.Row row3 = new AsciiTable.Row();
-        row3.getValues().add("To Shard");
-        row3.getValues().add(receiverShard.getIndex() + "");
+        row3.getValues().add("From Shard");
+        row3.getValues().add(senderShard.getIndex() + "");
         table.getData().add(row3);
 
         AsciiTable.Row row4 = new AsciiTable.Row();

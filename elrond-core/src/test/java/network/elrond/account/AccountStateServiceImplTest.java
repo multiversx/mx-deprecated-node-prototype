@@ -37,7 +37,7 @@ public class AccountStateServiceImplTest {
 
     @Test
     public void testGetOrCreateaAccountStateWithExistingAddress() throws IOException, ClassNotFoundException {
-        AccountState initialState = new AccountState();
+        AccountState initialState = new AccountState(AccountAddress.EMPTY_ADDRESS);
         initialState.setNonce(BigInteger.TEN);
         accountStateService.setAccountState(address, initialState, accounts);
         AccountState state = accountStateService.getOrCreateAccountState(address, accounts);
@@ -52,7 +52,7 @@ public class AccountStateServiceImplTest {
 
     @Test
     public void testGetAccountStateWithExistingAddress() throws IOException, ClassNotFoundException {
-        AccountState initialState = new AccountState();
+        AccountState initialState = new AccountState(AccountAddress.EMPTY_ADDRESS);
         initialState.setNonce(BigInteger.TEN);
         accountStateService.setAccountState(address, initialState, accounts);
         AccountState state = accountStateService.getOrCreateAccountState(address, accounts);
@@ -67,7 +67,7 @@ public class AccountStateServiceImplTest {
 
     @Test
     public void testRollbackAccountWithExistingAddress() throws IOException, ClassNotFoundException {
-        AccountState initialState = new AccountState();
+        AccountState initialState = new AccountState(AccountAddress.EMPTY_ADDRESS);
         initialState.setNonce(BigInteger.TEN);
         accountStateService.setAccountState(address, initialState, accounts);
         AccountState state = accountStateService.getAccountState(address, accounts);
@@ -79,7 +79,7 @@ public class AccountStateServiceImplTest {
 
     @Test
     public void testCommitAccountWithExistingAddress() throws IOException, ClassNotFoundException {
-        AccountState initialState = new AccountState();
+        AccountState initialState = new AccountState(AccountAddress.EMPTY_ADDRESS);
         initialState.setNonce(BigInteger.ONE);
         initialState.setBalance(BigInteger.TEN);
         accountStateService.setAccountState(address, initialState, accounts);
@@ -97,7 +97,7 @@ public class AccountStateServiceImplTest {
 
     @Test
     public void convertAccountStateToRLPAndBackAgain(){
-        AccountState initialState = new AccountState();
+        AccountState initialState = new AccountState(AccountAddress.EMPTY_ADDRESS);
         initialState.setNonce(BigInteger.ONE);
         initialState.setBalance(BigInteger.TEN);
         byte[] rlp = accountStateService.convertAccountStateToRLP(initialState);
@@ -108,7 +108,7 @@ public class AccountStateServiceImplTest {
 
     @Test
     public void convertAccountStateToRLPAndBackAgainWithOneZero(){
-        AccountState initialState = new AccountState();
+        AccountState initialState = new AccountState(AccountAddress.EMPTY_ADDRESS);
         byte[] rlp = accountStateService.convertAccountStateToRLP(initialState);
         AccountState back = accountStateService.convertToAccountStateFromRLP(rlp);
         Assert.assertEquals(BigInteger.ZERO, back.getNonce());

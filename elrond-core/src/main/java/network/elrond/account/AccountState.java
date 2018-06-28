@@ -10,23 +10,27 @@ import java.io.Serializable;
 import java.math.BigInteger;
 
 public class AccountState implements Serializable, AsciiPrintable {
+
     private static final Logger logger = LogManager.getLogger(AccountState.class);
 
     private BigInteger nonce;
     private BigInteger balance;
-    private boolean dirty;
+    private AccountAddress address;
 
-    public AccountState() {
-        this(BigInteger.ZERO, BigInteger.ZERO);
+
+    public AccountState(AccountAddress address) {
+        this(BigInteger.ZERO, BigInteger.ZERO, address);
     }
 
-    public AccountState(BigInteger nonce, BigInteger balance) {
+    public AccountState(BigInteger nonce, BigInteger balance, AccountAddress address) {
         logger.traceEntry("params: {} {}", nonce, balance);
         Util.check(!(nonce == null || nonce.compareTo(BigInteger.ZERO) < 0), "nonce>=0");
         Util.check(!(balance == null || balance.compareTo(BigInteger.ZERO) < 0), "balance>=0");
+        Util.check(address != null, "address !=null");
 
         this.nonce = nonce;
         this.balance = balance;
+        this.address = address;
         logger.traceExit();
     }
 
@@ -36,6 +40,8 @@ public class AccountState implements Serializable, AsciiPrintable {
 
         setNonce(source.getNonce());
         setBalance(source.getBalance());
+        setAddress(source.getAddress());
+
         logger.traceExit();
     }
 
@@ -74,26 +80,26 @@ public class AccountState implements Serializable, AsciiPrintable {
         return logger.traceExit(this.balance);
     }
 
+    public AccountAddress getAddress() {
+        return address;
+    }
+
+    public void setAddress(AccountAddress address) {
+        this.address = address;
+    }
+
     public String toString() {
         return String.format("AccountState{nonce=%d, balance=%d}", this.getNonce(), this.getBalance());
-    }
-
-    public boolean isDirty() {
-        return dirty;
-    }
-
-    public void setDirty(boolean dirty) {
-        this.dirty = dirty;
     }
 
     @Override
     public AsciiTable print() {
 
         AsciiTable table = new AsciiTable();
-        table.setMaxColumnWidth(20);
+        table.setMaxColumnWidth(90);
 
-        table.getColumns().add(new AsciiTable.Column("Nonce " + nonce));
-        table.getColumns().add(new AsciiTable.Column(""));
+        table.getColumns().add(new AsciiTable.Column("Account "));
+        table.getColumns().add(new AsciiTable.Column(Util.byteArrayToHexString(address.getBytes())));
 
         AsciiTable.Row row0 = new AsciiTable.Row();
         row0.getValues().add("Nonce");
