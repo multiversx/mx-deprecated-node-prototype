@@ -11,7 +11,6 @@ import network.elrond.processor.AppTask;
 import network.elrond.processor.impl.executor.ChronologyBlockTask;
 import network.elrond.processor.impl.initialization.NtpClientInitializerProcessor;
 import network.elrond.service.AppServiceProvider;
-import org.junit.Test;
 
 public class ChronologyBlockTaskTest {
 
@@ -45,7 +44,7 @@ public class ChronologyBlockTaskTest {
         } while(true);
     }
 
-    @Test
+
     public void testTimeConsumingBlocksOnEventHandlers() throws Exception{
         ChronologyService chronologyService = AppServiceProvider.getChronologyService();
         ChronologyBlockTask chronologyBlockTask = new ChronologyBlockTask();

@@ -43,6 +43,7 @@ public class AppShardingManager {
                 .stream()
                 .filter(Objects::nonNull)
                 .map(peerAddress -> peerAddress.peerId().toString())
+                .sorted()
                 .collect(Collectors.toList());
     }
 

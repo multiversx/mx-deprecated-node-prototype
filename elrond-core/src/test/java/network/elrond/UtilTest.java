@@ -10,17 +10,14 @@ import network.elrond.consensus.Validator;
 import network.elrond.core.Util;
 import network.elrond.data.Block;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-import org.apache.logging.log4j.core.LoggerContext;
 import org.junit.Test;
 
-import java.lang.management.ManagementFactory;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 
 
 public class UtilTest {
@@ -141,6 +138,7 @@ public class UtilTest {
 
     public static void createDummyGenesisBlock(Blockchain blockchain){
         Block blockGenesis = new Block();
+        blockGenesis.setShard(new Shard(0));
         blockGenesis.setTimestamp(System.currentTimeMillis() - 1000);
 
         blockchain.setGenesisBlock(blockGenesis);

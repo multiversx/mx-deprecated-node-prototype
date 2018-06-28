@@ -3,6 +3,7 @@ package network.elrond.p2p;
 import net.tomp2p.peers.PeerAddress;
 import network.elrond.Application;
 import network.elrond.application.AppContext;
+import network.elrond.crypto.PrivateKey;
 import network.elrond.processor.AppTasks;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Assert;
@@ -22,8 +23,12 @@ public class P2PAppBroadcastTest {
         messagesCount.set(0);
 
         AppContext context = createServer(6000);
+        context.setPrivateKey(new PrivateKey("seed"));
         Application app = new Application(context);
+        AppTasks.INITIALIZE_PUBLIC_PRIVATE_KEYS.process(app);
         AppTasks.INIT_P2P_CONNECTION.process(app);
+        AppTasks.INIT_SHARDING.process(app);
+        app.getState().getConnection().setShard(app.getState().getShard());
 
         P2PBroadcastChanel channel = AppP2PManager.instance().subscribeToChannel(app, P2PBroadcastChannelName.TRANSACTION, new P2PChannelListener() {
             @Override
@@ -48,8 +53,12 @@ public class P2PAppBroadcastTest {
         messagesCount.set(0);
 
         AppContext context = createServer(6000);
+        context.setPrivateKey(new PrivateKey("seed"));
         Application app = new Application(context);
+        AppTasks.INITIALIZE_PUBLIC_PRIVATE_KEYS.process(app);
         AppTasks.INIT_P2P_CONNECTION.process(app);
+        AppTasks.INIT_SHARDING.process(app);
+        app.getState().getConnection().setShard(app.getState().getShard());
 
         ArrayBlockingQueue<Object> queue = AppP2PManager.instance().subscribeToChannel(app, P2PBroadcastChannelName.TRANSACTION);
 
