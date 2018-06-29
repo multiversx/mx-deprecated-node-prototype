@@ -29,5 +29,6 @@ public class AppStateUtil {
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList())));
+
     }
 }
