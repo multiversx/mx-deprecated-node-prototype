@@ -105,7 +105,7 @@ public class BootstrapServiceImpl implements BootstrapService {
     }
 
     @Override
-    public ExecutionReport commitBlock(Block block, String blockHash, Blockchain blockchain, Accounts accounts) {
+    public ExecutionReport commitBlock(Block block, String blockHash, Blockchain blockchain) {
         logger.traceEntry("params: {} {} {}", block, blockHash, blockchain);
         ExecutionReport result = new ExecutionReport();
 
@@ -133,24 +133,6 @@ public class BootstrapServiceImpl implements BootstrapService {
             logger.trace("done updating current block");
 
             result.combine(new ExecutionReport().ok("Put block in blockchain : " + blockHash + " # " + block));
-
-            logger.info("New block synchronized with hash {}", blockHash);
-
-            logger.info("\n" + block.print().render());
-            //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
-            logger.info("\n" + AsciiTableUtil.listToTables(accounts.getAddresses()
-                    .stream()
-                    .map(accountAddress -> {
-                        try {
-                            return AppServiceProvider.getAccountStateService().getAccountState(accountAddress, accounts);
-                        } catch (IOException | ClassNotFoundException e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-                    })
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList())));
-
         } catch (Exception ex) {
             result.combine(new ExecutionReport().ko(ex));
         }
@@ -196,8 +178,7 @@ public class BootstrapServiceImpl implements BootstrapService {
         logger.trace("Generated genesis transaction and block.");
 
         try {
-//            ExecutionReport reportBlock = commitBlock(genesisBlock, genesisBlockHash, blockchain);
-            ExecutionReport reportBlock = commitBlock(genesisBlock, genesisBlockHash, blockchain, accounts); // PMS: 2018.06.29
+            ExecutionReport reportBlock = commitBlock(genesisBlock, genesisBlockHash, blockchain);
             result.combine(reportBlock);
 
             ExecutionReport reportTransaction = commitTransaction(genesisTransaction, genesisTransactionHash, blockchain);
@@ -266,8 +247,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                     return logger.traceExit(result);
                 }
 
-//                commitBlock(block, blockHash, blockchain);
-                commitBlock(block, blockHash, blockchain, accounts); // PMS: 2018.06.29
+                commitBlock(block, blockHash, blockchain);
                 commitBlockTransactions(block, blockchain);
                 // Update current block
                 blockchain.setCurrentBlock(block);
@@ -337,13 +317,30 @@ public class BootstrapServiceImpl implements BootstrapService {
                 AppBlockManager.instance().removeAlreadyProcessedTransactionsFromPool(state, block);
 
                 result.ok("Added block in blockchain : " + blockHash + " # " + block);
+
+                logger.info("New block synchronized with hash {}", blockHash);
+
+                logger.info("\n" + block.print().render());
+                //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
+                logger.info("\n" + AsciiTableUtil.listToTables(accounts.getAddresses()
+                        .stream()
+                        .map(accountAddress -> {
+                            try {
+                                return AppServiceProvider.getAccountStateService().getAccountState(accountAddress, accounts);
+                            } catch (IOException | ClassNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                            return null;
+                        })
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList())));
+
                 blockchain.setCurrentBlockIndex(blockIndex);
                 blockchain.setCurrentBlock(block);
 
                 // Update current block
                 blockchain.setCurrentBlock(block);
                 logger.trace("done updating current block");
-
 
             } catch (Exception ex) {
                 result.ko(ex);
