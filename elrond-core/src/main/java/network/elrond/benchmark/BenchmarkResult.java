@@ -1,11 +1,13 @@
 package network.elrond.benchmark;
 
 public class BenchmarkResult {
-    private long activeNodes;
+    private long networkActiveNodes;
+    private long shardActiveNodes;
     private long nrShards;
     private long averageRoundTime;
     private long liveRoundTime;
     private long averageNrTxPerBlock;
+
 
     private Double liveTps;
     private Double peakTps;
@@ -38,12 +40,20 @@ public class BenchmarkResult {
         this.averageTps = averageTps;
     }
 
-    public long getActiveNodes() {
-        return activeNodes;
+    public long getNetworkActiveNodes() {
+        return networkActiveNodes;
     }
 
-    public void setActiveNodes(long activeNodes) {
-        this.activeNodes = activeNodes;
+    public void setNetworkActiveNodes(long networkActiveNodes) {
+        this.networkActiveNodes = networkActiveNodes;
+    }
+
+    public long getShardActiveNodes() {
+        return shardActiveNodes;
+    }
+
+    public void setShardActiveNodes(long shardActiveNodes) {
+        this.shardActiveNodes = shardActiveNodes;
     }
 
     public long getNrShards() {

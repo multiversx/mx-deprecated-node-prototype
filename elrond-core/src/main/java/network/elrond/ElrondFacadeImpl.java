@@ -238,10 +238,11 @@ public class ElrondFacadeImpl implements ElrondFacade {
     @Override
     public BenchmarkResult getBenchmarkResult(String benchmarkId, Application application) {
         BenchmarkResult benchmarkResult = new BenchmarkResult();
-        benchmarkResult.setActiveNodes(10);
+
         StatisticsManager statisticsManager = application.getState().getStatisticsManager();
 
-
+        benchmarkResult.setNetworkActiveNodes(statisticsManager.getNumberNodesInNetwork());
+        benchmarkResult.setShardActiveNodes(statisticsManager.getNumberNodesInShard());
         benchmarkResult.setAverageRoundTime(statisticsManager.getAverageRoundTime());
         benchmarkResult.setLiveNrTransactionsPerBlock(statisticsManager.getLiveNrTransactionsInBlock());
         benchmarkResult.setAverageNrTxPerBlock(statisticsManager.getAverageNrTransactionsInBlock());
@@ -250,7 +251,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
         benchmarkResult.setPeakTps(statisticsManager.getMaxTps());
         benchmarkResult.setLiveRoundTime(statisticsManager.getLiveRoundTime());
         benchmarkResult.setTotalNrProcessedTransactions(statisticsManager.getTotalNrProcessedTransactions());
-        benchmarkResult.setNrShards(2);
+        benchmarkResult.setNrShards(statisticsManager.getNumberOfShards());
         return benchmarkResult;
     }
 

@@ -42,5 +42,10 @@ public class ShardingServiceImpl implements ShardingService {
         throw new RuntimeException("Not supported operation !");
     }
 
+    @Override
+    public Integer getNumberOfShards() {
+        return MAX_ACTIVE_SHARDS_CONT;
+    }
+
 
 }

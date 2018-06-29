@@ -8,4 +8,6 @@ public interface ShardingService {
 
     ShardOperation getShardOperation(Shard shard, Transaction transaction);
 
+    Integer getNumberOfShards();
+
 }
