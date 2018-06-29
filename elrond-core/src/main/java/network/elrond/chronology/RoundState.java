@@ -1,7 +1,7 @@
 package network.elrond.chronology;
 
 import network.elrond.consensus.handlers.AssemblyBlockHandler;
-import network.elrond.consensus.handlers.NopHandler;
+import network.elrond.consensus.handlers.EndRoundHandler;
 import network.elrond.consensus.handlers.StartRoundHandler;
 import network.elrond.core.EventHandler;
 
@@ -10,7 +10,7 @@ import java.util.EnumSet;
 public enum RoundState {
     START_ROUND(0, new StartRoundHandler()),
     PROPOSE_BLOCK(2500, new AssemblyBlockHandler()),
-    END_ROUND(0, new NopHandler());
+    END_ROUND(0, new EndRoundHandler());
 
 
     private final int roundStateDuration;

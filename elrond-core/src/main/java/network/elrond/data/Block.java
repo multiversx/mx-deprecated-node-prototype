@@ -209,6 +209,12 @@ public class Block implements Serializable, AsciiPrintable {
         table.getColumns().add(new AsciiTable.Column("Block "));
         table.getColumns().add(new AsciiTable.Column(nonce + ""));
 
+        AsciiTable.Row rowS = new AsciiTable.Row();
+        rowS.getValues().add("Shard");
+        rowS.getValues().add(shard.getIndex() + "");
+        table.getData().add(rowS);
+
+
         AsciiTable.Row row0 = new AsciiTable.Row();
         row0.getValues().add("Nonce");
         row0.getValues().add(nonce.toString());

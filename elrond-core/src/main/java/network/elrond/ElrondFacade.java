@@ -4,12 +4,15 @@ import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
 import network.elrond.benchmark.BenchmarkResult;
 import network.elrond.benchmark.MultipleTransactionResult;
+import network.elrond.blockchain.Blockchain;
 import network.elrond.crypto.PKSKPair;
+import network.elrond.data.Block;
 import network.elrond.data.Receipt;
 import network.elrond.data.Transaction;
 import network.elrond.p2p.PingResponse;
 
 import java.math.BigInteger;
+import java.util.List;
 
 public interface ElrondFacade {
 
@@ -93,5 +96,9 @@ public interface ElrondFacade {
      * @param application
      * @return
      */
-    BenchmarkResult getBenchmarkResult(String benchmarkId, Application application);
+    List<BenchmarkResult> getBenchmarkResult(String benchmarkId, Application application);
+
+    Transaction getTransactionFromHash(String transactionHash, Blockchain blockchain);
+
+    Block getBlockFromHash(String blockHash, Blockchain blockchain);
 }

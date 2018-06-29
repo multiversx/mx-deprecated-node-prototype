@@ -134,7 +134,9 @@ public class AccountStateServiceImpl implements AccountStateService {
         AccountState accountState = null;
 
         try {
-            AccountAddress accountAddress = AccountAddress.fromBytes(Util.PUBLIC_KEY_MINTING.getValue());
+
+            //AccountAddress accountAddress = AccountAddress.fromBytes(Util.PUBLIC_KEY_MINTING.getValue());
+            AccountAddress accountAddress = AppServiceProvider.getShardingService().getAddressForMinting(accounts.getShard());
             accountState = getOrCreateAccountState(accountAddress, accounts);
             accountState.setBalance(Util.VALUE_MINTING);
             setAccountState(accountAddress, accountState, accounts);
@@ -159,11 +161,14 @@ public class AccountStateServiceImpl implements AccountStateService {
             initialValue = Util.VALUE_MINTING;
         }
 
+        PrivateKey mintingPrivateKey = AppServiceProvider.getShardingService().getPrivateKeyForMinting(state.getShard());
+        PublicKey mintingPublicKey = AppServiceProvider.getShardingService().getPublicKeyForMinting(state.getShard());
+
         logger.trace("Creating mint transaction...");
-        Transaction transactionMint = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING,
+        Transaction transactionMint = AppServiceProvider.getTransactionService().generateTransaction(mintingPublicKey,
                 new PublicKey(Util.hexStringToByteArray(initialAddress)), initialValue, BigInteger.ZERO);
         logger.trace("Signing mint transaction...");
-        AppServiceProvider.getTransactionService().signTransaction(transactionMint, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
+        AppServiceProvider.getTransactionService().signTransaction(transactionMint, mintingPrivateKey.getValue(), mintingPublicKey.getValue());
 
         logger.trace("Generating genesis block...");
         Block genesisBlock = new Block();

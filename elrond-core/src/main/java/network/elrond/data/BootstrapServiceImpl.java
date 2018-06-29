@@ -19,6 +19,7 @@ import org.mapdb.Fun;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -194,6 +195,24 @@ public class BootstrapServiceImpl implements BootstrapService {
             if (result.isOk()) {
                 logger.trace("Execution of genesis block was successful!");
                 setCurrentBlockIndex(LocationType.BOTH, genesisBlock.getNonce(), blockchain);
+
+
+                logger.info("\n" + genesisBlock.print().render());
+                logger.info("\n" + AsciiTableUtil.listToTables(Arrays.asList(genesisTransaction)));
+                logger.info("\n" + AsciiTableUtil.listToTables(accounts.getAddresses()
+                        .stream()
+                        .map(accountAddress -> {
+                            try {
+                                return AppServiceProvider.getAccountStateService().getAccountState(accountAddress, accounts);
+                            } catch (IOException | ClassNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                            return null;
+                        })
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList())));
+
+
             }
 
 

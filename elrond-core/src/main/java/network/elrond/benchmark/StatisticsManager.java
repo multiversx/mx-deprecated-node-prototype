@@ -1,16 +1,25 @@
 package network.elrond.benchmark;
 
+import network.elrond.application.AppState;
+import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.AppShardingManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StatisticsManager {
+public class StatisticsManager implements Serializable {
     private static final Logger logger = LogManager.getLogger(StatisticsManager.class);
 
     private static final int maxStatistics = 100;
     private List<Statistic> statistics = new ArrayList<>();
+
+    private Integer currentShardNumber;
+    private Integer numberOfShards;
+    private Integer numberNodesInShard;
+    private Integer numberNodesInNetwork;
 
     private long currentIndex = 0;
     private long currentMillis = 0;
@@ -31,9 +40,16 @@ public class StatisticsManager {
 
     private long totalProcessedTransactions = 0;
 
-    public StatisticsManager(long startMillis){
+    public StatisticsManager(long startMillis) {
         this.startMillis = startMillis;
         currentMillis = startMillis;
+    }
+
+    public void updateNetworkStats(AppState state) {
+        currentShardNumber = state.getShard().getIndex();
+        numberOfShards = AppServiceProvider.getShardingService().getNumberOfShards();
+        numberNodesInNetwork = AppShardingManager.instance().getNumberNodesInNetwork(state);
+        numberNodesInShard = AppShardingManager.instance().getNumberNodesInShard(state);
     }
 
     public void addStatistic(Statistic statistic) {
@@ -44,12 +60,12 @@ public class StatisticsManager {
         currentMillis = statistic.getCurrentTimeMillis();
 
         statistics.add(statistic);
-        if (statistics.size() > maxStatistics){
+        if (statistics.size() > maxStatistics) {
             statistics.remove(0);
         }
 
         totalProcessedTransactions += statistic.getNrTransactionsInBlock();
-        liveTps  = statistic.getNrTransactionsInBlock() * 1000.0 / ellapsedMillis;
+        liveTps = statistic.getNrTransactionsInBlock() * 1000.0 / ellapsedMillis;
         logger.trace("currentTps is " + liveTps);
         ComputeTps(liveTps);
 
@@ -63,16 +79,16 @@ public class StatisticsManager {
     }
 
     private void computeAverageRoundTime(long timeDifference) {
-        averageRoundTime = (averageRoundTime *currentIndex + timeDifference) / (currentIndex+1);
+        averageRoundTime = (averageRoundTime * currentIndex + timeDifference) / (currentIndex + 1);
         logger.trace("averageNrTransactionsInBlock is " + averageNrTransactionsInBlock);
     }
 
     private void ComputeTps(Double currentTps) {
-        if(maxTps <currentTps){
+        if (maxTps < currentTps) {
             maxTps = currentTps;
         }
 
-        if(minTps > currentTps){
+        if (minTps > currentTps) {
             minTps = currentTps;
         }
 
@@ -81,15 +97,15 @@ public class StatisticsManager {
     }
 
     private void computeNrTransactionsInBlock(long currentNrTransactionsInBlock) {
-        if(maxNrTransactionsInBlock <currentNrTransactionsInBlock){
+        if (maxNrTransactionsInBlock < currentNrTransactionsInBlock) {
             maxNrTransactionsInBlock = currentNrTransactionsInBlock;
         }
 
-        if(minNrTransactionsInBlock > currentNrTransactionsInBlock){
+        if (minNrTransactionsInBlock > currentNrTransactionsInBlock) {
             minNrTransactionsInBlock = currentNrTransactionsInBlock;
         }
 
-        averageNrTransactionsInBlock = (averageNrTransactionsInBlock *currentIndex + currentNrTransactionsInBlock) /(currentIndex+1);
+        averageNrTransactionsInBlock = (averageNrTransactionsInBlock * currentIndex + currentNrTransactionsInBlock) / (currentIndex + 1);
         logger.trace("averageNrTransactionsInBlock is " + averageNrTransactionsInBlock);
     }
 
@@ -125,6 +141,18 @@ public class StatisticsManager {
         return liveNrTransactionsInBlock;
     }
 
+    public Integer getNumberOfShards() {
+        return numberOfShards;
+    }
+
+    public Integer getNumberNodesInShard() {
+        return numberNodesInShard;
+    }
+
+    public Integer getNumberNodesInNetwork() {
+        return numberNodesInNetwork;
+    }
+
     public long getAverageRoundTime() {
         return averageRoundTime;
     }
@@ -135,5 +163,9 @@ public class StatisticsManager {
 
     public long getTotalNrProcessedTransactions() {
         return totalProcessedTransactions;
+    }
+
+    public Integer getCurrentShardNumber() {
+        return currentShardNumber;
     }
 }

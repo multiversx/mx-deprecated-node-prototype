@@ -9,8 +9,10 @@ import network.elrond.api.manager.ElrondWebSocketManager;
 import network.elrond.application.AppContext;
 import network.elrond.benchmark.BenchmarkResult;
 import network.elrond.benchmark.MultipleTransactionResult;
+import network.elrond.blockchain.Blockchain;
 import network.elrond.core.Util;
 import network.elrond.crypto.PKSKPair;
+import network.elrond.data.Block;
 import network.elrond.data.BootstrapType;
 import network.elrond.data.Receipt;
 import network.elrond.data.Transaction;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.List;
 
 @Component
 class ElrondApiNode {
@@ -53,7 +56,7 @@ class ElrondApiNode {
             setupRestoreDir(new File(blockchainRestorePath), new File(blockchainPath));
         }
 
-        if (bootstrapType.equals(BootstrapType.START_FROM_SCRATCH)){
+        if (bootstrapType.equals(BootstrapType.START_FROM_SCRATCH)) {
             logger.trace("START_FROM_SCRATCH selected!");
         }
 
@@ -75,7 +78,7 @@ class ElrondApiNode {
         return logger.traceExit(facade.getBalance(address, application));
     }
 
-    BenchmarkResult getBenchmarkResult(String benchmarkId) {
+    List<BenchmarkResult> getBenchmarkResult(String benchmarkId) {
         logger.traceEntry("params: {}", benchmarkId);
         ElrondFacade facade = getFacade();
         return logger.traceExit(facade.getBenchmarkResult(benchmarkId, application));
@@ -90,6 +93,7 @@ class ElrondApiNode {
         logger.traceEntry("params: {} {}", receiver, value);
         return logger.traceExit(getFacade().send(receiver, value, application));
     }
+
     Receipt getReceipt(String transactionHash) {
         logger.traceEntry("params: {}", transactionHash);
         return logger.traceExit(getFacade().getReceipt(transactionHash, application));
@@ -105,6 +109,24 @@ class ElrondApiNode {
         logger.traceEntry();
         ElrondFacade facade = getFacade();
         return logger.traceExit(facade.generatePublicKeyAndPrivateKey(privateKey));
+    }
+
+    Transaction getTransactionFromHash(String transactionHash){
+        logger.traceEntry("params: {}", transactionHash);
+        ElrondFacade facade = getFacade();
+        Blockchain blockchain = application.getState().getBlockchain();
+
+        Transaction transaction = facade.getTransactionFromHash(transactionHash, blockchain);
+        return logger.traceExit(transaction);
+    }
+
+    Block getBlockFromHash(String blockHash){
+        logger.traceEntry("params: {}", blockHash);
+        ElrondFacade facade = getFacade();
+        Blockchain blockchain = application.getState().getBlockchain();
+
+        Block block = facade.getBlockFromHash(blockHash, blockchain);
+        return logger.traceExit(block);
     }
 
     private void setupRestoreDir(File sourceDir, File destinationDir) throws IOException {
@@ -127,7 +149,4 @@ class ElrondApiNode {
         }
         logger.traceExit();
     }
-
-
-
 }
