@@ -12,10 +12,7 @@ import network.elrond.chronology.ChronologyService;
 import network.elrond.chronology.NTPClient;
 import network.elrond.chronology.Round;
 import network.elrond.chronology.RoundState;
-import network.elrond.core.AsciiTableUtil;
-import network.elrond.core.ObjectUtil;
-import network.elrond.core.ThreadUtil;
-import network.elrond.core.Util;
+import network.elrond.core.*;
 import network.elrond.crypto.MultiSignatureService;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
@@ -106,20 +103,7 @@ public class AppBlockManager {
 
                 logger.info("New block proposed with hash {}", hashBlock);
 
-                logger.info("\n" + block.print().render());
-                //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
-                logger.info("\n" + AsciiTableUtil.listToTables(accounts.getAddresses()
-                        .stream()
-                        .map(accountAddress -> {
-                            try {
-                                return AppServiceProvider.getAccountStateService().getAccountState(accountAddress, accounts);
-                            } catch (IOException | ClassNotFoundException e) {
-                                e.printStackTrace();
-                            }
-                            return null;
-                        })
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList())));
+                AppStateUtil.print(block, accounts);
             }
 
             return logger.traceExit(block);
