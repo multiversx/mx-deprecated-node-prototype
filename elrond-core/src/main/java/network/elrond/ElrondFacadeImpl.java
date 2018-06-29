@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ElrondFacadeImpl implements ElrondFacade {
     private static final Logger logger = LogManager.getLogger(ElrondFacadeImpl.class);
@@ -152,19 +153,17 @@ public class ElrondFacadeImpl implements ElrondFacade {
         MultipleTransactionResult result = new MultipleTransactionResult();
         List<Transaction> transactions = new ArrayList<>();
         try {
-        for (int i = 0; i < nrTransactions; i++) {
-            Transaction transaction = generateTransaction(receiver, value, application.getState());
-            transactions.add(transaction);
+            for (int i = 0; i < nrTransactions; i++) {
+                Transaction transaction = generateTransaction(receiver, value, application.getState());
+                transactions.add(transaction);
 //            if (transaction == null) {
 //                result.setFailedTransactionsNumber(result.getFailedTransactionsNumber() + 1);
 //            } else {
 //                result.setSuccessfulTransactionsNumber(result.getSuccessfulTransactionsNumber() + 1);
 //            }
-        }
+            }
 
-
-
-            transactions.stream().parallel().forEach((tr)-> {
+            transactions.stream().parallel().filter(Objects::nonNull).forEach((tr)-> {
                 try {
                     sendTransaction(application.getState(), tr);
                 } catch (IOException e) {
@@ -172,12 +171,16 @@ public class ElrondFacadeImpl implements ElrondFacade {
                 }
             });
 
+            int successful =  (int) transactions.stream().filter(Objects::nonNull).count();
+            result.setSuccessfulTransactionsNumber(successful);
+            result.setFailedTransactionsNumber(nrTransactions - successful);
 
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+
         return result;
     }
 
@@ -192,8 +195,9 @@ public class ElrondFacadeImpl implements ElrondFacade {
         try {
 
             Transaction transaction = generateTransaction(receiver, value, application.getState());
-
-            sendTransaction(application.getState(), transaction);
+            if(transaction!=null) {
+                sendTransaction(application.getState(), transaction);
+            }
 
             return logger.traceExit(transaction);
 
