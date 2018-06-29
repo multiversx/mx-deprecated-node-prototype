@@ -107,7 +107,7 @@ public class AppBlockManager {
 
                 logger.info("New block proposed with hash {}", hashBlock);
 
-                AppStateUtil.print(block, accounts);
+                AppStateUtil.printBlockAndAccounts(block, accounts);
             }
 
             return logger.traceExit(block);

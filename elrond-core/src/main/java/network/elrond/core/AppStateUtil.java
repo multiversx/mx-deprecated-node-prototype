@@ -14,7 +14,7 @@ public class AppStateUtil {
 
     private static final Logger logger = LogManager.getLogger(AppStateUtil.class);
 
-    public static void print(Block block, Accounts accounts) {
+    public static void printBlockAndAccounts(Block block, Accounts accounts) {
 
         logger.info("\n" + block.print().render());
         logger.info("\n" + AsciiTableUtil.listToTables(accounts.getAddresses()
