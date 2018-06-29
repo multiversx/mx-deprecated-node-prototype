@@ -8,16 +8,19 @@ import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.blockchain.SettingsType;
 import network.elrond.chronology.NTPClient;
+import network.elrond.core.AsciiTableUtil;
 import network.elrond.core.Util;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mapdb.Fun;
-import org.spongycastle.util.encoders.Base64;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.List;
 
 public class BootstrapServiceImpl implements BootstrapService {
     private static final Logger logger = LogManager.getLogger(BootstrapServiceImpl.class);
@@ -128,6 +131,9 @@ public class BootstrapServiceImpl implements BootstrapService {
             // Update current block
             blockchain.setCurrentBlock(block);
             logger.trace("done updating current block");
+
+            //Maintain processed transactions
+            blockchain.getTransactionsProcessed().addBlock(block);
 
             result.combine(new ExecutionReport().ok("Put block in blockchain : " + blockHash + " # " + block));
         } catch (Exception ex) {
@@ -263,12 +269,14 @@ public class BootstrapServiceImpl implements BootstrapService {
 
     private void commitBlockTransactions(Block block, Blockchain blockchain) throws IOException, ClassNotFoundException {
         logger.traceEntry("params: {} {}", block, blockchain);
-        for (byte[] hash : block.getListTXHashes()) {
-            String transactionHash = new String(Base64.encode(hash));
+
+        List<String> hashes = BlockUtil.getTransactionsHashesAsString(block);
+        for (String transactionHash : hashes) {
             Transaction transaction = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION);
             commitTransaction(transaction, transactionHash, blockchain);
         }
-        logger.trace("Done, {} transactions processed!", block.getListTXHashes().size());
+
+        logger.trace("Done, {} transactions processed!", BlockUtil.getTransactionsCount(block));
         logger.traceExit();
     }
 
@@ -314,13 +322,30 @@ public class BootstrapServiceImpl implements BootstrapService {
                 AppBlockManager.instance().removeAlreadyProcessedTransactionsFromPool(state, block);
 
                 result.ok("Added block in blockchain : " + blockHash + " # " + block);
+
+                logger.info("New block synchronized with hash {}", blockHash);
+
+                logger.info("\n" + block.print().render());
+                //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
+                logger.info("\n" + AsciiTableUtil.listToTables(accounts.getAddresses()
+                        .stream()
+                        .map(accountAddress -> {
+                            try {
+                                return AppServiceProvider.getAccountStateService().getAccountState(accountAddress, accounts);
+                            } catch (IOException | ClassNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                            return null;
+                        })
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList())));
+
                 blockchain.setCurrentBlockIndex(blockIndex);
                 blockchain.setCurrentBlock(block);
 
                 // Update current block
                 blockchain.setCurrentBlock(block);
                 logger.trace("done updating current block");
-
 
             } catch (Exception ex) {
                 result.ko(ex);

@@ -1,5 +1,6 @@
 package network.elrond.data;
 
+import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;

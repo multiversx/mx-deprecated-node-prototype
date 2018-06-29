@@ -44,7 +44,7 @@ public class AccountStateTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testAccountStateCopyConstructorWithNullShouldThrowException() {
-        AccountState copiedState = new AccountState(AccountAddress.EMPTY_ADDRESS);
+        AccountState copiedState = new AccountState((AccountState) null);
         Assert.fail();
     }
 

@@ -21,7 +21,6 @@ import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongycastle.util.encoders.Base64;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -81,11 +80,9 @@ public class AppBlockManager {
             if (result.isOk()) {
                 removeAlreadyProcessedTransactionsFromPool(state, block);
 
-                logger.debug("removed {} transaction from pool", block.getListTXHashes().size());
+                logger.debug("removed {} transaction from pool", BlockUtil.getTransactionsCount(block));
 
-                List<String> acceptedTransactions = block.getListTXHashes().stream()
-                    .map(bytes -> new String(Base64.encode(bytes)))
-                    .collect(Collectors.toList());
+                List<String> acceptedTransactions = BlockUtil.getTransactionsHashesAsString(block);
 
                 List<Transaction> blockTransactions = AppServiceProvider.getBlockchainService()
                     .getAll(acceptedTransactions,
@@ -217,13 +214,13 @@ public class AppBlockManager {
             receipts.add(acceptTransaction(block, transaction, state));
 
             logger.trace("added transaction {} in block", txHash);
-            block.getListTXHashes().add(txHash);
+            BlockUtil.addTransactionInBlock(block, txHash);
 
             //test whether the system should continue to add transactions or not
             boolean forceFinishAddingTransactions = !AppServiceProvider.getChronologyService().isStillInRoundState(state.getNtpClient(), state.getBlockchain().getGenesisBlock().getTimestamp(),
                     block.getRoundIndex(), RoundState.PROPOSE_BLOCK);
             if (forceFinishAddingTransactions){
-                logger.debug("Force exit from add transactions method. Transactions added: {}", block.getListTXHashes().size());
+                logger.debug("Force exit from add transactions method. Transactions added: {}", BlockUtil.getTransactionsCount(block));
                 break;
             }
         }
@@ -259,17 +256,7 @@ public class AppBlockManager {
         return logger.traceExit(receipt);
     }
 
-    private SecureObject<Receipt> signReceipt(Receipt receipt, String receiptHash, AppState state) {
-        logger.traceEntry("params: {} {} {}", receipt, receiptHash, state);
-        Util.check(receipt != null, "receipt != null");
-        Util.check(receiptHash != null, "receiptHash != null");
-        Util.check(state != null, "state != null");
 
-        SignatureService signatureService = AppServiceProvider.getSignatureService();
-        Signature signature = signatureService.signMessage(receiptHash, state.getPrivateKey().getValue(), state.getPublicKey().getValue());
-
-        return logger.traceExit(new SecureObject<>(receipt, signature, state.getPublicKey().getValue()));
-    }
 
     private void sendReceipt(Block block, Receipt receipt, AppState state) throws IOException {
         logger.traceEntry("params: {} {} {}", block, receipt, state);
@@ -278,9 +265,8 @@ public class AppBlockManager {
         Util.check(state != null, "state != null");
 
         String blockHash = AppServiceProvider.getSerializationService().getHashString(block);
-        String receiptHash = AppServiceProvider.getSerializationService().getHashString(receipt);
         String transactionHash = receipt.getTransactionHash();
-        SecureObject<Receipt> secureReceipt = signReceipt(receipt, receiptHash, state);
+        SecureObject<Receipt> secureReceipt = SecureObjectUtil.create(receipt, state.getPrivateKey(), state.getPublicKey());
         String secureReceiptHash = AppServiceProvider.getSerializationService().getHashString(secureReceipt);
 
         // Store on blockchain
@@ -390,10 +376,7 @@ public class AppBlockManager {
         Util.check(state != null, "state != null");
         Util.check(block != null, "block != null");
 
-        List<String> toBeRemoved = block.getListTXHashes().stream()
-                .filter(Objects::nonNull)
-                .map(transactionHash -> Util.getDataEncoded64(transactionHash))
-                .collect(Collectors.toList());
+        List<String> toBeRemoved = BlockUtil.getTransactionsHashesAsString(block);
 
         ArrayBlockingQueue<String> transactionPool = state.getTransactionPool();
         transactionPool.removeAll(toBeRemoved);

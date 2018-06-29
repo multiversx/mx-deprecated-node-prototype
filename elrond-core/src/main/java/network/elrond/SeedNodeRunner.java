@@ -2,10 +2,12 @@ package network.elrond;
 
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
-import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
+import network.elrond.crypto.PublicKey;
 import network.elrond.data.BootstrapType;
+import network.elrond.data.Receipt;
 import network.elrond.data.Transaction;
+import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,22 +35,25 @@ public class SeedNodeRunner {
         Thread thread = new Thread(() -> {
 
             do {
+                PublicKey key = application.getState().getPublicKey();
                 AccountAddress address = AccountAddress.fromHexString(Util.TEST_ADDRESS);
+                //AccountAddress address = AccountAddress.fromHexString(Util.getAddressFromPublicKey(key.getValue()));
                 Transaction transaction = facade.send(address, BigInteger.TEN, application);
-                //logger.info("Sender Balance: {}", facade.getBalance(AccountAddress.fromBytes(application.getState().getPublicKey().getValue()), application));
+                logger.info("Sender Balance: {}", facade.getBalance(AccountAddress.fromBytes(application.getState().getPublicKey().getValue()), application));
 
-                //logger.info("Receiver  Balance: {}", facade.getBalance(address, application));
+                logger.info("Receiver  Balance: {}", facade.getBalance(address, application));
 
-//                if (transaction != null) {
-//                    String hash = AppServiceProvider.getSerializationService().getHashString(transaction);
-//                    Receipt receipt = facade.getReceipt(hash, application);
-//                    logger.info(receipt);
-//                }
+                if (transaction != null) {
+                    String hash = AppServiceProvider.getSerializationService().getHashString(transaction);
+                    Receipt receipt = facade.getReceipt(hash, application);
+                    logger.info(receipt);
+                }
 
-                ThreadUtil.sleep(1);
+                //ThreadUtil.sleep(1);
             } while (true);
 
         });
+        thread.setPriority(10);
         thread.start();
 
     }

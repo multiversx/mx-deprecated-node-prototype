@@ -10,6 +10,7 @@ import network.elrond.benchmark.MultipleTransactionResult;
 import network.elrond.benchmark.StatisticsManager;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
+import network.elrond.core.FutureUtil;
 import network.elrond.core.ObjectUtil;
 import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
@@ -26,10 +27,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.math.BigInteger;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 public class ElrondFacadeImpl implements ElrondFacade {
     private static final Logger logger = LogManager.getLogger(ElrondFacadeImpl.class);
@@ -110,8 +107,9 @@ public class ElrondFacadeImpl implements ElrondFacade {
     @Override
     public Receipt getReceipt(String transactionHash, Application application) {
         logger.traceEntry("params: {} {}", transactionHash, application);
+
         try {
-            FutureTask<Receipt> timeoutTask = new FutureTask<Receipt>(() -> {
+            return FutureUtil.get(() -> {
                 SecureObject<Receipt> secureReceipt;
                 Blockchain blockchain = application.getState().getBlockchain();
                 String receiptHash;
@@ -123,11 +121,10 @@ public class ElrondFacadeImpl implements ElrondFacade {
                 secureReceipt = AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT);
                 return logger.traceExit(secureReceipt.getObject());
             });
-            new Thread(timeoutTask).start();
-            return logger.traceExit(timeoutTask.get(30L, TimeUnit.SECONDS));
-        } catch (InterruptedException | TimeoutException | ExecutionException e) {
+        } catch (Exception e) {
             logger.catching(e);
         }
+
         return logger.traceExit((Receipt) null);
     }
 

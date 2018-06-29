@@ -16,7 +16,7 @@ public class CollectionUtil {
         return implode(list, glue, e -> e);
     }
 
-    public static <E,F> String implode(List<E> list, String glue, Function<E, F> function) {
+    public static <E, F> String implode(List<E> list, String glue, Function<E, F> function) {
 
         List<F> elems = list.stream().map(function).collect(Collectors.toList());
 
@@ -38,4 +38,7 @@ public class CollectionUtil {
     }
 
 
+    public static <E> boolean contains(List<E> list, E elem) {
+        return list != null && list.contains(elem);
+    }
 }

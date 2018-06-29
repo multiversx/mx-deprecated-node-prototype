@@ -189,7 +189,7 @@ public class ConsensusTest01 {
 
             return(String.format("Block{hash=%s, nonce=%d, appStateHash='%s', listTXHashes.size=%d, listTX=[%s], roundIndex=%d, timestamp=%d, createdBy='%s'}",
                     Util.getDataEncoded64(AppServiceProvider.getSerializationService().getHash(block)),
-                    block.getNonce(), Util.getDataEncoded64(block.getAppStateHash()), block.getListTXHashes().size(),
+                    block.getNonce(), Util.getDataEncoded64(block.getAppStateHash()), BlockUtil.getTransactionsCount(block),
                     stringBuilder.toString(), block.getRoundIndex(), block.getTimestamp(), block.getListPublicKeys(), leader));
         }
 
