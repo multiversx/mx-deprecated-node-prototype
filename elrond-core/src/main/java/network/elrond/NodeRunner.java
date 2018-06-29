@@ -6,6 +6,8 @@ import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.data.BootstrapType;
 
+import java.math.BigInteger;
+
 public class NodeRunner {
 
     public static void main(String[] args) throws Exception {
@@ -28,7 +30,7 @@ public class NodeRunner {
             do {
 
                 AccountAddress address = AccountAddress.fromHexString(Util.TEST_ADDRESS);
-//                facade.send(address, BigInteger.TEN, application);
+               facade.send(address, BigInteger.TEN, application);
                 System.out.println(facade.getBalance(address, application));
                 ThreadUtil.sleep(2000);
 

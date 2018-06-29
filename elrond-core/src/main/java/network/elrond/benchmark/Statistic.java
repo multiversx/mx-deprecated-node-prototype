@@ -1,11 +1,13 @@
 package network.elrond.benchmark;
 
-public class Statistic {
+import java.io.Serializable;
+
+public class Statistic implements Serializable {
     private long nrTransactionsInBlock;
     private long tps;
     private long currentTimeMillis;
 
-    public Statistic(long nrTransactionsInBlock){
+    public Statistic(long nrTransactionsInBlock) {
         this.nrTransactionsInBlock = nrTransactionsInBlock;
         currentTimeMillis = System.currentTimeMillis();
     }

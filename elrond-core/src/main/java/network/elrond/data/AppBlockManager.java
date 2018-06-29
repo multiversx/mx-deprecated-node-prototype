@@ -107,7 +107,7 @@ public class AppBlockManager {
                 logger.info("New block proposed with hash {}", hashBlock);
 
                 logger.info("\n" + block.print().render());
-                //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
+                logger.info("\n" + AsciiTableUtil.listToTables(transactions));
                 logger.info("\n" + AsciiTableUtil.listToTables(accounts.getAddresses()
                         .stream()
                         .map(accountAddress -> {

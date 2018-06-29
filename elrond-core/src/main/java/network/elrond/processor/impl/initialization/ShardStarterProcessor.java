@@ -19,10 +19,7 @@ public class ShardStarterProcessor implements AppTask {
 
         AppState state = application.getState();
         Shard shard = AppServiceProvider.getShardingService().getShard(state.getPublicKey().getValue());
-
-
         state.setShard(shard);
         logger.traceExit();
     }
-
 }
