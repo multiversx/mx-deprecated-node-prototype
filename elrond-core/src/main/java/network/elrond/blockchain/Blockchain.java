@@ -23,12 +23,12 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
 
     protected Block currentBlock;
     protected BigInteger currentBlockIndex = BigInteger.valueOf(-1);
-
     protected Block genesisBlock;
 
-    protected final Map<BlockchainUnitType, BlockchainPersistenceUnit<?, ?>> blockchain = new HashMap<>();
+    protected TransactionsPool pool = new TransactionsPool();
 
-    protected final TransactionsProcessed transactionsProcessed = new TransactionsProcessed();
+
+    protected final Map<BlockchainUnitType, BlockchainPersistenceUnit<?, ?>> blockchain = new HashMap<>();
 
 
 
@@ -101,10 +101,6 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
         return context.getShard();
     }
 
-    public TransactionsProcessed getTransactionsProcessed(){
-        return (transactionsProcessed);
-    }
-
     public void flush() {
         logger.traceEntry();
         for (BlockchainUnitType key : blockchain.keySet()) {
@@ -126,7 +122,9 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
         logger.traceExit();
     }
 
-
+    public TransactionsPool getPool() {
+        return pool;
+    }
 
     @Override
     public String toString() {

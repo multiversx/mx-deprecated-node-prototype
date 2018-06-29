@@ -5,6 +5,7 @@ import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.application.AppState;
+import network.elrond.blockchain.TransactionsPool;
 import network.elrond.data.Transaction;
 import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.processor.impl.AbstractChannelTask;
@@ -31,11 +32,12 @@ public class P2PTransactionsInterceptorProcessor extends AbstractChannelTask<Str
 
             // This will retrieve transaction from network if required
             Transaction transaction = blockchainService.get(hash, blockchain, BlockchainUnitType.TRANSACTION);
-            synchronized (state.lockerTransactionPool) {
-                boolean isHashPresent = blockchain.getTransactionsProcessed().checkExists(hash);
+            TransactionsPool pool = blockchain.getPool();
+            synchronized (pool.lock) {
+                boolean isHashPresent = pool.checkExists(hash);
 
                 if (!isHashPresent) {
-                    state.addTransactionToPool(hash);
+                    pool.add(hash);
                 }
             }
 

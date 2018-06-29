@@ -7,14 +7,18 @@ import network.elrond.application.AppState;
 import network.elrond.benchmark.Statistic;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
+import network.elrond.blockchain.TransactionsPool;
 import network.elrond.chronology.ChronologyService;
 import network.elrond.chronology.NTPClient;
 import network.elrond.chronology.Round;
 import network.elrond.chronology.RoundState;
 import network.elrond.core.AsciiTableUtil;
 import network.elrond.core.ObjectUtil;
+import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
-import network.elrond.crypto.*;
+import network.elrond.crypto.MultiSignatureService;
+import network.elrond.crypto.PrivateKey;
+import network.elrond.crypto.PublicKey;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.service.AppServiceProvider;
@@ -127,7 +131,7 @@ public class AppBlockManager {
     }
 
     private void sendReceipts(AppState state, Block block, List<Receipt> receipts) throws IOException {
-        Thread threadSend = new Thread(() -> {
+        ThreadUtil.submit(() -> {
             String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
             List<String> txHashes = new ArrayList<>();
             for (Receipt receipt : receipts) {
@@ -142,7 +146,7 @@ public class AppBlockManager {
                 txHashes.add(receipt.getTransactionHash());
             }
         });
-        threadSend.start();
+
     }
 
     public Pair<Block, List<Receipt>> composeBlock(List<Transaction> transactions, AppState state) throws
@@ -271,9 +275,9 @@ public class AppBlockManager {
 
         // Store on blockchain
         Blockchain blockchain = state.getBlockchain();
-        AppServiceProvider.getBlockchainService().put(transactionHash, secureReceiptHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
         AppServiceProvider.getBlockchainService().put(transactionHash, blockHash, blockchain, BlockchainUnitType.TRANSACTION_BLOCK);
         AppServiceProvider.getBlockchainService().put(secureReceiptHash, secureReceipt, blockchain, BlockchainUnitType.RECEIPT);
+        AppServiceProvider.getBlockchainService().put(transactionHash, secureReceiptHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
         logger.trace("placed on blockchain (TRANSACTION_RECEIPT, TRANSACTION_BLOCK and secure RECEIPT)");
 
         // Broadcast
@@ -378,7 +382,8 @@ public class AppBlockManager {
 
         List<String> toBeRemoved = BlockUtil.getTransactionsHashesAsString(block);
 
-        ArrayBlockingQueue<String> transactionPool = state.getTransactionPool();
+        TransactionsPool pool = state.getPool();
+        ArrayBlockingQueue<String> transactionPool = pool.getTransactionPool();
         transactionPool.removeAll(toBeRemoved);
 
         logger.debug("Removed {} transactions from pool, remaining: {}", toBeRemoved.size(),  transactionPool.size());
