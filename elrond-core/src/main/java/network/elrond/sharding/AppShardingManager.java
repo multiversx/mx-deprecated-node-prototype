@@ -9,9 +9,11 @@ import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class AppShardingManager {
@@ -37,7 +39,38 @@ public class AppShardingManager {
         return isSeedNode;
     }
 
-    public List<String> getPeersOnShard(AppState state){
+    public Integer getNumberNodesInShard(AppState state) {
+
+        P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.BLOCK);
+        Integer nbPeers = getConnectedPeersOnChannel(channel).size();
+
+        // account for self
+        return nbPeers + 1;
+    }
+
+    public Integer getNumberNodesInNetwork(AppState state) {
+        P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.XTRANSACTION);
+        Integer nbPeers = getConnectedPeersOnChannel(channel).size();
+
+        // account for self
+        return nbPeers + 1;
+    }
+
+
+    public List<String> getConnectedPeersOnChannel(P2PBroadcastChanel channel) {
+        // get only alive nodes
+        List<PeerAddress> allConnectedPeers = new ArrayList<>(channel.getConnection().getDht().peerBean().peerMap().all());
+
+        return AppServiceProvider.getP2PBroadcastService().getPeersOnChannel(channel)
+                .stream()
+                .filter(Objects::nonNull).filter(allConnectedPeers::contains)
+                .map(peerAddress -> peerAddress.peerId().toString())
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+
+    public List<String> getPeersOnShard(AppState state) {
         P2PBroadcastChanel chanel = state.getChanel(P2PBroadcastChannelName.BLOCK);
         return AppServiceProvider.getP2PBroadcastService().getPeersOnChannel(chanel)
                 .stream()
@@ -47,7 +80,7 @@ public class AppShardingManager {
                 .collect(Collectors.toList());
     }
 
-    public String getCurrentPeerID(AppState state){
+    public String getCurrentPeerID(AppState state) {
         return state.getConnection().getPeer().peerID().toString();
     }
 }

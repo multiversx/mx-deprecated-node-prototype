@@ -16,4 +16,7 @@ public interface ShardingService {
     PrivateKey getPrivateKeyForMinting(Shard shard);
 
     AccountAddress getAddressForMinting(Shard shard);
+
+    Integer getNumberOfShards();
+
 }
