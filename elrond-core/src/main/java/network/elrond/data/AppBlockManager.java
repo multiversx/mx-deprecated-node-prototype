@@ -16,6 +16,7 @@ import network.elrond.core.AsciiTableUtil;
 import network.elrond.core.ObjectUtil;
 import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
+import network.elrond.core.AppStateUtil;
 import network.elrond.crypto.MultiSignatureService;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
@@ -106,9 +107,7 @@ public class AppBlockManager {
 
                 logger.info("New block proposed with hash {}", hashBlock);
 
-
                 AppStateUtil.print(block, accounts);
-
             }
 
             return logger.traceExit(block);
