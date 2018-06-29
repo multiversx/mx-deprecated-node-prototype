@@ -85,9 +85,18 @@ public class P2PCommunicationServiceTest {
         thrAccept.join();
     }
 
-    @Test
+    //@Test
+    public void testIsPortReachable(){
+        P2PCommunicationService p2PCommunicationService = AppServiceProvider.getP2PCommunicationService();
+
+        System.out.println(p2PCommunicationService.isPortReachable("192.168.11.101", 445, 500));
+
+
+    }
+
+    //@Test
     public void testPingIP() throws Exception{
-        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse("192.168.11.121", 4000);
+        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse("192.168.11.131", 40454);
 
         System.out.println(pingResponse.toString());
 
