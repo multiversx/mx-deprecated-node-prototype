@@ -3,7 +3,7 @@ package network.elrond.consensus.handlers;
 import network.elrond.TimeWatch;
 import network.elrond.application.AppState;
 import network.elrond.benchmark.Statistic;
-import network.elrond.blockchain.TransactionsProcessed;
+import network.elrond.blockchain.TransactionsPool;
 import network.elrond.chronology.SubRound;
 import network.elrond.consensus.ConsensusState;
 import network.elrond.core.EventHandler;
@@ -51,7 +51,8 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
     private void proposeBlock(AppState state, SubRound data) {
         logger.traceEntry("params: {}", state);
 
-        ArrayBlockingQueue<String> transactionPool = state.getTransactionPool();
+        TransactionsPool pool = state.getPool();
+        ArrayBlockingQueue<String> transactionPool = pool.getTransactionPool();
         if (transactionPool.isEmpty()) {
             logger.info("Round: {}, subRound: {}> Can't execute, no transactions!",
                     data.getRound().getIndex(), data.getRoundState().name());
@@ -67,17 +68,15 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
 
         logger.debug("About to clean transaction pool...");
 
-        synchronized (state.lockerTransactionPool){
+        synchronized (pool.lock){
             //cleanup transaction pool
-
-            TransactionsProcessed transactionsProcessed = state.getBlockchain().getTransactionsProcessed();
 
             hashes =  new ArrayList<>(transactionPool);
 
             for (int i = 0; i < hashes.size(); i++){
                 String hash = hashes.get(i);
 
-                if (transactionsProcessed.checkExists(hash)){
+                if (pool.checkExists(hash)){
                     hashes.remove(i);
                     transactionPool.remove(hash);
                     i--;

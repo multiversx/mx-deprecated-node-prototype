@@ -11,19 +11,19 @@ import java.math.BigInteger;
 public class TransactionsProcessedTest {
     @Test(expected = IllegalArgumentException.class)
     public void testCheckShouldThrowException() {
-        TransactionsProcessed transactionsProcessed = new TransactionsProcessed();
+        TransactionsPool transactionsProcessed = new TransactionsPool();
         transactionsProcessed.checkExists(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testAddShouldThrowException() {
-        TransactionsProcessed transactionsProcessed = new TransactionsProcessed();
+        TransactionsPool transactionsProcessed = new TransactionsPool();
         transactionsProcessed.addBlock(null);
     }
 
     @Test
     public void testAddEmptyBlock() {
-        TransactionsProcessed transactionsProcessed = new TransactionsProcessed();
+        TransactionsPool transactionsProcessed = new TransactionsPool();
         Block emptyBlock = new Block();
 
         transactionsProcessed.addBlock(emptyBlock);
@@ -33,7 +33,7 @@ public class TransactionsProcessedTest {
 
     @Test
     public void testAddBlock() {
-        TransactionsProcessed transactionsProcessed = new TransactionsProcessed();
+        TransactionsPool transactionsProcessed = new TransactionsPool();
         Block block = new Block();
 
         for (int i = 0; i < 10; i++) {
@@ -50,7 +50,7 @@ public class TransactionsProcessedTest {
 
     @Test
     public void testAdd5BlocksAnCheck() {
-        TransactionsProcessed transactionsProcessed = new TransactionsProcessed();
+        TransactionsPool transactionsProcessed = new TransactionsPool();
 
         for (BigInteger i = BigInteger.ZERO; i.compareTo(BigInteger.valueOf(5)) < 0; i = i.add(BigInteger.ONE)) {
             Block block = new Block();
@@ -72,7 +72,7 @@ public class TransactionsProcessedTest {
 
     @Test
     public void testAdd7BlocksAnCheck() {
-        TransactionsProcessed transactionsProcessed = new TransactionsProcessed();
+        TransactionsPool transactionsProcessed = new TransactionsPool();
 
         for (BigInteger i = BigInteger.ZERO; i.compareTo(BigInteger.valueOf(7)) < 0; i = i.add(BigInteger.ONE)) {
             Block block = new Block();

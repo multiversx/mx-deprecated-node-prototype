@@ -43,6 +43,20 @@ public class BlockchainServiceImpl implements BlockchainService {
 
 
     /**
+     * Put object on object chain (memory->database->network) and wait
+     *
+     * @param hash   object hash
+     * @param object
+     * @throws IOException
+     */
+    //@Override
+    public synchronized <H extends Object, B extends Serializable> void putAndWait(H hash, B object, Blockchain blockchain, BlockchainUnitType type) throws IOException {
+        boolean await = true;
+        put(hash, object, blockchain, type, await);
+    }
+
+
+    /**
      * Put object on object chain (memory->database->network)
      *
      * @param hash   object hash
@@ -51,6 +65,11 @@ public class BlockchainServiceImpl implements BlockchainService {
      */
     @Override
     public synchronized <H extends Object, B extends Serializable> void put(H hash, B object, Blockchain blockchain, BlockchainUnitType type) throws IOException {
+        boolean await = false;
+        put(hash, object, blockchain, type, await);
+    }
+
+    private <H extends Object, B extends Serializable> void put(H hash, B object, Blockchain blockchain, BlockchainUnitType type, boolean await) throws IOException {
         logger.traceEntry("params: {} {} {} {}", hash, object, blockchain, type);
 
         Util.check(hash!=null, "hash!=null");
@@ -73,7 +92,8 @@ public class BlockchainServiceImpl implements BlockchainService {
         logger.trace("Locally stored!");
 
         if (!isOffline(connection)) {
-            AppServiceProvider.getP2PObjectService().put(connection, hash.toString(), object);
+
+            AppServiceProvider.getP2PObjectService().put(connection, hash.toString(), object, await, true);
             logger.trace("DHT stored!");
         }
 
