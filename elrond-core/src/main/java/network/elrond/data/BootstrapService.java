@@ -1,5 +1,6 @@
 package network.elrond.data;
 
+import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
@@ -26,7 +27,8 @@ public interface BootstrapService {
 
     ExecutionReport restoreFromDisk(BigInteger currentBlockIndex, AppState state, AppContext context);
 
-    ExecutionReport commitBlock(Block blk, String blockHash, Blockchain blockchain);
+//    ExecutionReport commitBlock(Block blk, String blockHash, Blockchain blockchain);
+    ExecutionReport commitBlock(Block blk, String blockHash, Blockchain blockchain, Accounts accounts); // PMS: 2018.06.29
 
     ExecutionReport commitTransaction(Transaction transaction, String transactionHash, Blockchain blockchain);
 

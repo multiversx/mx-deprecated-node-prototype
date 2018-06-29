@@ -8,6 +8,7 @@ import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.blockchain.SettingsType;
 import network.elrond.chronology.NTPClient;
+import network.elrond.core.AsciiTableUtil;
 import network.elrond.core.Util;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.service.AppServiceProvider;
@@ -18,6 +19,8 @@ import org.spongycastle.util.encoders.Base64;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class BootstrapServiceImpl implements BootstrapService {
     private static final Logger logger = LogManager.getLogger(BootstrapServiceImpl.class);
@@ -102,7 +105,7 @@ public class BootstrapServiceImpl implements BootstrapService {
     }
 
     @Override
-    public ExecutionReport commitBlock(Block block, String blockHash, Blockchain blockchain) {
+    public ExecutionReport commitBlock(Block block, String blockHash, Blockchain blockchain, Accounts accounts) {
         logger.traceEntry("params: {} {} {}", block, blockHash, blockchain);
         ExecutionReport result = new ExecutionReport();
 
@@ -130,6 +133,24 @@ public class BootstrapServiceImpl implements BootstrapService {
             logger.trace("done updating current block");
 
             result.combine(new ExecutionReport().ok("Put block in blockchain : " + blockHash + " # " + block));
+
+            logger.info("New block synchronized with hash {}", blockHash);
+
+            logger.info("\n" + block.print().render());
+            //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
+            logger.info("\n" + AsciiTableUtil.listToTables(accounts.getAddresses()
+                    .stream()
+                    .map(accountAddress -> {
+                        try {
+                            return AppServiceProvider.getAccountStateService().getAccountState(accountAddress, accounts);
+                        } catch (IOException | ClassNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList())));
+
         } catch (Exception ex) {
             result.combine(new ExecutionReport().ko(ex));
         }
@@ -175,7 +196,8 @@ public class BootstrapServiceImpl implements BootstrapService {
         logger.trace("Generated genesis transaction and block.");
 
         try {
-            ExecutionReport reportBlock = commitBlock(genesisBlock, genesisBlockHash, blockchain);
+//            ExecutionReport reportBlock = commitBlock(genesisBlock, genesisBlockHash, blockchain);
+            ExecutionReport reportBlock = commitBlock(genesisBlock, genesisBlockHash, blockchain, accounts); // PMS: 2018.06.29
             result.combine(reportBlock);
 
             ExecutionReport reportTransaction = commitTransaction(genesisTransaction, genesisTransactionHash, blockchain);
@@ -244,7 +266,8 @@ public class BootstrapServiceImpl implements BootstrapService {
                     return logger.traceExit(result);
                 }
 
-                commitBlock(block, blockHash, blockchain);
+//                commitBlock(block, blockHash, blockchain);
+                commitBlock(block, blockHash, blockchain, accounts); // PMS: 2018.06.29
                 commitBlockTransactions(block, blockchain);
                 // Update current block
                 blockchain.setCurrentBlock(block);
