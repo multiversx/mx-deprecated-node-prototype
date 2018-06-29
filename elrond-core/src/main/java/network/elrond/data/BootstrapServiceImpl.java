@@ -345,6 +345,8 @@ public class BootstrapServiceImpl implements BootstrapService {
 
                 logger.info("New block synchronized with hash {}", blockHash);
 
+                logger.info("\n" + state.print().render());
+
                 AppStateUtil.printBlockAndAccounts(block, accounts);
 
                 blockchain.setCurrentBlockIndex(blockIndex);

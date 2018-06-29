@@ -107,6 +107,8 @@ public class AppBlockManager {
 
                 logger.info("New block proposed with hash {}", hashBlock);
 
+                logger.info("\n" + state.print().render());
+
                 AppStateUtil.printBlockAndAccounts(block, accounts);
             }
 
