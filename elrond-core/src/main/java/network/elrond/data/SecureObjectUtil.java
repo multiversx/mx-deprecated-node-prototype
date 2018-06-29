@@ -14,7 +14,9 @@ public class SecureObjectUtil {
         byte[] _privateKey = privateKey.getValue();
         byte[] _publicKey = publicKey.getValue();
         byte[] hash = AppServiceProvider.getSerializationService().getHash(object);
-        Signature signature = signatureService.signMessage(hash, _privateKey, _publicKey);
+        //TODO !!!!!
+        // Signature signature = signatureService.signMessage(hash, _privateKey, _publicKey);
+        Signature signature = new Signature();
         return new SecureObject<E>(object, signature, _publicKey);
     }
 
