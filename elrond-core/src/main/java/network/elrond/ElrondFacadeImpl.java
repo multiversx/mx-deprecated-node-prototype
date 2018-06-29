@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class ElrondFacadeImpl implements ElrondFacade {
     private static final Logger logger = LogManager.getLogger(ElrondFacadeImpl.class);
@@ -163,7 +162,9 @@ public class ElrondFacadeImpl implements ElrondFacade {
 //            }
         }
 
-            transactions.stream().parallel().filter(Objects::nonNull).forEach((tr)-> {
+
+
+            transactions.stream().parallel().forEach((tr)-> {
                 try {
                     sendTransaction(application.getState(), tr);
                 } catch (IOException e) {
@@ -171,16 +172,12 @@ public class ElrondFacadeImpl implements ElrondFacade {
                 }
             });
 
-            int successful =  (int) transactions.stream().filter(Objects::nonNull).count();
-            result.setSuccessfulTransactionsNumber(successful);
-            result.setFailedTransactionsNumber(nrTransactions - successful);
 
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-
         return result;
     }
 
@@ -195,9 +192,8 @@ public class ElrondFacadeImpl implements ElrondFacade {
         try {
 
             Transaction transaction = generateTransaction(receiver, value, application.getState());
-            if(transaction!=null) {
-                sendTransaction(application.getState(), transaction);
-            }
+
+            sendTransaction(application.getState(), transaction);
 
             return logger.traceExit(transaction);
 
