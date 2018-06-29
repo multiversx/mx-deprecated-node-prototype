@@ -1,6 +1,7 @@
 package network.elrond.benchmark;
 
 public class BenchmarkResult {
+    private long currentShardNumber;
     private long networkActiveNodes;
     private long shardActiveNodes;
     private long nrShards;
@@ -102,5 +103,13 @@ public class BenchmarkResult {
 
     public void setTotalNrProcessedTransactions(long totalNrProcessedTransactions) {
         this.totalNrProcessedTransactions = totalNrProcessedTransactions;
+    }
+
+    public long getCurrentShardNumber() {
+        return currentShardNumber;
+    }
+
+    public void setCurrentShardNumber(long currentShardNumber) {
+        this.currentShardNumber = currentShardNumber;
     }
 }

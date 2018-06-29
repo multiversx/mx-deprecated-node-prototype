@@ -6,15 +6,17 @@ import network.elrond.sharding.AppShardingManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StatisticsManager {
+public class StatisticsManager implements Serializable {
     private static final Logger logger = LogManager.getLogger(StatisticsManager.class);
 
     private static final int maxStatistics = 100;
     private List<Statistic> statistics = new ArrayList<>();
 
+    private Integer currentShardNumber;
     private Integer numberOfShards;
     private Integer numberNodesInShard;
     private Integer numberNodesInNetwork;
@@ -44,6 +46,7 @@ public class StatisticsManager {
     }
 
     public void updateNetworkStats(AppState state) {
+        currentShardNumber = state.getShard().getIndex();
         numberOfShards = AppServiceProvider.getShardingService().getNumberOfShards();
         numberNodesInNetwork = AppShardingManager.instance().getNumberNodesInNetwork(state);
         numberNodesInShard = AppShardingManager.instance().getNumberNodesInShard(state);
@@ -160,5 +163,9 @@ public class StatisticsManager {
 
     public long getTotalNrProcessedTransactions() {
         return totalProcessedTransactions;
+    }
+
+    public Integer getCurrentShardNumber() {
+        return currentShardNumber;
     }
 }

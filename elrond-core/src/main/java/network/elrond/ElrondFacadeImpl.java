@@ -27,6 +27,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ElrondFacadeImpl implements ElrondFacade {
     private static final Logger logger = LogManager.getLogger(ElrondFacadeImpl.class);
@@ -233,23 +235,39 @@ public class ElrondFacadeImpl implements ElrondFacade {
     }
 
     @Override
-    public BenchmarkResult getBenchmarkResult(String benchmarkId, Application application) {
-        BenchmarkResult benchmarkResult = new BenchmarkResult();
+    public ArrayList<BenchmarkResult> getBenchmarkResult(String benchmarkId, Application application) {
+        ArrayList<BenchmarkResult> benchmarkResults = new ArrayList<>();
 
-        StatisticsManager statisticsManager = application.getState().getStatisticsManager();
+        P2PRequestChannel channel = application.getState().getChanel(P2PRequestChannelName.STATISTICS);
+        Integer numberOfShards = AppServiceProvider.getShardingService().getNumberOfShards();
 
-        benchmarkResult.setNetworkActiveNodes(statisticsManager.getNumberNodesInNetwork());
-        benchmarkResult.setShardActiveNodes(statisticsManager.getNumberNodesInShard());
-        benchmarkResult.setAverageRoundTime(statisticsManager.getAverageRoundTime());
-        benchmarkResult.setLiveNrTransactionsPerBlock(statisticsManager.getLiveNrTransactionsInBlock());
-        benchmarkResult.setAverageNrTxPerBlock(statisticsManager.getAverageNrTransactionsInBlock());
-        benchmarkResult.setAverageTps(statisticsManager.getAverageTps());
-        benchmarkResult.setLiveTps(statisticsManager.getLiveTps());
-        benchmarkResult.setPeakTps(statisticsManager.getMaxTps());
-        benchmarkResult.setLiveRoundTime(statisticsManager.getLiveRoundTime());
-        benchmarkResult.setTotalNrProcessedTransactions(statisticsManager.getTotalNrProcessedTransactions());
-        benchmarkResult.setNrShards(statisticsManager.getNumberOfShards());
-        return benchmarkResult;
+        ArrayList<StatisticsManager> shardsStatistics = new ArrayList<>();
+
+        for (int i = 0; i < numberOfShards; i++) {
+            Shard addressShard = new Shard(i);
+            StatisticsManager statisticsManager = AppServiceProvider.getP2PRequestService().get(channel, addressShard, P2PRequestChannelName.STATISTICS, null);
+            if (statisticsManager != null) {
+                shardsStatistics.add(statisticsManager);
+            }
+        }
+
+        for (StatisticsManager statisticsManager : shardsStatistics) {
+            BenchmarkResult benchmarkResult = new BenchmarkResult();
+            benchmarkResult.setCurrentShardNumber(statisticsManager.getCurrentShardNumber());
+            benchmarkResult.setNetworkActiveNodes(statisticsManager.getNumberNodesInNetwork());
+            benchmarkResult.setShardActiveNodes(statisticsManager.getNumberNodesInShard());
+            benchmarkResult.setAverageRoundTime(statisticsManager.getAverageRoundTime());
+            benchmarkResult.setLiveNrTransactionsPerBlock(statisticsManager.getLiveNrTransactionsInBlock());
+            benchmarkResult.setAverageNrTxPerBlock(statisticsManager.getAverageNrTransactionsInBlock());
+            benchmarkResult.setAverageTps(statisticsManager.getAverageTps());
+            benchmarkResult.setLiveTps(statisticsManager.getLiveTps());
+            benchmarkResult.setPeakTps(statisticsManager.getMaxTps());
+            benchmarkResult.setLiveRoundTime(statisticsManager.getLiveRoundTime());
+            benchmarkResult.setTotalNrProcessedTransactions(statisticsManager.getTotalNrProcessedTransactions());
+            benchmarkResult.setNrShards(statisticsManager.getNumberOfShards());
+            benchmarkResults.add(benchmarkResult);
+        }
+        return benchmarkResults;
     }
 
 }
