@@ -55,7 +55,7 @@ public class BlockchainTest extends BaseBlockchainTest{
             for (int d = 0; d < 5; d++) {
                 byte[] buff = new byte[32];
                 rdm.nextBytes(buff);
-                block.getListTXHashes().add(buff);
+                BlockUtil.addTransactionInBlock(block, buff);
             }
 
             String hash = new String(Base64.encode(serializationService.getHash(block)

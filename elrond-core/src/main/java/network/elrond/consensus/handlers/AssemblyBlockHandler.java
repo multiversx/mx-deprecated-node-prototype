@@ -3,6 +3,7 @@ package network.elrond.consensus.handlers;
 import network.elrond.TimeWatch;
 import network.elrond.application.AppState;
 import network.elrond.benchmark.Statistic;
+import network.elrond.blockchain.TransactionsProcessed;
 import network.elrond.chronology.SubRound;
 import network.elrond.consensus.ConsensusState;
 import network.elrond.core.EventHandler;
@@ -11,6 +12,7 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.data.AppBlockManager;
 import network.elrond.data.Block;
+import network.elrond.data.BlockUtil;
 import network.elrond.sharding.AppShardingManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -61,12 +63,32 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
         int size = 0;
 
         PrivateKey privateKey = state.getPrivateKey();
-        List<String> hashes = new ArrayList<>(transactionPool);
-        Block block = AppBlockManager.instance().generateAndBroadcastBlock(hashes, privateKey, state);
+        List<String> hashes = new ArrayList<>();
 
-        if (block != null && block.getListTXHashes() != null) {
-            size = block.getListTXHashes().size();
+        logger.debug("About to clean transaction pool...");
+
+        synchronized (state.lockerTransactionPool){
+            //cleanup transaction pool
+
+            TransactionsProcessed transactionsProcessed = state.getBlockchain().getTransactionsProcessed();
+
+            hashes =  new ArrayList<>(transactionPool);
+
+            for (int i = 0; i < hashes.size(); i++){
+                String hash = hashes.get(i);
+
+                if (transactionsProcessed.checkExists(hash)){
+                    hashes.remove(i);
+                    transactionPool.remove(hash);
+                    i--;
+                }
+            }
         }
+
+        logger.debug("Transaction pool cleaned!");
+
+        Block block = AppBlockManager.instance().generateAndBroadcastBlock(hashes, privateKey, state);
+        size = BlockUtil.getTransactionsCount(block);
 
         long time = watch.time(TimeUnit.MILLISECONDS);
         long tps = (time > 0) ? ((size * 1000) / time) : 0;

@@ -31,10 +31,16 @@ public class P2PTransactionsInterceptorProcessor extends AbstractChannelTask<Str
 
             // This will retrieve transaction from network if required
             Transaction transaction = blockchainService.get(hash, blockchain, BlockchainUnitType.TRANSACTION);
-            state.addTransactionToPool(hash);
+            synchronized (state.lockerTransactionPool) {
+                boolean isHashPresent = blockchain.getTransactionsProcessed().checkExists(hash);
+
+                if (!isHashPresent) {
+                    state.addTransactionToPool(hash);
+                }
+            }
 
             if (transaction == null) {
-                logger.info("Transaction with hash {} was not found!", hash);
+                logger.warn("Transaction with hash {} was not found!", hash);
                 return;
             }
 

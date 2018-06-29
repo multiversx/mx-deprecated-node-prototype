@@ -15,12 +15,12 @@ import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mapdb.Fun;
-import org.spongycastle.util.encoders.Base64;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.List;
 
 public class BootstrapServiceImpl implements BootstrapService {
     private static final Logger logger = LogManager.getLogger(BootstrapServiceImpl.class);
@@ -131,6 +131,9 @@ public class BootstrapServiceImpl implements BootstrapService {
             // Update current block
             blockchain.setCurrentBlock(block);
             logger.trace("done updating current block");
+
+            //Maintain processed transactions
+            blockchain.getTransactionsProcessed().addBlock(block);
 
             result.combine(new ExecutionReport().ok("Put block in blockchain : " + blockHash + " # " + block));
         } catch (Exception ex) {
@@ -266,12 +269,14 @@ public class BootstrapServiceImpl implements BootstrapService {
 
     private void commitBlockTransactions(Block block, Blockchain blockchain) throws IOException, ClassNotFoundException {
         logger.traceEntry("params: {} {}", block, blockchain);
-        for (byte[] hash : block.getListTXHashes()) {
-            String transactionHash = new String(Base64.encode(hash));
+
+        List<String> hashes = BlockUtil.getTransactionsHashesAsString(block);
+        for (String transactionHash : hashes) {
             Transaction transaction = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION);
             commitTransaction(transaction, transactionHash, blockchain);
         }
-        logger.trace("Done, {} transactions processed!", block.getListTXHashes().size());
+
+        logger.trace("Done, {} transactions processed!", BlockUtil.getTransactionsCount(block));
         logger.traceExit();
     }
 
