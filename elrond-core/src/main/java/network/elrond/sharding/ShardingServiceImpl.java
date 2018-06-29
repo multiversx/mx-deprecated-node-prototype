@@ -14,7 +14,7 @@ public class ShardingServiceImpl implements ShardingService {
 
     Logger logger = LoggerFactory.getLogger(ShardingServiceImpl.class);
 
-    public static Integer MAX_ACTIVE_SHARDS_CONT = 1;
+    public static Integer MAX_ACTIVE_SHARDS_CONT = 2;
 
     @Override
     public Shard getShard(byte[] address) {
