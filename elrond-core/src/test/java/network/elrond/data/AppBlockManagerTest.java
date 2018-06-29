@@ -101,10 +101,9 @@ public class AppBlockManagerTest {
 
 
         String hashString = AppServiceProvider.getSerializationService().getHashString(blockchain.getGenesisBlock());
-//        AppServiceProvider.getBootstrapService().commitBlock(blockchain.getGenesisBlock(), hashString, blockchain);
+        AppServiceProvider.getBootstrapService().commitBlock(blockchain.getGenesisBlock(), hashString, blockchain);
 
         accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
-        AppServiceProvider.getBootstrapService().commitBlock(blockchain.getGenesisBlock(), hashString, blockchain, accounts); // PMS: 2018.06.29
 
         appBlockManager = new AppBlockManager();
     }

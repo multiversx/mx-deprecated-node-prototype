@@ -67,8 +67,7 @@ public class AppBlockManager {
             logger.debug("signed block with hash: {}", hashBlock);
             ExecutionService executionService = AppServiceProvider.getExecutionService();
 
-//            ExecutionReport result = AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
-            ExecutionReport result = AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain, accounts); // PMS: 2018.06.29
+            ExecutionReport result = AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
 
             if (!result.isOk()){
                 logger.debug("Could not commit block with hash {}", hashBlock);

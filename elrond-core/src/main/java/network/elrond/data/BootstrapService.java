@@ -27,8 +27,7 @@ public interface BootstrapService {
 
     ExecutionReport restoreFromDisk(BigInteger currentBlockIndex, AppState state, AppContext context);
 
-//    ExecutionReport commitBlock(Block blk, String blockHash, Blockchain blockchain);
-    ExecutionReport commitBlock(Block blk, String blockHash, Blockchain blockchain, Accounts accounts); // PMS: 2018.06.29
+    ExecutionReport commitBlock(Block blk, String blockHash, Blockchain blockchain);
 
     ExecutionReport commitTransaction(Transaction transaction, String transactionHash, Blockchain blockchain);
 

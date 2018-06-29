@@ -13,7 +13,7 @@ public class NodeRunner {
         String nodeName = "elrond-node-2.1";
         Integer port = 4001;
         Integer masterPeerPort = 4000;
-        String masterPeerIpAddress = "127.0.0.1";
+        String masterPeerIpAddress = "192.168.11.101";
         String nodeRunnerPrivateKey = "1111111111111111fa612ecafcfd145cc06c1fb64d7499ef34696ff16b82cbc2";
         //Reuploaded
         AppContext context = ContextCreator.createAppContext(nodeName, nodeRunnerPrivateKey, masterPeerIpAddress, masterPeerPort, port,
