@@ -27,6 +27,7 @@ import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -148,15 +149,34 @@ public class ElrondFacadeImpl implements ElrondFacade {
             logger.warn("Invalid application state, application is null");
             return logger.traceExit((MultipleTransactionResult) null);
         }
-
         MultipleTransactionResult result = new MultipleTransactionResult();
+        List<Transaction> transactions = new ArrayList<>();
+        try {
         for (int i = 0; i < nrTransactions; i++) {
-            Transaction transaction = send(receiver, value, application);
-            if (transaction == null) {
-                result.setFailedTransactionsNumber(result.getFailedTransactionsNumber() + 1);
-            } else {
-                result.setSuccessfulTransactionsNumber(result.getSuccessfulTransactionsNumber() + 1);
-            }
+            Transaction transaction = generateTransaction(receiver, value, application.getState());
+            transactions.add(transaction);
+//            if (transaction == null) {
+//                result.setFailedTransactionsNumber(result.getFailedTransactionsNumber() + 1);
+//            } else {
+//                result.setSuccessfulTransactionsNumber(result.getSuccessfulTransactionsNumber() + 1);
+//            }
+        }
+
+
+
+            transactions.stream().parallel().forEach((tr)-> {
+                try {
+                    sendTransaction(application.getState(), tr);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
         return result;
     }
@@ -171,35 +191,9 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
         try {
 
-            AppState state = application.getState();
-            Accounts accounts = state.getAccounts();
+            Transaction transaction = generateTransaction(receiver, value, application.getState());
 
-
-            PublicKey senderPublicKey = state.getPublicKey();
-            PrivateKey senderPrivateKey = state.getPrivateKey();
-            AccountAddress senderAddress = AccountAddress.fromBytes(senderPublicKey.getValue());
-            AccountState senderAccount = AppServiceProvider.getAccountStateService().getAccountState(senderAddress, accounts);
-
-
-            if (senderAccount == null) {
-                // sender account is new, can't send
-                logger.warn("Sender account is new, can't send");
-                return logger.traceExit((Transaction) null);
-            }
-
-            PublicKey receiverPublicKey = new PublicKey(receiver.getBytes());
-
-            BigInteger nonce = senderAccount.getNonce();
-            Transaction transaction = AppServiceProvider.getTransactionService().generateTransaction(senderPublicKey, receiverPublicKey, value, nonce);
-            AppServiceProvider.getTransactionService().signTransaction(transaction, senderPrivateKey.getValue(), senderPublicKey.getValue());
-
-            String hash = AppServiceProvider.getSerializationService().getHashString(transaction);
-            P2PConnection connection = state.getConnection();
-            AppServiceProvider.getP2PObjectService().put(connection, hash, transaction);
-
-            P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.TRANSACTION);
-            AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, hash);
-
+            sendTransaction(application.getState(), transaction);
 
             return logger.traceExit(transaction);
 
@@ -209,6 +203,39 @@ public class ElrondFacadeImpl implements ElrondFacade {
         }
 
         return logger.traceExit((Transaction) null);
+    }
+
+    private Transaction generateTransaction(AccountAddress receiver, BigInteger value, AppState state) throws IOException, ClassNotFoundException {
+        Accounts accounts = state.getAccounts();
+
+        PublicKey senderPublicKey = state.getPublicKey();
+        PrivateKey senderPrivateKey = state.getPrivateKey();
+        AccountAddress senderAddress = AccountAddress.fromBytes(senderPublicKey.getValue());
+        AccountState senderAccount = AppServiceProvider.getAccountStateService().getAccountState(senderAddress, accounts);
+
+
+        if (senderAccount == null) {
+            // sender account is new, can't send
+            logger.warn("Sender account is new, can't send");
+            return logger.traceExit((Transaction) null);
+        }
+
+        PublicKey receiverPublicKey = new PublicKey(receiver.getBytes());
+
+        BigInteger nonce = senderAccount.getNonce();
+        Transaction transaction = AppServiceProvider.getTransactionService().generateTransaction(senderPublicKey, receiverPublicKey, value, nonce);
+        AppServiceProvider.getTransactionService().signTransaction(transaction, senderPrivateKey.getValue(), senderPublicKey.getValue());
+        return transaction;
+
+    }
+
+    private void sendTransaction(AppState state, Transaction transaction) throws java.io.IOException {
+        String hash = AppServiceProvider.getSerializationService().getHashString(transaction);
+        P2PConnection connection = state.getConnection();
+        AppServiceProvider.getP2PObjectService().put(connection, hash, transaction);
+
+        P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.TRANSACTION);
+        AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, hash);
     }
 
     @Override

@@ -56,6 +56,6 @@ public class P2PTransactionsInterceptorProcessor extends AbstractChannelTask<Str
 
     @Override
     protected int getWaitingTime() {
-        return 100;
+        return 5;
     }
 }
