@@ -17,6 +17,7 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PKSKPair;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
+import network.elrond.data.Block;
 import network.elrond.data.Receipt;
 import network.elrond.data.SecureObject;
 import network.elrond.data.Transaction;
@@ -278,6 +279,26 @@ public class ElrondFacadeImpl implements ElrondFacade {
             benchmarkResults.add(benchmarkResult);
         }
         return benchmarkResults;
+    }
+
+    @Override
+    public Transaction getTransactionFromHash(String transactionHash, Blockchain blockchain){
+        try {
+            return (AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION));
+        } catch (Exception ex){
+            logger.throwing(ex);
+            return (null);
+        }
+    }
+
+    @Override
+    public Block getBlockFromHash(String blockHash, Blockchain blockchain){
+        try {
+            return (AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK));
+        } catch (Exception ex){
+            logger.throwing(ex);
+            return (null);
+        }
     }
 
 }

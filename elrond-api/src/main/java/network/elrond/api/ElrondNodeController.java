@@ -7,6 +7,7 @@ import network.elrond.api.manager.ElrondWebSocketManager;
 import network.elrond.application.AppContext;
 import network.elrond.core.Util;
 import network.elrond.crypto.PKSKPair;
+import network.elrond.data.Block;
 import network.elrond.data.BootstrapType;
 import network.elrond.data.Transaction;
 import network.elrond.p2p.PingResponse;
@@ -190,6 +191,26 @@ public class ElrondNodeController {
         }
 
         return logger.traceExit(0);
+    }
+
+    @RequestMapping(path = "/node/gettransactionfromhash", method = RequestMethod.GET)
+    public @ResponseBody
+    Transaction getTransactionFromHash(
+            HttpServletResponse response,
+            @RequestParam() String transactionHash) {
+
+        logger.traceEntry("params: {}", transactionHash);
+        return logger.traceExit(elrondApiNode.getTransactionFromHash(transactionHash));
+    }
+
+    @RequestMapping(path = "/node/getblockfromhash", method = RequestMethod.GET)
+    public @ResponseBody
+    Block getBlockFromHash(
+            HttpServletResponse response,
+            @RequestParam() String blockHash) {
+
+        logger.traceEntry("params: {}", blockHash);
+        return logger.traceExit(elrondApiNode.getBlockFromHash(blockHash));
     }
 
     @RequestMapping(path = "/node/exit", method = RequestMethod.GET)
