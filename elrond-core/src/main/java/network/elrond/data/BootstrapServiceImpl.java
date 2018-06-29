@@ -8,6 +8,7 @@ import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.blockchain.SettingsType;
 import network.elrond.chronology.NTPClient;
+import network.elrond.core.AsciiTableUtil;
 import network.elrond.core.Util;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.service.AppServiceProvider;
@@ -17,6 +18,8 @@ import org.mapdb.Fun;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.List;
 
 public class BootstrapServiceImpl implements BootstrapService {
@@ -319,13 +322,30 @@ public class BootstrapServiceImpl implements BootstrapService {
                 AppBlockManager.instance().removeAlreadyProcessedTransactionsFromPool(state, block);
 
                 result.ok("Added block in blockchain : " + blockHash + " # " + block);
+
+                logger.info("New block synchronized with hash {}", blockHash);
+
+                logger.info("\n" + block.print().render());
+                //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
+                logger.info("\n" + AsciiTableUtil.listToTables(accounts.getAddresses()
+                        .stream()
+                        .map(accountAddress -> {
+                            try {
+                                return AppServiceProvider.getAccountStateService().getAccountState(accountAddress, accounts);
+                            } catch (IOException | ClassNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                            return null;
+                        })
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList())));
+
                 blockchain.setCurrentBlockIndex(blockIndex);
                 blockchain.setCurrentBlock(block);
 
                 // Update current block
                 blockchain.setCurrentBlock(block);
                 logger.trace("done updating current block");
-
 
             } catch (Exception ex) {
                 result.ko(ex);
