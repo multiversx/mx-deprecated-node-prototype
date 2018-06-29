@@ -3,6 +3,7 @@ package network.elrond.application;
 import network.elrond.account.Accounts;
 import network.elrond.benchmark.StatisticsManager;
 import network.elrond.blockchain.Blockchain;
+import network.elrond.blockchain.TransactionsPool;
 import network.elrond.chronology.NTPClient;
 import network.elrond.consensus.ConsensusState;
 import network.elrond.core.Util;
@@ -16,7 +17,6 @@ import org.apache.logging.log4j.Logger;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
 
 public class AppState implements Serializable {
 
@@ -24,7 +24,6 @@ public class AppState implements Serializable {
 
     private boolean stillRunning = true;
     public Object lockerSyncPropose = new Object();
-    public Object lockerTransactionPool = new Object();
 
     private Shard shard;
     private Accounts accounts;
@@ -43,9 +42,6 @@ public class AppState implements Serializable {
     private ConsensusState consensusState = new ConsensusState();
 
     private StatisticsManager statisticsManager = new StatisticsManager(System.currentTimeMillis());
-
-    private ArrayBlockingQueue<String> transactionsPool = new ArrayBlockingQueue<>(50000, true);
-
 
     public P2PRequestChannel getChanel(P2PRequestChannelName channelName) {
         logger.traceEntry("params: {}", channelName);
@@ -157,15 +153,11 @@ public class AppState implements Serializable {
         this.shard = shard;
     }
 
-    public ArrayBlockingQueue<String> getTransactionPool() {
-        return (transactionsPool);
-    }
-
-    public void addTransactionToPool(String hash) {
-        transactionsPool.add(hash);
-    }
-
     public StatisticsManager getStatisticsManager() {
         return statisticsManager;
+    }
+
+    public TransactionsPool getPool() {
+        return blockchain.getPool();
     }
 }

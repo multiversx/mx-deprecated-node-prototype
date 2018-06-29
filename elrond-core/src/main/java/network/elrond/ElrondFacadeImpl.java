@@ -107,24 +107,34 @@ public class ElrondFacadeImpl implements ElrondFacade {
     @Override
     public Receipt getReceipt(String transactionHash, Application application) {
         logger.traceEntry("params: {} {}", transactionHash, application);
+        Blockchain blockchain = application.getState().getBlockchain();
 
         try {
-            return FutureUtil.get(() -> {
-                SecureObject<Receipt> secureReceipt;
-                Blockchain blockchain = application.getState().getBlockchain();
-                String receiptHash;
+
+            Receipt receipt = FutureUtil.get(() -> {
+
+                String receiptHash = null;
+                SecureObject<Receipt> secureReceipt = null;
+
                 do {
                     receiptHash = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
+                    if (receiptHash != null) {
+                        secureReceipt = AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT);
+                    }
                     ThreadUtil.sleep(200);
-                } while (receiptHash == null);
 
-                secureReceipt = AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT);
-                return logger.traceExit(secureReceipt.getObject());
-            });
+                } while (receiptHash == null || secureReceipt == null);
+
+                return secureReceipt.getObject();
+
+            }, 60L);
+
+            return logger.traceExit(receipt);
+
+
         } catch (Exception e) {
             logger.catching(e);
         }
-
         return logger.traceExit((Receipt) null);
     }
 

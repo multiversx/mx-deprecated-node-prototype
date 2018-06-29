@@ -2,6 +2,7 @@ package network.elrond;
 
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
+import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.BootstrapType;
@@ -49,11 +50,10 @@ public class SeedNodeRunner {
                     logger.info(receipt);
                 }
 
-                //ThreadUtil.sleep(1);
+                ThreadUtil.sleep(1);
             } while (true);
 
         });
-        thread.setPriority(10);
         thread.start();
 
     }

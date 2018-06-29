@@ -9,21 +9,34 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public class TransactionsProcessed {
+public class TransactionsPool {
 
     public static final int WINDOW_SIZE = 5;
 
-    protected Map<BigInteger, Collection<String>> map = new ConcurrentHashMap<>();
+    public Object lock = new Object();
+
+    protected final Map<BigInteger, Collection<String>> map = new ConcurrentHashMap<>();
+    protected final ArrayBlockingQueue<String> transactions = new ArrayBlockingQueue<>(50000, true);
 
 
-    public boolean checkExists(String transactionHash) {
-        Util.check(transactionHash != null, "transactionHash != null");
+    public ArrayBlockingQueue<String> getTransactionPool() {
+        return (transactions);
+    }
+
+    public void add(String transaction) {
+        transactions.add(transaction);
+    }
+
+
+    public boolean checkExists(String transaction) {
+        Util.check(transaction != null, "transaction != null");
 
         for (Collection<String> hashes : map.values()) {
-            if (hashes.contains(transactionHash)) {
+            if (hashes.contains(transaction)) {
                 return true;
             }
         }
@@ -51,5 +64,4 @@ public class TransactionsProcessed {
             map.remove(processedBlockNonces.get(0));
         }
     }
-
 }
