@@ -129,6 +129,9 @@ public class BootstrapServiceImpl implements BootstrapService {
             blockchain.setCurrentBlock(block);
             logger.trace("done updating current block");
 
+            //Maintain processed transactions
+            blockchain.getTransactionsProcessed().addBlock(block);
+
             result.combine(new ExecutionReport().ok("Put block in blockchain : " + blockHash + " # " + block));
         } catch (Exception ex) {
             result.combine(new ExecutionReport().ko(ex));

@@ -24,6 +24,7 @@ public class AppState implements Serializable {
 
     private boolean stillRunning = true;
     public Object lockerSyncPropose = new Object();
+    public Object lockerTransactionPool = new Object();
 
     private Shard shard;
     private Accounts accounts;

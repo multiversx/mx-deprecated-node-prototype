@@ -26,9 +26,9 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
 
     protected final Map<BlockchainUnitType, BlockchainPersistenceUnit<?, ?>> blockchain = new HashMap<>();
 
+    private final TransactionsProcessed transactionsProcessed = new TransactionsProcessed();
+
     private static final Logger logger = LogManager.getLogger(Blockchain.class);
-
-
 
     public Blockchain(BlockchainContext context) throws IOException {
         Util.check(context != null, "context!=null");
@@ -97,6 +97,10 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
 
     public Shard getShard() {
         return context.getShard();
+    }
+
+    public TransactionsProcessed getTransactionsProcessed(){
+        return (transactionsProcessed);
     }
 
     public void flush() {

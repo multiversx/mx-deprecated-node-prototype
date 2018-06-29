@@ -3,6 +3,7 @@ package network.elrond.consensus.handlers;
 import network.elrond.TimeWatch;
 import network.elrond.application.AppState;
 import network.elrond.benchmark.Statistic;
+import network.elrond.blockchain.TransactionsProcessed;
 import network.elrond.chronology.SubRound;
 import network.elrond.consensus.ConsensusState;
 import network.elrond.core.EventHandler;
@@ -61,7 +62,30 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
         int size = 0;
 
         PrivateKey privateKey = state.getPrivateKey();
-        List<String> hashes = new ArrayList<>(transactionPool);
+        List<String> hashes = new ArrayList<>();
+
+        logger.debug("About to clean transaction pool...");
+
+        synchronized (state.lockerTransactionPool){
+            //cleanup transaction pool
+
+            TransactionsProcessed transactionsProcessed = state.getBlockchain().getTransactionsProcessed();
+
+            hashes =  new ArrayList<>(transactionPool);
+
+            for (int i = 0; i < hashes.size(); i++){
+                String hash = hashes.get(i);
+
+                if (transactionsProcessed.checkExists(hash)){
+                    hashes.remove(i);
+                    transactionPool.remove(hash);
+                    i--;
+                }
+            }
+        }
+
+        logger.debug("Transaction pool cleaned!");
+
         Block block = AppBlockManager.instance().generateAndBroadcastBlock(hashes, privateKey, state);
 
         if (block != null && block.getListTXHashes() != null) {
