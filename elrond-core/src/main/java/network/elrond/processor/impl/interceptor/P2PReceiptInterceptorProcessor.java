@@ -5,6 +5,8 @@ import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
+import network.elrond.core.FutureUtil;
+import network.elrond.core.ThreadUtil;
 import network.elrond.data.Receipt;
 import network.elrond.data.SecureObject;
 import network.elrond.p2p.P2PBroadcastChannelName;
@@ -30,8 +32,16 @@ public class P2PReceiptInterceptorProcessor extends AbstractChannelTask<String> 
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
 
         try {
-            // This will retrieve receipt from network if required
-            SecureObject<Receipt> secureReceipt = blockchainService.get(hash, blockchain, BlockchainUnitType.RECEIPT);
+
+            SecureObject<Receipt> secureReceipt = FutureUtil.get(() -> {
+                SecureObject<Receipt> result;
+                do {
+                    result = blockchainService.get(hash, blockchain, BlockchainUnitType.RECEIPT);
+                    ThreadUtil.sleep(200);
+                } while (result == null);
+                return result;
+            }, 60L);
+
 
             if (secureReceipt == null) {
                 logger.warn("Receipt with hash {} was not found!", hash);

@@ -2,7 +2,6 @@ package network.elrond;
 
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
-import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.BootstrapType;
@@ -37,8 +36,8 @@ public class SeedNodeRunner {
 
             do {
                 PublicKey key = application.getState().getPublicKey();
-                // AccountAddress address = AccountAddress.fromHexString(Util.TEST_ADDRESS);
-                AccountAddress address = AccountAddress.fromHexString(Util.getAddressFromPublicKey(key.getValue()));
+                AccountAddress address = AccountAddress.fromHexString(Util.TEST_ADDRESS);
+                //AccountAddress address = AccountAddress.fromHexString(Util.getAddressFromPublicKey(key.getValue()));
                 Transaction transaction = facade.send(address, BigInteger.TEN, application);
                 logger.info("Sender Balance: {}", facade.getBalance(AccountAddress.fromBytes(application.getState().getPublicKey().getValue()), application));
 
@@ -50,10 +49,11 @@ public class SeedNodeRunner {
                     logger.info(receipt);
                 }
 
-                ThreadUtil.sleep(1);
+                //ThreadUtil.sleep(1);
             } while (true);
 
         });
+        thread.setPriority(10);
         thread.start();
 
     }
