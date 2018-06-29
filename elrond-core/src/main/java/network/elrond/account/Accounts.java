@@ -1,15 +1,17 @@
 package network.elrond.account;
 
+import network.elrond.blockchain.PersistenceUnitContainer;
 import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
-
-import network.elrond.blockchain.PersistenceUnitContainer;
+import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Accounts implements Serializable, PersistenceUnitContainer {
 
@@ -20,15 +22,19 @@ public class Accounts implements Serializable, PersistenceUnitContainer {
     private final Set<AccountAddress> addresses;
     private static final Logger logger = LogManager.getLogger(Accounts.class);
 
-    public Accounts(AccountsContext context, AccountsPersistenceUnit<AccountAddress, AccountState> unit) throws IOException {
+    public Accounts(AccountsContext context, AccountsPersistenceUnit<AccountAddress, AccountState> unit) {
         logger.traceEntry();
-        Util.check(context!=null, "context!=null");
-        Util.check(unit!=null, "unit!=null");
+        Util.check(context != null, "context!=null");
+        Util.check(unit != null, "unit!=null");
         this.context = context;
         this.unit = unit;
         addresses = new HashSet<>();
         AppServiceProvider.getAccountStateService().initialMintingToKnownAddress(this);
         logger.traceExit();
+    }
+
+    public Shard getShard() {
+        return context.getShard();
     }
 
     public AccountsPersistenceUnit<AccountAddress, AccountState> getAccountsPersistenceUnit() {

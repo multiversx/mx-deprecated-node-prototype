@@ -1,0 +1,7 @@
+package network.elrond.p2p;
+
+public enum P2PRequestChannelName {
+
+    ACCOUNT,
+    STATISTICS,;
+}

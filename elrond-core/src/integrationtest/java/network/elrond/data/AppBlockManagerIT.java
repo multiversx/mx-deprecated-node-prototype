@@ -139,43 +139,43 @@ public class AppBlockManagerIT {
 
 
 
-    @Test
-    public void testComposeAndSignNTransactionsInBlock() throws IOException, ClassNotFoundException {
+//    @Test
+//    public void testComposeAndSignNTransactionsInBlock() throws IOException, ClassNotFoundException {
+//
+//        List<String> hashes = GenerateTransactionHashes(N);
+//
+//        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
+//
+//        accounts = new Accounts(new AccountsContext(), new AccountsPersistenceUnit<>(""));
+//
+//        long start = System.currentTimeMillis();
+//        List<Transaction> transactions = blockchainService.getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
+//        Block block = AppBlockManager.instance().composeBlock(transactions, blockchain, accounts, null);
+//        AppBlockManager.instance().signBlock(block, privateKey);
+//        long end = System.currentTimeMillis();
+//        System.out.println((end - start));
+//        WriteLine("Composed and signed block of  ", end - start);
+//
+//    }
 
-        List<String> hashes = GenerateTransactionHashes(N);
-
-        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
-
-        accounts = new Accounts(new AccountsContext(), new AccountsPersistenceUnit<>(""));
-
-        long start = System.currentTimeMillis();
-        List<Transaction> transactions = blockchainService.getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
-        Block block = AppBlockManager.instance().composeBlock(transactions, blockchain, accounts, null);
-        AppBlockManager.instance().signBlock(block, privateKey);
-        long end = System.currentTimeMillis();
-        System.out.println((end - start));
-        WriteLine("Composed and signed block of  ", end - start);
-
-    }
-
-    @Test
-    public void testGenerateAndBroadCastBlock() throws IOException, ClassNotFoundException {
-
-        List<String> hashes = GenerateTransactionHashes(N);
-
-        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
-
-        accounts = new Accounts(new AccountsContext(), new AccountsPersistenceUnit<>(""));
-
-        long start = System.currentTimeMillis();
-
-        AppBlockManager.instance().generateAndBroadcastBlock(hashes, accounts, blockchain, privateKey, null);
-
-        long end = System.currentTimeMillis();
-        System.out.println((end - start));
-        WriteLine("Generated and broadcasted block of ", end - start);
-
-    }
+//    @Test
+//    public void testGenerateAndBroadCastBlock() throws IOException, ClassNotFoundException {
+//
+//        List<String> hashes = GenerateTransactionHashes(N);
+//
+//        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
+//
+//        accounts = new Accounts(new AccountsContext(), new AccountsPersistenceUnit<>(""));
+//
+//        long start = System.currentTimeMillis();
+//
+//        AppBlockManager.instance().generateAndBroadcastBlock(hashes, accounts, blockchain, privateKey, null);
+//
+//        long end = System.currentTimeMillis();
+//        System.out.println((end - start));
+//        WriteLine("Generated and broadcasted block of ", end - start);
+//
+//    }
 
     private List<String> GenerateTransactionHashes(double nrTransactions) {
         List<String> hashes = new ArrayList<String>();

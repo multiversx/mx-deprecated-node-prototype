@@ -12,45 +12,45 @@ public class AccountStateTest {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Test
-    public void testAccountStateDefaultConstructor(){
-        AccountState accountState = new AccountState();
+    public void testAccountStateDefaultConstructor() {
+        AccountState accountState = new AccountState(AccountAddress.EMPTY_ADDRESS);
         Assert.assertEquals(BigInteger.ZERO, accountState.getBalance());
         Assert.assertEquals(BigInteger.ZERO, accountState.getNonce());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testAccountStateConstructorWithNegativeBalanceShouldThrowException(){
-        AccountState accountState = new AccountState(BigInteger.ZERO, BigInteger.valueOf(-1));
+    public void testAccountStateConstructorWithNegativeBalanceShouldThrowException() {
+        AccountState accountState = new AccountState(BigInteger.ZERO, BigInteger.valueOf(-1), AccountAddress.EMPTY_ADDRESS);
         Assert.fail();
     }
 
     @Test
-    public void testAccountStateConstructorWithCorrectBalance(){
-        AccountState accountState = new AccountState(BigInteger.ZERO, BigInteger.valueOf(2));
+    public void testAccountStateConstructorWithCorrectBalance() {
+        AccountState accountState = new AccountState(BigInteger.ZERO, BigInteger.valueOf(2), AccountAddress.EMPTY_ADDRESS);
         Assert.assertTrue(accountState.getBalance().longValue() == 2);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testAccountStateConstructorWithNegativeNonceShouldThrowException(){
-        AccountState accountState = new AccountState(BigInteger.valueOf(-1), BigInteger.valueOf(2));
+    public void testAccountStateConstructorWithNegativeNonceShouldThrowException() {
+        AccountState accountState = new AccountState(BigInteger.valueOf(-1), BigInteger.valueOf(2), AccountAddress.EMPTY_ADDRESS);
         Assert.fail();
     }
 
     @Test
-    public void testAccountStateConstructorWithCorrectNonce(){
-        AccountState accountState = new AccountState(BigInteger.valueOf(1), BigInteger.valueOf(2));
+    public void testAccountStateConstructorWithCorrectNonce() {
+        AccountState accountState = new AccountState(BigInteger.valueOf(1), BigInteger.valueOf(2), AccountAddress.EMPTY_ADDRESS);
         Assert.assertTrue(accountState.getNonce().longValue() == 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testAccountStateCopyConstructorWithNullShouldThrowException(){
-        AccountState copiedState = new AccountState(null);
+    public void testAccountStateCopyConstructorWithNullShouldThrowException() {
+        AccountState copiedState = new AccountState((AccountState) null);
         Assert.fail();
     }
 
     @Test
-    public void testAccountStateCopyConstructorWithCorrectValues(){
-        AccountState accountState = new AccountState(BigInteger.valueOf(1), BigInteger.valueOf(2));
+    public void testAccountStateCopyConstructorWithCorrectValues() {
+        AccountState accountState = new AccountState(BigInteger.valueOf(1), BigInteger.valueOf(2), AccountAddress.EMPTY_ADDRESS);
         AccountState copiedState = new AccountState(accountState);
 
         Assert.assertTrue(copiedState.getBalance().longValue() == 2);
@@ -58,32 +58,32 @@ public class AccountStateTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testAccountStateSetNonceNegativeShouldThrowException(){
-        AccountState accountState = new AccountState();
+    public void testAccountStateSetNonceNegativeShouldThrowException() {
+        AccountState accountState = new AccountState(AccountAddress.EMPTY_ADDRESS);
         accountState.setNonce(BigInteger.valueOf(-1));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testAccountStateSetNonceNullShouldThrowException(){
-        AccountState accountState = new AccountState();
+    public void testAccountStateSetNonceNullShouldThrowException() {
+        AccountState accountState = new AccountState(AccountAddress.EMPTY_ADDRESS);
         accountState.setNonce(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testAccountStateSetBalanceNegativeShouldThrowException(){
-        AccountState accountState = new AccountState();
+    public void testAccountStateSetBalanceNegativeShouldThrowException() {
+        AccountState accountState = new AccountState(AccountAddress.EMPTY_ADDRESS);
         accountState.setBalance(BigInteger.valueOf(-1));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testAccountStateSetBalanceNullShouldThrowException(){
-        AccountState accountState = new AccountState();
+    public void testAccountStateSetBalanceNullShouldThrowException() {
+        AccountState accountState = new AccountState(AccountAddress.EMPTY_ADDRESS);
         accountState.setBalance(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testAccountStateAddToBalanceNullShouldThrowException(){
-        AccountState accountState = new AccountState();
+    public void testAccountStateAddToBalanceNullShouldThrowException() {
+        AccountState accountState = new AccountState(AccountAddress.EMPTY_ADDRESS);
         accountState.addToBalance(null);
     }
 
@@ -93,7 +93,6 @@ public class AccountStateTest {
 //        accountState.addToBalance(BigInteger.valueOf(-2));
 //
 //    }
-
 
 
 //    @Test
@@ -221,7 +220,7 @@ public class AccountStateTest {
 //        tx1.setNonce(BigInteger.ZERO);
 //        //2 ERDs
 //        tx1.setValue(BigInteger.valueOf(10).pow(8).multiply(BigInteger.valueOf(2)));
-//        tx1.setSendAddress(Util.getAddressFromPublicKey(pb1.getEncoded()));
+//        tx1.setSenderAddress(Util.getAddressFromPublicKey(pb1.getEncoded()));
 //        tx1.setReceiverAddress(Util.getAddressFromPublicKey(pb2.getEncoded()));
 //        tx1.setPubKey(Util.byteArrayToHexString(pb1.getEncoded()));
 //        transactionService.signTransaction(tx1, pv1.getValue());
@@ -230,7 +229,7 @@ public class AccountStateTest {
 //        tx2.setNonce(BigInteger.ZERO);
 //        //3 ERDs
 //        tx2.setValue(BigInteger.valueOf(10).pow(8).multiply(BigInteger.valueOf(3)));
-//        tx2.setSendAddress(Util.getAddressFromPublicKey(pb3.getEncoded()));
+//        tx2.setSenderAddress(Util.getAddressFromPublicKey(pb3.getEncoded()));
 //        tx2.setReceiverAddress(Util.getAddressFromPublicKey(pb4.getEncoded()));
 //        tx2.setPubKey(Util.byteArrayToHexString(pb3.getEncoded()));
 //        transactionService.signTransaction(tx2, pv3.getValue());

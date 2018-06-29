@@ -1,7 +1,6 @@
 package network.elrond.account;
 
 import network.elrond.core.Util;
-import network.elrond.crypto.PublicKey;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -9,7 +8,11 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 public class AccountAddress implements Serializable {
+
     private static final Logger logger = LogManager.getLogger(AccountAddress.class);
+
+    public static final AccountAddress EMPTY_ADDRESS = new AccountAddress(new byte[0]);
+
 
     private byte[] bytes;
 
@@ -20,7 +23,7 @@ public class AccountAddress implements Serializable {
 
     private AccountAddress(byte[] publicKeyBytes) {
         logger.traceEntry("params: {}", publicKeyBytes);
-        Util.check(publicKeyBytes != null,"publicKeyBytes != null" );
+        Util.check(publicKeyBytes != null, "publicKeyBytes != null");
         this.bytes = publicKeyBytes;
         logger.traceExit();
     }
@@ -36,22 +39,15 @@ public class AccountAddress implements Serializable {
         return new AccountAddress(publicKeyBytes);
     }
 
-//    public static AccountAddress fromPublicKey(PublicKey key) {
-//        if (key == null) {
-//            throw new IllegalArgumentException("PublicKey cannot be null");
-//        }
-//        return fromBytes(key.getValue());
-//    }
-
     @Override
     public boolean equals(Object o) {
         logger.traceEntry("params: this>{} {}", this, o);
-        if (this == o){
+        if (this == o) {
             logger.trace("same object");
             return logger.traceExit(true);
         }
 
-        if (o == null || getClass() != o.getClass()){
+        if (o == null || getClass() != o.getClass()) {
             logger.trace("object null, class not the same");
             return logger.traceExit(false);
         }

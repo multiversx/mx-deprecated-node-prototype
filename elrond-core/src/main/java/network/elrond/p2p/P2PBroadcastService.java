@@ -1,27 +1,19 @@
 package network.elrond.p2p;
 
 
-import network.elrond.application.AppContext;
+import net.tomp2p.peers.PeerAddress;
 
-import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
 
 public interface P2PBroadcastService {
 
-    P2PConnection createConnection(AppContext context) throws IOException;
-
-    P2PConnection createConnection(
-            String nodeName,
-            int peerPort,
-            String masterPeerIpAddress,
-            int masterPeerPort
-    ) throws IOException;
-
-
-    P2PBroadcastChanel createChannel(P2PConnection connection, P2PChannelName chanelName);
+    P2PBroadcastChanel createChannel(P2PConnection connection, P2PBroadcastChannelName chanelName);
 
     boolean subscribeToChannel(P2PBroadcastChanel chanel);
+
+    HashSet<PeerAddress> getPeersOnChannel(P2PBroadcastChanel channel);
 
     boolean publishToChannel(P2PBroadcastChanel chanel, Serializable obj);
 

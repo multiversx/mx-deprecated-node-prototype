@@ -313,7 +313,7 @@ public class TrieImpl implements Trie {
 
     /**
      * Helper method to retrieve the actual node
-     * If the node is not a list and length is > 32
+     * If the node is not a listToTable and length is > 32
      * bytes getAccountState the actual node from the db
      *
      * @param node -
@@ -431,7 +431,7 @@ public class TrieImpl implements Trie {
 
             logger.trace("Garbage collected node: [{}]", Hex.toHexString(key.getData()));
         }
-        logger.trace("Garbage collected node list, size: [{}]", toRemoveSet.size());
+        logger.trace("Garbage collected node listToTable, size: [{}]", toRemoveSet.size());
         logger.trace("Garbage collection time: [{}ms]", System.currentTimeMillis() - startTime);
     }
 

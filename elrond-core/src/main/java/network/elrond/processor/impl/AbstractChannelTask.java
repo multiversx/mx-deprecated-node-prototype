@@ -4,7 +4,7 @@ import network.elrond.Application;
 import network.elrond.application.AppState;
 import network.elrond.core.ThreadUtil;
 import network.elrond.p2p.AppP2PManager;
-import network.elrond.p2p.P2PChannelName;
+import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.processor.AppTask;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,7 +26,7 @@ public abstract class AbstractChannelTask<T> implements AppTask {
                     logger.trace("processing...");
                     process(queue, application);
                     logger.trace("waiting...");
-                    ThreadUtil.sleep(500);
+                    ThreadUtil.sleep(getWaitingTime());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -50,7 +50,9 @@ public abstract class AbstractChannelTask<T> implements AppTask {
 
     protected abstract void process(T object, Application application);
 
-    protected abstract P2PChannelName getChannelName();
+    protected abstract P2PBroadcastChannelName getChannelName();
 
-
+    protected int getWaitingTime(){
+        return 500;
+    }
 }

@@ -3,6 +3,7 @@ package network.elrond.data;
 import network.elrond.account.Accounts;
 import network.elrond.account.AccountsManager;
 import network.elrond.benchmark.Statistic;
+import network.elrond.benchmark.StatisticsManager;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
@@ -11,6 +12,8 @@ import network.elrond.chronology.Round;
 import network.elrond.core.Util;
 import network.elrond.crypto.MultiSignatureService;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
+import network.elrond.sharding.ShardOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongycastle.util.encoders.Base64;
@@ -27,7 +30,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     private SerializationService serializationService = AppServiceProvider.getSerializationService();
 
     @Override
-    public ExecutionReport processBlock(Block block, Accounts accounts, Blockchain blockchain) {
+    public ExecutionReport processBlock(Block block, Accounts accounts, Blockchain blockchain, StatisticsManager statisticsManager) {
         logger.traceEntry("params: {} {} {}", block, accounts, blockchain);
 
         Util.check(block != null, "block != null");
@@ -35,7 +38,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         Util.check(blockchain != null, "blockchain != null");
 
         try {
-            return logger.traceExit(_processBlock(accounts, blockchain, block));
+            return logger.traceExit(_processBlock(accounts, blockchain, block, statisticsManager));
         } catch (IOException | ClassNotFoundException e) {
             return logger.traceExit(ExecutionReport.create().ko(e));
         }
@@ -44,7 +47,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     private boolean validateBlockSigners(Accounts accounts, Blockchain blockchain, Block block) {
         logger.traceEntry("params: {} {} {}", accounts, blockchain, block);
         // TODO: need to check that signers are the right ones for that specific epoch & round
-        // Signers part of the eligible list in the epoch
+        // Signers part of the eligible listToTable in the epoch
         // Signers are selected by the previous block signature
         return logger.traceExit(true);
     }
@@ -71,7 +74,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         return logger.traceExit(signatureService.verifyAggregatedSignature(signersPublicKeys, signature, commitment, message, bitmap));
     }
 
-    private boolean validateBlockTimestampRound(Blockchain blockchain, Block block){
+    private boolean validateBlockTimestampRound(Blockchain blockchain, Block block) {
         logger.traceEntry("params: {} {}", blockchain, block);
         Util.check(blockchain.getGenesisBlock() != null, "genesis!=null");
 
@@ -91,20 +94,14 @@ public class ExecutionServiceImpl implements ExecutionService {
         return logger.traceExit(chronologyService.isDateTimeInRound(roundBlock, block.getTimestamp()));
     }
 
-    private ExecutionReport _processBlock(Accounts accounts, Blockchain blockchain, Block block) throws IOException, ClassNotFoundException {
+    private ExecutionReport _processBlock(Accounts accounts, Blockchain blockchain, Block block, StatisticsManager statisticsManager) throws IOException, ClassNotFoundException {
         logger.traceEntry("params: {} {}", accounts, blockchain, block);
-        long transactionsProcessed = 0 ;
+        long nrProcessedTransactions = 0;
         try {
             ExecutionReport blockExecutionReport = ExecutionReport.create();
             BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
             ArrayList<String> signers;
             String blockHash = serializationService.getHashString(block);
-
-            // check that block is not already processed
-//        if (blockchainService.contains(blockHash, blockchain, BlockchainUnitType.BLOCK)) {
-//            blockExecutionReport.ko("Block already in blockchain");
-//            return blockExecutionReport;
-//        }
 
             // check if previous block hash is in blockchain, otherwise can't add it yet
             // do the check only if nonce is not 0
@@ -173,28 +170,30 @@ public class ExecutionServiceImpl implements ExecutionService {
             if (blockExecutionReport.isOk()) {
                 // check state merkle patricia trie root is the same with what was stored in block
                 if (!Arrays.equals(block.getAppStateHash(), accounts.getAccountsPersistenceUnit().getRootHash())) {
-                    blockExecutionReport.ko("Application state root hash does not match");
+                    blockExecutionReport.ko(String.format("Application state root hash does not match. Generated: %s, block: %s",
+                            Util.getDataEncoded64(accounts.getAccountsPersistenceUnit().getRootHash()),
+                            Util.getDataEncoded64(block.getAppStateHash())));
                     AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
                     logger.trace("Block process FAILED!");
                     return logger.traceExit(blockExecutionReport);
                 }
 
                 AppServiceProvider.getAccountStateService().commitAccountStates(accounts);
-                blockExecutionReport.ok("Commit account state changes");
-                transactionsProcessed = block.getListTXHashes() != null ? block.getListTXHashes().size() : 0;
-
+                blockExecutionReport.ok(String.format("Commit account state changes, state root hash: %s", Util.getDataEncoded64(accounts.getAccountsPersistenceUnit().getRootHash())));
+                nrProcessedTransactions = BlockUtil.getTransactionsCount(block);
                 logger.trace("Block process was SUCCESSFUL!");
             } else {
                 AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
                 blockExecutionReport.ko("Rollback account state changes");
-                AppServiceProvider.getStatisticService().addStatistic(new Statistic(0));
                 logger.trace("Block process FAILED!");
             }
 
             return logger.traceExit(blockExecutionReport);
         }
         finally {
-            AppServiceProvider.getStatisticService().addStatistic(new Statistic(transactionsProcessed));
+            if(statisticsManager!=null) {
+                statisticsManager.addStatistic(new Statistic(nrProcessedTransactions));
+            }
         }
     }
 
@@ -207,6 +206,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         try {
             return logger.traceExit(_processTransaction(accounts, transaction));
         } catch (Exception e) {
+            logger.catching(e);
             return logger.traceExit(ExecutionReport.create().ko(e));
         }
     }
@@ -222,19 +222,33 @@ public class ExecutionServiceImpl implements ExecutionService {
             return logger.traceExit(ExecutionReport.create().ko("Invalid transaction! tx hash: " + strHash));
         }
 
-        //We have to copy-construct the objects for sandbox mode
-        if (!AccountsManager.instance().hasFunds(accounts, transaction.getSendAddress(), transaction.getValue())) {
+
+        Shard shard = accounts.getShard();
+        ShardOperation operation = AppServiceProvider.getShardingService().getShardOperation(shard, transaction);
+
+
+        String senderAddress = transaction.getSenderAddress();
+        String receiverAddress = transaction.getReceiverAddress();
+
+
+        BigInteger value = transaction.getValue();
+        if (operation.isCheckSource() && !AccountsManager.instance().hasFunds(accounts, senderAddress, value)) {
             return logger.traceExit(ExecutionReport.create().ko("Invalid transaction! Will result in negative balance! tx hash: " + strHash));
         }
 
-        if (!AccountsManager.instance().hasCorrectNonce(accounts, transaction.getSendAddress(), transaction.getNonce())) {
+        BigInteger nonce = transaction.getNonce();
+        if (operation.isCheckSource() && !AccountsManager.instance().hasCorrectNonce(accounts, senderAddress, nonce)) {
             return logger.traceExit(ExecutionReport.create().ko("Invalid transaction! Nonce mismatch! tx hash: " + strHash));
         }
 
-        AccountsManager.instance().transferFunds(accounts,
-                transaction.getSendAddress(), transaction.getReceiverAddress(),
-                transaction.getValue(), transaction.getNonce());
+
+        AccountsManager.instance().transferFunds(accounts, senderAddress, receiverAddress, value, nonce, operation);
 
         return logger.traceExit(ExecutionReport.create().ok());
+
+
     }
+
+
+
 }

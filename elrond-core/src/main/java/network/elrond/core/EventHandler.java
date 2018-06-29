@@ -1,7 +1,9 @@
 package network.elrond.core;
 
 import network.elrond.Application;
+import network.elrond.application.AppState;
 
-public interface EventHandler<T> {
-    void onEvent(Application application, Object sender, T data);
+//public interface EventHandler<D, Q> {
+public interface EventHandler<D> {
+    void onEvent(AppState state, D data);
 }

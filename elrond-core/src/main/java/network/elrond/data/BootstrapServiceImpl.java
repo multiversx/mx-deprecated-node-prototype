@@ -1,22 +1,27 @@
 package network.elrond.data;
 
+import net.tomp2p.dht.FuturePut;
 import network.elrond.account.Accounts;
-import network.elrond.account.AccountsContext;
 import network.elrond.application.AppContext;
+import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.blockchain.SettingsType;
 import network.elrond.chronology.NTPClient;
+import network.elrond.core.AsciiTableUtil;
 import network.elrond.core.Util;
-import network.elrond.crypto.PrivateKey;
+import network.elrond.p2p.P2PConnection;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongycastle.util.encoders.Base64;
 import org.mapdb.Fun;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.List;
 
 public class BootstrapServiceImpl implements BootstrapService {
     private static final Logger logger = LogManager.getLogger(BootstrapServiceImpl.class);
@@ -106,13 +111,19 @@ public class BootstrapServiceImpl implements BootstrapService {
         ExecutionReport result = new ExecutionReport();
 
         try {
+            // Put index <=> hash mapping only on DHT
+            P2PConnection connection = blockchain.getConnection();
+            String blockNonce = getBlockIndexIdentifier(block.getNonce());
+            FuturePut futurePut = AppServiceProvider.getP2PObjectService().put(connection, blockNonce, blockHash, true, false);
+            if (!futurePut.isSuccess()){
+                result.combine(new ExecutionReport().ko("Not allowed to override block index " + blockNonce));
+                return result;
+            }
+            logger.trace("stored block index {}", block.getNonce());
+
             AppServiceProvider.getBlockchainService().put(blockHash, block, blockchain, BlockchainUnitType.BLOCK);
             setBlockHashWithIndex(block.getNonce(), blockHash, blockchain);
             logger.trace("stored block {}", blockHash);
-
-            // Put index <=> hash mapping
-            AppServiceProvider.getBlockchainService().put(block.getNonce(), blockHash, blockchain, BlockchainUnitType.BLOCK_INDEX);
-            logger.trace("stored block index {}", block.getNonce());
 
             // Update max index
             setCurrentBlockIndex(LocationType.BOTH, block.getNonce(), blockchain);
@@ -121,6 +132,9 @@ public class BootstrapServiceImpl implements BootstrapService {
             // Update current block
             blockchain.setCurrentBlock(block);
             logger.trace("done updating current block");
+
+            //Maintain processed transactions
+            blockchain.getPool().addBlock(block);
 
             result.combine(new ExecutionReport().ok("Put block in blockchain : " + blockHash + " # " + block));
         } catch (Exception ex) {
@@ -146,17 +160,18 @@ public class BootstrapServiceImpl implements BootstrapService {
 
 
     @Override
-    public ExecutionReport startFromGenesis(Accounts accounts, Blockchain blockchain, AppContext context, NTPClient ntpClient) {
-        logger.traceEntry("params: {} {} {} {}", accounts, blockchain, context, ntpClient);
+    public ExecutionReport startFromGenesis(AppState state, AppContext context) {
+        logger.traceEntry("params: {} {}", state, context);
         ExecutionReport result = new ExecutionReport().ok("Start from scratch...");
+
+
+        Accounts accounts = state.getAccounts();
+        Blockchain blockchain = state.getBlockchain();
 
         // Generate genesis block
         String addressMint = context.getStrAddressMint();
         BigInteger valueMint = context.getValueMint();
-        PrivateKey privateKey = context.getPrivateKey();
-        AccountsContext accountsContext = new AccountsContext();
-        Fun.Tuple2<Block, Transaction> genesisData = AppServiceProvider.getAccountStateService()
-                .generateGenesisBlock(addressMint, valueMint, accountsContext, privateKey, ntpClient);
+        Fun.Tuple2<Block, Transaction> genesisData = AppServiceProvider.getAccountStateService().generateGenesisBlock(addressMint, valueMint, state, context);
 
         Block genesisBlock = genesisData.a;
         String genesisBlockHash = AppServiceProvider.getSerializationService().getHashString(genesisBlock);
@@ -173,12 +188,30 @@ public class BootstrapServiceImpl implements BootstrapService {
             ExecutionReport reportTransaction = commitTransaction(genesisTransaction, genesisTransactionHash, blockchain);
             result.combine(reportTransaction);
 
-            ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(genesisBlock, accounts, blockchain);
+            ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(genesisBlock, accounts, blockchain,  state.getStatisticsManager());
             result.combine(executionReport);
 
             if (result.isOk()) {
                 logger.trace("Execution of genesis block was successful!");
                 setCurrentBlockIndex(LocationType.BOTH, genesisBlock.getNonce(), blockchain);
+
+
+                logger.info("\n" + genesisBlock.print().render());
+                logger.info("\n" + AsciiTableUtil.listToTables(Arrays.asList(genesisTransaction)));
+                logger.info("\n" + AsciiTableUtil.listToTables(accounts.getAddresses()
+                        .stream()
+                        .map(accountAddress -> {
+                            try {
+                                return AppServiceProvider.getAccountStateService().getAccountState(accountAddress, accounts);
+                            } catch (IOException | ClassNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                            return null;
+                        })
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList())));
+
+
             }
 
 
@@ -192,8 +225,14 @@ public class BootstrapServiceImpl implements BootstrapService {
 
 
     @Override
-    public ExecutionReport restoreFromDisk(BigInteger currentBlockIndex, Accounts accounts, Blockchain blockchain, AppContext context, NTPClient ntpClient) {
-        logger.traceEntry("params: {} {} {} {}", currentBlockIndex, accounts, blockchain, context, ntpClient);
+    public ExecutionReport restoreFromDisk(BigInteger currentBlockIndex, AppState state, AppContext context) {
+
+        logger.traceEntry("params: {} {}", currentBlockIndex, context);
+
+        Accounts accounts = state.getAccounts();
+        Blockchain blockchain = state.getBlockchain();
+        NTPClient ntpClient = state.getNtpClient();
+
 
         ExecutionReport result = new ExecutionReport().ok("Start bootstrapping by loading from disk...");
         BigInteger idx = BigInteger.valueOf(-1);
@@ -210,7 +249,7 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         if (idx.equals(BigInteger.valueOf(-1))) {
             logger.trace("no index stored on disk so need to create genesis");
-            return startFromGenesis(accounts, blockchain, context, ntpClient);
+            return startFromGenesis(state, context);
         }
 
         BigInteger genesisBlockIndex = BigInteger.valueOf(0);
@@ -222,7 +261,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                 Block block = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK);
 
                 logger.trace("re-running block to update internal state...");
-                ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain);
+                ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain,  state.getStatisticsManager());
                 result.combine(executionReport);
 
                 if (!result.isOk()) {
@@ -232,7 +271,9 @@ public class BootstrapServiceImpl implements BootstrapService {
 
                 commitBlock(block, blockHash, blockchain);
                 commitBlockTransactions(block, blockchain);
-
+                // Update current block
+                blockchain.setCurrentBlock(block);
+                logger.trace("done updating current block");
 
             } catch (Exception ex) {
                 result.ko(ex);
@@ -247,19 +288,25 @@ public class BootstrapServiceImpl implements BootstrapService {
 
     private void commitBlockTransactions(Block block, Blockchain blockchain) throws IOException, ClassNotFoundException {
         logger.traceEntry("params: {} {}", block, blockchain);
-        for (byte[] hash : block.getListTXHashes()) {
-            String transactionHash = new String(Base64.encode(hash));
+
+        List<String> hashes = BlockUtil.getTransactionsHashesAsString(block);
+        for (String transactionHash : hashes) {
             Transaction transaction = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION);
             commitTransaction(transaction, transactionHash, blockchain);
         }
-        logger.trace("Done, {} transactions processed!", block.getListTXHashes().size());
+
+        logger.trace("Done, {} transactions processed!", BlockUtil.getTransactionsCount(block));
         logger.traceExit();
     }
 
 
     @Override
-    public ExecutionReport synchronize(BigInteger localBlockIndex, BigInteger remoteBlockIndex, Blockchain blockchain, Accounts accounts) {
-        logger.traceEntry("params: {} {} {} {}", localBlockIndex, remoteBlockIndex, blockchain, accounts);
+    public ExecutionReport synchronize(BigInteger localBlockIndex, BigInteger remoteBlockIndex, AppState state) {
+        logger.traceEntry("params: {} {} {} {}", localBlockIndex, remoteBlockIndex, state);
+
+        Accounts accounts = state.getAccounts();
+        Blockchain blockchain = state.getBlockchain();
+
         ExecutionReport result = new ExecutionReport().ok("Bootstrapping... [local height: " + localBlockIndex + " > network height: " + remoteBlockIndex + "...");
 
         logger.trace("re-running stored blocks to update internal state...");
@@ -283,7 +330,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                 }
 
 
-                ExecutionReport executionReport = executionService.processBlock(block, accounts, blockchain);
+                ExecutionReport executionReport = executionService.processBlock(block, accounts, blockchain,  state.getStatisticsManager());
                 result.combine(executionReport);
 
                 if (!result.isOk()) {
@@ -291,9 +338,33 @@ public class BootstrapServiceImpl implements BootstrapService {
                     return logger.traceExit(result);
                 }
 
-                result.ok("Added block in blockchain : " + blockHash + " # " + block);
-                blockchain.setCurrentBlockIndex(blockIndex);
+                AppBlockManager.instance().removeAlreadyProcessedTransactionsFromPool(state, block);
 
+                result.ok("Added block in blockchain : " + blockHash + " # " + block);
+
+                logger.info("New block synchronized with hash {}", blockHash);
+
+                logger.info("\n" + block.print().render());
+                //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
+                logger.info("\n" + AsciiTableUtil.listToTables(accounts.getAddresses()
+                        .stream()
+                        .map(accountAddress -> {
+                            try {
+                                return AppServiceProvider.getAccountStateService().getAccountState(accountAddress, accounts);
+                            } catch (IOException | ClassNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                            return null;
+                        })
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList())));
+
+                blockchain.setCurrentBlockIndex(blockIndex);
+                blockchain.setCurrentBlock(block);
+
+                // Update current block
+                blockchain.setCurrentBlock(block);
+                logger.trace("done updating current block");
 
             } catch (Exception ex) {
                 result.ko(ex);
@@ -304,6 +375,20 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         logger.trace("Synchronized was SUCCESSFUL!");
         return logger.traceExit(result);
+    }
+
+    @Override
+    public SyncState getSyncState(Blockchain blockchain) throws Exception{
+        SyncState syncState = new SyncState();
+
+        syncState.setRemoteBlockIndex(AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.NETWORK, blockchain));
+        syncState.setLocalBlockIndex(AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.LOCAL, blockchain));
+
+        boolean isBlocAvailable = syncState.getRemoteBlockIndex().compareTo(BigInteger.ZERO) >= 0;
+        boolean isNewBlockRemote = syncState.getRemoteBlockIndex().compareTo(syncState.getLocalBlockIndex()) > 0;
+        syncState.setSyncRequired(isBlocAvailable && isNewBlockRemote);
+
+        return(syncState);
     }
 
 

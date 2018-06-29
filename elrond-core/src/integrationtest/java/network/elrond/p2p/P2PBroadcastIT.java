@@ -91,24 +91,24 @@ public class P2PBroadcastIT {
         return chanel;
     }
 
-    private P2PConnection createClient(Integer masterPeerPort, Integer port) throws IOException {
-        AppContext context = new AppContext();
-        context.setMasterPeerIpAddress("127.0.0.1");
-        context.setMasterPeerPort(masterPeerPort);
-        context.setPort(port);
-        context.setNodeName("Client-" + port);
-
-        return AppServiceProvider.getP2PBroadcastService().createConnection(context);
-    }
-
-    private P2PConnection createServer(int port) throws IOException {
-        AppContext context = new AppContext();
-        context.setMasterPeerIpAddress("127.0.0.1");
-        context.setMasterPeerPort(port);
-        context.setPort(port);
-        context.setNodeName("Server");
-
-        return AppServiceProvider.getP2PBroadcastService().createConnection(context);
-    }
+//    private P2PConnection createClient(Integer masterPeerPort, Integer port) throws IOException {
+//        AppContext context = new AppContext();
+//        context.setMasterPeerIpAddress("127.0.0.1");
+//        context.setMasterPeerPort(masterPeerPort);
+//        context.setPort(port);
+//        context.setNodeName("Client-" + port);
+//
+//        return AppServiceProvider.getP2PBroadcastService().createConnection(context);
+//    }
+//
+//    private P2PConnection createServer(int port) throws IOException {
+//        AppContext context = new AppContext();
+//        context.setMasterPeerIpAddress("127.0.0.1");
+//        context.setMasterPeerPort(port);
+//        context.setPort(port);
+//        context.setNodeName("Server");
+//
+//        return AppServiceProvider.getP2PBroadcastService().createConnection(context);
+//    }
 
 }

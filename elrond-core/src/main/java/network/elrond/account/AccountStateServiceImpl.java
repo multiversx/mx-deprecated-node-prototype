@@ -1,5 +1,7 @@
 package network.elrond.account;
 
+import network.elrond.application.AppContext;
+import network.elrond.application.AppState;
 import network.elrond.chronology.NTPClient;
 import network.elrond.core.RLP;
 import network.elrond.core.RLPList;
@@ -33,7 +35,7 @@ public class AccountStateServiceImpl implements AccountStateService {
         }
 
         logger.trace("Create account state...");
-        setAccountState(address, new AccountState(), accounts);
+        setAccountState(address, new AccountState(address), accounts);
         return logger.traceExit(getAccountState(address, accounts));
     }
 
@@ -47,8 +49,9 @@ public class AccountStateServiceImpl implements AccountStateService {
 
         AccountsPersistenceUnit<AccountAddress, AccountState> unit = accounts.getAccountsPersistenceUnit();
         byte[] bytes = address.getBytes();
+        byte[] data = unit.get(bytes);
 
-        return logger.traceExit((bytes != null) ? convertToAccountStateFromRLP(unit.get(bytes)) : null);
+        return logger.traceExit((bytes != null) ? convertToAccountStateFromRLP(data) : null);
     }
 
     @Override
@@ -89,8 +92,9 @@ public class AccountStateServiceImpl implements AccountStateService {
         logger.traceEntry("params: {}", accountState);
         byte[] nonce = RLP.encodeBigInteger(accountState.getNonce());
         byte[] balance = RLP.encodeBigInteger(accountState.getBalance());
+        byte[] address = RLP.encodeElement(accountState.getAddress().getBytes());
 
-        return logger.traceExit(RLP.encodeList(nonce, balance));
+        return logger.traceExit(RLP.encodeList(nonce, balance, address));
     }
 
 
@@ -102,12 +106,25 @@ public class AccountStateServiceImpl implements AccountStateService {
             return logger.traceExit((AccountState)null);
         }
 
-        AccountState accountState = new AccountState();
+        byte[] EMPTY_DATA = {0};
         RLPList items = (RLPList) RLP.decode2(data).get(0);
-        accountState.setNonce(new BigInteger(1, ((items.get(0).getRLPData()) == null ? new byte[]{0} :
-                items.get(0).getRLPData())));
-        accountState.setBalance(new BigInteger(1, ((items.get(1).getRLPData()) == null ? new byte[]{0} :
-                items.get(1).getRLPData())));
+
+        byte[] nonceRlpData = items.get(0).getRLPData();
+        BigInteger nonce = new BigInteger(1, (nonceRlpData == null ? EMPTY_DATA : nonceRlpData));
+
+
+        byte[] balanceRlpData = items.get(1).getRLPData();
+        BigInteger balance = new BigInteger(1, (balanceRlpData == null ? EMPTY_DATA : balanceRlpData));
+
+
+        byte[] addressRlpData = items.get(2).getRLPData();
+        AccountAddress address = AccountAddress.fromBytes((addressRlpData == null ? EMPTY_DATA : addressRlpData));
+
+
+        AccountState accountState = new AccountState(address);
+        accountState.setNonce(nonce);
+        accountState.setBalance(balance);
+
 
         return logger.traceExit(accountState);
     }
@@ -117,7 +134,9 @@ public class AccountStateServiceImpl implements AccountStateService {
         AccountState accountState = null;
 
         try {
-            AccountAddress accountAddress = AccountAddress.fromBytes(Util.PUBLIC_KEY_MINTING.getValue());
+
+            //AccountAddress accountAddress = AccountAddress.fromBytes(Util.PUBLIC_KEY_MINTING.getValue());
+            AccountAddress accountAddress = AppServiceProvider.getShardingService().getAddressForMinting(accounts.getShard());
             accountState = getOrCreateAccountState(accountAddress, accounts);
             accountState.setBalance(Util.VALUE_MINTING);
             setAccountState(accountAddress, accountState, accounts);
@@ -129,42 +148,51 @@ public class AccountStateServiceImpl implements AccountStateService {
         logger.traceExit();
     }
 
-    public Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue,
-                                                               AccountsContext accountsContextTemporary, PrivateKey privateKey,
-                                                               NTPClient ntpClient) {
-        logger.traceEntry("params: {} {} {} {} {}", initialAddress, initialValue, accountsContextTemporary, privateKey, ntpClient);
+    public Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue,  AppState state, AppContext context) {
+        logger.traceEntry("params: {} {} {} {}", initialAddress, initialValue, state, context);
+
+        PrivateKey privateKey = context.getPrivateKey();
 
         Util.check(!(initialAddress == null || initialAddress.isEmpty()), "initialAddress!=null");
         Util.check(!(initialValue.compareTo(BigInteger.ZERO) < 0), "initialValue is less than zero");
-        Util.check(accountsContextTemporary!= null, "accountsContextTemporary!=null");
         Util.check(privateKey!=null, "privateKey!=null");
 
         if (initialValue.compareTo(Util.VALUE_MINTING) > 0) {
             initialValue = Util.VALUE_MINTING;
         }
 
+        PrivateKey mintingPrivateKey = AppServiceProvider.getShardingService().getPrivateKeyForMinting(state.getShard());
+        PublicKey mintingPublicKey = AppServiceProvider.getShardingService().getPublicKeyForMinting(state.getShard());
+
         logger.trace("Creating mint transaction...");
-        Transaction transactionMint = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING,
+        Transaction transactionMint = AppServiceProvider.getTransactionService().generateTransaction(mintingPublicKey,
                 new PublicKey(Util.hexStringToByteArray(initialAddress)), initialValue, BigInteger.ZERO);
         logger.trace("Signing mint transaction...");
-        AppServiceProvider.getTransactionService().signTransaction(transactionMint, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
+        AppServiceProvider.getTransactionService().signTransaction(transactionMint, mintingPrivateKey.getValue(), mintingPublicKey.getValue());
 
         logger.trace("Generating genesis block...");
         Block genesisBlock = new Block();
+        genesisBlock.setShard(state.getShard());
         genesisBlock.setNonce(BigInteger.ZERO);
-        genesisBlock.getListTXHashes().add(AppServiceProvider.getSerializationService().getHash(transactionMint));
+
+        BlockUtil.addTransactionInBlock(genesisBlock, transactionMint);
+
         logger.trace("Setting timestamp and round...");
+        NTPClient ntpClient = state.getNtpClient();
         genesisBlock.setTimestamp(AppServiceProvider.getChronologyService().getSynchronizedTime(ntpClient));
         genesisBlock.setRoundIndex(0);
 
         logger.trace("Computing state root hash...");
         try {
-            Accounts accountsTemp = new Accounts(accountsContextTemporary, new AccountsPersistenceUnit<>(accountsContextTemporary.getDatabasePath()));
+
+            AccountsContext accountsContext = new AccountsContext();
+            accountsContext.setShard(state.getShard());
+            Accounts accountsTemp = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
 
             ExecutionService executionService = AppServiceProvider.getExecutionService();
             ExecutionReport executionReport = executionService.processTransaction(transactionMint, accountsTemp);
             if (!executionReport.isOk()) {
-                logger.traceExit((Fun.Tuple2<Block, Transaction>)null);
+                return logger.traceExit((Fun.Tuple2<Block, Transaction>)null);
             }
             genesisBlock.setAppStateHash(accountsTemp.getAccountsPersistenceUnit().getRootHash());
             AppBlockManager.instance().signBlock(genesisBlock, privateKey);

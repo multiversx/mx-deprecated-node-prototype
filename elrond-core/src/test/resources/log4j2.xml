@@ -2,27 +2,64 @@
 <Configuration status="WARN" monitorInterval="30">
     <Properties>
         <Property name="MAIN_LOG_PATTERN">
-        %d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex
+            %highlight{%d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex}{FATAL=Blinking bright red, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=blue, TRACE=white}
         </Property>
         <Property name="ALT_LOG_PATTERN">
             %d{yyyy-MM-dd HH:mm:ss.SSS} %5p: %msg  >>> [%t] %c{1.}%n
+        </Property>
+        <Property name="LOG_FOLDER">
+            logs
         </Property>
     </Properties>
 
     <Appenders>
         <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
-            <PatternLayout pattern="${MAIN_LOG_PATTERN}"/>
-            <!--<Filters>-->
-                <!--<MarkerFilter marker="CATCHING" onMatch="DENY" onMismatch="NEUTRAL"/>-->
-            <!--</Filters>-->
+            <PatternLayout pattern="${MAIN_LOG_PATTERN}" disableAnsi="false"/>
         </Console>
+
+        <!-- Rolling File Appender -->
+        <RollingFile name="FileAppender" fileName="${ctx:LOG_FOLDER}/elrond.log"
+                     filePattern="${ctx:LOG_FOLDER}/elrond-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout>
+                <Pattern>${MAIN_LOG_PATTERN}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+
+        <!-- SMTP Appender
+        <SMTP name="MailAppender"
+              subject="Log4j2 Demo [PROD]"
+              to="youremail@example.com"
+              from="log4j2-demo-alerts@example.com"
+              smtpHost="yourSMTPHost"
+              smtpPort="587"
+              smtpUsername="yourSMTPUsername"
+              smtpPassword="yourSMTPPassword"
+              bufferSize="1">
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout>
+                <Pattern>${LOG_PATTERN}</Pattern>
+            </PatternLayout>
+        </SMTP>
+         -->
     </Appenders>
 
     <Loggers>
+        <!--<AsyncLogger name="network.elrond" level="debug" additivity="false">-->
+            <!--<AppenderRef ref="ConsoleAppender"/>-->
+            <!--<AppenderRef ref="FileAppender"/>-->
+            <!--<AppenderRef ref="WebSocketAppender"/>-->
+        <!--</AsyncLogger>-->
+
         <Root level="ERROR">
             <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="FileAppender"/>
         </Root>
 
-        <Logger name="network.elrond" level="INFO"></Logger>
+        <Logger name="network.elrond" level="DEBUG"></Logger>
     </Loggers>
 </Configuration>

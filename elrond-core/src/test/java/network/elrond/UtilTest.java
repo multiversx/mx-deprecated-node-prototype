@@ -10,6 +10,7 @@ import network.elrond.consensus.Validator;
 import network.elrond.core.Util;
 import network.elrond.data.Block;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
@@ -20,7 +21,23 @@ import java.util.List;
 
 
 public class UtilTest {
+
+//    static{
+//        ThreadContext.put("LOG_FOLDER", "logs-test");
+//    }
+
     private static Logger logger = LogManager.getLogger(UtilTest.class);
+
+
+
+//    static {
+//        // Get the process id
+//        String pid = ManagementFactory.getRuntimeMXBean().getName().replaceAll("@.*", "");
+//
+//        // MDC
+//        ThreadContext.put("pid", pid);
+//    }
+
 
     public static void displayListValidators(List<Validator> list) {
         for (int i = 0; i < list.size(); i++) {
@@ -71,12 +88,31 @@ public class UtilTest {
 
     @Test
     public void testLoggerParameters(){
+//        //System.setProperty("logFilename", "/test");
+//
+//        Properties properties = new Properties();
+//        properties.setProperty("property.DEFAULT_LOG_FOLDER", "logs-test");
+//
+//
+//
+//        ctx.getConfiguration().getRootLogger().getPropertyList();
+//
+//        System.getProperties();
+//
+//
+////                .getStrSubstitutor().getVariableResolver()..getProperties().put("DEFAULT_LOG_FOLDER", "test-logs");
+//        ctx.reconfigure();
 
+//
+//        ThreadContext.put("LOG_FOLDER", "logs-test");
+//        org.apache.logging.log4j.core.LoggerContext ctx =
+//                (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false);
+//        ctx.reconfigure();
 
         //logger.traceEntry("Params {} {} {}", null, null, null);
 
         logger.trace("TRACE {} {}", 1, 2);
-        logger.trace("TRACE {} {}", 1, 2);
+        logger.debug("DEBUG {} {}", 1, 2);
         logger.info("INFO {} {}", 1, 2);
         logger.warn("WARN {} {}", 1, 2);
         logger.error("ERROR {} {}", 1, 2);
@@ -102,6 +138,7 @@ public class UtilTest {
 
     public static void createDummyGenesisBlock(Blockchain blockchain){
         Block blockGenesis = new Block();
+        blockGenesis.setShard(new Shard(0));
         blockGenesis.setTimestamp(System.currentTimeMillis() - 1000);
 
         blockchain.setGenesisBlock(blockGenesis);

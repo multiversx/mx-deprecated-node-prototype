@@ -2,10 +2,6 @@ package network.elrond.data;
 
 import junit.framework.TestCase;
 import network.elrond.UtilTest;
-import network.elrond.account.AccountAddress;
-import network.elrond.account.AccountState;
-import network.elrond.account.Accounts;
-import network.elrond.account.AccountsContext;
 import network.elrond.account.*;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainService;
@@ -15,6 +11,7 @@ import network.elrond.crypto.MultiSignatureService;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -80,8 +77,12 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         addressReceiver = Util.getAddressFromPublicKey(publicKeyReceiver.getValue());
         accountsSandbox = initAccounts(accountsSandbox, publicKeysWallets, publicKeyMint, mintValue);
 
+        Shard senderShard= AppServiceProvider.getShardingService().getShard(addressSender.getBytes());
+        Shard receiverShard = AppServiceProvider.getShardingService().getShard(addressReceiver.getBytes());
+
+
         for (int i = 0; i < numberOfTransactions; i++) {
-            tx = new Transaction(addressSender, addressReceiver, BigInteger.valueOf(valuePerTransaction), BigInteger.valueOf(i));
+            tx = new Transaction(addressSender, addressReceiver, BigInteger.valueOf(valuePerTransaction), BigInteger.valueOf(i), senderShard, receiverShard);
             tx.setPubKey(Util.byteArrayToHexString(publicKeyMint.getValue()));
             tx.setData(new byte[0]);
             transactionService.signTransaction(tx, privateKeyMint.getValue(), publicKeyMint.getValue());
@@ -254,7 +255,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         Accounts accounts = null;
         Block block = new Block();
         ExecutionService executionService = AppServiceProvider.getExecutionService();
-        executionService.processBlock(block, accounts, blockchain);
+        executionService.processBlock(block, accounts, blockchain, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -262,14 +263,14 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         Block block = new Block();
         Blockchain blockchain = null;
         ExecutionService executionService = AppServiceProvider.getExecutionService();
-        executionService.processBlock(block, accounts, blockchain);
+        executionService.processBlock(block, accounts, blockchain, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testProcessBlockNullBlock() {
         Block block = null;
         ExecutionService executionService = AppServiceProvider.getExecutionService();
-        executionService.processBlock(block, accounts, blockchain);
+        executionService.processBlock(block, accounts, blockchain, null);
     }
 
     @Test
@@ -294,7 +295,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         }
 
         ExecutionService executionService = AppServiceProvider.getExecutionService();
-        ExecutionReport report = executionService.processBlock(block, accounts, blockchain);
+        ExecutionReport report = executionService.processBlock(block, accounts, blockchain, null);
 
         // waiting for failure due to block already present in blockchain
         if (report.isOk()) {
@@ -313,7 +314,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         block.setNonce(BigInteger.valueOf(10));
 
         ExecutionService executionService = AppServiceProvider.getExecutionService();
-        ExecutionReport report = executionService.processBlock(block, accounts, blockchain);
+        ExecutionReport report = executionService.processBlock(block, accounts, blockchain, null);
 
         // waiting for failure due to missing previous block in blockchain
         if (report.isOk()) {
@@ -340,7 +341,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         Block block = generateSignedBlockWithTransactions(100, 3, 50);
         //execute
         ExecutionService executionService = AppServiceProvider.getExecutionService();
-        ExecutionReport report = executionService.processBlock(block, accounts, blockchain);
+        ExecutionReport report = executionService.processBlock(block, accounts, blockchain, null);
 
         // waiting for failure due to missing previous block in blockchain
         if (report.isOk()) {
@@ -355,7 +356,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         Block block = generateSignedBlockWithTransactions(100000, 100, 100);
         //execute
         ExecutionService executionService = AppServiceProvider.getExecutionService();
-        ExecutionReport report = executionService.processBlock(block, accounts, blockchain);
+        ExecutionReport report = executionService.processBlock(block, accounts, blockchain, null);
 
         // waiting for failure due to missing previous block in blockchain
         if (!report.isOk()) {

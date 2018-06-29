@@ -2,6 +2,8 @@ package network.elrond.data;
 
 import junit.framework.TestCase;
 import network.elrond.account.*;
+import network.elrond.application.AppContext;
+import network.elrond.application.AppState;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
@@ -32,7 +34,11 @@ public class GenesisBlockTest {
         AccountState acsMintTest = accountStateService.getAccountState(acMint, accounts);
         TestCase.assertEquals("Expected " + Util.VALUE_MINTING, Util.VALUE_MINTING, acsMintTest.getBalance());
 
-        Fun.Tuple2<Block, Transaction> genesisData = accountStateService.generateGenesisBlock(Util.byteArrayToHexString(pbk1.getValue()), value, accTemp, pvk1, null);
+        AppState appState = new AppState();
+        AppContext appContext = new AppContext();
+        appContext.setPrivateKey(pvk1);
+
+        Fun.Tuple2<Block, Transaction> genesisData = accountStateService.generateGenesisBlock(Util.byteArrayToHexString(pbk1.getValue()), value, appState, appContext);
 
         TestCase.assertNotNull("Not expecting null for GenesisData ", genesisData);
 

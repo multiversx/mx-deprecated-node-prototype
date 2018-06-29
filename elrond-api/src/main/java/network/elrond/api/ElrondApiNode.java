@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.List;
 
 @Component
 class ElrondApiNode {
@@ -53,7 +54,7 @@ class ElrondApiNode {
             setupRestoreDir(new File(blockchainRestorePath), new File(blockchainPath));
         }
 
-        if (bootstrapType.equals(BootstrapType.START_FROM_SCRATCH)){
+        if (bootstrapType.equals(BootstrapType.START_FROM_SCRATCH)) {
             logger.trace("START_FROM_SCRATCH selected!");
         }
 
@@ -75,7 +76,7 @@ class ElrondApiNode {
         return logger.traceExit(facade.getBalance(address, application));
     }
 
-    BenchmarkResult getBenchmarkResult(String benchmarkId) {
+    List<BenchmarkResult> getBenchmarkResult(String benchmarkId) {
         logger.traceEntry("params: {}", benchmarkId);
         ElrondFacade facade = getFacade();
         return logger.traceExit(facade.getBenchmarkResult(benchmarkId, application));
@@ -90,6 +91,7 @@ class ElrondApiNode {
         logger.traceEntry("params: {} {}", receiver, value);
         return logger.traceExit(getFacade().send(receiver, value, application));
     }
+
     Receipt getReceipt(String transactionHash) {
         logger.traceEntry("params: {}", transactionHash);
         return logger.traceExit(getFacade().getReceipt(transactionHash, application));
@@ -127,7 +129,4 @@ class ElrondApiNode {
         }
         logger.traceExit();
     }
-
-
-
 }

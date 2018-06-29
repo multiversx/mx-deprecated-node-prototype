@@ -34,12 +34,12 @@ public class SPoSTest {
 
         EligibleListValidators cleanedUpList = sss.generateCleanupList(vList);
 
-        System.out.printf("Original list [%d]:",vList.size());
+        System.out.printf("Original listToTable [%d]:",vList.size());
         System.out.println();
         System.out.println("==========================================================");
         UtilTest.displayListValidators(vList);
 
-        System.out.printf("Cleaned up list [%d]:", cleanedUpList.list.size());
+        System.out.printf("Cleaned up listToTable [%d]:", cleanedUpList.list.size());
         System.out.println();
         System.out.println("==========================================================");
         UtilTest.displayListValidators(cleanedUpList.list);
@@ -73,7 +73,7 @@ public class SPoSTest {
         EligibleListValidators cleanedUpList = sss.generateCleanupList(vList);
         List<Validator> lResult = sss.generateWeightedEligibleList(cleanedUpList);
 
-        System.out.printf("[small] Original list [%d]:", vList.size());
+        System.out.printf("[small] Original listToTable [%d]:", vList.size());
         System.out.println();
         System.out.println("==========================================================");
         UtilTest.displayListValidators(vList);
@@ -115,7 +115,7 @@ public class SPoSTest {
         EligibleListValidators cleanedUpList = sss.generateCleanupList(vList);
         List<Validator> lResult = sss.generateWeightedEligibleList(cleanedUpList);
 
-        System.out.printf("[small] Original list [%d]:", vList.size());
+        System.out.printf("[small] Original listToTable [%d]:", vList.size());
         System.out.println();
         System.out.println("==========================================================");
         UtilTest.displayListValidators(vList);

@@ -14,4 +14,5 @@ public interface ChronologyService {
 
     RoundState computeRoundState(long roundStartTimeStamp, long currentTimeStamp);
 
+    boolean isStillInRoundState(NTPClient ntpClient, long genesisTimeStamp, long targetRoundIndex, RoundState targetRoundState);
 }

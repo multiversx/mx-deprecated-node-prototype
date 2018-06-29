@@ -8,12 +8,20 @@ import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainContext;
+import network.elrond.chronology.ChronologyService;
+import network.elrond.chronology.NTPClient;
+import network.elrond.chronology.Round;
+import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.MultiSignatureService;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
+import network.elrond.sharding.ShardingServiceImpl;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,19 +34,33 @@ import java.util.Arrays;
 import java.util.List;
 
 public class AppBlockManagerTest {
-    AppBlockManager appBlockManager;
-    AppState state;
-    AppContext context;
-    Accounts accounts;
-    AccountsContext accountsContext;
-    PublicKey publicKey;
-    PrivateKey privateKey;
-    Blockchain blockchain;
+    static AppBlockManager appBlockManager;
+    static AppState state;
+    static AppContext context;
+    static Accounts accounts;
+    static AccountsContext accountsContext;
+    static PublicKey publicKey;
+    static PrivateKey privateKey;
+    static Blockchain blockchain;
     static P2PConnection connection = null;
 
+    static boolean initialized = false;
+
+    private static final Logger logger = LogManager.getLogger(AppBlockManagerTest.class);
+
     @Before
+    //do one time per class
     public void setupTest() throws Exception {
-        AppContext context = new AppContext();
+        if (initialized){
+            return;
+        }
+
+        initialized = true;
+
+        ShardingServiceImpl.MAX_ACTIVE_SHARDS_CONT = 1;
+
+
+        context = new AppContext();
         //context.setMasterPeerIpAddress("");
         context.setMasterPeerPort(4000);
         context.setPort(4000);
@@ -47,22 +69,28 @@ public class AppBlockManagerTest {
         context.setBootstrapType(BootstrapType.START_FROM_SCRATCH);
         context.setPrivateKey(new PrivateKey("PRODUCER"));
 
-        Block blk0 = new Block();
+        //Block blk0 = new Block();
         state = new AppState();
 
         if (connection == null) {
-            connection = AppServiceProvider.getP2PBroadcastService().createConnection(context);
+            connection = AppServiceProvider.getP2PConnectionService().createConnection(context);
         }
         state.setConnection(connection);
+        connection.setShard(new Shard(0));
+        state.setShard(new Shard(0));
 
         BlockchainContext blockchainContext = new BlockchainContext();
         blockchainContext.setConnection(state.getConnection());
+        blockchainContext.setShard(new Shard(0));
         blockchain = new Blockchain(blockchainContext);
-        blockchain.setCurrentBlock(blk0);
+
         state.setBlockchain(blockchain);
         state.setStillRunning(false);
+        state.setNtpClient(new NTPClient(context.getListNTPServers(), 100));
+        Thread.sleep(300);
 
         UtilTest.createDummyGenesisBlock(state.getBlockchain());
+        blockchain.setCurrentBlock(blockchain.getGenesisBlock());
 
         //memory-only accounts
         accountsContext = new AccountsContext();
@@ -71,8 +99,9 @@ public class AppBlockManagerTest {
         privateKey = new PrivateKey("Receiver");
         publicKey = new PublicKey(privateKey);
 
-        String hashString = AppServiceProvider.getSerializationService().getHashString(blk0);
-        AppServiceProvider.getBootstrapService().commitBlock(blk0, hashString, blockchain);
+
+        String hashString = AppServiceProvider.getSerializationService().getHashString(blockchain.getGenesisBlock());
+        AppServiceProvider.getBootstrapService().commitBlock(blockchain.getGenesisBlock(), hashString, blockchain);
 
         accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
 
@@ -86,7 +115,8 @@ public class AppBlockManagerTest {
 
     @Test
     public void testInitialAccounts() throws Exception {
-        state.setAccounts(accounts);
+        AccountsContext accountsContextLocal = new AccountsContext();
+        state.setAccounts(new Accounts(accountsContextLocal, new AccountsPersistenceUnit<>(accountsContextLocal.getDatabasePath())));
 
         //size should be 1
         TestCase.assertEquals("Accounts size should have been 1: ", 1, state.getAccounts().getAddresses().size());
@@ -115,6 +145,7 @@ public class AppBlockManagerTest {
         transactions.add(tx1);
         AppServiceProvider.getBootstrapService().commitTransaction(tx1, AppServiceProvider.getSerializationService().getHashString(tx1), state.getBlockchain());
 
+        waitToStartInAnewRound();
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(transactions, state);
         Block blk = blockReceiptsPair.getKey();
         appBlockManager.signBlock(blk, pvkeyRecv);
@@ -126,7 +157,7 @@ public class AppBlockManagerTest {
         TestCase.assertEquals(Util.VALUE_MINTING, getBalance(Util.PUBLIC_KEY_MINTING));
         TestCase.assertEquals(BigInteger.ZERO, getNonce(Util.PUBLIC_KEY_MINTING));
 
-        ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(blk, state.getAccounts(), state.getBlockchain());
+        ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(blk, state.getAccounts(), state.getBlockchain(), state.getStatisticsManager());
 
         TestCase.assertTrue("Should have executed!", executionReport.isOk());
         TestCase.assertEquals(Util.VALUE_MINTING.subtract(BigInteger.TEN), getBalance(Util.PUBLIC_KEY_MINTING));
@@ -159,6 +190,7 @@ public class AppBlockManagerTest {
         AppServiceProvider.getBootstrapService().commitTransaction(tx1, AppServiceProvider.getSerializationService().getHashString(tx1), state.getBlockchain());
         AppServiceProvider.getBootstrapService().commitTransaction(tx2, AppServiceProvider.getSerializationService().getHashString(tx2), state.getBlockchain());
 
+        waitToStartInAnewRound();
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(transactions, state);
         Block blk = blockReceiptsPair.getKey();
         appBlockManager.signBlock(blk, pvkeyRecv);
@@ -170,7 +202,7 @@ public class AppBlockManagerTest {
         TestCase.assertEquals(Util.VALUE_MINTING, getBalance(Util.PUBLIC_KEY_MINTING));
         TestCase.assertEquals(BigInteger.ZERO, getNonce(Util.PUBLIC_KEY_MINTING));
 
-        ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(blk, state.getAccounts(), state.getBlockchain());
+        ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(blk, state.getAccounts(), state.getBlockchain(), state.getStatisticsManager());
 
         TestCase.assertTrue("Should have executed!", executionReport.isOk());
         TestCase.assertEquals(Util.VALUE_MINTING.subtract(BigInteger.TEN), getBalance(Util.PUBLIC_KEY_MINTING));
@@ -214,6 +246,7 @@ public class AppBlockManagerTest {
             AppServiceProvider.getBootstrapService().commitTransaction(transaction, AppServiceProvider.getSerializationService().getHashString(transaction), state.getBlockchain());
         }
 
+        waitToStartInAnewRound();
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(transactions, state);
         Block blk = blockReceiptsPair.getKey();
         appBlockManager.signBlock(blk, pvkeyRecv1);
@@ -225,7 +258,7 @@ public class AppBlockManagerTest {
         TestCase.assertEquals(Util.VALUE_MINTING, getBalance(Util.PUBLIC_KEY_MINTING));
         TestCase.assertEquals(BigInteger.ZERO, getNonce(Util.PUBLIC_KEY_MINTING));
 
-        ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(blk, state.getAccounts(), state.getBlockchain());
+        ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(blk, state.getAccounts(), state.getBlockchain(), state.getStatisticsManager());
 
         TestCase.assertTrue("Should have executed!", executionReport.isOk());
 
@@ -274,7 +307,7 @@ public class AppBlockManagerTest {
             AppServiceProvider.getBootstrapService().commitTransaction(transaction, AppServiceProvider.getSerializationService().getHashString(transaction), state.getBlockchain());
         }
 
-
+        waitToStartInAnewRound();
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(transactions, state);
         Block block = blockReceiptsPair.getKey();
         appBlockManager.signBlock(block, pvkeyRecv1);
@@ -307,6 +340,16 @@ public class AppBlockManagerTest {
         message = AppServiceProvider.getSerializationService().getHash(block);
 
         TestCase.assertFalse(AppServiceProvider.getMultiSignatureService().verifyAggregatedSignature(signers, signature, commitment, message, bitmap));
+    }
+
+    private void waitToStartInAnewRound(){
+        long currentTimeStamp = state.getNtpClient().currentTimeMillis();
+        ChronologyService chronologyService = AppServiceProvider.getChronologyService();
+        Round round = chronologyService.getRoundFromDateTime(blockchain.getGenesisBlock().getTimestamp(), currentTimeStamp);
+
+        int milliSecondsToWait = (int)(chronologyService.getRoundTimeDuration() - (currentTimeStamp - round.getStartTimeStamp()));
+        logger.info("Waiting {} ms...", milliSecondsToWait);
+        ThreadUtil.sleep(milliSecondsToWait);
     }
 
     private int getValidAccounts(Accounts accounts) throws Exception {
@@ -365,18 +408,16 @@ public class AppBlockManagerTest {
         Block block = blockReceiptsPair.getKey();
         Assert.assertTrue("Block cannot be null", block != null);
         Assert.assertTrue("PrevBlockHash cannot be null", block.prevBlockHash != null);
-        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", block.getListTXHashes().size() == 0);
+        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.isEmptyBlock(block));
     }
 
     @Test
     public void testComposeBlockWithOneValidTransaction() throws IOException {
-        UtilTest.createDummyGenesisBlock(state.getBlockchain());
-
         Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN, BigInteger.ZERO);
         AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx), state);
         Block block = blockReceiptsPair.getKey();
-        Assert.assertTrue("ListOfTxHashes does not have exactly 1 hash", block.getListTXHashes().size() == 1);
+        Assert.assertTrue("ListOfTxHashes does not have exactly 1 hash", BlockUtil.getTransactionsCount(block) == 1);
     }
 
     @Test
@@ -385,7 +426,7 @@ public class AppBlockManagerTest {
         //AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue());
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx), state);
         Block block = blockReceiptsPair.getKey();
-        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", block.getListTXHashes().size() == 0);
+        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.getTransactionsCount(block) == 0);
     }
 
     @Test
@@ -394,7 +435,7 @@ public class AppBlockManagerTest {
         AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx), state);
         Block block = blockReceiptsPair.getKey();
-        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", block.getListTXHashes().size() == 0);
+        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.getTransactionsCount(block) == 0);
     }
 
     //TODO: Readd when NonceIsVerified
@@ -404,7 +445,7 @@ public class AppBlockManagerTest {
         AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx), state);
         Block block = blockReceiptsPair.getKey();
-        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", block.getListTXHashes().size() == 0);
+        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.getTransactionsCount(block) == 0);
     }
 
     @Test
@@ -417,7 +458,7 @@ public class AppBlockManagerTest {
 
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx, tx2), state);
         Block block = blockReceiptsPair.getKey();
-        Assert.assertTrue("ListOfTxHashes does not have exactly 1 hash", block.getListTXHashes().size() == 1);
+        Assert.assertTrue("ListOfTxHashes does not have exactly 1 hash", BlockUtil.getTransactionsCount(block) == 1);
     }
 
     @Test
@@ -426,7 +467,7 @@ public class AppBlockManagerTest {
         Block block = blockReceiptsPair.getKey();
         Assert.assertTrue("Block cannot be null", block != null);
         Assert.assertTrue("PrevBlockHash cannot be null", block.prevBlockHash != null);
-        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", block.getListTXHashes().size() == 0);
+        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.getTransactionsCount(block) == 0);
     }
 
     @Test
@@ -474,9 +515,10 @@ public class AppBlockManagerTest {
 
         accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
 
-        state = new AppState();
-        state.setAccounts(accounts);
-        state.setBlockchain(blockchain);
+//        state = new AppState();
+//        state.setAccounts(accounts);
+//        state.setBlockchain(blockchain);
+//        state.setNtpClient(new NTPClient(new ArrayList<String>(), 100));
 
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx, tx2), state);
         Block block = blockReceiptsPair.getKey();
@@ -540,6 +582,4 @@ public class AppBlockManagerTest {
 
         return multiSignatureService.verifyAggregatedSignature(signersPublicKeys, aggregatedSignature, aggregatedCommitment, blockHashNoSig, 1);
     }
-
-
 }

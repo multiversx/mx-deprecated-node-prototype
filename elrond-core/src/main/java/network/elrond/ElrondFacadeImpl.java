@@ -7,28 +7,28 @@ import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.benchmark.BenchmarkResult;
 import network.elrond.benchmark.MultipleTransactionResult;
+import network.elrond.benchmark.StatisticsManager;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
+import network.elrond.core.FutureUtil;
+import network.elrond.core.ObjectUtil;
 import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.PKSKPair;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.Receipt;
+import network.elrond.data.SecureObject;
 import network.elrond.data.Transaction;
-import network.elrond.p2p.P2PBroadcastChanel;
-import network.elrond.p2p.P2PChannelName;
-import network.elrond.p2p.P2PConnection;
-import network.elrond.p2p.PingResponse;
+import network.elrond.p2p.*;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.math.BigInteger;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ElrondFacadeImpl implements ElrondFacade {
     private static final Logger logger = LogManager.getLogger(ElrondFacadeImpl.class);
@@ -44,7 +44,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
             return logger.traceExit(application);
         } catch (Exception e) {
             logger.catching(e);
-            return logger.traceExit((Application)null);
+            return logger.traceExit((Application) null);
         }
     }
 
@@ -71,39 +71,73 @@ public class ElrondFacadeImpl implements ElrondFacade {
             return BigInteger.ZERO;
         }
 
-        try {
-            AppState state = application.getState();
-            Accounts accounts = state.getAccounts();
 
-            AccountState account = AppServiceProvider.getAccountStateService().getAccountState(address, accounts);
+        AppState state = application.getState();
+        Shard currentShard = application.getState().getShard();
+        Shard addressShard = AppServiceProvider.getShardingService().getShard(address.getBytes());
+
+        if (ObjectUtil.isEqual(addressShard, currentShard)) {
+
+            try {
+
+                Accounts accounts = state.getAccounts();
+                AccountState account = AppServiceProvider.getAccountStateService().getAccountState(address, accounts);
+
+                return logger.traceExit((account == null) ? BigInteger.ZERO : account.getBalance());
+
+            } catch (Exception ex) {
+                logger.throwing(ex);
+                return logger.traceExit((BigInteger) null);
+            }
+        }
+
+        try {
+
+            P2PRequestChannel channel = state.getChanel(P2PRequestChannelName.ACCOUNT);
+            AccountState account = AppServiceProvider.getP2PRequestService().get(channel, addressShard, P2PRequestChannelName.ACCOUNT, address);
 
             return logger.traceExit((account == null) ? BigInteger.ZERO : account.getBalance());
 
         } catch (Exception ex) {
             logger.throwing(ex);
-            return logger.traceExit((BigInteger)null);
+            return logger.traceExit((BigInteger) null);
         }
+
+
     }
 
     @Override
     public Receipt getReceipt(String transactionHash, Application application) {
         logger.traceEntry("params: {} {}", transactionHash, application);
+        Blockchain blockchain = application.getState().getBlockchain();
+
         try {
-            FutureTask<Receipt> timeoutTask = new FutureTask<Receipt>(() -> {
-                Blockchain blockchain = application.getState().getBlockchain();
-                String receiptHash;
+
+            Receipt receipt = FutureUtil.get(() -> {
+
+                String receiptHash = null;
+                SecureObject<Receipt> secureReceipt = null;
+
                 do {
                     receiptHash = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
+                    if (receiptHash != null) {
+                        secureReceipt = AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT);
+                    }
                     ThreadUtil.sleep(200);
-                } while (receiptHash == null);
-                return logger.traceExit((Receipt)AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT));
-            });
-            new Thread(timeoutTask).start();
-            return logger.traceExit(timeoutTask.get(30L, TimeUnit.SECONDS));
-        } catch (InterruptedException | TimeoutException | ExecutionException e) {
+
+                } while (receiptHash == null || secureReceipt == null);
+
+                return secureReceipt.getObject();
+
+            }, 60L);
+
+            return logger.traceExit(receipt);
+
+
+        } catch (Exception e) {
             logger.catching(e);
         }
-        return logger.traceExit((Receipt)null);
+        return logger.traceExit((Receipt) null);
     }
 
     @Override
@@ -111,17 +145,16 @@ public class ElrondFacadeImpl implements ElrondFacade {
         logger.traceEntry("params: {} {} {}", receiver, value, application);
         if (application == null) {
             logger.warn("Invalid application state, application is null");
-            return logger.traceExit((MultipleTransactionResult)null);
+            return logger.traceExit((MultipleTransactionResult) null);
         }
 
         MultipleTransactionResult result = new MultipleTransactionResult();
-        for(int i = 0;i<nrTransactions;i++){
+        for (int i = 0; i < nrTransactions; i++) {
             Transaction transaction = send(receiver, value, application);
-            if(transaction == null){
-                result.setFailedTransactionsNumber(result.getFailedTransactionsNumber()+1);
-            }
-            else{
-                result.setSuccessfulTransactionsNumber(result.getSuccessfulTransactionsNumber() +1);
+            if (transaction == null) {
+                result.setFailedTransactionsNumber(result.getFailedTransactionsNumber() + 1);
+            } else {
+                result.setSuccessfulTransactionsNumber(result.getSuccessfulTransactionsNumber() + 1);
             }
         }
         return result;
@@ -132,7 +165,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
         logger.traceEntry("params: {} {} {}", receiver, value, application);
         if (application == null) {
             logger.warn("Invalid application state, application is null");
-            return logger.traceExit((Transaction)null);
+            return logger.traceExit((Transaction) null);
         }
 
         try {
@@ -150,7 +183,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
             if (senderAccount == null) {
                 // sender account is new, can't send
                 logger.warn("Sender account is new, can't send");
-                return logger.traceExit((Transaction)null);
+                return logger.traceExit((Transaction) null);
             }
 
             PublicKey receiverPublicKey = new PublicKey(receiver.getBytes());
@@ -163,17 +196,18 @@ public class ElrondFacadeImpl implements ElrondFacade {
             P2PConnection connection = state.getConnection();
             AppServiceProvider.getP2PObjectService().put(connection, hash, transaction);
 
-            P2PBroadcastChanel channel = state.getChanel(P2PChannelName.TRANSACTION);
+            P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.TRANSACTION);
             AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, hash);
 
 
             return logger.traceExit(transaction);
 
+
         } catch (Exception ex) {
             logger.catching(ex);
         }
 
-        return logger.traceExit((Transaction)null);
+        return logger.traceExit((Transaction) null);
     }
 
     @Override
@@ -203,7 +237,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
             PublicKey publicKey = new PublicKey(privateKey);
 
-            return logger.traceExit(new PKSKPair(   Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue())));
+            return logger.traceExit(new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue())));
         } catch (Exception ex) {
             logger.catching(ex);
             return logger.traceExit(new PKSKPair("Error", "Error"));
@@ -211,19 +245,39 @@ public class ElrondFacadeImpl implements ElrondFacade {
     }
 
     @Override
-    public BenchmarkResult getBenchmarkResult(String benchmarkId, Application application) {
-        BenchmarkResult benchmarkResult = new BenchmarkResult();
-        benchmarkResult.setActiveNodes(10);
-        benchmarkResult.setAverageRoundTime(application.getStatisticsManager().getAverageRoundTime());
-        benchmarkResult.setLiveNrTransactionsPerBlock(application.getStatisticsManager().getLiveNrTransactionsInBlock());
-        benchmarkResult.setAverageNrTxPerBlock(application.getStatisticsManager().getAverageNrTransactionsInBlock());
-        benchmarkResult.setAverageTps(application.getStatisticsManager().getAverageTps());
-        benchmarkResult.setLiveTps(application.getStatisticsManager().getLiveTps());
-        benchmarkResult.setPeakTps(application.getStatisticsManager().getMaxTps());
-        benchmarkResult.setLiveRoundTime(application.getStatisticsManager().getLiveRoundTime());
-        benchmarkResult.setTotalNrProcessedTransactions(application.getStatisticsManager().getTotalNrProcessedTransactions());
-        benchmarkResult.setNrShards(2);
-        return benchmarkResult;
+    public ArrayList<BenchmarkResult> getBenchmarkResult(String benchmarkId, Application application) {
+        ArrayList<BenchmarkResult> benchmarkResults = new ArrayList<>();
+
+        P2PRequestChannel channel = application.getState().getChanel(P2PRequestChannelName.STATISTICS);
+        Integer numberOfShards = AppServiceProvider.getShardingService().getNumberOfShards();
+
+        ArrayList<StatisticsManager> shardsStatistics = new ArrayList<>();
+
+        for (int i = 0; i < numberOfShards; i++) {
+            Shard addressShard = new Shard(i);
+            StatisticsManager statisticsManager = AppServiceProvider.getP2PRequestService().get(channel, addressShard, P2PRequestChannelName.STATISTICS, null);
+            if (statisticsManager != null) {
+                shardsStatistics.add(statisticsManager);
+            }
+        }
+
+        for (StatisticsManager statisticsManager : shardsStatistics) {
+            BenchmarkResult benchmarkResult = new BenchmarkResult();
+            benchmarkResult.setCurrentShardNumber(statisticsManager.getCurrentShardNumber());
+            benchmarkResult.setNetworkActiveNodes(statisticsManager.getNumberNodesInNetwork());
+            benchmarkResult.setShardActiveNodes(statisticsManager.getNumberNodesInShard());
+            benchmarkResult.setAverageRoundTime(statisticsManager.getAverageRoundTime());
+            benchmarkResult.setLiveNrTransactionsPerBlock(statisticsManager.getLiveNrTransactionsInBlock());
+            benchmarkResult.setAverageNrTxPerBlock(statisticsManager.getAverageNrTransactionsInBlock());
+            benchmarkResult.setAverageTps(statisticsManager.getAverageTps());
+            benchmarkResult.setLiveTps(statisticsManager.getLiveTps());
+            benchmarkResult.setPeakTps(statisticsManager.getMaxTps());
+            benchmarkResult.setLiveRoundTime(statisticsManager.getLiveRoundTime());
+            benchmarkResult.setTotalNrProcessedTransactions(statisticsManager.getTotalNrProcessedTransactions());
+            benchmarkResult.setNrShards(statisticsManager.getNumberOfShards());
+            benchmarkResults.add(benchmarkResult);
+        }
+        return benchmarkResults;
     }
 
 }

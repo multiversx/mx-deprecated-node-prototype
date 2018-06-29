@@ -1,5 +1,6 @@
 package network.elrond.trie;
 
+import network.elrond.account.AccountAddress;
 import network.elrond.account.AccountState;
 import network.elrond.account.AccountStateService;
 import network.elrond.db.MockDB;
@@ -67,7 +68,7 @@ public class TrieTest {
         String address = "0x00";
         BigInteger value = BigInteger.valueOf(5);
 
-        AccountState accountState = new AccountState();
+        AccountState accountState = new AccountState(AccountAddress.EMPTY_ADDRESS);
         accountState.addToBalance(value);
 
         TrieImpl merkleTrieOfState = new TrieImpl(null);

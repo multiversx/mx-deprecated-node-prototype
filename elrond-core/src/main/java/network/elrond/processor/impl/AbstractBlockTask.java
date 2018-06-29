@@ -24,18 +24,14 @@ public abstract class AbstractBlockTask implements AppTask {
             while (state.isStillRunning()) {
 
                 try {
-                    if (state.isLock()) {
-                        ThreadUtil.sleep(100);
-                        continue;
+
+                    synchronized (state.lockerSyncPropose) {
+                        logger.trace("doing some work...");
+                        doProcess(application);
                     }
 
-                    state.setLock();
-                    logger.trace("doing some work...");
-                    doProcess(application);
-                    state.clearLock();
-
                     logger.trace("waiting...");
-                    ThreadUtil.sleep(5000);
+                    ThreadUtil.sleep(getWaitingTime());
                 } catch (Exception ex) {
                     logger.catching(ex);
                 }
@@ -48,5 +44,9 @@ public abstract class AbstractBlockTask implements AppTask {
     }
 
     protected abstract void doProcess(Application application);
+
+    protected int getWaitingTime(){
+        return 200;
+    }
 
 }

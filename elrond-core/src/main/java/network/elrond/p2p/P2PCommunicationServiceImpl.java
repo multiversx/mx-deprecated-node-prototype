@@ -13,12 +13,15 @@ import java.util.Date;
 public class P2PCommunicationServiceImpl implements P2PCommunicationService {
     private static final Logger logger = LogManager.getLogger(P2PCommunicationServiceImpl.class);
 
-    private final int pingConnectionTimeOut = 1000;
+    private final int pingConnectionTimeOut = 2000;
+    private final int pingAltConnectionTimeOut = 1000;
     private final int portConnectionTimeOut = 1000;
+    private final int altPortForPingEmulation = 445;
 
     public PingResponse getPingResponse(String address, int port) throws Exception {
         long timeStampStart = System.currentTimeMillis();
         long timeStampEnd = 0;
+        long timeStampStartPing = System.currentTimeMillis();
         logger.traceEntry("params: {} {}", address, port);
 
         PingResponse pingResponse = new PingResponse();
@@ -62,18 +65,22 @@ public class P2PCommunicationServiceImpl implements P2PCommunicationService {
 
         //step 1. plain ping
         InetAddress inet = InetAddress.getByName(address);
-        Date dStart = new Date();
+        timeStampStartPing = System.currentTimeMillis();
 
         if (!inet.isReachable(pingConnectionTimeOut)) {
-            pingResponse.setErrorMessage("timeout");
-            logger.trace("timeout");
-            timeStampEnd = System.currentTimeMillis();
-            logger.trace("took {} ms", timeStampEnd - timeStampStart);
-            return logger.traceExit(pingResponse);
+            //try to connect to altPortForPingEmulation
+            timeStampStartPing = System.currentTimeMillis();
+            if (!isPortReachable(address, altPortForPingEmulation, pingAltConnectionTimeOut)){
+                pingResponse.setErrorMessage("timeout");
+                logger.trace("timeout");
+                timeStampEnd = System.currentTimeMillis();
+                logger.trace("took {} ms", timeStampEnd - timeStampStart);
+                return logger.traceExit(pingResponse);
+            }
         }
+        timeStampEnd = System.currentTimeMillis();
 
-        Date dEnd = new Date();
-        pingResponse.setResponseTimeMs(dEnd.getTime() - dStart.getTime());
+        pingResponse.setResponseTimeMs(timeStampEnd - timeStampStartPing);
         pingResponse.setReachablePing(true);
 
         if (!((port > 1) && (port < 65535))) {
@@ -84,18 +91,11 @@ public class P2PCommunicationServiceImpl implements P2PCommunicationService {
             return logger.traceExit(pingResponse);
         }
 
-        //set 2. try to open socket on port
-        try{
-            Socket socket = new Socket();
-            socket.connect(new InetSocketAddress(address, port), portConnectionTimeOut);
-            OutputStream out = socket.getOutputStream();
-
-            out.close();
-            socket.close();
+        //step 2. try to open socket on port
+        if (isPortReachable(address, port, portConnectionTimeOut)){
             pingResponse.setReachablePort(true);
-        } catch (Exception ex){
-            pingResponse.setErrorMessage(ex.getLocalizedMessage());
-            logger.catching(ex);
+        } else {
+            pingResponse.setErrorMessage(String.format("Unreachable port %d", port));
         }
 
         timeStampEnd = System.currentTimeMillis();
@@ -103,5 +103,19 @@ public class P2PCommunicationServiceImpl implements P2PCommunicationService {
         return logger.traceExit(pingResponse);
     }
 
+    public boolean isPortReachable(String address, int port, int timeoutPeriod){
+        try{
+            Socket socket = new Socket();
+            socket.connect(new InetSocketAddress(address, port), timeoutPeriod);
+            OutputStream out = socket.getOutputStream();
 
+            out.close();
+            socket.close();
+            return(true);
+        } catch (Exception ex){
+            logger.catching(ex);
+        }
+
+        return(false);
+    }
 }

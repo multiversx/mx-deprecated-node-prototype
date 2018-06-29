@@ -1,6 +1,8 @@
 package network.elrond.data;
 
+import network.elrond.AsciiTable;
 import network.elrond.core.Util;
+import network.elrond.sharding.Shard;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -14,21 +16,21 @@ import java.util.List;
  * @version 1.0
  * @since 2018-05-14
  */
-public class Block implements Serializable {
+public class Block implements Serializable, AsciiPrintable {
     //block counter
     protected BigInteger nonce;
     //blob of data containing first part of sig
     private byte[] signature;
     //blob of data containing second part of sig
     private byte[] commitment;
-    //list of public keys used in signing. First is the leader that proposed the block
+    //listToTable of public keys used in signing. First is the leader that proposed the block
     protected List<String> listPubKeys;
     //previus block hash
     protected byte[] prevBlockHash;
-    //list of transaction hashes included in block
+    //listToTable of transaction hashes included in block
     protected List<byte[]> listTXHashes;
     //int shard ID
-    protected int shard;
+    protected Shard shard;
     //app state hash
     protected byte[] appStateHash;
 
@@ -38,12 +40,9 @@ public class Block implements Serializable {
 
     public Block() {
         nonce = BigInteger.ZERO;
-//        hashNoSig = new byte[0];
-//        hash = new byte[0];
         listPubKeys = new ArrayList<String>();
         prevBlockHash = new byte[0];
         listTXHashes = new ArrayList<byte[]>();
-        shard = 0;
         appStateHash = new byte[0];
         signature = new byte[0];
         commitment = new byte[0];
@@ -68,9 +67,9 @@ public class Block implements Serializable {
     }
 
     /**
-     * Gets the list of transaction hashes
+     * Gets the listToTable of transaction hashes
      *
-     * @return list of tx hashes
+     * @return listToTable of tx hashes
      */
     public List<byte[]> getListTXHashes() {
         return (listTXHashes);
@@ -83,7 +82,7 @@ public class Block implements Serializable {
     /**
      * Gets te public keys used in signing process of the block
      *
-     * @return the list of public keys
+     * @return the listToTable of public keys
      */
     public List<String> getListPublicKeys() {
         return (listPubKeys);
@@ -131,19 +130,15 @@ public class Block implements Serializable {
 
     /**
      * Gets the shard's number
-     *
-     * @return shard as int
      */
-    public int getShard() {
+    public Shard getShard() {
         return (shard);
     }
 
     /**
      * Sets the shard's number
-     *
-     * @param shard to be set
      */
-    public void setShard(int shard) {
+    public void setShard(Shard shard) {
         this.shard = shard;
     }
 
@@ -187,21 +182,86 @@ public class Block implements Serializable {
         return timestamp;
     }
 
-    public void setTimestamp(long timestamp){
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 
-    public long getRoundIndex(){
+    public long getRoundIndex() {
         return (roundIndex);
     }
 
-    public void setRoundIndex(long roundIndex){
+    public void setRoundIndex(long roundIndex) {
         this.roundIndex = roundIndex;
     }
 
     @Override
     public String toString() {
-        return (String.format("Block{nonce=%d, appStateHash='%s', listTXHashes.size=%d, roundIndex=%d, timestamp=%d}",
-                nonce, Util.byteArrayToHexString(appStateHash), listTXHashes.size(), roundIndex, timestamp));
+        return (String.format("Block{shard=%s,nonce=%d, appStateHash='%s', listTXHashes.size=%d, roundIndex=%d, timestamp=%d}",
+                shard, nonce, Util.byteArrayToHexString(appStateHash), listTXHashes.size(), roundIndex, timestamp));
+    }
+
+    @Override
+    public AsciiTable print() {
+
+        AsciiTable table = new AsciiTable();
+        table.setMaxColumnWidth(200);
+
+        table.getColumns().add(new AsciiTable.Column("Block "));
+        table.getColumns().add(new AsciiTable.Column(nonce + ""));
+
+        AsciiTable.Row rowS = new AsciiTable.Row();
+        rowS.getValues().add("Shard");
+        rowS.getValues().add(shard.getIndex() + "");
+        table.getData().add(rowS);
+
+
+        AsciiTable.Row row0 = new AsciiTable.Row();
+        row0.getValues().add("Nonce");
+        row0.getValues().add(nonce.toString());
+        table.getData().add(row0);
+
+        AsciiTable.Row row1 = new AsciiTable.Row();
+        row1.getValues().add("State Hash");
+        row1.getValues().add(Util.byteArrayToHexString(appStateHash));
+        table.getData().add(row1);
+
+        AsciiTable.Row row2 = new AsciiTable.Row();
+        row2.getValues().add("Signature");
+        row2.getValues().add(Util.byteArrayToHexString(signature));
+        table.getData().add(row2);
+
+        AsciiTable.Row row3 = new AsciiTable.Row();
+        row3.getValues().add("Commitment");
+        row3.getValues().add(Util.byteArrayToHexString(commitment));
+        table.getData().add(row3);
+
+        AsciiTable.Row row4 = new AsciiTable.Row();
+        row4.getValues().add("Prev block");
+        row4.getValues().add(Util.byteArrayToHexString(prevBlockHash));
+        table.getData().add(row4);
+
+
+        AsciiTable.Row row5 = new AsciiTable.Row();
+        row5.getValues().add("Transactions in block");
+        row5.getValues().add(listTXHashes.size() + "");
+        table.getData().add(row5);
+
+        AsciiTable.Row row6 = new AsciiTable.Row();
+        row6.getValues().add("----------------------");
+        row6.getValues().add("----------------------------------------------------------------");
+        table.getData().add(row6);
+
+
+        for (int index = 0; index < listTXHashes.size(); index++) {
+            byte[] tx = listTXHashes.get(index);
+            AsciiTable.Row row7 = new AsciiTable.Row();
+            row7.getValues().add("#" + index);
+            row7.getValues().add(Util.byteArrayToHexString(tx));
+            table.getData().add(row7);
+        }
+
+
+        table.calculateColumnWidth();
+        return table;
     }
 }

@@ -1,16 +1,16 @@
 package network.elrond.application;
 
-
-import network.elrond.account.AccountStateServiceImpl;
 import network.elrond.account.Accounts;
+import network.elrond.benchmark.StatisticsManager;
 import network.elrond.blockchain.Blockchain;
+import network.elrond.blockchain.TransactionsPool;
 import network.elrond.chronology.NTPClient;
+import network.elrond.consensus.ConsensusState;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
-import network.elrond.p2p.P2PBroadcastChanel;
-import network.elrond.p2p.P2PChannelName;
-import network.elrond.p2p.P2PConnection;
+import network.elrond.p2p.*;
+import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,29 +20,52 @@ import java.util.Map;
 
 public class AppState implements Serializable {
 
-    private boolean stillRunning = true;
-    private boolean lock = false;
-    private Accounts accounts;
-    private Blockchain blockchain;
-    private PublicKey publicKey;
-    private PrivateKey privateKey;
-    private P2PConnection connection;
-    private Map<P2PChannelName, P2PBroadcastChanel> channels = new HashMap<>();
-
-    private NTPClient ntpClient = null;
-
     private static final Logger logger = LogManager.getLogger(AppState.class);
 
-    public P2PBroadcastChanel getChanel(P2PChannelName channelName) {
+    private boolean stillRunning = true;
+    public Object lockerSyncPropose = new Object();
+
+    private Shard shard;
+    private Accounts accounts;
+    private Blockchain blockchain;
+
+    private PublicKey publicKey;
+    private PrivateKey privateKey;
+
+    private NTPClient ntpClient;
+    private P2PConnection connection;
+
+
+    private Map<P2PBroadcastChannelName, P2PBroadcastChanel> broadcastChannels = new HashMap<>();
+    private Map<P2PRequestChannelName, P2PRequestChannel> requestChannels = new HashMap<>();
+
+    private ConsensusState consensusState = new ConsensusState();
+
+    private StatisticsManager statisticsManager = new StatisticsManager(System.currentTimeMillis());
+
+    public P2PRequestChannel getChanel(P2PRequestChannelName channelName) {
         logger.traceEntry("params: {}", channelName);
         Util.check(channelName != null, "channelName!=null");
-        return logger.traceExit(channels.get(channelName));
+        return logger.traceExit(requestChannels.get(channelName));
+    }
+
+    public void addChanel(P2PRequestChannel requestChanel) {
+        logger.traceEntry("params: {}", requestChanel);
+        Util.check(requestChanel != null, "requestChanel!=null");
+        this.requestChannels.put(requestChanel.getName(), requestChanel);
+        logger.traceExit();
+    }
+
+    public P2PBroadcastChanel getChanel(P2PBroadcastChannelName channelName) {
+        logger.traceEntry("params: {}", channelName);
+        Util.check(channelName != null, "channelName!=null");
+        return logger.traceExit(broadcastChannels.get(channelName));
     }
 
     public void addChanel(P2PBroadcastChanel broadcastChanel) {
         logger.traceEntry("params: {}", broadcastChanel);
         Util.check(broadcastChanel != null, "broadcastChanel!=null");
-        this.channels.put(broadcastChanel.getName(), broadcastChanel);
+        this.broadcastChannels.put(broadcastChanel.getName(), broadcastChanel);
         logger.traceExit();
     }
 
@@ -110,25 +133,31 @@ public class AppState implements Serializable {
         return publicKey;
     }
 
-
-    public synchronized boolean isLock() {
-        return lock;
+    public NTPClient getNtpClient() {
+        return ntpClient;
     }
 
-    public synchronized void setLock() {
-        this.lock = true;
-    }
-
-    public synchronized void clearLock() {
-        this.lock = false;
-    }
-
-    public NTPClient getNtpClient(){
-        return(ntpClient);
-    }
-
-    public void setNtpClient(NTPClient ntpClient){
+    public void setNtpClient(NTPClient ntpClient) {
         this.ntpClient = ntpClient;
     }
 
+    public ConsensusState getConsensusState() {
+        return consensusState;
+    }
+
+    public Shard getShard() {
+        return shard;
+    }
+
+    public void setShard(Shard shard) {
+        this.shard = shard;
+    }
+
+    public StatisticsManager getStatisticsManager() {
+        return statisticsManager;
+    }
+
+    public TransactionsPool getPool() {
+        return blockchain.getPool();
+    }
 }

@@ -4,6 +4,7 @@ import network.elrond.account.AbstractPersistenceUnit;
 import network.elrond.core.Util;
 import network.elrond.data.Block;
 import network.elrond.p2p.P2PConnection;
+import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,23 +17,26 @@ import java.util.Map;
 
 public class Blockchain implements Serializable, PersistenceUnitContainer {
 
-    private final BlockchainContext context;
+    private static final Logger logger = LogManager.getLogger(Blockchain.class);
 
-    private Block currentBlock;
-    private BigInteger currentBlockIndex = BigInteger.valueOf(-1);
+    protected final BlockchainContext context;
 
-    private Block genesisBlock;
+    protected Block currentBlock;
+    protected BigInteger currentBlockIndex = BigInteger.valueOf(-1);
+    protected Block genesisBlock;
+
+    protected TransactionsPool pool = new TransactionsPool();
+
 
     protected final Map<BlockchainUnitType, BlockchainPersistenceUnit<?, ?>> blockchain = new HashMap<>();
 
-    private static final Logger logger = LogManager.getLogger(Blockchain.class);
+
 
     public Blockchain(BlockchainContext context) throws IOException {
         Util.check(context != null, "context!=null");
         this.context = context;
 
         generatePersistenceUnitMap(context);
-
     }
 
     public void generatePersistenceUnitMap(BlockchainContext context) throws IOException {
@@ -61,6 +65,7 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
     public P2PConnection getConnection() {
         return context.getConnection();
     }
+
 
     public Block getCurrentBlock() {
         return currentBlock;
@@ -92,6 +97,10 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
         this.currentBlockIndex = currentBlockIndex;
     }
 
+    public Shard getShard() {
+        return context.getShard();
+    }
+
     public void flush() {
         logger.traceEntry();
         for (BlockchainUnitType key : blockchain.keySet()) {
@@ -111,6 +120,10 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
             }
         }
         logger.traceExit();
+    }
+
+    public TransactionsPool getPool() {
+        return pool;
     }
 
     @Override

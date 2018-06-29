@@ -1,6 +1,13 @@
 package network.elrond.processor;
 
-import network.elrond.processor.impl.*;
+import network.elrond.processor.impl.executor.BootstrapBlockTask;
+import network.elrond.processor.impl.executor.ChronologyBlockTask;
+import network.elrond.processor.impl.executor.SynchronizationBlockTask;
+import network.elrond.processor.impl.initialization.*;
+import network.elrond.processor.impl.interceptor.P2PBlocksInterceptorProcessor;
+import network.elrond.processor.impl.interceptor.P2PReceiptInterceptorProcessor;
+import network.elrond.processor.impl.interceptor.P2PTransactionsInterceptorProcessor;
+import network.elrond.processor.impl.interceptor.P2PXTransactionsInterceptorProcessor;
 
 
 public class AppTasks {
@@ -21,6 +28,13 @@ public class AppTasks {
     };
 
     /**
+     * P2P transactions broadcast cross shards
+     */
+    public static AppTask INTERCEPT_XTRANSACTIONS = (application) -> {
+        new P2PXTransactionsInterceptorProcessor().process(application);
+    };
+
+    /**
      * P2P receipts broadcast
      */
     public static AppTask INTERCEPT_RECEIPTS = (application) -> {
@@ -30,9 +44,9 @@ public class AppTasks {
     /**
      * P2P transactions broadcast
      */
-    public static AppTask BLOCK_ASSEMBLY_PROCESSOR = (application) -> {
-        new BlockAssemblyProcessor().process(application);
-    };
+//    public static AppTask BLOCK_ASSEMBLY_PROCESSOR = (application) -> {
+//        new BlockAssemblyProcessor().process(application);
+//    };
 
 
     /**
@@ -54,6 +68,13 @@ public class AppTasks {
      */
     public static AppTask INIT_BLOCKCHAIN = (application) -> {
         new BlockchainStarterProcessor().process(application);
+    };
+
+    /**
+     * Init shard
+     */
+    public static AppTask INIT_SHARDING = (application) -> {
+        new ShardStarterProcessor().process(application);
     };
 
     /**
@@ -80,14 +101,24 @@ public class AppTasks {
     };
 
     /**
+     * Init request object mechanism
+     */
+    public static AppTask INIT_REQUEST_OBJECT = (application) -> {
+        new P2PRequestObjectStarterProcessor().process(application);
+    };
+
+    /**
      * Init NTP client
      */
-    public static AppTask NTP_CLIENT_INITIALIZER = (application) ->{
+    public static AppTask NTP_CLIENT_INITIALIZER = (application) -> {
         new NtpClientInitializerProcessor().process(application);
     };
+
 
     public static AppTask CHRONOLOGY = (application) -> {
         new ChronologyBlockTask().process(application);
     };
+
+
 
 }

@@ -5,24 +5,19 @@ This is a modified version of example by Jason Mathews, MITRE Corp that was
 published on https://commons.apache.org/proper/commons-net/index.html
 with the Apache Commons Net software.
  */
+import network.elrond.core.Util;
+import org.apache.commons.net.ntp.NTPUDPClient;
+import org.apache.commons.net.ntp.TimeInfo;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-
-import network.elrond.core.Util;
-import org.apache.commons.net.ntp.NTPUDPClient;
-import org.apache.commons.net.ntp.NtpUtils;
-import org.apache.commons.net.ntp.NtpV3Packet;
-import org.apache.commons.net.ntp.TimeInfo;
-import org.apache.commons.net.ntp.TimeStamp;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * NTPClient polls an NTP server with UDP  and returns milli seconds with
@@ -52,7 +47,7 @@ public class NTPClient implements AutoCloseable{
                     this.setTimeInfo(ti);
                     offline = false;
                 } catch (SocketTimeoutException ste) {
-                    logger.trace("Failed to reach NTPServer {}, trying next server from list!", getCurrentHostName());
+                    logger.trace("Failed to reach NTPServer {}, trying nex server from listToTable!", getCurrentHostName());
                     currentHost++;
                     currentHost = currentHost % listHostsAddr.size();
                     offline = true;
@@ -93,7 +88,7 @@ public class NTPClient implements AutoCloseable{
 
         if (listHostsAddr.size() == 0){
             logger.trace("Lists are empty, adding a default, not usable server!");
-            listHostsAddr.add(InetAddress.getByName("[N/A]"));
+            listHostsAddr.add(InetAddress.getByName("localhost"));
             listHosts.add("[N/A]");
         }
 
@@ -179,5 +174,4 @@ public class NTPClient implements AutoCloseable{
             logger.throwing(ex);
         }
     }
-
 }
