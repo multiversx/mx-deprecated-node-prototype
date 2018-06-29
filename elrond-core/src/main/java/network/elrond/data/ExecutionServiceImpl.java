@@ -180,7 +180,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
                 AppServiceProvider.getAccountStateService().commitAccountStates(accounts);
                 blockExecutionReport.ok(String.format("Commit account state changes, state root hash: %s", Util.getDataEncoded64(accounts.getAccountsPersistenceUnit().getRootHash())));
-                nrProcessedTransactions = block.getListTXHashes() == null? 0 : block.getListTXHashes().size();
+                nrProcessedTransactions = BlockUtil.getTransactionsCount(block);
                 logger.trace("Block process was SUCCESSFUL!");
             } else {
                 AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);

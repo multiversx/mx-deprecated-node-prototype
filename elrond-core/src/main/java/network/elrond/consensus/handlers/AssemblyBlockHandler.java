@@ -12,6 +12,7 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.data.AppBlockManager;
 import network.elrond.data.Block;
+import network.elrond.data.BlockUtil;
 import network.elrond.sharding.AppShardingManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -87,10 +88,7 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
         logger.debug("Transaction pool cleaned!");
 
         Block block = AppBlockManager.instance().generateAndBroadcastBlock(hashes, privateKey, state);
-
-        if (block != null && block.getListTXHashes() != null) {
-            size = block.getListTXHashes().size();
-        }
+        size = BlockUtil.getTransactionsCount(block);
 
         long time = watch.time(TimeUnit.MILLISECONDS);
         long tps = (time > 0) ? ((size * 1000) / time) : 0;

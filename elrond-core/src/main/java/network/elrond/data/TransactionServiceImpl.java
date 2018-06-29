@@ -143,12 +143,11 @@ public class TransactionServiceImpl implements TransactionService {
         //JLS 2018.05.29 - need to store fetched transaction!
         //BlockchainService appPersistenceService = AppServiceProvider.getAppPersistanceService();
 
-        List<byte[]> hashes = block.getListTXHashes();
-        for (byte[] hash : hashes) {
-            String hashString = Util.getDataEncoded64(hash);
-            Transaction transaction = AppServiceProvider.getBlockchainService().get(hashString, blockchain, BlockchainUnitType.TRANSACTION);
+        List<String> hashes = BlockUtil.getTransactionsHashesAsString(block);
+        for (String transactionHash : hashes) {
+            Transaction transaction = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION);
             if (transaction == null) {
-                logger.warn("Found null transaction for hash {}", hash);
+                logger.warn("Found null transaction for hash {}", transactionHash);
                 continue;
             }
             transactions.add(transaction);

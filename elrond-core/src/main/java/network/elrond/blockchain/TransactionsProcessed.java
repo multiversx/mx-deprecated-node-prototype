@@ -1,58 +1,54 @@
 package network.elrond.blockchain;
 
+import network.elrond.core.CollectionUtil;
 import network.elrond.core.Util;
 import network.elrond.data.Block;
+import network.elrond.data.BlockUtil;
 
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class TransactionsProcessed {
-    protected Map<BigInteger, List<String>> transactionsProcessed;
 
     public static final int WINDOW_SIZE = 5;
 
-    public TransactionsProcessed(){
-        transactionsProcessed = new ConcurrentHashMap<>();
-    }
+    protected Map<BigInteger, Collection<String>> map = new ConcurrentHashMap<>();
 
-    public boolean checkExists(String transactionHash){
+
+    public boolean checkExists(String transactionHash) {
         Util.check(transactionHash != null, "transactionHash != null");
 
-        for (List<String> hashes : transactionsProcessed.values()){
-            if (hashes.contains(transactionHash)){
-                return(true);
+        for (Collection<String> hashes : map.values()) {
+            if (hashes.contains(transactionHash)) {
+                return true;
             }
         }
 
-        return(false);
+        return false;
     }
 
-    public void addBlock(Block block){
+    public void addBlock(Block block) {
         Util.check(block != null, "block != null");
 
-        List<byte[]> byteHashes = block.getListTXHashes();
-
-        if (byteHashes.size() == 0){
+        if (BlockUtil.isEmptyBlock(block)) {
             return;
         }
 
-        List<BigInteger> nonces = transactionsProcessed.keySet().stream().sorted().collect(Collectors.toList());
-
-        if (nonces.contains(block.getNonce())){
+        List<BigInteger> processedBlockNonces = map.keySet().stream().sorted().collect(Collectors.toList());
+        BigInteger currentBlockNonce = block.getNonce();
+        if (CollectionUtil.contains(processedBlockNonces, currentBlockNonce)) {
             return;
         }
 
-        List<String> hashes = byteHashes.stream().
-                map(byteHash -> Util.getDataEncoded64(byteHash)).
-                collect(Collectors.toList());
+        Collection<String> hashes = BlockUtil.getTransactionsHashesAsString(block);
+        map.put(currentBlockNonce, hashes);
 
-        transactionsProcessed.put(block.getNonce(), hashes);
-
-        if (nonces.size() + 1 > WINDOW_SIZE){
-            transactionsProcessed.remove(nonces.get(0));
+        if (processedBlockNonces.size() + 1 > WINDOW_SIZE) {
+            map.remove(processedBlockNonces.get(0));
         }
     }
 

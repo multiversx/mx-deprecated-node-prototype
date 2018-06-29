@@ -21,7 +21,6 @@ import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongycastle.util.encoders.Base64;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -81,11 +80,9 @@ public class AppBlockManager {
             if (result.isOk()) {
                 removeAlreadyProcessedTransactionsFromPool(state, block);
 
-                logger.debug("removed {} transaction from pool", block.getListTXHashes().size());
+                logger.debug("removed {} transaction from pool", BlockUtil.getTransactionsCount(block));
 
-                List<String> acceptedTransactions = block.getListTXHashes().stream()
-                    .map(bytes -> new String(Base64.encode(bytes)))
-                    .collect(Collectors.toList());
+                List<String> acceptedTransactions = BlockUtil.getTransactionsHashesAsString(block);
 
                 List<Transaction> blockTransactions = AppServiceProvider.getBlockchainService()
                     .getAll(acceptedTransactions,
@@ -217,13 +214,13 @@ public class AppBlockManager {
             receipts.add(acceptTransaction(block, transaction, state));
 
             logger.trace("added transaction {} in block", txHash);
-            block.getListTXHashes().add(txHash);
+            BlockUtil.addTransactionInBlock(block, txHash);
 
             //test whether the system should continue to add transactions or not
             boolean forceFinishAddingTransactions = !AppServiceProvider.getChronologyService().isStillInRoundState(state.getNtpClient(), state.getBlockchain().getGenesisBlock().getTimestamp(),
                     block.getRoundIndex(), RoundState.PROPOSE_BLOCK);
             if (forceFinishAddingTransactions){
-                logger.debug("Force exit from add transactions method. Transactions added: {}", block.getListTXHashes().size());
+                logger.debug("Force exit from add transactions method. Transactions added: {}", BlockUtil.getTransactionsCount(block));
                 break;
             }
         }
@@ -390,10 +387,7 @@ public class AppBlockManager {
         Util.check(state != null, "state != null");
         Util.check(block != null, "block != null");
 
-        List<String> toBeRemoved = block.getListTXHashes().stream()
-                .filter(Objects::nonNull)
-                .map(transactionHash -> Util.getDataEncoded64(transactionHash))
-                .collect(Collectors.toList());
+        List<String> toBeRemoved = BlockUtil.getTransactionsHashesAsString(block);
 
         ArrayBlockingQueue<String> transactionPool = state.getTransactionPool();
         transactionPool.removeAll(toBeRemoved);

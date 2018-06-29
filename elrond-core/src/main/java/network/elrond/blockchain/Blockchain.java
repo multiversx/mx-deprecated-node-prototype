@@ -17,18 +17,20 @@ import java.util.Map;
 
 public class Blockchain implements Serializable, PersistenceUnitContainer {
 
-    private final BlockchainContext context;
+    private static final Logger logger = LogManager.getLogger(Blockchain.class);
 
-    private Block currentBlock;
-    private BigInteger currentBlockIndex = BigInteger.valueOf(-1);
+    protected final BlockchainContext context;
 
-    private Block genesisBlock;
+    protected Block currentBlock;
+    protected BigInteger currentBlockIndex = BigInteger.valueOf(-1);
+
+    protected Block genesisBlock;
 
     protected final Map<BlockchainUnitType, BlockchainPersistenceUnit<?, ?>> blockchain = new HashMap<>();
 
-    private final TransactionsProcessed transactionsProcessed = new TransactionsProcessed();
+    protected final TransactionsProcessed transactionsProcessed = new TransactionsProcessed();
 
-    private static final Logger logger = LogManager.getLogger(Blockchain.class);
+
 
     public Blockchain(BlockchainContext context) throws IOException {
         Util.check(context != null, "context!=null");

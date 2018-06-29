@@ -408,7 +408,7 @@ public class AppBlockManagerTest {
         Block block = blockReceiptsPair.getKey();
         Assert.assertTrue("Block cannot be null", block != null);
         Assert.assertTrue("PrevBlockHash cannot be null", block.prevBlockHash != null);
-        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", block.getListTXHashes().size() == 0);
+        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.isEmptyBlock(block));
     }
 
     @Test
@@ -417,7 +417,7 @@ public class AppBlockManagerTest {
         AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx), state);
         Block block = blockReceiptsPair.getKey();
-        Assert.assertTrue("ListOfTxHashes does not have exactly 1 hash", block.getListTXHashes().size() == 1);
+        Assert.assertTrue("ListOfTxHashes does not have exactly 1 hash", BlockUtil.getTransactionsCount(block) == 1);
     }
 
     @Test
@@ -426,7 +426,7 @@ public class AppBlockManagerTest {
         //AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue());
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx), state);
         Block block = blockReceiptsPair.getKey();
-        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", block.getListTXHashes().size() == 0);
+        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.getTransactionsCount(block) == 0);
     }
 
     @Test
@@ -435,7 +435,7 @@ public class AppBlockManagerTest {
         AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx), state);
         Block block = blockReceiptsPair.getKey();
-        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", block.getListTXHashes().size() == 0);
+        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.getTransactionsCount(block) == 0);
     }
 
     //TODO: Readd when NonceIsVerified
@@ -445,7 +445,7 @@ public class AppBlockManagerTest {
         AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx), state);
         Block block = blockReceiptsPair.getKey();
-        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", block.getListTXHashes().size() == 0);
+        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.getTransactionsCount(block) == 0);
     }
 
     @Test
@@ -458,7 +458,7 @@ public class AppBlockManagerTest {
 
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx, tx2), state);
         Block block = blockReceiptsPair.getKey();
-        Assert.assertTrue("ListOfTxHashes does not have exactly 1 hash", block.getListTXHashes().size() == 1);
+        Assert.assertTrue("ListOfTxHashes does not have exactly 1 hash", BlockUtil.getTransactionsCount(block) == 1);
     }
 
     @Test
@@ -467,7 +467,7 @@ public class AppBlockManagerTest {
         Block block = blockReceiptsPair.getKey();
         Assert.assertTrue("Block cannot be null", block != null);
         Assert.assertTrue("PrevBlockHash cannot be null", block.prevBlockHash != null);
-        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", block.getListTXHashes().size() == 0);
+        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.getTransactionsCount(block) == 0);
     }
 
     @Test

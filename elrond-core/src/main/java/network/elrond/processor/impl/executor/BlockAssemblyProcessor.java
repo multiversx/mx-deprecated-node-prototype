@@ -10,6 +10,7 @@ import network.elrond.core.ThreadUtil;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.data.AppBlockManager;
 import network.elrond.data.Block;
+import network.elrond.data.BlockUtil;
 import network.elrond.data.LocationType;
 import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.processor.impl.AbstractChannelTask;
@@ -65,9 +66,7 @@ public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
         int size = 0;
         synchronized (state.lockerSyncPropose) {
             Block block = proposeBlock(queue, application);
-            if (block != null && block.getListTXHashes() != null) {
-                size = block.getListTXHashes().size();
-            }
+            size = BlockUtil.getTransactionsCount(block);
         }
 
         long time = watch.time(TimeUnit.MILLISECONDS);
