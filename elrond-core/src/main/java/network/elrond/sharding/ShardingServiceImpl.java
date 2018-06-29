@@ -1,6 +1,9 @@
 package network.elrond.sharding;
 
+import network.elrond.account.AccountAddress;
 import network.elrond.core.ObjectUtil;
+import network.elrond.crypto.PrivateKey;
+import network.elrond.crypto.PublicKey;
 import network.elrond.data.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +14,7 @@ public class ShardingServiceImpl implements ShardingService {
 
     Logger logger = LoggerFactory.getLogger(ShardingServiceImpl.class);
 
-    public static Integer MAX_ACTIVE_SHARDS_CONT = 1;
+    public static Integer MAX_ACTIVE_SHARDS_CONT = 2;
 
     @Override
     public Shard getShard(byte[] address) {
@@ -40,6 +43,32 @@ public class ShardingServiceImpl implements ShardingService {
 
 
         throw new RuntimeException("Not supported operation !");
+    }
+
+    @Override
+    public PublicKey getPublicKeyForMinting(Shard shard) {
+        PrivateKey key = getPrivateKeyForMinting(shard);
+        return new PublicKey(key);
+    }
+
+    @Override
+    public PrivateKey getPrivateKeyForMinting(Shard shard) {
+        int index = 0;
+        PrivateKey key = null;
+        boolean found;
+        do {
+            key = new PrivateKey("MINTING ADDRESS FOR INITIAL TRANSFER" + (++index));
+            Shard addressShard = getShard(new PublicKey(key).getValue());
+            found = ObjectUtil.isEqual(addressShard, shard);
+        } while (!found);
+
+        return key;
+    }
+
+    @Override
+    public AccountAddress getAddressForMinting(Shard shard) {
+        PublicKey key = getPublicKeyForMinting(shard);
+        return AccountAddress.fromBytes(key.getValue());
     }
 
 

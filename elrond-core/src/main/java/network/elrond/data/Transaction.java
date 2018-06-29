@@ -356,6 +356,11 @@ public class Transaction implements Serializable, AsciiPrintable {
         row5.getValues().add(nonce.toString());
         table.getData().add(row5);
 
+        AsciiTable.Row row6 = new AsciiTable.Row();
+        row6.getValues().add("Value");
+        row6.getValues().add(value.toString());
+        table.getData().add(row6);
+
 
         table.calculateColumnWidth();
         return table;
