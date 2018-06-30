@@ -16,10 +16,10 @@ public class StatisticsManager implements Serializable {
     private static final int maxStatistics = 100;
     private List<Statistic> statistics = new ArrayList<>();
 
-    private Integer currentShardNumber;
-    private Integer numberOfShards;
-    private Integer numberNodesInShard;
-    private Integer numberNodesInNetwork;
+    private Integer currentShardNumber = 0;
+    private Integer numberOfShards = 0;
+    private Integer numberNodesInShard = 0;
+    private Integer numberNodesInNetwork = 0;
 
     private long currentIndex = 0;
     private long currentMillis = 0;

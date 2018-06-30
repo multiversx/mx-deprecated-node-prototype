@@ -163,7 +163,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
 //            }
             }
 
-            transactions.stream().parallel().filter(Objects::nonNull).forEach((tr)-> {
+            transactions.stream().parallel().filter(Objects::nonNull).forEach((tr) -> {
                 try {
                     sendTransaction(application.getState(), tr);
                 } catch (IOException e) {
@@ -171,7 +171,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
                 }
             });
 
-            int successful =  (int) transactions.stream().filter(Objects::nonNull).count();
+            int successful = (int) transactions.stream().filter(Objects::nonNull).count();
             result.setSuccessfulTransactionsNumber(successful);
             result.setFailedTransactionsNumber(nrTransactions - successful);
 
@@ -195,7 +195,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
         try {
 
             Transaction transaction = generateTransaction(receiver, value, application.getState());
-            if(transaction!=null) {
+            if (transaction != null) {
                 sendTransaction(application.getState(), transaction);
             }
 
@@ -290,6 +290,8 @@ public class ElrondFacadeImpl implements ElrondFacade {
             StatisticsManager statisticsManager = AppServiceProvider.getP2PRequestService().get(channel, addressShard, P2PRequestChannelName.STATISTICS, null);
             if (statisticsManager != null) {
                 shardsStatistics.add(statisticsManager);
+            } else {
+                shardsStatistics.add(new StatisticsManager(System.currentTimeMillis()));
             }
         }
 
@@ -313,20 +315,20 @@ public class ElrondFacadeImpl implements ElrondFacade {
     }
 
     @Override
-    public Transaction getTransactionFromHash(String transactionHash, Blockchain blockchain){
+    public Transaction getTransactionFromHash(String transactionHash, Blockchain blockchain) {
         try {
             return (AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION));
-        } catch (Exception ex){
+        } catch (Exception ex) {
             logger.throwing(ex);
             return (null);
         }
     }
 
     @Override
-    public Block getBlockFromHash(String blockHash, Blockchain blockchain){
+    public Block getBlockFromHash(String blockHash, Blockchain blockchain) {
         try {
             return (AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK));
-        } catch (Exception ex){
+        } catch (Exception ex) {
             logger.throwing(ex);
             return (null);
         }
