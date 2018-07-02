@@ -5,6 +5,8 @@ import network.elrond.application.AppState;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
+import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +23,9 @@ public class AccountStateServiceImplTest {
     @Before
     public void SetUp() throws IOException {
         accountStateService = new AccountStateServiceImpl();
-        accounts = new Accounts(new AccountsContext(), new AccountsPersistenceUnit<>(""));
+        AccountsContext context = new AccountsContext();
+        context.setShard(new Shard(0));
+        accounts = new Accounts(context, new AccountsPersistenceUnit<>(""));
         address = AccountAddress.fromHexString("testAddresss");
     }
 
@@ -96,7 +100,7 @@ public class AccountStateServiceImplTest {
     }
 
     @Test
-    public void convertAccountStateToRLPAndBackAgain(){
+    public void convertAccountStateToRLPAndBackAgain() {
         AccountState initialState = new AccountState(AccountAddress.EMPTY_ADDRESS);
         initialState.setNonce(BigInteger.ONE);
         initialState.setBalance(BigInteger.TEN);
@@ -107,7 +111,7 @@ public class AccountStateServiceImplTest {
     }
 
     @Test
-    public void convertAccountStateToRLPAndBackAgainWithOneZero(){
+    public void convertAccountStateToRLPAndBackAgainWithOneZero() {
         AccountState initialState = new AccountState(AccountAddress.EMPTY_ADDRESS);
         byte[] rlp = accountStateService.convertAccountStateToRLP(initialState);
         AccountState back = accountStateService.convertToAccountStateFromRLP(rlp);

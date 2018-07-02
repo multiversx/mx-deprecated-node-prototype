@@ -5,6 +5,7 @@ import network.elrond.application.AppState;
 import network.elrond.core.CollectionUtil;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PBroadcastChannelName;
+import network.elrond.p2p.P2PConnection;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -72,9 +73,21 @@ public class AppShardingManager {
 
     public List<String> getPeersOnShard(AppState state) {
         P2PBroadcastChanel chanel = state.getChanel(P2PBroadcastChannelName.BLOCK);
-        return AppServiceProvider.getP2PBroadcastService().getPeersOnChannel(chanel)
+
+        List<PeerAddress> allPeers = state.getConnection().getPeer().peerBean().peerMap().all();
+
+        // add self to the list
+        allPeers.add(state.getConnection().getPeer().peerAddress());
+
+        List<PeerAddress> peersOnChannel = AppServiceProvider.getP2PBroadcastService().getPeersOnChannel(chanel)
                 .stream()
                 .filter(Objects::nonNull)
+                .sorted()
+                .collect(Collectors.toList());
+
+        peersOnChannel.retainAll(allPeers);
+
+        return peersOnChannel.stream()
                 .map(peerAddress -> peerAddress.peerId().toString())
                 .sorted()
                 .collect(Collectors.toList());
