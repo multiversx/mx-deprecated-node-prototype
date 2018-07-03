@@ -1,6 +1,8 @@
 package network.elrond.benchmark;
 
-public class ElrondSystemTimerImpl implements ElrondSystemTimer{
+import java.io.Serializable;
+
+public class ElrondSystemTimerImpl implements ElrondSystemTimer, Serializable {
     @Override
     public long getCurrentTime() {
         return System.currentTimeMillis();
