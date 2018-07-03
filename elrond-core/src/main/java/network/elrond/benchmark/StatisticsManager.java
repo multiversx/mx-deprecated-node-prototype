@@ -12,7 +12,7 @@ import java.util.List;
 
 public class StatisticsManager implements Serializable {
     private static final Logger logger = LogManager.getLogger(StatisticsManager.class);
-
+    private ElrondSystemTimer timer;
     private static final int maxStatistics = 100;
     private List<Statistic> statistics = new ArrayList<>();
 
@@ -40,8 +40,9 @@ public class StatisticsManager implements Serializable {
 
     private long totalProcessedTransactions = 0;
 
-    public StatisticsManager(long startMillis) {
-        this.startMillis = startMillis;
+    public StatisticsManager(ElrondSystemTimer timer) {
+        this.timer = timer;
+        this.startMillis = timer.getCurrentTime();
         currentMillis = startMillis;
     }
 
@@ -92,7 +93,7 @@ public class StatisticsManager implements Serializable {
             minTps = currentTps;
         }
 
-        averageTps = (totalProcessedTransactions * 1000.0) / (System.currentTimeMillis() - startMillis);
+        averageTps = (totalProcessedTransactions * 1000.0) / (timer.getCurrentTime() - startMillis);
         logger.trace("averageTps is " + averageTps);
     }
 
