@@ -154,6 +154,7 @@ public class AppState implements Serializable {
     }
 
     public StatisticsManager getStatisticsManager() {
+        logger.warn("Transactions in Pool: {}", getPool().getTransactionPool().size());
         return statisticsManager;
     }
 
