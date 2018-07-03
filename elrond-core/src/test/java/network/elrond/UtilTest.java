@@ -94,6 +94,8 @@ public class UtilTest {
 
 
         logger.warn(sdfSource.format(new Date()));
+        logger.warn(Util.getHostName());
+
 
 //        //System.setProperty("logFilename", "/test");
 //

@@ -38,7 +38,7 @@ public class ElrondApiApplication {
     public static void main(String[] args) {
         SimpleDateFormat sdfSource = new SimpleDateFormat(
                 "yyyy-MM-dd hh.mm.ss");
-        Util.changeLogsPath("logs/" + sdfSource.format(new Date()));
+        Util.changeLogsPath("logs/" + Util.getHostName() + " - " + sdfSource.format(new Date()));
 
         logger.info("Starting ElrondApiApplication...");
         SpringApplication.run(ElrondApiApplication.class, args);

@@ -14,6 +14,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public class Util {
     private static final Logger logger = LogManager.getLogger(Util.class);
@@ -172,5 +174,16 @@ public class Util {
             throw ex;
         }
         logger.traceExit();
+    }
+
+    public static String getHostName() {
+        String hostName = "UNKNOWN_HOST";
+        try {
+            java.net.InetAddress addr = InetAddress.getLocalHost();
+            hostName = addr.getHostName();
+        } catch (UnknownHostException ex) {
+            logger.throwing(ex);
+        }
+        return hostName;
     }
 }
