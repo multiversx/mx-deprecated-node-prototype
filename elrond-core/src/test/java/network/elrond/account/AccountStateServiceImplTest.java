@@ -6,6 +6,7 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.AppShardingManager;
 import network.elrond.sharding.Shard;
 import org.junit.Assert;
 import org.junit.Before;
@@ -24,7 +25,8 @@ public class AccountStateServiceImplTest {
     public void SetUp() throws IOException {
         accountStateService = new AccountStateServiceImpl();
         AccountsContext context = new AccountsContext();
-        context.setShard(new Shard(0));
+        PublicKey publicKeyMinting = AppServiceProvider.getShardingService().getPublicKeyForMinting(new Shard(0));
+        context.setShard(AppServiceProvider.getShardingService().getShard(publicKeyMinting.getValue()));
         accounts = new Accounts(context, new AccountsPersistenceUnit<>(""));
         address = AccountAddress.fromHexString("testAddresss");
     }
@@ -122,25 +124,29 @@ public class AccountStateServiceImplTest {
     @Test
     public void testInitialMintingToKnownAddress() throws IOException, ClassNotFoundException {
         accountStateService.initialMintingToKnownAddress(accounts);
-        AccountState state = accountStateService.getAccountState(AccountAddress.fromBytes(Util.PUBLIC_KEY_MINTING.getValue()), accounts);
+        AccountState state = accountStateService.getAccountState(AppServiceProvider.getShardingService().getAddressForMinting(accounts.getShard()), accounts);
         Assert.assertNotNull(state);
         Assert.assertTrue(state.getBalance().compareTo(Util.VALUE_MINTING) == 0);
     }
 
+
     @Test
     public void testGenerateGenesisBlock() throws IOException, ClassNotFoundException {
         AccountsContext accountsContext = new AccountsContext();
+        AppState appState = new AppState();
+        AppContext appContext = new AppContext();
         PrivateKey privateKey = new PrivateKey();
         PublicKey publicKey = new PublicKey(new PrivateKey());
+        appContext.setPrivateKey(privateKey);
+        Shard shard = AppServiceProvider.getShardingService().getShard(publicKey.getValue());
+        accountsContext.setShard(shard);
+        appState.setShard(shard);
+
         accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(""));
         String initialAddress = Util.byteArrayToHexString(publicKey.getValue());
 
-        AppState appState = new AppState();
-        AppContext appContext = new AppContext();
-        appContext.setPrivateKey(privateKey);
-
         accountStateService.generateGenesisBlock(initialAddress, BigInteger.TEN, appState, appContext);
-        AccountState state = accountStateService.getAccountState(AccountAddress.fromBytes(Util.PUBLIC_KEY_MINTING.getValue()), accounts);
+        AccountState state = accountStateService.getAccountState(AppServiceProvider.getShardingService().getAddressForMinting(accounts.getShard()), accounts);
         Assert.assertNotNull(state);
         Assert.assertTrue(state.getBalance().compareTo(Util.VALUE_MINTING) == 0);
         Assert.assertTrue(state.getBalance().compareTo(Util.VALUE_MINTING) == 0);

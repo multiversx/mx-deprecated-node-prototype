@@ -24,13 +24,13 @@ public class AccountStateServiceImpl implements AccountStateService {
     public synchronized AccountState getOrCreateAccountState(AccountAddress address, Accounts accounts) throws IOException, ClassNotFoundException {
         logger.traceEntry("params: {} {}", address, accounts);
 
-        Util.check(address!=null,"address!=null");
-        Util.check(accounts!=null,"accounts!=null");
+        Util.check(address != null, "address!=null");
+        Util.check(accounts != null, "accounts!=null");
 
         AccountState state = getAccountState(address, accounts);
 
         if (state != null) {
-            logger.trace("state is null");
+            logger.trace("state not null");
             return logger.traceExit(state);
         }
 
@@ -44,14 +44,14 @@ public class AccountStateServiceImpl implements AccountStateService {
         logger.traceEntry("params: {} {}", address, accounts);
         if (address == null) {
             logger.trace("address is null");
-            return logger.traceExit((AccountState)null);
+            return logger.traceExit((AccountState) null);
         }
 
         AccountsPersistenceUnit<AccountAddress, AccountState> unit = accounts.getAccountsPersistenceUnit();
         byte[] bytes = address.getBytes();
         byte[] data = unit.get(bytes);
 
-        return logger.traceExit((bytes != null) ? convertToAccountStateFromRLP(data) : null);
+        return logger.traceExit((data != null) ? convertToAccountStateFromRLP(data) : null);
     }
 
     @Override
@@ -103,7 +103,7 @@ public class AccountStateServiceImpl implements AccountStateService {
         logger.traceEntry("params: {}", data);
         if (data == null || data.length == 0) {
             logger.trace("data is null or data.length = 0");
-            return logger.traceExit((AccountState)null);
+            return logger.traceExit((AccountState) null);
         }
 
         byte[] EMPTY_DATA = {0};
@@ -148,14 +148,14 @@ public class AccountStateServiceImpl implements AccountStateService {
         logger.traceExit();
     }
 
-    public Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue,  AppState state, AppContext context) {
+    public Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue, AppState state, AppContext context) {
         logger.traceEntry("params: {} {} {} {}", initialAddress, initialValue, state, context);
 
         PrivateKey privateKey = context.getPrivateKey();
 
         Util.check(!(initialAddress == null || initialAddress.isEmpty()), "initialAddress!=null");
         Util.check(!(initialValue.compareTo(BigInteger.ZERO) < 0), "initialValue is less than zero");
-        Util.check(privateKey!=null, "privateKey!=null");
+        Util.check(privateKey != null, "privateKey!=null");
 
         if (initialValue.compareTo(Util.VALUE_MINTING) > 0) {
             initialValue = Util.VALUE_MINTING;
@@ -192,7 +192,7 @@ public class AccountStateServiceImpl implements AccountStateService {
             ExecutionService executionService = AppServiceProvider.getExecutionService();
             ExecutionReport executionReport = executionService.processTransaction(transactionMint, accountsTemp);
             if (!executionReport.isOk()) {
-                return logger.traceExit((Fun.Tuple2<Block, Transaction>)null);
+                return logger.traceExit((Fun.Tuple2<Block, Transaction>) null);
             }
             genesisBlock.setAppStateHash(accountsTemp.getAccountsPersistenceUnit().getRootHash());
             AppBlockManager.instance().signBlock(genesisBlock, privateKey);
@@ -200,7 +200,7 @@ public class AccountStateServiceImpl implements AccountStateService {
             logger.trace("Genesis block created!");
         } catch (Exception ex) {
             logger.catching(ex);
-            logger.traceExit((Fun.Tuple2<Block, Transaction>)null);
+            logger.traceExit((Fun.Tuple2<Block, Transaction>) null);
         }
 
         return logger.traceExit(new Fun.Tuple2<>(genesisBlock, transactionMint));

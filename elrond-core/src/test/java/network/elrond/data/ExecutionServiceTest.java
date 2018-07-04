@@ -31,12 +31,16 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
     @Before
     public void setUp() throws IOException {
         AccountsContext accountsContext = new AccountsContext();
+        PublicKey publicKeyMinting = AppServiceProvider.getShardingService().getPublicKeyForMinting(new Shard(0));
 
         if (blockchain != null) {
             blockchain.flush();
         }
 
         blockchain = new Blockchain(getDefaultTestBlockchainContext());
+
+        accountsContext.setShard(AppServiceProvider.getShardingService().getShard(publicKeyMinting.getValue()));
+
         accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
     }
 
@@ -53,6 +57,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
                                                         long mintValue,
                                                         int numberOfTransactions,
                                                         long valuePerTransaction) throws IOException, ClassNotFoundException {
+        PublicKey publicKeyMinting = AppServiceProvider.getShardingService().getPublicKeyForMinting(new Shard(0));
         TransactionService transactionService = AppServiceProvider.getTransactionService();
         SerializationService serializationService = AppServiceProvider.getSerializationService();
         Transaction tx;
@@ -65,6 +70,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         byte[] hash;
         byte[] appStateHash = new byte[0];
         AccountsContext accountsContext = new AccountsContext();
+        accountsContext.setShard(AppServiceProvider.getShardingService().getShard(publicKeyMinting.getValue()));
         Accounts accountsSandbox = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
 
         for (PublicKey pkWallet : publicKeysWallets) {
@@ -77,7 +83,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         addressReceiver = Util.getAddressFromPublicKey(publicKeyReceiver.getValue());
         accountsSandbox = initAccounts(accountsSandbox, publicKeysWallets, publicKeyMint, mintValue);
 
-        Shard senderShard= AppServiceProvider.getShardingService().getShard(addressSender.getBytes());
+        Shard senderShard = AppServiceProvider.getShardingService().getShard(addressSender.getBytes());
         Shard receiverShard = AppServiceProvider.getShardingService().getShard(addressReceiver.getBytes());
 
 

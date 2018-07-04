@@ -8,6 +8,7 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
 import org.junit.Test;
 import org.mapdb.Fun;
 
@@ -16,18 +17,20 @@ import java.math.BigInteger;
 public class GenesisBlockTest {
 
     @Test
-    public void testBlock() throws Exception{
+    public void testBlock() throws Exception {
+        PublicKey publicKeyMinting = AppServiceProvider.getShardingService().getPublicKeyForMinting(new Shard(0));
         BigInteger value = BigInteger.TEN.pow(10);
 
         AccountStateService accountStateService = AppServiceProvider.getAccountStateService();
         ExecutionService executionService = AppServiceProvider.getExecutionService();
 
-        PrivateKey pvk1 = new PrivateKey("Another seed in the wall");
+        PrivateKey pvk1 = new PrivateKey("Another brick in the wall");
         PublicKey pbk1 = new PublicKey(pvk1);
         AccountAddress acRecv = AccountAddress.fromBytes(pbk1.getValue());
-        AccountAddress acMint = AccountAddress.fromBytes(Util.PUBLIC_KEY_MINTING.getValue());
+        AccountAddress acMint = AccountAddress.fromBytes(publicKeyMinting.getValue());
 
         AccountsContext accTemp = new AccountsContext();
+        accTemp.setShard(AppServiceProvider.getShardingService().getShard(publicKeyMinting.getValue()));
         accTemp.setDatabasePath(null);
 
         Accounts accounts = new Accounts(accTemp, new AccountsPersistenceUnit<>(accTemp.getDatabasePath()));
@@ -35,6 +38,7 @@ public class GenesisBlockTest {
         TestCase.assertEquals("Expected " + Util.VALUE_MINTING, Util.VALUE_MINTING, acsMintTest.getBalance());
 
         AppState appState = new AppState();
+        appState.setShard(AppServiceProvider.getShardingService().getShard(publicKeyMinting.getValue()));
         AppContext appContext = new AppContext();
         appContext.setPrivateKey(pvk1);
 

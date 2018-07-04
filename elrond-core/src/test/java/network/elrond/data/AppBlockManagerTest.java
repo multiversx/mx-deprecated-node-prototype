@@ -43,6 +43,8 @@ public class AppBlockManagerTest {
     static PrivateKey privateKey;
     static Blockchain blockchain;
     static P2PConnection connection = null;
+    static PublicKey publicKeyMinting;
+    static PrivateKey privateKeyMinting;
 
     static boolean initialized = false;
 
@@ -51,7 +53,7 @@ public class AppBlockManagerTest {
     @Before
     //do one time per class
     public void setupTest() throws Exception {
-        if (initialized){
+        if (initialized) {
             return;
         }
 
@@ -94,11 +96,14 @@ public class AppBlockManagerTest {
 
         //memory-only accounts
         accountsContext = new AccountsContext();
+        accountsContext.setShard(new Shard(0));
         state.setAccounts(new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath())));
 
         privateKey = new PrivateKey("Receiver");
         publicKey = new PublicKey(privateKey);
 
+        publicKeyMinting = AppServiceProvider.getShardingService().getPublicKeyForMinting(new Shard(0));
+        privateKeyMinting = AppServiceProvider.getShardingService().getPrivateKeyForMinting(new Shard(0));
 
         String hashString = AppServiceProvider.getSerializationService().getHashString(blockchain.getGenesisBlock());
         AppServiceProvider.getBootstrapService().commitBlock(blockchain.getGenesisBlock(), hashString, blockchain);
@@ -116,15 +121,16 @@ public class AppBlockManagerTest {
     @Test
     public void testInitialAccounts() throws Exception {
         AccountsContext accountsContextLocal = new AccountsContext();
+        accountsContextLocal.setShard(new Shard(0));
         state.setAccounts(new Accounts(accountsContextLocal, new AccountsPersistenceUnit<>(accountsContextLocal.getDatabasePath())));
-
+        state.setShard(AppServiceProvider.getShardingService().getShard(publicKeyMinting.getValue()));
         //size should be 1
         TestCase.assertEquals("Accounts size should have been 1: ", 1, state.getAccounts().getAddresses().size());
 
         //the only account should be the mint address and should have the proper value
         List<AccountAddress> listAccountsAddress = new ArrayList<>(state.getAccounts().getAddresses());
         AccountState accountState = AppServiceProvider.getAccountStateService().getAccountState(listAccountsAddress.get(0), state.getAccounts());
-        TestCase.assertTrue(Arrays.equals(Util.PUBLIC_KEY_MINTING.getValue(), listAccountsAddress.get(0).getBytes()));
+        TestCase.assertTrue(Arrays.equals(AppServiceProvider.getShardingService().getPublicKeyForMinting(new Shard(0)).getValue(), listAccountsAddress.get(0).getBytes()));
 
         TestCase.assertEquals(Util.VALUE_MINTING, accountState.getBalance());
 
@@ -138,8 +144,8 @@ public class AppBlockManagerTest {
         PrivateKey pvkeyRecv = new PrivateKey("RECV");
         PublicKey pbkeyRecv = new PublicKey(pvkeyRecv);
 
-        Transaction tx1 = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv, BigInteger.TEN, BigInteger.ZERO);
-        AppServiceProvider.getTransactionService().signTransaction(tx1, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
+        Transaction tx1 = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, pbkeyRecv, BigInteger.TEN, BigInteger.ZERO);
+        AppServiceProvider.getTransactionService().signTransaction(tx1, privateKeyMinting.getValue(), publicKeyMinting.getValue());
 
         List<Transaction> transactions = new ArrayList<>();
         transactions.add(tx1);
@@ -154,14 +160,14 @@ public class AppBlockManagerTest {
 
         TestCase.assertNotNull("Should have returned a block: ", blk);
         TestCase.assertEquals("Should have been 1 account", 1, getValidAccounts(state.getAccounts()));
-        TestCase.assertEquals(Util.VALUE_MINTING, getBalance(Util.PUBLIC_KEY_MINTING));
-        TestCase.assertEquals(BigInteger.ZERO, getNonce(Util.PUBLIC_KEY_MINTING));
+        TestCase.assertEquals(Util.VALUE_MINTING, getBalance(publicKeyMinting));
+        TestCase.assertEquals(BigInteger.ZERO, getNonce(publicKeyMinting));
 
         ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(blk, state.getAccounts(), state.getBlockchain(), state.getStatisticsManager());
 
         TestCase.assertTrue("Should have executed!", executionReport.isOk());
-        TestCase.assertEquals(Util.VALUE_MINTING.subtract(BigInteger.TEN), getBalance(Util.PUBLIC_KEY_MINTING));
-        TestCase.assertEquals(BigInteger.ONE, getNonce(Util.PUBLIC_KEY_MINTING));
+        TestCase.assertEquals(Util.VALUE_MINTING.subtract(BigInteger.TEN), getBalance(publicKeyMinting));
+        TestCase.assertEquals(BigInteger.ONE, getNonce(publicKeyMinting));
 
         TestCase.assertEquals(BigInteger.TEN, getBalance(pbkeyRecv));
         TestCase.assertEquals(BigInteger.ZERO, getNonce(pbkeyRecv));
@@ -178,11 +184,11 @@ public class AppBlockManagerTest {
         PrivateKey pvkeyRecv = new PrivateKey("RECV");
         PublicKey pbkeyRecv = new PublicKey(pvkeyRecv);
 
-        Transaction tx1 = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv, BigInteger.TEN, BigInteger.ZERO);
-        AppServiceProvider.getTransactionService().signTransaction(tx1, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
+        Transaction tx1 = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, pbkeyRecv, BigInteger.TEN, BigInteger.ZERO);
+        AppServiceProvider.getTransactionService().signTransaction(tx1, privateKeyMinting.getValue(), publicKeyMinting.getValue());
 
-        Transaction tx2 = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv, BigInteger.TEN, BigInteger.ZERO);
-        AppServiceProvider.getTransactionService().signTransaction(tx1, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
+        Transaction tx2 = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, pbkeyRecv, BigInteger.TEN, BigInteger.ZERO);
+        AppServiceProvider.getTransactionService().signTransaction(tx1, privateKeyMinting.getValue(), publicKeyMinting.getValue());
 
         List<Transaction> transactions = new ArrayList<>();
         transactions.add(tx1);
@@ -199,14 +205,14 @@ public class AppBlockManagerTest {
 
         TestCase.assertNotNull("Should have returned a block: ", blk);
         TestCase.assertEquals("Should have been 1 account", 1, getValidAccounts(state.getAccounts()));
-        TestCase.assertEquals(Util.VALUE_MINTING, getBalance(Util.PUBLIC_KEY_MINTING));
-        TestCase.assertEquals(BigInteger.ZERO, getNonce(Util.PUBLIC_KEY_MINTING));
+        TestCase.assertEquals(Util.VALUE_MINTING, getBalance(publicKeyMinting));
+        TestCase.assertEquals(BigInteger.ZERO, getNonce(publicKeyMinting));
 
         ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(blk, state.getAccounts(), state.getBlockchain(), state.getStatisticsManager());
 
         TestCase.assertTrue("Should have executed!", executionReport.isOk());
-        TestCase.assertEquals(Util.VALUE_MINTING.subtract(BigInteger.TEN), getBalance(Util.PUBLIC_KEY_MINTING));
-        TestCase.assertEquals(BigInteger.ONE, getNonce(Util.PUBLIC_KEY_MINTING));
+        TestCase.assertEquals(Util.VALUE_MINTING.subtract(BigInteger.TEN), getBalance(publicKeyMinting));
+        TestCase.assertEquals(BigInteger.ONE, getNonce(publicKeyMinting));
 
         TestCase.assertEquals(BigInteger.TEN, getBalance(pbkeyRecv));
         TestCase.assertEquals(BigInteger.ZERO, getNonce(pbkeyRecv));
@@ -226,22 +232,22 @@ public class AppBlockManagerTest {
 
         List<Transaction> transactions = new ArrayList<>();
         //valid transaction to recv1
-        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv1, BigInteger.TEN, BigInteger.ZERO));
+        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, pbkeyRecv1, BigInteger.TEN, BigInteger.ZERO));
         //not valid transaction to recv1 (nonce mismatch)
-        //transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv1, BigInteger.TEN, BigInteger.ZERO));
+        //transactions.add(AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, pbkeyRecv1, BigInteger.TEN, BigInteger.ZERO));
         //not valid transaction to recv1 (not enough funds)
-        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv1, BigInteger.TEN.pow(100), BigInteger.ONE));
+        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, pbkeyRecv1, BigInteger.TEN.pow(100), BigInteger.ONE));
         //valid transaction to recv2
-        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv2, BigInteger.TEN, BigInteger.ONE));
+        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, pbkeyRecv2, BigInteger.TEN, BigInteger.ONE));
         //not valid transaction to recv2 (nonce mismatch)
         //transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv2, BigInteger.TEN, BigInteger.ZERO));
         //not valid transaction to recv2 (not enough funds)
-        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv2, BigInteger.TEN.pow(100), BigInteger.ZERO));
+        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, pbkeyRecv2, BigInteger.TEN.pow(100), BigInteger.ZERO));
         //valid transaction to recv1
-        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv1, BigInteger.TEN, BigInteger.valueOf(2)));
+        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, pbkeyRecv1, BigInteger.TEN, BigInteger.valueOf(2)));
 
         for (Transaction transaction : transactions) {
-            AppServiceProvider.getTransactionService().signTransaction(transaction, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
+            AppServiceProvider.getTransactionService().signTransaction(transaction, privateKeyMinting.getValue(), publicKeyMinting.getValue());
 
             AppServiceProvider.getBootstrapService().commitTransaction(transaction, AppServiceProvider.getSerializationService().getHashString(transaction), state.getBlockchain());
         }
@@ -255,15 +261,15 @@ public class AppBlockManagerTest {
 
         TestCase.assertNotNull("Should have returned a block: ", blk);
         TestCase.assertEquals("Should have been 1 account", 1, getValidAccounts(state.getAccounts()));
-        TestCase.assertEquals(Util.VALUE_MINTING, getBalance(Util.PUBLIC_KEY_MINTING));
-        TestCase.assertEquals(BigInteger.ZERO, getNonce(Util.PUBLIC_KEY_MINTING));
+        TestCase.assertEquals(Util.VALUE_MINTING, getBalance(publicKeyMinting));
+        TestCase.assertEquals(BigInteger.ZERO, getNonce(publicKeyMinting));
 
         ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(blk, state.getAccounts(), state.getBlockchain(), state.getStatisticsManager());
 
         TestCase.assertTrue("Should have executed!", executionReport.isOk());
 
-        TestCase.assertEquals(Util.VALUE_MINTING.subtract(BigInteger.valueOf(30)), getBalance(Util.PUBLIC_KEY_MINTING));
-        TestCase.assertEquals(BigInteger.valueOf(3), getNonce(Util.PUBLIC_KEY_MINTING));
+        TestCase.assertEquals(Util.VALUE_MINTING.subtract(BigInteger.valueOf(30)), getBalance(publicKeyMinting));
+        TestCase.assertEquals(BigInteger.valueOf(3), getNonce(publicKeyMinting));
 
         TestCase.assertEquals(BigInteger.valueOf(20), getBalance(pbkeyRecv1));
         TestCase.assertEquals(BigInteger.valueOf(0), getNonce(pbkeyRecv1));
@@ -287,22 +293,22 @@ public class AppBlockManagerTest {
 
         List<Transaction> transactions = new ArrayList<>();
         //valid transaction to recv1
-        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv1, BigInteger.TEN, BigInteger.ZERO));
+        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, pbkeyRecv1, BigInteger.TEN, BigInteger.ZERO));
         //not valid transaction to recv1 (nonce mismatch)
-        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv1, BigInteger.TEN, BigInteger.ZERO));
+        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, pbkeyRecv1, BigInteger.TEN, BigInteger.ZERO));
         //not valid transaction to recv1 (not enough funds)
-        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv1, BigInteger.TEN.pow(100), BigInteger.ONE));
+        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, pbkeyRecv1, BigInteger.TEN.pow(100), BigInteger.ONE));
         //valid transaction to recv2
-        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv2, BigInteger.TEN, BigInteger.ONE));
+        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, pbkeyRecv2, BigInteger.TEN, BigInteger.ONE));
         //not valid transaction to recv2 (nonce mismatch)
-        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv2, BigInteger.TEN, BigInteger.ZERO));
+        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, pbkeyRecv2, BigInteger.TEN, BigInteger.ZERO));
         //not valid transaction to recv2 (not enough funds)
-        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv2, BigInteger.TEN.pow(100), BigInteger.ZERO));
+        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, pbkeyRecv2, BigInteger.TEN.pow(100), BigInteger.ZERO));
         //valid transaction to recv1
-        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, pbkeyRecv1, BigInteger.TEN, BigInteger.valueOf(2)));
+        transactions.add(AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, pbkeyRecv1, BigInteger.TEN, BigInteger.valueOf(2)));
 
         for (Transaction transaction : transactions) {
-            AppServiceProvider.getTransactionService().signTransaction(transaction, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
+            AppServiceProvider.getTransactionService().signTransaction(transaction, privateKeyMinting.getValue(), publicKeyMinting.getValue());
 
             AppServiceProvider.getBootstrapService().commitTransaction(transaction, AppServiceProvider.getSerializationService().getHashString(transaction), state.getBlockchain());
         }
@@ -342,12 +348,12 @@ public class AppBlockManagerTest {
         TestCase.assertFalse(AppServiceProvider.getMultiSignatureService().verifyAggregatedSignature(signers, signature, commitment, message, bitmap));
     }
 
-    private void waitToStartInAnewRound(){
+    private void waitToStartInAnewRound() {
         long currentTimeStamp = state.getNtpClient().currentTimeMillis();
         ChronologyService chronologyService = AppServiceProvider.getChronologyService();
         Round round = chronologyService.getRoundFromDateTime(blockchain.getGenesisBlock().getTimestamp(), currentTimeStamp);
 
-        int milliSecondsToWait = (int)(chronologyService.getRoundTimeDuration() - (currentTimeStamp - round.getStartTimeStamp()));
+        int milliSecondsToWait = (int) (chronologyService.getRoundTimeDuration() - (currentTimeStamp - round.getStartTimeStamp()));
         logger.info("Waiting {} ms...", milliSecondsToWait);
         ThreadUtil.sleep(milliSecondsToWait);
     }
@@ -413,8 +419,11 @@ public class AppBlockManagerTest {
 
     @Test
     public void testComposeBlockWithOneValidTransaction() throws IOException {
-        Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN, BigInteger.ZERO);
-        AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
+        PublicKey publicKeyMinting = AppServiceProvider.getShardingService().getPublicKeyForMinting(new Shard(0));
+        PrivateKey privateKeyMinting = AppServiceProvider.getShardingService().getPrivateKeyForMinting(new Shard(0));
+
+        Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, publicKey, BigInteger.TEN, BigInteger.ZERO);
+        AppServiceProvider.getTransactionService().signTransaction(tx, privateKeyMinting.getValue(), publicKeyMinting.getValue());
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx), state);
         Block block = blockReceiptsPair.getKey();
         Assert.assertTrue("ListOfTxHashes does not have exactly 1 hash", BlockUtil.getTransactionsCount(block) == 1);
@@ -422,7 +431,7 @@ public class AppBlockManagerTest {
 
     @Test
     public void testComposeBlockWithOneNotSignedTransaction() throws IOException {
-        Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN.pow(100), BigInteger.ZERO);
+        Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, publicKey, BigInteger.TEN.pow(100), BigInteger.ZERO);
         //AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue());
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx), state);
         Block block = blockReceiptsPair.getKey();
@@ -431,8 +440,8 @@ public class AppBlockManagerTest {
 
     @Test
     public void testComposeBlockWithOneNotEnoughFundsTransaction() throws IOException {
-        Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN.pow(100), BigInteger.ZERO);
-        AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
+        Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, publicKey, BigInteger.TEN.pow(100), BigInteger.ZERO);
+        AppServiceProvider.getTransactionService().signTransaction(tx, privateKeyMinting.getValue(), publicKeyMinting.getValue());
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx), state);
         Block block = blockReceiptsPair.getKey();
         Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.getTransactionsCount(block) == 0);
@@ -441,8 +450,8 @@ public class AppBlockManagerTest {
     //TODO: Readd when NonceIsVerified
     //@Test
     public void testComposeBlockWithOneNonceMismatchTransaction() throws IOException {
-        Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN, BigInteger.TEN);
-        AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
+        Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, publicKey, BigInteger.TEN, BigInteger.TEN);
+        AppServiceProvider.getTransactionService().signTransaction(tx, privateKeyMinting.getValue(), publicKeyMinting.getValue());
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx), state);
         Block block = blockReceiptsPair.getKey();
         Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.getTransactionsCount(block) == 0);
@@ -450,11 +459,14 @@ public class AppBlockManagerTest {
 
     @Test
     public void testComposeBlockWithOneValidAndOneInValidTransaction() throws IOException {
-        Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN.pow(100), BigInteger.ZERO);
-        Transaction tx2 = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN.pow(1), BigInteger.ZERO);
+        PublicKey publicKeyMinting = AppServiceProvider.getShardingService().getPublicKeyForMinting(new Shard(0));
+        PrivateKey privateKeyMinting = AppServiceProvider.getShardingService().getPrivateKeyForMinting(new Shard(0));
 
-        AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
-        AppServiceProvider.getTransactionService().signTransaction(tx2, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
+        Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, publicKey, BigInteger.TEN.pow(100), BigInteger.ZERO);
+        Transaction tx2 = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, publicKey, BigInteger.TEN.pow(1), BigInteger.ZERO);
+
+        AppServiceProvider.getTransactionService().signTransaction(tx, privateKeyMinting.getValue(), publicKeyMinting.getValue());
+        AppServiceProvider.getTransactionService().signTransaction(tx2, privateKeyMinting.getValue(), publicKeyMinting.getValue());
 
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx, tx2), state);
         Block block = blockReceiptsPair.getKey();
@@ -507,11 +519,11 @@ public class AppBlockManagerTest {
 
     @Test
     public void testVerifySignatureBlock() throws IOException {
-        Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN.pow(1), BigInteger.ONE);
-        Transaction tx2 = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING, publicKey, BigInteger.TEN.pow(1), BigInteger.ONE);
+        Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, publicKey, BigInteger.TEN.pow(1), BigInteger.ONE);
+        Transaction tx2 = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, publicKey, BigInteger.TEN.pow(1), BigInteger.ONE);
 
-        AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
-        AppServiceProvider.getTransactionService().signTransaction(tx2, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
+        AppServiceProvider.getTransactionService().signTransaction(tx, privateKeyMinting.getValue(), publicKeyMinting.getValue());
+        AppServiceProvider.getTransactionService().signTransaction(tx2, privateKeyMinting.getValue(), publicKeyMinting.getValue());
 
         accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
 

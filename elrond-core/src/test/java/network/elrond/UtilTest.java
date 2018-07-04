@@ -8,6 +8,7 @@ import network.elrond.account.Accounts;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.consensus.Validator;
 import network.elrond.core.Util;
+import network.elrond.crypto.PublicKey;
 import network.elrond.data.Block;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
@@ -29,7 +30,6 @@ public class UtilTest {
     private static Logger logger = LogManager.getLogger(UtilTest.class);
 
 
-
 //    static {
 //        // Get the process id
 //        String pid = ManagementFactory.getRuntimeMXBean().getName().replaceAll("@.*", "");
@@ -49,7 +49,7 @@ public class UtilTest {
     }
 
     @Test
-    public void testDisplayStuff1(){
+    public void testDisplayStuff1() {
         long currentMillis = System.currentTimeMillis();
         System.out.println(String.format("Event from , time: %1$tY.%1$tm.%1$td %1$tT.%2$03d", new Date(currentMillis), currentMillis % 1000));
 
@@ -65,7 +65,7 @@ public class UtilTest {
         TestCase.assertEquals("80", Util.byteArrayToHexString(new byte[]{-128}));
         TestCase.assertEquals("ff", Util.byteArrayToHexString(new byte[]{-1}));
         TestCase.assertEquals("13d18bf84f5643", Util.byteArrayToHexString(new byte[]{19, -47, -117,
-        -8, 79, 86, 67}));
+                -8, 79, 86, 67}));
 
         TestCase.assertEquals("13d18bf84f5643", Util.byteArrayToHexString(Util.hexStringToByteArray("13d18bf84f5643")));
     }
@@ -87,7 +87,7 @@ public class UtilTest {
     }
 
     @Test
-    public void testLoggerParameters(){
+    public void testLoggerParameters() {
 //        //System.setProperty("logFilename", "/test");
 //
 //        Properties properties = new Properties();
@@ -124,7 +124,7 @@ public class UtilTest {
         //logger.trace(String.format("BigInteger.TEN = %d", null));
 
         logger.trace("Exit, returns: " + logger.traceExit("A"));
-        logger.trace("Exit, returns: " + logger.traceExit((Object)null));
+        logger.trace("Exit, returns: " + logger.traceExit((Object) null));
 
         byte[] buff = new byte[]{0, 1, 2, 3, 4};
         logger.trace("byte array: {}", buff);
@@ -132,11 +132,11 @@ public class UtilTest {
     }
 
     @Test
-    public void testStringFormat(){
-        logger.info(String.format("test %s %d", (Object)null, (BigInteger)null));
+    public void testStringFormat() {
+        logger.info(String.format("test %s %d", (Object) null, (BigInteger) null));
     }
 
-    public static void createDummyGenesisBlock(Blockchain blockchain){
+    public static void createDummyGenesisBlock(Blockchain blockchain) {
         Block blockGenesis = new Block();
         blockGenesis.setShard(new Shard(0));
         blockGenesis.setTimestamp(System.currentTimeMillis() - 1000);
@@ -144,17 +144,17 @@ public class UtilTest {
         blockchain.setGenesisBlock(blockGenesis);
     }
 
-    public static void printAccountsWithBalance(Accounts accounts){
+    public static void printAccountsWithBalance(Accounts accounts) {
         System.out.println("Accounts: ");
         System.out.println("================================================================");
 
-        if (accounts == null){
+        if (accounts == null) {
             System.out.println(" * NULL accounts object!");
             System.out.println("================================================================");
             return;
         }
 
-        if (accounts.getAddresses().size() == 0){
+        if (accounts.getAddresses().size() == 0) {
             System.out.println(" * EMPTY set!");
             System.out.println("================================================================");
             return;
@@ -162,16 +162,16 @@ public class UtilTest {
 
         AccountState accountState;
 
-        for (AccountAddress accountAddress : accounts.getAddresses()){
+        for (AccountAddress accountAddress : accounts.getAddresses()) {
 
             try {
                 accountState = AppServiceProvider.getAccountStateService().getAccountState(accountAddress, accounts);
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 ex.printStackTrace();
                 continue;
             }
 
-            if (accountState == null){
+            if (accountState == null) {
                 continue;
             }
 
@@ -179,7 +179,6 @@ public class UtilTest {
                     accountState.getNonce().toString(10) + "; balance " +
                     accountState.getBalance().toString(10));
         }
-
 
 
 //        for ( entry: nodes.keySet()){
