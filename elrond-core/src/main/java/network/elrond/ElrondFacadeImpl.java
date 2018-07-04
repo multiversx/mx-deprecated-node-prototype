@@ -6,6 +6,7 @@ import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.benchmark.BenchmarkResult;
+import network.elrond.benchmark.ElrondSystemTimerImpl;
 import network.elrond.benchmark.MultipleTransactionResult;
 import network.elrond.benchmark.StatisticsManager;
 import network.elrond.blockchain.Blockchain;
@@ -291,7 +292,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
             if (statisticsManager != null) {
                 shardsStatistics.add(statisticsManager);
             } else {
-                shardsStatistics.add(new StatisticsManager(System.currentTimeMillis()));
+                shardsStatistics.add(new StatisticsManager(new ElrondSystemTimerImpl()));
             }
         }
 

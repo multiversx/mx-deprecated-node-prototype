@@ -7,6 +7,9 @@
         <Property name="ALT_LOG_PATTERN">
             %d{yyyy-MM-dd HH:mm:ss.SSS} %5p: %msg  >>> [%t] %c{1.}%n
         </Property>
+        <Property name="LOG_FOLDER">
+            logs
+        </Property>
     </Properties>
 
     <Appenders>
@@ -20,8 +23,8 @@
         </WebSocketAppender>
 
         <!-- Rolling File Appender -->
-        <RollingFile name="FileAppender" fileName="logs/elrond.log"
-                     filePattern="logs/elrond-%d{yyyy-MM-dd}-%i.log">
+        <RollingFile name="FileAppender" fileName="${ctx:LOG_FOLDER}/elrond.log"
+                     filePattern="${ctx:LOG_FOLDER}/elrond-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout>
                 <Pattern>${MAIN_LOG_PATTERN}</Pattern>
             </PatternLayout>

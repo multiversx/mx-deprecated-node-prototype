@@ -1,9 +1,8 @@
 package network.elrond.api;
 
-import network.elrond.account.AbstractPersistenceUnit;
+import network.elrond.core.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +11,9 @@ import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 @SpringBootApplication
@@ -34,6 +36,10 @@ public class ElrondApiApplication {
     }
 
     public static void main(String[] args) {
+        SimpleDateFormat sdfSource = new SimpleDateFormat(
+                "yyyy-MM-dd hh.mm.ss");
+        Util.changeLogsPath("logs/" + Util.getHostName() + " - " + sdfSource.format(new Date()));
+
         logger.info("Starting ElrondApiApplication...");
         SpringApplication.run(ElrondApiApplication.class, args);
     }

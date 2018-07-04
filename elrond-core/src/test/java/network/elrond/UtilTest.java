@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -87,7 +88,14 @@ public class UtilTest {
     }
 
     @Test
-    public void testLoggerParameters() {
+    public void testLoggerParameters(){
+        SimpleDateFormat sdfSource = new SimpleDateFormat(
+                "yyyy-MM-dd hh.mm.ss");
+
+
+        logger.warn(sdfSource.format(new Date()));
+        logger.warn(Util.getHostName());
+
 //        //System.setProperty("logFilename", "/test");
 //
 //        Properties properties = new Properties();

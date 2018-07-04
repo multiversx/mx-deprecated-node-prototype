@@ -1,6 +1,7 @@
 package network.elrond.application;
 
 import network.elrond.account.Accounts;
+import network.elrond.benchmark.ElrondSystemTimerImpl;
 import network.elrond.benchmark.StatisticsManager;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.TransactionsPool;
@@ -41,7 +42,7 @@ public class AppState implements Serializable {
 
     private ConsensusState consensusState = new ConsensusState();
 
-    private StatisticsManager statisticsManager = new StatisticsManager(System.currentTimeMillis());
+    private StatisticsManager statisticsManager = new StatisticsManager(new ElrondSystemTimerImpl());
 
     public P2PRequestChannel getChanel(P2PRequestChannelName channelName) {
         logger.traceEntry("params: {}", channelName);
