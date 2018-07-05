@@ -13,11 +13,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class SeedNodeRunner {
     private static final Logger logger = LogManager.getLogger(SeedNodeRunner.class);
 
     public static void main(String[] args) throws Exception {
+        SimpleDateFormat sdfSource = new SimpleDateFormat(
+                "yyyy-MM-dd HH.mm.ss");
+        Util.changeLogsPath("logs/" + Util.getHostName() + " - " + sdfSource.format(new Date()));
 
         String nodeName = "elrond-node-1";
         Integer port = 4000;

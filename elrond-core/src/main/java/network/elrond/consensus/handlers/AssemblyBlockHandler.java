@@ -87,12 +87,14 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
         logger.debug("Transaction pool cleaned!");
 
         Block block = AppBlockManager.instance().generateAndBroadcastBlock(hashes, privateKey, state);
-        size = BlockUtil.getTransactionsCount(block);
+        if (block != null) {
+            size = BlockUtil.getTransactionsCount(block);
 
-        long time = watch.time(TimeUnit.MILLISECONDS);
-        long tps = (time > 0) ? ((size * 1000) / time) : 0;
-        logger.info(" ###### Executed {} transactions in {}ms  TPS:{}   ###### ",
-                size, time, tps);
+            long time = watch.time(TimeUnit.MILLISECONDS);
+            long tps = (time > 0) ? ((size * 1000) / time) : 0;
+            logger.info(" ###### Executed {} transactions in {}ms  TPS:{}   ###### ",
+                    size, time, tps);
+        }
 
 //        Statistic stats = new Statistic();
 //
