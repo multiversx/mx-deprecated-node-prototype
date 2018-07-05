@@ -8,6 +8,7 @@ import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.blockchain.SettingsType;
 import network.elrond.chronology.NTPClient;
+import network.elrond.core.AppStateUtil;
 import network.elrond.core.AsciiTableUtil;
 import network.elrond.core.Util;
 import network.elrond.p2p.P2PConnection;
@@ -195,23 +196,9 @@ public class BootstrapServiceImpl implements BootstrapService {
                 logger.trace("Execution of genesis block was successful!");
                 setCurrentBlockIndex(LocationType.BOTH, genesisBlock.getNonce(), blockchain);
 
-
-                logger.info("\n" + genesisBlock.print().render());
-                logger.info("\n" + AsciiTableUtil.listToTables(Arrays.asList(genesisTransaction)));
-                logger.info("\n" + AsciiTableUtil.listToTables(accounts.getAddresses()
-                        .stream()
-                        .map(accountAddress -> {
-                            try {
-                                return AppServiceProvider.getAccountStateService().getAccountState(accountAddress, accounts);
-                            } catch (IOException | ClassNotFoundException e) {
-                                e.printStackTrace();
-                            }
-                            return null;
-                        })
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList())));
-
-
+                logger.info("\n" + state.print().render());
+                //logger.info("\n" + AsciiTableUtil.listToTables(Arrays.asList(genesisTransaction)));
+                AppStateUtil.printBlockAndAccounts(genesisBlock, accounts);
             }
 
 
@@ -344,20 +331,9 @@ public class BootstrapServiceImpl implements BootstrapService {
 
                 logger.info("New block synchronized with hash {}", blockHash);
 
-                logger.info("\n" + block.print().render());
-                //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
-                logger.info("\n" + AsciiTableUtil.listToTables(accounts.getAddresses()
-                        .stream()
-                        .map(accountAddress -> {
-                            try {
-                                return AppServiceProvider.getAccountStateService().getAccountState(accountAddress, accounts);
-                            } catch (IOException | ClassNotFoundException e) {
-                                e.printStackTrace();
-                            }
-                            return null;
-                        })
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList())));
+                logger.info("\n" + state.print().render());
+              //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
+                AppStateUtil.printBlockAndAccounts(block, accounts);
 
                 blockchain.setCurrentBlockIndex(blockIndex);
                 blockchain.setCurrentBlock(block);

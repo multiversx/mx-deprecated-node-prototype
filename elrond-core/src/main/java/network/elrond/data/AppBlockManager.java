@@ -16,6 +16,7 @@ import network.elrond.core.AsciiTableUtil;
 import network.elrond.core.ObjectUtil;
 import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
+import network.elrond.core.AppStateUtil;
 import network.elrond.crypto.MultiSignatureService;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
@@ -106,20 +107,9 @@ public class AppBlockManager {
 
                 logger.info("New block proposed with hash {}", hashBlock);
 
-                logger.info("\n" + block.print().render());
-                logger.info("\n" + AsciiTableUtil.listToTables(transactions));
-                logger.info("\n" + AsciiTableUtil.listToTables(accounts.getAddresses()
-                        .stream()
-                        .map(accountAddress -> {
-                            try {
-                                return AppServiceProvider.getAccountStateService().getAccountState(accountAddress, accounts);
-                            } catch (IOException | ClassNotFoundException e) {
-                                e.printStackTrace();
-                            }
-                            return null;
-                        })
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList())));
+                logger.info("\n" + state.print().render());
+                //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
+                AppStateUtil.printBlockAndAccounts(block, accounts);
             }
 
             return logger.traceExit(block);
