@@ -26,7 +26,6 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.List;
 
 @Component
 class ElrondApiNode {
@@ -78,7 +77,7 @@ class ElrondApiNode {
         return logger.traceExit(facade.getBalance(address, application));
     }
 
-    List<BenchmarkResult> getBenchmarkResult(String benchmarkId) {
+    BenchmarkResult getBenchmarkResult(String benchmarkId) {
         logger.traceEntry("params: {}", benchmarkId);
         ElrondFacade facade = getFacade();
         return logger.traceExit(facade.getBenchmarkResult(benchmarkId, application));

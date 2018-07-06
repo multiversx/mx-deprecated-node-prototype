@@ -12,7 +12,6 @@ import network.elrond.data.Transaction;
 import network.elrond.p2p.PingResponse;
 
 import java.math.BigInteger;
-import java.util.List;
 
 public interface ElrondFacade {
 
@@ -96,7 +95,7 @@ public interface ElrondFacade {
      * @param application
      * @return
      */
-    List<BenchmarkResult> getBenchmarkResult(String benchmarkId, Application application);
+    BenchmarkResult getBenchmarkResult(String benchmarkId, Application application);
 
     Transaction getTransactionFromHash(String transactionHash, Blockchain blockchain);
 

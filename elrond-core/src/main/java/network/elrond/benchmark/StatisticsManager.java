@@ -1,7 +1,6 @@
 package network.elrond.benchmark;
 
 import network.elrond.application.AppState;
-import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.AppShardingManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,9 +16,7 @@ public class StatisticsManager implements Serializable {
     private List<Statistic> statistics = new ArrayList<>();
 
     private Integer currentShardNumber = 0;
-    private Integer numberOfShards = 0;
     private Integer numberNodesInShard = 0;
-    private Integer numberNodesInNetwork = 0;
 
     private long currentIndex = 0;
     private long currentMillis = 0;
@@ -40,16 +37,14 @@ public class StatisticsManager implements Serializable {
 
     private long totalProcessedTransactions = 0;
 
-    public StatisticsManager(ElrondSystemTimer timer) {
+    public StatisticsManager(ElrondSystemTimer timer, int currentShardNumber) {
         this.timer = timer;
         this.startMillis = timer.getCurrentTime();
         currentMillis = startMillis;
+        this.currentShardNumber = currentShardNumber;
     }
 
     public void updateNetworkStats(AppState state) {
-        currentShardNumber = state.getShard().getIndex();
-        numberOfShards = AppServiceProvider.getShardingService().getNumberOfShards();
-        numberNodesInNetwork = AppShardingManager.instance().getNumberNodesInNetwork(state);
         numberNodesInShard = AppShardingManager.instance().getNumberNodesInShard(state);
     }
 
@@ -105,9 +100,10 @@ public class StatisticsManager implements Serializable {
         if (minNrTransactionsInBlock > currentNrTransactionsInBlock) {
             minNrTransactionsInBlock = currentNrTransactionsInBlock;
         }
-
-        averageNrTransactionsInBlock = (averageNrTransactionsInBlock * currentIndex + currentNrTransactionsInBlock) / (currentIndex + 1);
-        logger.trace("averageNrTransactionsInBlock is " + averageNrTransactionsInBlock);
+        if(currentNrTransactionsInBlock>0) { //only in proposed blocks, this cannot have zero trasactions in them
+            averageNrTransactionsInBlock = (averageNrTransactionsInBlock * currentIndex + currentNrTransactionsInBlock) / (currentIndex + 1);
+        }
+        logger.trace("averageNrTransactionsInProposedBlock is " + averageNrTransactionsInBlock);
     }
 
     public Double getAverageTps() {
@@ -142,16 +138,8 @@ public class StatisticsManager implements Serializable {
         return liveNrTransactionsInBlock;
     }
 
-    public Integer getNumberOfShards() {
-        return numberOfShards;
-    }
-
     public Integer getNumberNodesInShard() {
         return numberNodesInShard;
-    }
-
-    public Integer getNumberNodesInNetwork() {
-        return numberNodesInNetwork;
     }
 
     public long getAverageRoundTime() {
