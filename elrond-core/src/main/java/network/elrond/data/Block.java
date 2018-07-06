@@ -222,22 +222,22 @@ public class Block implements Serializable, AsciiPrintable {
 
         AsciiTable.Row row1 = new AsciiTable.Row();
         row1.getValues().add("State Hash");
-        row1.getValues().add(Util.byteArrayToHexString(appStateHash));
+        row1.getValues().add(Util.getDataEncoded64(appStateHash));
         table.getData().add(row1);
 
         AsciiTable.Row row2 = new AsciiTable.Row();
         row2.getValues().add("Signature");
-        row2.getValues().add(Util.byteArrayToHexString(signature));
+        row2.getValues().add(Util.getDataEncoded64(signature));
         table.getData().add(row2);
 
         AsciiTable.Row row3 = new AsciiTable.Row();
         row3.getValues().add("Commitment");
-        row3.getValues().add(Util.byteArrayToHexString(commitment));
+        row3.getValues().add(Util.getDataEncoded64(commitment));
         table.getData().add(row3);
 
         AsciiTable.Row row4 = new AsciiTable.Row();
         row4.getValues().add("Prev block");
-        row4.getValues().add(Util.byteArrayToHexString(prevBlockHash));
+        row4.getValues().add(Util.getDataEncoded64(prevBlockHash));
         table.getData().add(row4);
 
 
@@ -256,7 +256,7 @@ public class Block implements Serializable, AsciiPrintable {
             byte[] tx = listTXHashes.get(index);
             AsciiTable.Row row7 = new AsciiTable.Row();
             row7.getValues().add("#" + index);
-            row7.getValues().add(Util.byteArrayToHexString(tx));
+            row7.getValues().add(Util.getDataEncoded64(tx));
             table.getData().add(row7);
         }
 

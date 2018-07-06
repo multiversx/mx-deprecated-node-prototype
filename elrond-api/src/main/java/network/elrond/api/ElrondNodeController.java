@@ -5,12 +5,9 @@ import network.elrond.ContextCreator;
 import network.elrond.account.AccountAddress;
 import network.elrond.api.manager.ElrondWebSocketManager;
 import network.elrond.application.AppContext;
+import network.elrond.core.ResponseObject;
 import network.elrond.core.Util;
-import network.elrond.crypto.PKSKPair;
-import network.elrond.data.Block;
 import network.elrond.data.BootstrapType;
-import network.elrond.data.Transaction;
-import network.elrond.p2p.PingResponse;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.ShardingService;
 import org.apache.logging.log4j.LogManager;
@@ -95,21 +92,25 @@ public class ElrondNodeController {
 
     @RequestMapping(path = "/node/send", method = RequestMethod.GET)
     public @ResponseBody
-    Transaction send(
+    ResponseObject send(
             HttpServletResponse response,
             @RequestParam  String address,
             @RequestParam(defaultValue = "1") BigInteger value) {
         logger.traceEntry("params: {} {}", address, value);
 
-        AccountAddress _add = AccountAddress.fromHexString(address);
-        Transaction transaction = elrondApiNode.send(_add, value);
-        return logger.traceExit((transaction != null) ? transaction : (Transaction)null);
+        try {
+            AccountAddress _add = AccountAddress.fromHexString(address);
+            return logger.traceExit(elrondApiNode.send(_add, value));
+        } catch (Exception ex){
+            logger.catching(ex);
+            return logger.traceExit(new ResponseObject(false, ex.getMessage(), null));
+        }
     }
 
 
     @RequestMapping(path = "/node/receipt", method = RequestMethod.GET)
     public @ResponseBody
-    Object getReceipt(
+    ResponseObject getReceipt(
             HttpServletResponse response,
             @RequestParam() String transactionHash) {
 
@@ -121,33 +122,42 @@ public class ElrondNodeController {
 
     @RequestMapping(path = "/node/balance", method = RequestMethod.GET)
     public @ResponseBody
-    Object getBalance(
+    ResponseObject getBalance(
             HttpServletResponse response,
             @RequestParam() String address) {
 
         logger.traceEntry("params: {}", address);
-        AccountAddress _add = AccountAddress.fromHexString(address);
-        return logger.traceExit(elrondApiNode.getBalance(_add));
-
+        try {
+            AccountAddress _add = AccountAddress.fromHexString(address);
+            return logger.traceExit(elrondApiNode.getBalance(_add));
+        } catch (Exception ex){
+            logger.catching(ex);
+            return logger.traceExit(new ResponseObject(false, ex.getMessage(), null));
+        }
     }
 
     @RequestMapping(path = "/node/sendMultipleTransactions", method = RequestMethod.GET)
     public @ResponseBody
-    Object sendMultipleTransactions(
+    ResponseObject sendMultipleTransactions(
             HttpServletResponse response,
             @RequestParam String address,
             @RequestParam(defaultValue = "1") BigInteger value,
             @RequestParam(defaultValue = "1") Integer nrTransactions) {
         logger.traceEntry("params: {} {} {}", address, value, nrTransactions);
 
-        AccountAddress _add = AccountAddress.fromHexString(address);
-        return logger.traceExit(elrondApiNode.sendMultipleTransactions(_add, value, nrTransactions));
+        try {
+            AccountAddress _add = AccountAddress.fromHexString(address);
+            return logger.traceExit(elrondApiNode.sendMultipleTransactions(_add, value, nrTransactions));
+        } catch (Exception ex){
+            logger.catching(ex);
+            return logger.traceExit(new ResponseObject(false, ex.getMessage(), null));
+        }
     }
 
 
     @RequestMapping(path = "/node/getStats", method = RequestMethod.GET)
     public @ResponseBody
-    Object getStats(
+    ResponseObject getStats(
             HttpServletResponse response) {
         return logger.traceExit(elrondApiNode.getBenchmarkResult(""));
 
@@ -155,7 +165,7 @@ public class ElrondNodeController {
 
     @RequestMapping(path = "/node/ping", method = RequestMethod.GET)
     public @ResponseBody
-    PingResponse ping(
+    ResponseObject ping(
             HttpServletResponse response,
             @RequestParam() String ipAddress,
             @RequestParam() int port
@@ -166,7 +176,7 @@ public class ElrondNodeController {
 
     @RequestMapping(path = "/node/generatepublickeyandprivateKey", method = RequestMethod.GET)
     public @ResponseBody
-    PKSKPair generatePublicKeyAndPrivateKey(
+    ResponseObject generatePublicKeyAndPrivateKey(
             HttpServletResponse response,
             @RequestParam() String privateKey) {
         logger.traceEntry("params: {}", privateKey);
@@ -175,7 +185,7 @@ public class ElrondNodeController {
 
     @RequestMapping(path = "/node/shardofaddress", method = RequestMethod.GET)
     public @ResponseBody
-    Integer ShardOfAddress(
+    ResponseObject shardOfAddress(
             HttpServletResponse response,
             @RequestParam() String address) {
 
@@ -185,17 +195,16 @@ public class ElrondNodeController {
 
             ShardingService shardingService = AppServiceProvider.getShardingService();
             byte[] publicKeyBytes = Util.hexStringToByteArray(address);
-            return logger.traceExit(shardingService.getShard(publicKeyBytes).getIndex());
+            return logger.traceExit(new ResponseObject(true, "", shardingService.getShard(publicKeyBytes).getIndex()));
         } catch (Exception ex){
             logger.throwing(ex);
+            return logger.traceExit(new ResponseObject(false, ex.getMessage(), null));
         }
-
-        return logger.traceExit(0);
     }
 
     @RequestMapping(path = "/node/gettransactionfromhash", method = RequestMethod.GET)
     public @ResponseBody
-    Transaction getTransactionFromHash(
+    ResponseObject getTransactionFromHash(
             HttpServletResponse response,
             @RequestParam() String transactionHash) {
 
@@ -205,7 +214,7 @@ public class ElrondNodeController {
 
     @RequestMapping(path = "/node/getblockfromhash", method = RequestMethod.GET)
     public @ResponseBody
-    Block getBlockFromHash(
+    ResponseObject getBlockFromHash(
             HttpServletResponse response,
             @RequestParam() String blockHash) {
 
