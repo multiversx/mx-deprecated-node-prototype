@@ -62,7 +62,8 @@ public class P2PObjectServiceImpl implements P2PObjectService {
             builder.putIfAbsent();
         }
 
-        FuturePut fp = builder.data(new Data(value)).start();
+        //FuturePut fp = builder.data(new Data(value)).start();
+        FuturePut fp = builder.data(new Data(value).ttlSeconds(60)).start();
         logger.trace("Put object with key {}", key);
 
         if (await) {

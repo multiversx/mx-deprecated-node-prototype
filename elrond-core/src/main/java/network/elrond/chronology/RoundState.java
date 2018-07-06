@@ -9,7 +9,7 @@ import java.util.EnumSet;
 
 public enum RoundState {
     START_ROUND(0, new StartRoundHandler()),
-    PROPOSE_BLOCK(2500, new AssemblyBlockHandler()),
+    PROPOSE_BLOCK(4000, new AssemblyBlockHandler()),
     END_ROUND(0, new EndRoundHandler());
 
 

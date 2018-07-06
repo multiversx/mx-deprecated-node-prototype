@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Collect new transactions and put them into new block
  */
+@Deprecated()
 public class BlockAssemblyProcessor extends AbstractChannelTask<String> {
     private static final Logger logger = LogManager.getLogger(BlockAssemblyProcessor.class);
 
