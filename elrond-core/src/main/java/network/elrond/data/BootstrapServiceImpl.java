@@ -9,7 +9,6 @@ import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.blockchain.SettingsType;
 import network.elrond.chronology.NTPClient;
 import network.elrond.core.AppStateUtil;
-import network.elrond.core.AsciiTableUtil;
 import network.elrond.core.Util;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.service.AppServiceProvider;
@@ -19,9 +18,6 @@ import org.mapdb.Fun;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.List;
 
 public class BootstrapServiceImpl implements BootstrapService {
@@ -60,7 +56,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                 BigInteger.class);
 
         if (maxHeight == null) {
-            logger.trace("maxHeight == null");
+            logger.debug("maxHeight == null while getting data from network!");
             return logger.traceExit(Util.BIG_INT_MIN_ONE);
         }
 
@@ -305,14 +301,14 @@ public class BootstrapServiceImpl implements BootstrapService {
                 String blockHash = getBlockHashFromIndex(blockIndex, blockchain);
                 if (blockHash == null) {
                     result.ko("Can not synchronize! Could not find block with nonce = " + blockIndex.toString(10) + " on LOCAL!");
-                    logger.trace("Synchronized FAILED at index {}!", blockIndex);
+                    logger.warn("Synchronized FAILED at index {}!", blockIndex);
                     return logger.traceExit(result);
                 }
 
                 Block block = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK);
                 if (block == null) {
                     result.ko("Can not find block hash " + blockHash + " on LOCAL!");
-                    logger.trace("Synchronized FAILED at index {}!", blockIndex);
+                    logger.warn("Synchronized FAILED at index {}!", blockIndex);
                     return logger.traceExit(result);
                 }
 
@@ -321,7 +317,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                 result.combine(executionReport);
 
                 if (!result.isOk()) {
-                    logger.trace("Synchronized FAILED at index {}!", blockIndex);
+                    logger.warn("Synchronized FAILED at index {}!", blockIndex);
                     return logger.traceExit(result);
                 }
 
@@ -344,7 +340,7 @@ public class BootstrapServiceImpl implements BootstrapService {
 
             } catch (Exception ex) {
                 result.ko(ex);
-                logger.trace("Synchronized FAILED at index {}!", blockIndex);
+                logger.warn("Synchronized FAILED at index {}!", blockIndex);
                 return logger.traceExit(result);
             }
         }
