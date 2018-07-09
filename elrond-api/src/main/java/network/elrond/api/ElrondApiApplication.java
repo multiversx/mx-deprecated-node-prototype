@@ -1,5 +1,6 @@
 package network.elrond.api;
 
+import network.elrond.core.ResponseObject;
 import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.data.BootstrapType;
@@ -18,6 +19,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Map;
 
 
 @SpringBootApplication
@@ -46,14 +48,43 @@ public class ElrondApiApplication {
                 "yyyy-MM-dd HH.mm.ss");
         Util.changeLogsPath("logs/" + Util.getHostName() + " - " + sdfSource.format(new Date()));
 
+        ResponseObject responseObject = CommandLinesInterpretor.interpretCommandLines(args);
+
+        if (responseObject == null){
+            logger.fatal("Internal error! Can not start node!");
+            System.exit(1);
+            return;
+        }
+
+        if (!responseObject.isSuccess()){
+            System.exit(1);
+            return;
+        }
+
         logger.info("Starting ElrondApiApplication...");
 
         configurableApplicationContext = null;
 
-        boolean isEnoughArguments = (args != null) && (args.length == 5);
+        boolean isEnoughArguments = responseObject.getPayload() != null;
 
         if (isEnoughArguments) {
-            logger.info("Will auto-start node with parameters: {}", Arrays.asList(args));
+            StringBuilder stringBuilderParameters = new StringBuilder();
+
+            Map<String, Object> data = (Map<String, Object>)responseObject.getPayload();
+
+            boolean isFirst = true;
+            for (String key : data.keySet()){
+                if (!isFirst){
+                    stringBuilderParameters.append(", ");
+                }
+                isFirst = false;
+                stringBuilderParameters.append(key);
+                stringBuilderParameters.append(": ");
+                stringBuilderParameters.append(data.get(key).toString());
+            }
+
+
+            logger.info("Will auto-start node with parameters: [{}]", stringBuilderParameters.toString());
             Thread threadAutoStart = new Thread(() -> {
                 while (true) {
                     ThreadUtil.sleep(1000);
@@ -68,8 +99,16 @@ public class ElrondApiApplication {
                         try {
                             ElrondNodeController elrondNodeController = configurableApplicationContext.getBean(ElrondNodeController.class);
 
-                            elrondNodeController.startNode(null, args[0], Integer.valueOf(args[1]), Integer.valueOf(args[2]), args[3], args[4],
-                                    null, BootstrapType.START_FROM_SCRATCH, args[0], args[0]);
+                            elrondNodeController.startNode(null,
+                                    data.get("node_name").toString(),
+                                    (int)data.get("port"),
+                                    (int)data.get("master_peer_port"),
+                                    data.get("peer_ip").toString(),
+                                    data.get("node_private_key").toString(),
+                                    null,
+                                    (BootstrapType)data.get("startup_type"),
+                                    data.get("blockchain_path").toString(),
+                                    data.get("blockchain_restore_path").toString());
                         } catch (Exception ex) {
                             logger.catching(ex);
                             logger.error("Can not auto-start node!");
@@ -83,7 +122,7 @@ public class ElrondApiApplication {
             });
             threadAutoStart.start();
         } else {
-            logger.info("Will not auto-start! Expected 5 arguments: node_name, port, master_port, ip, private_key");
+            logger.info("Will not auto-start! Type -h or --help to get the command line options!");
         }
 
         configurableApplicationContext = SpringApplication.run(ElrondApiApplication.class, args);
