@@ -139,7 +139,11 @@ public class AppBlockManagerTest {
 
     @Test
     public void testProposeAndExecuteBlock() throws Exception {
-        state.setAccounts(accounts);
+        //state.setAccounts(accounts);
+
+        AccountsContext accountsContextLocal = new AccountsContext();
+        accountsContextLocal.setShard(new Shard(0));
+        state.setAccounts(new Accounts(accountsContextLocal, new AccountsPersistenceUnit<>(accountsContextLocal.getDatabasePath())));
 
         PrivateKey pvkeyRecv = new PrivateKey("RECV");
         PublicKey pbkeyRecv = new PublicKey(pvkeyRecv);
@@ -179,7 +183,11 @@ public class AppBlockManagerTest {
 
     @Test
     public void testProposeAndExecuteBlock1BadTx() throws Exception {
-        state.setAccounts(accounts);
+        //state.setAccounts(accounts);
+
+        AccountsContext accountsContextLocal = new AccountsContext();
+        accountsContextLocal.setShard(new Shard(0));
+        state.setAccounts(new Accounts(accountsContextLocal, new AccountsPersistenceUnit<>(accountsContextLocal.getDatabasePath())));
 
         PrivateKey pvkeyRecv = new PrivateKey("RECV");
         PublicKey pbkeyRecv = new PublicKey(pvkeyRecv);
@@ -222,7 +230,11 @@ public class AppBlockManagerTest {
 
     @Test
     public void testProposeAndExecuteBlock2BadTx3OK() throws Exception {
-        state.setAccounts(accounts);
+        //state.setAccounts(accounts);
+
+        AccountsContext accountsContextLocal = new AccountsContext();
+        accountsContextLocal.setShard(new Shard(0));
+        state.setAccounts(new Accounts(accountsContextLocal, new AccountsPersistenceUnit<>(accountsContextLocal.getDatabasePath())));
 
         PrivateKey pvkeyRecv1 = new PrivateKey("RECV1");
         PublicKey pbkeyRecv1 = new PublicKey(pvkeyRecv1);
@@ -283,7 +295,11 @@ public class AppBlockManagerTest {
 
     @Test
     public void validateBlock() throws Exception {
-        state.setAccounts(accounts);
+        //state.setAccounts(accounts);
+
+        AccountsContext accountsContextLocal = new AccountsContext();
+        accountsContextLocal.setShard(new Shard(0));
+        state.setAccounts(new Accounts(accountsContextLocal, new AccountsPersistenceUnit<>(accountsContextLocal.getDatabasePath())));
 
         PrivateKey pvkeyRecv1 = new PrivateKey("RECV1");
         PublicKey pbkeyRecv1 = new PublicKey(pvkeyRecv1);
