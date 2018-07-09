@@ -5,10 +5,7 @@ import network.elrond.account.AccountState;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
-import network.elrond.benchmark.BenchmarkResult;
-import network.elrond.benchmark.ElrondSystemTimerImpl;
-import network.elrond.benchmark.MultipleTransactionResult;
-import network.elrond.benchmark.StatisticsManager;
+import network.elrond.benchmark.*;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.*;
@@ -21,6 +18,7 @@ import network.elrond.data.SecureObject;
 import network.elrond.data.Transaction;
 import network.elrond.p2p.*;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.AppShardingManager;
 import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -356,40 +354,27 @@ public class ElrondFacadeImpl implements ElrondFacade {
             return logger.traceExit(new ResponseObject(false, "Invalid application state, state is null", null));
         }
 
-        ArrayList<BenchmarkResult> benchmarkResults = new ArrayList<>();
-
         P2PRequestChannel channel = state.getChanel(P2PRequestChannelName.STATISTICS);
         Integer numberOfShards = AppServiceProvider.getShardingService().getNumberOfShards();
+        Integer numberNodesInNetwork = AppShardingManager.instance().getNumberNodesInNetwork(application.getState());
 
-        ArrayList<StatisticsManager> shardsStatistics = new ArrayList<>();
+        ArrayList<StatisticsManager> statisticsManagers = new ArrayList<>();
 
         for (int i = 0; i < numberOfShards; i++) {
             Shard addressShard = new Shard(i);
             StatisticsManager statisticsManager = AppServiceProvider.getP2PRequestService().get(channel, addressShard, P2PRequestChannelName.STATISTICS, null);
             if (statisticsManager != null) {
-                shardsStatistics.add(statisticsManager);
+                statisticsManagers.add(statisticsManager);
             } else {
-                shardsStatistics.add(new StatisticsManager(new ElrondSystemTimerImpl()));
+                statisticsManagers.add(new StatisticsManager(new ElrondSystemTimerImpl(), i));
             }
         }
 
-        for (StatisticsManager statisticsManager : shardsStatistics) {
-            BenchmarkResult benchmarkResult = new BenchmarkResult();
-            benchmarkResult.setCurrentShardNumber(statisticsManager.getCurrentShardNumber());
-            benchmarkResult.setNetworkActiveNodes(statisticsManager.getNumberNodesInNetwork());
-            benchmarkResult.setShardActiveNodes(statisticsManager.getNumberNodesInShard());
-            benchmarkResult.setAverageRoundTime(statisticsManager.getAverageRoundTime());
-            benchmarkResult.setLiveNrTransactionsPerBlock(statisticsManager.getLiveNrTransactionsInBlock());
-            benchmarkResult.setAverageNrTxPerBlock(statisticsManager.getAverageNrTransactionsInBlock());
-            benchmarkResult.setAverageTps(statisticsManager.getAverageTps());
-            benchmarkResult.setLiveTps(statisticsManager.getLiveTps());
-            benchmarkResult.setPeakTps(statisticsManager.getMaxTps());
-            benchmarkResult.setLiveRoundTime(statisticsManager.getLiveRoundTime());
-            benchmarkResult.setTotalNrProcessedTransactions(statisticsManager.getTotalNrProcessedTransactions());
-            benchmarkResult.setNrShards(statisticsManager.getNumberOfShards());
-            benchmarkResults.add(benchmarkResult);
-        }
-        return logger.traceExit(new ResponseObject(true, "", benchmarkResults));
+        BenchmarkResult res = BenchmarkManager.getInstance().getBenchmarkResult(statisticsManagers);
+        res.setNetworkActiveNodes(numberNodesInNetwork);
+        res.setNrShards(numberOfShards);
+
+        return logger.traceExit(new ResponseObject(true, "", res));
     }
 
     @Override
