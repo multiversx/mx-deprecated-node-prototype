@@ -127,13 +127,13 @@ public class ElrondFacadeImpl implements ElrondFacade {
                     if (receiptHash != null) {
                         secureReceipt = AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT);
                     }
-                    ThreadUtil.sleep(200);
+                    ThreadUtil.sleep(50);
 
                 } while (receiptHash == null || secureReceipt == null);
 
                 return secureReceipt.getObject();
 
-            }, 60L);
+            }, 200L);
 
             return logger.traceExit(receipt);
 
@@ -334,5 +334,4 @@ public class ElrondFacadeImpl implements ElrondFacade {
             return (null);
         }
     }
-
 }

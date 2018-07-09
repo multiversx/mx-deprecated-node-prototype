@@ -37,10 +37,10 @@ public class P2PReceiptInterceptorProcessor extends AbstractChannelTask<String> 
                 SecureObject<Receipt> result;
                 do {
                     result = blockchainService.get(hash, blockchain, BlockchainUnitType.RECEIPT);
-                    ThreadUtil.sleep(200);
+                    ThreadUtil.sleep(50);
                 } while (result == null);
                 return result;
-            }, 60L);
+            }, 200L);
 
 
             if (secureReceipt == null) {

@@ -53,15 +53,17 @@ public class AppBlockManager {
 
         List<String> hashes = new ArrayList<>(queue);
 
-        if (hashes.isEmpty()) {
-            logger.info("Can't execute, no transaction!");
-            state.getStatisticsManager().addStatistic(new Statistic(0));
-            return null;
-        }
-
         try {
-            List<Transaction> transactions = AppServiceProvider.getBlockchainService().getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
-            Pair<Block, List<Receipt>> blockReceiptsPair = composeBlock(transactions, state);
+            Pair<Block, List<Receipt>> blockReceiptsPair;
+
+            if (hashes.isEmpty()) {
+                logger.info("No transaction, generating empty block...");
+                blockReceiptsPair = composeEmptyBlock(state);
+            } else {
+                List<Transaction> transactions = AppServiceProvider.getBlockchainService().getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
+                blockReceiptsPair = composeBlock(transactions, state);
+            }
+
             Block block = blockReceiptsPair.getKey();
             List<Receipt> receipts = blockReceiptsPair.getValue();
             AppBlockManager.instance().signBlock(block, privateKey);
@@ -73,7 +75,7 @@ public class AppBlockManager {
 
             ExecutionReport result = AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
 
-            if (!result.isOk()){
+            if (!result.isOk()) {
                 logger.debug("Could not commit block with hash {}", hashBlock);
                 return logger.traceExit((Block) null);
             }
@@ -90,16 +92,16 @@ public class AppBlockManager {
                 List<String> acceptedTransactions = BlockUtil.getTransactionsHashesAsString(block);
 
                 List<Transaction> blockTransactions = AppServiceProvider.getBlockchainService()
-                    .getAll(acceptedTransactions,
-                            blockchain,
-                            BlockchainUnitType.TRANSACTION);
+                        .getAll(acceptedTransactions,
+                                blockchain,
+                                BlockchainUnitType.TRANSACTION);
                 blockTransactions.stream()
-                    .filter(transaction -> transaction.isCrossShardTransaction())
+                        .filter(transaction -> transaction.isCrossShardTransaction())
                         .filter(transaction -> !ObjectUtil.isEqual(shard, transaction.getReceiverShard()))
-                    .forEach(transaction -> {
-                        P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.XTRANSACTION);
-                        AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, transaction);
-                    });
+                        .forEach(transaction -> {
+                            P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.XTRANSACTION);
+                            AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, transaction);
+                        });
 
                 logger.debug("sent Xtransactions");
 
@@ -114,7 +116,7 @@ public class AppBlockManager {
 
             return logger.traceExit(block);
         } catch (IOException | ClassNotFoundException e) {
-            logger.throwing(e);
+            logger.catching(e);
         }
 
         return logger.traceExit((Block) null);
@@ -136,20 +138,15 @@ public class AppBlockManager {
                 txHashes.add(receipt.getTransactionHash());
             }
         });
-
     }
 
-    public Pair<Block, List<Receipt>> composeBlock(List<Transaction> transactions, AppState state) throws
-            IOException {
-        logger.traceEntry("params: {} {}", transactions, state);
-        Util.check(state != null, "state!=null");
-        List<Receipt> receipts;
-
+    public Pair<Block, List<Receipt>> composeEmptyBlock(AppState state) {
+        logger.traceEntry("params: {}", state);
+        List<Receipt> receipts = new ArrayList<>();
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();
         NTPClient ntpClient = state.getNtpClient();
 
-        Util.check(transactions != null, "transactions!=null");
         Util.check(blockchain != null, "blockchain!=null");
         Util.check(accounts != null, "accounts!=null");
         Util.check(blockchain.getGenesisBlock() != null, "genesisBlock!=null");
@@ -166,15 +163,38 @@ public class AppBlockManager {
         logger.trace("done computing round and round start millis = calculated round start millis, round index = {}, time stamp = {}",
                 block.roundIndex, block.timestamp);
 
-        receipts = addTransactions(transactions, block, state);
-        logger.trace("done added {} transactions to block", transactions.size());
-
         block.setAppStateHash(accounts.getAccountsPersistenceUnit().getRootHash());
         logger.trace("done added state root hash to block as {}", block.getAppStateHash());
 
-        AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
-        logger.trace("reverted app state to original form");
+        return logger.traceExit(new Pair<>(block, receipts));
+    }
 
+
+    public Pair<Block, List<Receipt>> composeBlock(List<Transaction> transactions, AppState state) throws
+            IOException {
+        logger.traceEntry("params: {} {}", transactions, state);
+        Util.check(state != null, "state!=null");
+        List<Receipt> receipts;
+
+        Accounts accounts = state.getAccounts();
+
+        Util.check(transactions != null, "transactions!=null");
+        Util.check(accounts != null, "accounts!=null");
+
+        Pair<Block, List<Receipt>> blockReceiptPair = composeEmptyBlock(state);
+        Block block = blockReceiptPair.getKey();
+        receipts = blockReceiptPair.getValue();
+
+        if (transactions != null) {
+            receipts = addTransactions(transactions, block, state);
+            logger.trace("done added {} transactions to block", transactions.size());
+
+            block.setAppStateHash(accounts.getAccountsPersistenceUnit().getRootHash());
+            logger.trace("done added state root hash to block as {}", block.getAppStateHash());
+
+            AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
+            logger.trace("reverted app state to original form");
+        }
         return logger.traceExit(new Pair<>(block, receipts));
     }
 
@@ -213,7 +233,7 @@ public class AppBlockManager {
             //test whether the system should continue to add transactions or not
             boolean forceFinishAddingTransactions = !AppServiceProvider.getChronologyService().isStillInRoundState(state.getNtpClient(), state.getBlockchain().getGenesisBlock().getTimestamp(),
                     block.getRoundIndex(), RoundState.PROPOSE_BLOCK);
-            if (forceFinishAddingTransactions){
+            if (forceFinishAddingTransactions) {
                 logger.debug("Force exit from add transactions method. Transactions added: {}", BlockUtil.getTransactionsCount(block));
                 break;
             }
@@ -249,7 +269,6 @@ public class AppBlockManager {
 
         return logger.traceExit(receipt);
     }
-
 
 
     private void sendReceipt(Block block, Receipt receipt, AppState state) throws IOException {
@@ -366,7 +385,7 @@ public class AppBlockManager {
         logger.traceExit();
     }
 
-    public void removeAlreadyProcessedTransactionsFromPool(AppState state, Block block){
+    public void removeAlreadyProcessedTransactionsFromPool(AppState state, Block block) {
         Util.check(state != null, "state != null");
         Util.check(block != null, "block != null");
 
@@ -376,7 +395,6 @@ public class AppBlockManager {
         ArrayBlockingQueue<String> transactionPool = pool.getTransactionPool();
         transactionPool.removeAll(toBeRemoved);
 
-        logger.debug("Removed {} transactions from pool, remaining: {}", toBeRemoved.size(),  transactionPool.size());
-
+        logger.debug("Removed {} transactions from pool, remaining: {}", toBeRemoved.size(), transactionPool.size());
     }
 }

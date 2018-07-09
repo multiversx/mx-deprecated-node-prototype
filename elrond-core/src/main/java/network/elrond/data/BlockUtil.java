@@ -19,6 +19,8 @@ public class BlockUtil {
     }
 
     public static List<byte[]> getTransactionsHashesAsByte(Block block) {
+        Util.check(block != null, "block != null");
+
         List<byte[]> list = block.getListTXHashes();
         return list != null ? list : new ArrayList<>();
     }
@@ -39,6 +41,4 @@ public class BlockUtil {
     public static void addTransactionInBlock(Block block, Transaction transaction) {
         block.getListTXHashes().add(AppServiceProvider.getSerializationService().getHash(transaction));
     }
-
-
 }

@@ -100,6 +100,11 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
             if (futureGet.isSuccess()) {
                 HashSet<PeerAddress> peersOnChannel;
                 peersOnChannel = (HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object();
+
+                if (peersOnChannel == null || peersOnChannel.isEmpty()) {
+                    logger.debug("peers on channel: {} for channel ID: {}", peersOnChannel, channelIdentifier);
+                }
+
                 return logger.traceExit(peersOnChannel);
             } else {
                 logger.warn(futureGet.failedReason());

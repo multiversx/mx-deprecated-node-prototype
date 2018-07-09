@@ -85,6 +85,11 @@ public class AppShardingManager {
                 .sorted()
                 .collect(Collectors.toList());
 
+        if (peersOnChannel.size() == 0) {
+            logger.debug("no peers on channel");
+            return new ArrayList<>();
+        }
+
         peersOnChannel.retainAll(allPeers);
 
         return peersOnChannel.stream()

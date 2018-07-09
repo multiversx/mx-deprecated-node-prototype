@@ -26,7 +26,7 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
     private static final Logger logger = LogManager.getLogger(AssemblyBlockHandler.class);
 
     public void onEvent(AppState state, SubRound data) {
-        logger.traceEntry("params: {} {}",state, data);
+        logger.traceEntry("params: {} {}", state, data);
 
         Util.check(state != null, "state is null while trying to get full nodes list!");
 
@@ -68,15 +68,15 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
 
         logger.debug("About to clean transaction pool...");
 
-        synchronized (pool.lock){
+        synchronized (pool.lock) {
             //cleanup transaction pool
 
-            hashes =  new ArrayList<>(transactionPool);
+            hashes = new ArrayList<>(transactionPool);
 
-            for (int i = 0; i < hashes.size(); i++){
+            for (int i = 0; i < hashes.size(); i++) {
                 String hash = hashes.get(i);
 
-                if (pool.checkExists(hash)){
+                if (pool.checkExists(hash)) {
                     hashes.remove(i);
                     transactionPool.remove(hash);
                     i--;
@@ -87,6 +87,10 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
         logger.debug("Transaction pool cleaned!");
 
         Block block = AppBlockManager.instance().generateAndBroadcastBlock(hashes, privateKey, state);
+        if (block == null) {
+            logger.traceExit();
+            return;
+        }
         size = BlockUtil.getTransactionsCount(block);
 
         long time = watch.time(TimeUnit.MILLISECONDS);
@@ -105,7 +109,7 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
         logger.traceExit();
     }
 
-    private boolean isLeader(AppState state){
+    private boolean isLeader(AppState state) {
         ConsensusState consensusState = state.getConsensusState();
         String currentNodePeerID = AppShardingManager.instance().getCurrentPeerID(state);
         String selectedLeaderPeerID = consensusState.getSelectedLeaderPeerID();
