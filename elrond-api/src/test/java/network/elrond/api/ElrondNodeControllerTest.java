@@ -9,12 +9,12 @@ public class ElrondNodeControllerTest {
     public void testShardAllocation(){
         ElrondNodeController elrondNodeController = new ElrondNodeController();
 
-        TestCase.assertEquals((int)0, (int)elrondNodeController.ShardOfAddress(null, null));
-        TestCase.assertEquals((int)0, (int)elrondNodeController.ShardOfAddress(null, ""));
-        TestCase.assertEquals((int)0, (int)elrondNodeController.ShardOfAddress(null, "0302fa311fac6aa56c1a5b08e6c9bcea32fc1939cbef5010c2ab853afb5563976c"));
-        TestCase.assertEquals((int)1, (int)elrondNodeController.ShardOfAddress(null, "0302fa311fac6aa56c1a5b08e6c9bcea32fc1939cbef5010c2ab853afb5563976d"));
+        TestCase.assertEquals(false, elrondNodeController.shardOfAddress(null, null).isSuccess());
+        TestCase.assertEquals(false, elrondNodeController.shardOfAddress(null, "").isSuccess());
+        TestCase.assertEquals((int)0, elrondNodeController.shardOfAddress(null, "0302fa311fac6aa56c1a5b08e6c9bcea32fc1939cbef5010c2ab853afb5563976c").getPayload());
+        TestCase.assertEquals((int)1, elrondNodeController.shardOfAddress(null, "0302fa311fac6aa56c1a5b08e6c9bcea32fc1939cbef5010c2ab853afb5563976d").getPayload());
 
-        System.out.println("Shard: " + elrondNodeController.ShardOfAddress(null, "0302fa311fac6aa56c1a5b08e6c9bcea32fc1939cbef5010c2ab853afb5563976c"));
+        System.out.println("Shard: " + elrondNodeController.shardOfAddress(null, "0302fa311fac6aa56c1a5b08e6c9bcea32fc1939cbef5010c2ab853afb5563976c"));
 
 
 

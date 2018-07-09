@@ -2,14 +2,8 @@ package network.elrond;
 
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
-import network.elrond.benchmark.BenchmarkResult;
-import network.elrond.benchmark.MultipleTransactionResult;
 import network.elrond.blockchain.Blockchain;
-import network.elrond.crypto.PKSKPair;
-import network.elrond.data.Block;
-import network.elrond.data.Receipt;
-import network.elrond.data.Transaction;
-import network.elrond.p2p.PingResponse;
+import network.elrond.core.ResponseObject;
 
 import java.math.BigInteger;
 
@@ -38,7 +32,7 @@ public interface ElrondFacade {
      * @param application
      * @return
      */
-    BigInteger getBalance(AccountAddress address, Application application);
+    ResponseObject getBalance(AccountAddress address, Application application);
 
 
     /**
@@ -48,7 +42,7 @@ public interface ElrondFacade {
      * @param application
      * @return
      */
-    Receipt getReceipt(String transactionHash, Application application);
+    ResponseObject getReceipt(String transactionHash, Application application);
 
     /**
      * Send value to account
@@ -58,7 +52,7 @@ public interface ElrondFacade {
      * @param application
      * @return the transaction hash
      */
-    Transaction send(AccountAddress receiver, BigInteger value, Application application);
+    ResponseObject send(AccountAddress receiver, BigInteger value, Application application);
 
     /**
      * Send multiple transactions of value to account
@@ -69,7 +63,7 @@ public interface ElrondFacade {
      * @param application
      * @return result with successfultransactions and failedtransactions number
      */
-    MultipleTransactionResult sendMultipleTransactions(AccountAddress receiver, BigInteger value, Integer nrTransactions, Application application);
+    ResponseObject sendMultipleTransactions(AccountAddress receiver, BigInteger value, Integer nrTransactions, Application application);
 
     /**
      * Pings an IP address and checks if port is open
@@ -78,7 +72,7 @@ public interface ElrondFacade {
      * @param port
      * @return
      */
-    PingResponse ping(String ipAddress, int port);
+    ResponseObject ping(String ipAddress, int port);
 
     /**
      * Generate public key and private key
@@ -86,7 +80,7 @@ public interface ElrondFacade {
      * @return
      */
 
-    PKSKPair generatePublicKeyAndPrivateKey(String strPrivateKey);
+    ResponseObject generatePublicKeyAndPrivateKey(String strPrivateKey);
 
     /**
      * Get BenchmarkResult
@@ -95,9 +89,9 @@ public interface ElrondFacade {
      * @param application
      * @return
      */
-    BenchmarkResult getBenchmarkResult(String benchmarkId, Application application);
+    ResponseObject getBenchmarkResult(String benchmarkId, Application application);
 
-    Transaction getTransactionFromHash(String transactionHash, Blockchain blockchain);
+    ResponseObject getTransactionFromHash(String transactionHash, Blockchain blockchain);
 
-    Block getBlockFromHash(String blockHash, Blockchain blockchain);
+    ResponseObject getBlockFromHash(String blockHash, Blockchain blockchain);
 }
