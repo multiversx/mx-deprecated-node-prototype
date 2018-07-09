@@ -5,16 +5,9 @@ import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongycastle.crypto.params.ECDomainParameters;
-import org.spongycastle.jce.interfaces.ECPublicKey;
-import org.spongycastle.jce.spec.ECParameterSpec;
-import org.spongycastle.jce.spec.ECPublicKeySpec;
 import org.spongycastle.math.ec.ECPoint;
 
 import java.math.BigInteger;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
 
 public class PublicKey {
     private static final Logger logger = LogManager.getLogger(PublicKey.class);
@@ -149,6 +142,10 @@ public class PublicKey {
 
     @Override
     public String toString() {
-        return String.format("PublicKey{%s}", Util.byteArrayToHexString(this.getValue()));
+        if (!isValid()){
+            return String.format("PublicKey is not valid %s", super.toString());
+        } else {
+            return String.format("PublicKey{%s}", Util.byteArrayToHexString(this.getValue()));
+        }
     }
 }

@@ -2,22 +2,25 @@ package network.elrond;
 
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
+import network.elrond.core.ResponseObject;
 import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.BootstrapType;
-import network.elrond.data.Receipt;
-import network.elrond.data.Transaction;
-import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class SeedNodeRunner {
     private static final Logger logger = LogManager.getLogger(SeedNodeRunner.class);
 
     public static void main(String[] args) throws Exception {
+        SimpleDateFormat sdfSource = new SimpleDateFormat(
+                "yyyy-MM-dd HH.mm.ss");
+        Util.changeLogsPath("logs/" + Util.getHostName() + " - " + sdfSource.format(new Date()));
 
         String nodeName = "elrond-node-1";
         Integer port = 4000;
@@ -39,15 +42,15 @@ public class SeedNodeRunner {
                 PublicKey key = application.getState().getPublicKey();
                 AccountAddress address = AccountAddress.fromHexString(Util.TEST_ADDRESS);
                 //AccountAddress address = AccountAddress.fromHexString(Util.getAddressFromPublicKey(key.getValue()));
-                Transaction transaction = facade.send(address, BigInteger.TEN, application);
-                logger.info("Sender Balance: {}", facade.getBalance(AccountAddress.fromBytes(application.getState().getPublicKey().getValue()), application));
+                ResponseObject responseObjectTransaction = facade.send(address, BigInteger.TEN, application);
+                if (responseObjectTransaction.isSuccess()){
+                    ResponseObject sendersBalance = facade.getBalance(AccountAddress.fromBytes(application.getState().getPublicKey().getValue()), application);
+                    ResponseObject receiverBalance = facade.getBalance(address, application);
+                    logger.info("Sender balance: {}, receiver balance: {}", sendersBalance.getPayload(), receiverBalance.getPayload());
 
-                logger.info("Receiver  Balance: {}", facade.getBalance(address, application));
-
-                if (transaction != null) {
-                    String hash = AppServiceProvider.getSerializationService().getHashString(transaction);
-                    Receipt receipt = facade.getReceipt(hash, application);
-                    logger.info(receipt);
+//                    String hash = AppServiceProvider.getSerializationService().getHashString(responseObjectTransaction.getPayload().toString());
+//                    ResponseObject responseObjectReceipt = facade.getReceipt(hash, application);
+//                    logger.info(responseObjectReceipt);
                 }
 
                 ThreadUtil.sleep(1);

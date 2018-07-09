@@ -19,7 +19,7 @@ public class StatisticsMangerTest {
                 .thenReturn((long) 3000)
                 .thenReturn((long) 4000)
                 .thenReturn((long) 5000);
-        statisticService = new StatisticsManager(timer);
+        statisticService = new StatisticsManager(timer, 0);
     }
 
     @Test
