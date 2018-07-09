@@ -44,7 +44,7 @@ public class AppState implements Serializable, AsciiPrintable {
 
     private ConsensusState consensusState = new ConsensusState();
 
-    private StatisticsManager statisticsManager = new StatisticsManager(new ElrondSystemTimerImpl());
+    private StatisticsManager statisticsManagers;
 
     public P2PRequestChannel getChanel(P2PRequestChannelName channelName) {
         logger.traceEntry("params: {}", channelName);
@@ -158,7 +158,10 @@ public class AppState implements Serializable, AsciiPrintable {
 
     public StatisticsManager getStatisticsManager() {
         logger.warn("Transactions in Pool: {}", getPool().getTransactionPool().size());
-        return statisticsManager;
+        if(statisticsManagers == null){
+          statisticsManagers  = new StatisticsManager(new ElrondSystemTimerImpl(), getShard().getIndex());
+        }
+        return statisticsManagers;
     }
 
     public TransactionsPool getPool() {
