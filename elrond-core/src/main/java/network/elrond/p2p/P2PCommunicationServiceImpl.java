@@ -18,7 +18,7 @@ public class P2PCommunicationServiceImpl implements P2PCommunicationService {
     private final int portConnectionTimeOut = 1000;
     private final int altPortForPingEmulation = 445;
 
-    public PingResponse getPingResponse(String address, int port) throws Exception {
+    public PingResponse getPingResponse(String address, int port, boolean throwOnPortClosed) throws Exception {
         logger.traceEntry("params: {} {}", address, port);
 
         Util.check(address != null, "Address is null!");
@@ -64,9 +64,11 @@ public class P2PCommunicationServiceImpl implements P2PCommunicationService {
         pingResponse.setReachablePing(true);
 
         //step 2. try to open socket on port
-        if (isPortReachable(address, port, portConnectionTimeOut)){
-            pingResponse.setReachablePort(true);
-        } else {
+        pingResponse.setReachablePort(isPortReachable(address, port, portConnectionTimeOut));
+
+        boolean throwException = !pingResponse.isReachablePort() && throwOnPortClosed;
+
+        if (throwException){
             throw new Exception(String.format("Unreachable port %d", port));
         }
 

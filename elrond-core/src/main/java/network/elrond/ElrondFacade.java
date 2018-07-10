@@ -75,6 +75,15 @@ public interface ElrondFacade {
     ResponseObject ping(String ipAddress, int port);
 
     /**
+     * Pings an IP address and checks if port is closed
+     *
+     * @param ipAddress
+     * @param port
+     * @return
+     */
+    ResponseObject checkFreePort(String ipAddress, int port);
+
+    /**
      * Generate public key and private key
      *
      * @return

@@ -302,7 +302,20 @@ public class ElrondFacadeImpl implements ElrondFacade {
     public ResponseObject ping(String ipAddress, int port) {
         logger.traceEntry("params: {} {}", ipAddress, port);
         try {
-            PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse(ipAddress, port);
+            PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse(ipAddress, port, true);
+            return logger.traceExit(new ResponseObject(true, "", pingResponse));
+        } catch (Exception ex) {
+            logger.catching(ex);
+
+            return logger.traceExit(new ResponseObject(false, ex.getMessage(), null));
+        }
+    }
+
+    @Override
+    public ResponseObject checkFreePort(String ipAddress, int port) {
+        logger.traceEntry("params: {} {}", ipAddress, port);
+        try {
+            PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse(ipAddress, port, false);
             return logger.traceExit(new ResponseObject(true, "", pingResponse));
         } catch (Exception ex) {
             logger.catching(ex);

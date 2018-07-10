@@ -10,46 +10,40 @@ public class P2PCommunicationServiceTest {
 
     @Test (expected = IllegalArgumentException.class)
     public void testAddressNullShouldThrowException() throws Exception{
-        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse(null, 3);
+        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse(null, 3, true);
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void testAddressInvalid1ShouldThrowExceptio() throws Exception{
-        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse("aaa", 3);
+        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse("aaa", 3, true);
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void testAddressInvalid2ShouldThrowExceptio() throws Exception{
-        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse("255.0.0.0", 3);
+        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse("255.0.0.0", 3, true);
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void testPortOutsideRangeShouldThrowExceptio() throws Exception{
-        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse("127.0.0.1", 65536);
+        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse("127.0.0.1", 65536, true);
     }
 
     @Test (expected = Exception.class)
     public void testPingLocalHostNotServerRunning() throws Exception{
-        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse("127.0.0.1", 60000);
+        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse("127.0.0.1", 60000, true);
+    }
 
-//        System.out.println(pingResponse.toString());
-//
-//        TestCase.assertEquals(true, pingResponse.isReachablePing());
-//        TestCase.assertTrue((pingResponse.getReponseTimeMs() >= 0) && (pingResponse.getReponseTimeMs() < 1000));
-//        TestCase.assertEquals(false, pingResponse.isReachablePort());
-//        TestCase.assertFalse(pingResponse.getErrorMessage().equals(""));
+    @Test
+    public void testPingLocalHostNotServerRunningNotThrowing() throws Exception{
+        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse("127.0.0.1", 60000, false);
+
+        TestCase.assertTrue(pingResponse.isReachablePing());
+        TestCase.assertFalse(pingResponse.isReachablePort());
     }
 
     @Test (expected = Exception.class)
     public void testPingWrongIP() throws Exception{
-        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse("1.2.3.4", 4000);
-//
-//        System.out.println(pingResponse.toString());
-//
-//        TestCase.assertEquals(false, pingResponse.isReachablePing());
-//        TestCase.assertTrue(pingResponse.getReponseTimeMs() == 0);
-//        TestCase.assertEquals(false, pingResponse.isReachablePort());
-//        TestCase.assertFalse(pingResponse.getErrorMessage().equals(""));
+        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse("1.2.3.4", 4000, true);
     }
 
     @Test
@@ -65,7 +59,7 @@ public class P2PCommunicationServiceTest {
         });
         thrAccept.start();
 
-        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse("127.0.0.1", 60000);
+        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse("127.0.0.1", 60000, true);
 
         System.out.println(pingResponse.toString());
 
@@ -88,7 +82,7 @@ public class P2PCommunicationServiceTest {
 
     //@Test
     public void testPingIP() throws Exception{
-        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse("192.168.11.121", 4000);
+        PingResponse pingResponse = AppServiceProvider.getP2PCommunicationService().getPingResponse("192.168.11.121", 4000, true);
 
         System.out.println(pingResponse.toString());
 

@@ -98,6 +98,12 @@ class ElrondApiNode {
         return logger.traceExit(facade.ping(ipAddress, port));
     }
 
+    ResponseObject checkFreePort(String ipAddress, int port) {
+        logger.traceEntry("params: {} {}", ipAddress, port);
+        ElrondFacade facade = getFacade();
+        return logger.traceExit(facade.checkFreePort(ipAddress, port));
+    }
+
     ResponseObject generatePublicKeyAndPrivateKey(String privateKey) {
         logger.traceEntry();
         ElrondFacade facade = getFacade();
