@@ -174,6 +174,17 @@ public class ElrondNodeController {
         return logger.traceExit(elrondApiNode.ping(ipAddress, port));
     }
 
+    @RequestMapping(path = "/node/checkfreeport", method = RequestMethod.GET)
+    public @ResponseBody
+    ResponseObject checkFreePort(
+            HttpServletResponse response,
+            @RequestParam() String ipAddress,
+            @RequestParam() int port
+    ) {
+        logger.traceEntry("params: {} {}", ipAddress, port);
+        return logger.traceExit(elrondApiNode.checkFreePort(ipAddress, port));
+    }
+
     @RequestMapping(path = "/node/generatepublickeyandprivateKey", method = RequestMethod.GET)
     public @ResponseBody
     ResponseObject generatePublicKeyAndPrivateKey(

@@ -3,12 +3,20 @@ package network.elrond.api;
 import javafx.util.Pair;
 import network.elrond.core.ResponseObject;
 import network.elrond.core.Util;
+import network.elrond.crypto.PKSKPair;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.data.BootstrapType;
+import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.ShardingService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.FileReader;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,12 +37,17 @@ public class CommandLinesInterpretor {
 
         boolean isHelp = false;
         String configFileName = null;
+        String generateFor = "";
 
         for (int i = 0; i < args.length; i++){
             isHelp = isHelp || isHelpArgument(args[i]);
 
             if (isConfig(args[i])){
                 configFileName = args[i].substring(args[i].indexOf("=") + 1);
+            }
+
+            if(isGenerate(args[i])){
+                generateFor = args[i].substring(args[i].indexOf("=") + 1);
             }
         }
 
@@ -49,13 +62,128 @@ public class CommandLinesInterpretor {
             //read config and parse the properties
             Map<String, Object> properties = parseFileProperties(configFileName);
 
-            if (properties == null){
+            if (properties == null) {
                 System.out.println("Error parsing file! Can not start!");
                 return logger.traceExit(new ResponseObject(false, "config file parse error", null));
             }
 
-            return logger.traceExit(new ResponseObject(true, "autostart", properties));
+            if(generateFor == null || generateFor.isEmpty()){
+
+                return logger.traceExit(new ResponseObject(true, "autostart", properties));
+            }
+            else{
+
+                String[] generateSplit = generateFor.split(";");
+                if(generateSplit.length !=2){
+                    System.out.println("Error generating! Can not start!");
+                    return logger.traceExit(new ResponseObject(false, "Error generating!", null));
+                }
+
+                Integer nrShards = Integer.parseInt(generateSplit[0]);
+                Integer nodesPerShard = Integer.parseInt(generateSplit[1]);
+
+                Map<Integer, List<String>> shardPrivateKeys = new HashMap<>();
+
+                GeneratePrivateKeysPerShard(nrShards, nodesPerShard, shardPrivateKeys);
+
+                List<String> configs = GenerateConfigFiles(shardPrivateKeys);
+
+                String fileName = GenerateCommandFile(configs);
+
+                try {
+                    Runtime.getRuntime().exec("cmd /c start "+fileName);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                return logger.traceExit(new ResponseObject(false, "generate", properties));
+            }
         }
+    }
+
+    private static String GenerateCommandFile(List<String> configs) {
+        try {
+            int count = 0;
+            List<String> commands = new ArrayList<>();
+            for (String configFile : configs) {
+                count++;
+                List<String> lines = Arrays.asList(
+                        String.format("java -jar elrond-api-1.0-SNAPSHOT.jar -config=%s --server.port=%d", configFile, 8080 + count));
+                String fileName = String.format("startPeerNode%d.bat",count);
+                Path file = Paths.get(fileName);
+                Files.write(file, lines, Charset.forName("UTF-8"));
+
+                commands.add("start cmd /k call " + fileName);
+            }
+
+            String fileName = "startMultipleGenerated.bat";
+            Path file = Paths.get(fileName);
+            Files.write(file, commands, Charset.forName("UTF-8"));
+            return fileName;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private static List<String> GenerateConfigFiles(Map<Integer,List<String>> shardPrivateKeys) {
+       List<String> configs = new ArrayList<>();
+        try {
+            int count = 0;
+        for(int i : shardPrivateKeys.keySet()){
+            for(String pKey : shardPrivateKeys.get(i)){
+                count++;
+                List<String> lines = Arrays.asList(
+                 "node_name=elrond-node-" + count,
+                "port=" + (4000+count),
+                "master_peer_port=31201",
+                "peer_ip=127.0.0.1",
+                "node_private_key=" + pKey,
+                "startup_type=START_FROM_SCRATCH",
+                "blockchain_path=elrond-node-" + count,
+                "blockchain_restore_path=elrond-node-" + count);
+                String configFile = "configGen_" + count +".config";
+                Path file = Paths.get(configFile);
+                    Files.write(file, lines, Charset.forName("UTF-8"));
+                    configs.add(configFile);
+            }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return  configs;
+    }
+
+    public static void GeneratePrivateKeysPerShard(Integer nrShards, Integer nodesPerShard, Map<Integer, List<String>> shardPrivateKeys) {
+        ElrondApiNode node = new ElrondApiNode();
+        List<String> publicPrivateKeysList = new ArrayList<>();
+        for(int i = 0;i<nrShards;i++){
+            List<String> privateKeysList = new ArrayList<>();
+            for(int j = 0; j<nodesPerShard ;j++){
+                int shardNumber = -1;
+                PKSKPair pair;
+               do{
+                   ResponseObject ro = node.generatePublicKeyAndPrivateKey("");
+                   pair = (PKSKPair) ro.getPayload();
+                   ShardingService shardingService = AppServiceProvider.getShardingService();
+                   byte[] publicKeyBytes = Util.hexStringToByteArray(pair.getPublicKey());
+                   shardNumber = shardingService.getShard(publicKeyBytes).getIndex();
+               }while(shardNumber!=i);
+               privateKeysList.add(pair.getPrivateKey());
+                publicPrivateKeysList.add(String.format("Shard: %d  Private: %s / Public: %s", i, pair.getPrivateKey(), pair.getPublicKey()));
+            }
+            shardPrivateKeys.put(i, privateKeysList);
+        }
+
+        Path file = Paths.get("generatedKeys.txt");
+        try {
+            Files.write(file, publicPrivateKeysList, Charset.forName("UTF-8"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     static boolean isHelpArgument(String arg){
@@ -77,6 +205,18 @@ public class CommandLinesInterpretor {
         split[0] = split[0].toUpperCase();
 
         return split[0].equals("-CONFIG") || split[0].equals("--CONFIG");
+
+    }
+
+    static boolean isGenerate(String arg){
+        if (!isKeyValuePair(arg)){
+            return(false);
+        }
+
+        String[] split = arg.split("=");
+        split[0] = split[0].toUpperCase();
+
+        return split[0].equals("-GENERATE") || split[0].equals("--GENERATE");
 
     }
 
@@ -103,6 +243,7 @@ public class CommandLinesInterpretor {
         System.out.println("                   start the UI app");
         System.out.println(" -h --h -H --H -help -HELP --help --HELP :  Display this help message");
         System.out.println(" -config=configfile.cfg :  Loads the config file from disk and automatically starts the node");
+        System.out.println(" -config=configfile.cfg -generate=nrShards;nodesInShard:  Loads the config file from disk and generates scripts for nrShards x nodesInShardInstances");
         System.out.println();
         System.out.println("Sample of a config file:");
         System.out.println("------------------------");
