@@ -20,7 +20,7 @@ import java.util.List;
 public class P2PObjectServiceRunnerTest {
 
     private String strKey = "";
-    private final int MAX_GENERATED_KEYS = 30;
+    private final int MAX_GENERATED_KEYS = 60;
     private List<String> strKeys = new ArrayList<>();
 
     @Test
@@ -83,7 +83,7 @@ public class P2PObjectServiceRunnerTest {
                     String strValue = nodeName + "-" + n;
 //                    String strValue = nodeName;
 
-                    logger.info(nodeName + " start runda " + n + ": try to put at key: " + strLocalKey + " -> value: " + strValue);
+                    logger.info(nodeName + " start round " + n + ": try to put at key: " + strLocalKey + " -> value: " + strValue);
 
                     if (strKey.isEmpty()) break;
 
@@ -97,9 +97,10 @@ public class P2PObjectServiceRunnerTest {
 
                     String strCurrentValue = futureGet.data().object().toString();
 
-                    logger.info(nodeName + " stop runda " + n + ": put at key: " + strLocalKey + " -> value: " + strValue + " and get value: " + strCurrentValue + " with success: " + futurePut.isSuccess());
+                    logger.info(nodeName + " stop round " + n + ": put at key: " + strLocalKey + " -> value: " + strValue + " and got value: " + strCurrentValue + " with success: " + futurePut.isSuccess() + " and partially success: " + futurePut.isSuccessPartially());
 
                     if (futurePut.isSuccess()) {
+//                    if (futurePut.isSuccessPartially()) {
 //                    System.out.println(strLocalKey + " - " + strValue);
                         logger.info(strLocalKey + " - " + strValue);
 
