@@ -1,5 +1,6 @@
 package network.elrond.data;
 
+import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.FuturePut;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
@@ -116,9 +117,19 @@ public class BootstrapServiceImpl implements BootstrapService {
             P2PConnection connection = blockchain.getConnection();
             String blockNonce = getBlockIndexIdentifier(block.getNonce());
             FuturePut futurePut = AppServiceProvider.getP2PObjectService().put(connection, blockNonce, blockHash, true, false);
+
             if (!futurePut.isSuccess()){
-                result.combine(new ExecutionReport().ko("Not allowed to override block index " + blockNonce));
-                return result;
+
+                String blockHashGot = AppServiceProvider.getP2PObjectService().get(connection, blockNonce, String.class);
+
+                if (!blockHashGot.equals(blockHash)) {
+                    result.combine(new ExecutionReport().ko("Not allowed to override block index " + blockNonce));
+                    return result;
+                }
+                else
+                {
+                    logger.debug("Not allowed (BUT IT DOES) to override block index " + blockNonce);
+                }
             }
             logger.trace("stored block index {}", block.getNonce());
 
