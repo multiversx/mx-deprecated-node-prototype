@@ -6,12 +6,17 @@ import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.data.BootstrapType;
 
-import java.math.BigInteger;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 
 public class NodeRunner {
 
     public static void main(String[] args) throws Exception {
+        SimpleDateFormat sdfSource = new SimpleDateFormat(
+                "yyyy-MM-dd HH.mm.ss");
+        Util.changeLogsPath("logs/" + Util.getHostName() + " - " + sdfSource.format(new Date()));
+
         Random rand = new Random();
         int nr = rand.nextInt(1000);
 
