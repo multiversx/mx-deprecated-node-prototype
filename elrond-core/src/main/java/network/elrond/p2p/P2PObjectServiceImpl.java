@@ -26,7 +26,7 @@ public class P2PObjectServiceImpl implements P2PObjectService {
         Number160 hash = getDHTHash(connection, key, clazz);
 
         FutureGet futureGet = peer.get(hash).start();
-        futureGet.awaitUninterruptibly();
+        futureGet.awaitUninterruptibly(500);
 
         if (futureGet.isSuccess()) {
             Iterator<Data> iterator = futureGet.dataMap().values().iterator();
@@ -40,6 +40,7 @@ public class P2PObjectServiceImpl implements P2PObjectService {
 
         } else {
             logger.warn("Timeout getting data with hash {}", key);
+
         }
 
         return logger.traceExit((T) null);
@@ -85,5 +86,4 @@ public class P2PObjectServiceImpl implements P2PObjectService {
 
         return Number160.createHash(string);
     }
-
 }

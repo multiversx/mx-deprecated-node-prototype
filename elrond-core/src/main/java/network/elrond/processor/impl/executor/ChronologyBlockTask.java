@@ -52,7 +52,7 @@ public class ChronologyBlockTask implements AppTask {
                         ThreadUtil.sleep(1000);
 
                         continue;
-                    } else{
+                    } else {
                         genesisTimeStampCached = state.getBlockchain().getGenesisBlock().getTimestamp();
                         logger.trace("Cached genesis time stamp as: {}", genesisTimeStampCached);
                     }
@@ -61,7 +61,7 @@ public class ChronologyBlockTask implements AppTask {
                 try {
                     SyncState syncState = AppServiceProvider.getBootstrapService().getSyncState(blockchain);
 
-                    if (syncState.isSyncRequired()){
+                    if (syncState.isSyncRequired()) {
                         continue;
                     }
 
@@ -73,7 +73,7 @@ public class ChronologyBlockTask implements AppTask {
                         computeAndCallStartEndRounds(application, currentRound, globalTimeStamp);
                         computeAndCallRoundState(application, currentRound, globalTimeStamp);
                     }
-                } catch (Exception ex){
+                } catch (Exception ex) {
                     logger.catching(ex);
                 }
             }
@@ -83,14 +83,14 @@ public class ChronologyBlockTask implements AppTask {
         thread.start();
     }
 
-    private void computeAndCallStartEndRounds(Application application, Round currentRound, long globalTimeStamp){
+    private void computeAndCallStartEndRounds(Application application, Round currentRound, long globalTimeStamp) {
         boolean isFirstRoundTransition = (previousRound == null);
         boolean isRoundTransition = isFirstRoundTransition || (previousRound.getIndex() != currentRound.getIndex());
         boolean existsPreviousRound = (previousRound != null);
 
-        if (isRoundTransition){
+        if (isRoundTransition) {
             logger.trace("round transition detected!");
-            if (existsPreviousRound){
+            if (existsPreviousRound) {
                 notifyEventObjects(application, previousRound, RoundState.END_ROUND, globalTimeStamp);
             }
 
@@ -103,14 +103,14 @@ public class ChronologyBlockTask implements AppTask {
         previousRound = currentRound;
     }
 
-    private void computeAndCallRoundState(Application application, Round currentRound, long globalTimeStamp){
+    private void computeAndCallRoundState(Application application, Round currentRound, long globalTimeStamp) {
         long startTimeStamp = currentRound.getStartTimeStamp();
 
         RoundState currentRoundState = AppServiceProvider.getChronologyService().computeRoundState(startTimeStamp, globalTimeStamp);
 
         boolean isCurrentRoundStateNotDefined = (currentRoundState == null);
 
-        if (isCurrentRoundStateNotDefined){
+        if (isCurrentRoundStateNotDefined) {
             return;
         }
 
@@ -126,20 +126,24 @@ public class ChronologyBlockTask implements AppTask {
     }
 
 
-    private void notifyEventObjects(Application application, Round round, RoundState roundState, long globalTimeStamp){
+    private void notifyEventObjects(Application application, Round round, RoundState roundState, long globalTimeStamp) {
         SubRound subRound = new SubRound();
         subRound.setRound(round);
         subRound.setRoundState(roundState);
         subRound.setTimeStamp(globalTimeStamp);
 
-        AppState state= application.getState();
+        AppState state = application.getState();
 
         logger.debug("notifyEventObjects event {}, {}, {}", round.toString(), roundState.toString(), globalTimeStamp);
 
         EventHandler eventHandler = roundState.getEventHandler();
-        if (eventHandler != null){
+        if (eventHandler != null) {
             logger.trace("calling default event handler object (from enum)...");
-            eventHandler.onEvent(state, subRound);
+            try {
+                eventHandler.onEvent(state, subRound);
+            } catch (Exception ex) {
+                logger.catching(ex);
+            }
         } else {
             logger.warn("{} does not have an associated event handler!", roundState);
         }

@@ -3,6 +3,7 @@ package network.elrond.processor.impl.executor;
 import network.elrond.Application;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
+import network.elrond.core.Util;
 import network.elrond.data.ExecutionReport;
 import network.elrond.processor.impl.AbstractBlockTask;
 import network.elrond.data.SyncState;
@@ -32,6 +33,10 @@ public class SynchronizationBlockTask extends AbstractBlockTask {
 
             BigInteger localBlockIndex = syncState.getLocalBlockIndex();
             BigInteger remoteBlockIndex = syncState.getRemoteBlockIndex();
+
+            if ((localBlockIndex.equals(Util.BIG_INT_MIN_ONE)) || (remoteBlockIndex.equals(Util.BIG_INT_MIN_ONE))){
+                logger.fatal("ERR");
+            }
 
             logger.info("{}, Starting to synchronize > Current bloc index {} | remote block index {}",
                     application.getContext().getNodeName(), localBlockIndex,

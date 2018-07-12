@@ -39,10 +39,9 @@ public abstract class AbstractChannelTask<T> implements AppTask {
     }
 
     protected void process(ArrayBlockingQueue<T> queue, Application application) {
-        logger.traceEntry();
         T object = queue.poll();
         if (object == null) {
-            logger.traceExit("null object!", null);
+            logger.trace("null object!");
             return;
         }
         process(object, application);
@@ -52,7 +51,7 @@ public abstract class AbstractChannelTask<T> implements AppTask {
 
     protected abstract P2PBroadcastChannelName getChannelName();
 
-    protected int getWaitingTime(){
+    protected int getWaitingTime() {
         return 500;
     }
 }

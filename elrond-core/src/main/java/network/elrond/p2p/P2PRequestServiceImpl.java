@@ -100,8 +100,6 @@ public class P2PRequestServiceImpl implements P2PRequestService {
                         try {
                             if (fd.object() != null) {
                                 responses.add((R) fd.object());
-                            } else {
-                                logger.debug("null reply");
                             }
                         } catch (ClassNotFoundException | IOException e) {
                             logger.catching(e);

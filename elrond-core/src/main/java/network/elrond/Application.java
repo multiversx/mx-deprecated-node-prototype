@@ -119,6 +119,8 @@ public class Application implements Serializable {
         
         logger.debug("Start chronology processor...");
         AppTasks.CHRONOLOGY.process(this);
+
+        logger.traceExit();
     }
 
     /**

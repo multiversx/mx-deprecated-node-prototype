@@ -5,6 +5,7 @@ import net.tomp2p.p2p.Peer;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 import network.elrond.core.ObjectUtil;
+import network.elrond.core.Util;
 import network.elrond.sharding.Shard;
 
 import java.util.ArrayList;
@@ -110,6 +111,18 @@ public class P2PConnection {
         return dataReplyCallback;
     }
 
+    public P2PRequestChannel getRequestChannel(String channelName) {
+        Util.check(channelName != null, "channelName != null");
+
+        for (P2PRequestChannel requestChannel : requestChannels) {
+            P2PRequestChannelName requestChannelName = requestChannel.getName();
+            if (channelName.equals(requestChannelName.getName())) {
+                return requestChannel;
+            }
+        }
+
+        return null;
+    }
 
     @Override
     public String toString() {

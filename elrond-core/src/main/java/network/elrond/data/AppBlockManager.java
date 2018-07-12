@@ -143,6 +143,9 @@ public class AppBlockManager {
     public Pair<Block, List<Receipt>> composeEmptyBlock(AppState state) {
         logger.traceEntry("params: {}", state);
         List<Receipt> receipts = new ArrayList<>();
+
+        Util.check(state != null, "state!=null");
+
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();
         NTPClient ntpClient = state.getNtpClient();
@@ -173,7 +176,9 @@ public class AppBlockManager {
     public Pair<Block, List<Receipt>> composeBlock(List<Transaction> transactions, AppState state) throws
             IOException {
         logger.traceEntry("params: {} {}", transactions, state);
+
         Util.check(state != null, "state!=null");
+
         List<Receipt> receipts;
 
         Accounts accounts = state.getAccounts();

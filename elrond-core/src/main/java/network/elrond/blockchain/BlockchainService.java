@@ -1,5 +1,7 @@
 package network.elrond.blockchain;
 
+import network.elrond.p2p.P2PRequestChannel;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;

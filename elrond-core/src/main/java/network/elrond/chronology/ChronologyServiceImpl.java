@@ -47,7 +47,7 @@ public class ChronologyServiceImpl implements ChronologyService {
     public long getSynchronizedTime(NTPClient ntpClient){
         logger.traceEntry();
         if (ntpClient != null){
-            return(ntpClient.currentTimeMillis());
+            return logger.traceExit(ntpClient.currentTimeMillis());
         }
 
         logger.trace("NTP client is null, returning system's clock.");

@@ -4,6 +4,7 @@ import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.data.Receipt;
+import network.elrond.data.SecureObject;
 import network.elrond.p2p.P2PRequestMessage;
 import network.elrond.p2p.RequestHandler;
 import network.elrond.service.AppServiceProvider;
@@ -22,7 +23,7 @@ public class ReceiptRequestHandler implements RequestHandler<Receipt, P2PRequest
         String receiptHash = (String) data.getKey();
         Blockchain blockchain = state.getBlockchain();
         try {
-            Receipt receipt = AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT);
+            Receipt receipt = (Receipt) ((SecureObject) AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT)).getObject();
             return logger.traceExit(receipt);
         } catch (IOException | ClassNotFoundException e) {
             logger.catching(e);

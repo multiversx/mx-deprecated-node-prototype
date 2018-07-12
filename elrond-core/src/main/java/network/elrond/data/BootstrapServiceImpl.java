@@ -39,8 +39,17 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         if (locationType == LocationType.LOCAL) {
             BigInteger currentBlockIndex = blockchain.getCurrentBlockIndex();
-            BigInteger networkBlockIndex = getNetworkBlockIndex(blockchain);
-            return logger.traceExit(currentBlockIndex.min(networkBlockIndex));
+//            BigInteger networkBlockIndex = getNetworkBlockIndex(blockchain);
+//
+//            if (currentBlockIndex.equals(Util.BIG_INT_MIN_ONE)){
+//                logger.fatal("ERR LOCAL");
+//            }
+//
+//            if (networkBlockIndex.equals(Util.BIG_INT_MIN_ONE)){
+//                logger.fatal("ERR NETWORKs");
+//            }
+
+            return logger.traceExit(currentBlockIndex/*.min(networkBlockIndex)*/);
         }
 
         if (locationType == LocationType.NETWORK) {
@@ -89,7 +98,7 @@ public class BootstrapServiceImpl implements BootstrapService {
     public String getBlockHashFromIndex(BigInteger blockIndex, Blockchain blockchain) throws Exception {
         logger.traceEntry("params: {} {}", blockIndex, blockchain);
         String identifier = getBlockIndexIdentifier(blockIndex);
-        return logger.traceExit((String)AppServiceProvider.getBlockchainService().get(identifier, blockchain, BlockchainUnitType.BLOCK_INDEX));
+        return logger.traceExit((String) AppServiceProvider.getBlockchainService().get(identifier, blockchain, BlockchainUnitType.BLOCK_INDEX));
     }
 
 
@@ -116,7 +125,7 @@ public class BootstrapServiceImpl implements BootstrapService {
             P2PConnection connection = blockchain.getConnection();
             String blockNonce = getBlockIndexIdentifier(block.getNonce());
             FuturePut futurePut = AppServiceProvider.getP2PObjectService().put(connection, blockNonce, blockHash, true, false);
-            if (!futurePut.isSuccess()){
+            if (!futurePut.isSuccess()) {
                 result.combine(new ExecutionReport().ko("Not allowed to override block index " + blockNonce));
                 return result;
             }
@@ -189,7 +198,7 @@ public class BootstrapServiceImpl implements BootstrapService {
             ExecutionReport reportTransaction = commitTransaction(genesisTransaction, genesisTransactionHash, blockchain);
             result.combine(reportTransaction);
 
-            ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(genesisBlock, accounts, blockchain,  state.getStatisticsManager());
+            ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(genesisBlock, accounts, blockchain, state.getStatisticsManager());
             result.combine(executionReport);
 
             if (result.isOk()) {
@@ -248,7 +257,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                 Block block = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK);
 
                 logger.trace("re-running block to update internal state...");
-                ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain,  state.getStatisticsManager());
+                ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain, state.getStatisticsManager());
                 result.combine(executionReport);
 
                 if (!result.isOk()) {
@@ -305,23 +314,23 @@ public class BootstrapServiceImpl implements BootstrapService {
                 String blockHash = getBlockHashFromIndex(blockIndex, blockchain);
                 if (blockHash == null) {
                     result.ko("Can not synchronize! Could not find block with nonce = " + blockIndex.toString(10) + " on LOCAL!");
-                    logger.trace("Synchronized FAILED at index {}!", blockIndex);
+                    logger.info("Synchronized FAILED at index {}!", blockIndex);
                     return logger.traceExit(result);
                 }
 
                 Block block = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK);
                 if (block == null) {
                     result.ko("Can not find block hash " + blockHash + " on LOCAL!");
-                    logger.trace("Synchronized FAILED at index {}!", blockIndex);
+                    logger.info("Synchronized FAILED at index {}!", blockIndex);
                     return logger.traceExit(result);
                 }
 
 
-                ExecutionReport executionReport = executionService.processBlock(block, accounts, blockchain,  state.getStatisticsManager());
+                ExecutionReport executionReport = executionService.processBlock(block, accounts, blockchain, state.getStatisticsManager());
                 result.combine(executionReport);
 
                 if (!result.isOk()) {
-                    logger.trace("Synchronized FAILED at index {}!", blockIndex);
+                    logger.info("Synchronized FAILED at index {}!", blockIndex);
                     return logger.traceExit(result);
                 }
 
@@ -329,22 +338,17 @@ public class BootstrapServiceImpl implements BootstrapService {
 
                 result.ok("Added block in blockchain : " + blockHash + " # " + block);
 
-                logger.info("New block synchronized with hash {}", blockHash);
-
                 logger.info("\n" + state.print().render());
-              //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
+                //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
                 AppStateUtil.printBlockAndAccounts(block, accounts);
 
                 blockchain.setCurrentBlockIndex(blockIndex);
                 blockchain.setCurrentBlock(block);
-
-                // Update current block
-                blockchain.setCurrentBlock(block);
-                logger.trace("done updating current block");
+                logger.info("done updating current block");
 
             } catch (Exception ex) {
                 result.ko(ex);
-                logger.trace("Synchronized FAILED at index {}!", blockIndex);
+                logger.info("Synchronized FAILED at index {}!", blockIndex);
                 return logger.traceExit(result);
             }
         }
@@ -354,7 +358,7 @@ public class BootstrapServiceImpl implements BootstrapService {
     }
 
     @Override
-    public SyncState getSyncState(Blockchain blockchain) throws Exception{
+    public synchronized SyncState getSyncState(Blockchain blockchain) throws Exception {
         SyncState syncState = new SyncState();
 
         syncState.setRemoteBlockIndex(AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.NETWORK, blockchain));
@@ -364,7 +368,7 @@ public class BootstrapServiceImpl implements BootstrapService {
         boolean isNewBlockRemote = syncState.getRemoteBlockIndex().compareTo(syncState.getLocalBlockIndex()) > 0;
         syncState.setSyncRequired(isBlocAvailable && isNewBlockRemote);
 
-        return(syncState);
+        return (syncState);
     }
 
 
