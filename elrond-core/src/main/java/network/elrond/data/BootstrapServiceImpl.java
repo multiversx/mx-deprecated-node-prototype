@@ -119,7 +119,6 @@ public class BootstrapServiceImpl implements BootstrapService {
             FuturePut futurePut = AppServiceProvider.getP2PObjectService().put(connection, blockNonce, blockHash, true, false);
 
             if (!futurePut.isSuccess()){
-
                 String blockHashGot = AppServiceProvider.getP2PObjectService().get(connection, blockNonce, String.class);
 
                 if (!blockHashGot.equals(blockHash)) {
