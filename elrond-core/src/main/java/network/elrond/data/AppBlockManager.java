@@ -12,11 +12,10 @@ import network.elrond.chronology.ChronologyService;
 import network.elrond.chronology.NTPClient;
 import network.elrond.chronology.Round;
 import network.elrond.chronology.RoundState;
-import network.elrond.core.AsciiTableUtil;
+import network.elrond.core.AppStateUtil;
 import network.elrond.core.ObjectUtil;
 import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
-import network.elrond.core.AppStateUtil;
 import network.elrond.crypto.MultiSignatureService;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
@@ -31,9 +30,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.stream.Collectors;
 
 
 //TODO: remove from "data" package
@@ -373,10 +369,6 @@ public class AppBlockManager {
         List<String> toBeRemoved = BlockUtil.getTransactionsHashesAsString(block);
 
         TransactionsPool pool = state.getPool();
-        ArrayBlockingQueue<String> transactionPool = pool.getTransactionPool();
-        transactionPool.removeAll(toBeRemoved);
-
-        logger.debug("Removed {} transactions from pool, remaining: {}", toBeRemoved.size(),  transactionPool.size());
-
+        pool.removeTransactions(toBeRemoved);
     }
 }

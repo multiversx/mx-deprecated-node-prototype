@@ -17,9 +17,7 @@ import network.elrond.sharding.AppShardingManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class AssemblyBlockHandler implements EventHandler<SubRound> {
@@ -52,8 +50,8 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
         logger.traceEntry("params: {}", state);
 
         TransactionsPool pool = state.getPool();
-        ArrayBlockingQueue<String> transactionPool = pool.getTransactionPool();
-        if (transactionPool.isEmpty()) {
+        List<String> hashes = pool.getTransactions();
+        if (hashes.isEmpty()) {
             logger.info("Round: {}, subRound: {}> Can't execute, no transactions!",
                     data.getRound().getIndex(), data.getRoundState().name());
             state.getStatisticsManager().addStatistic(new Statistic(0));
@@ -64,27 +62,27 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
         int size = 0;
 
         PrivateKey privateKey = state.getPrivateKey();
-        List<String> hashes = new ArrayList<>();
 
-        logger.debug("About to clean transaction pool...");
 
-        synchronized (pool.lock){
-            //cleanup transaction pool
-
-            hashes =  new ArrayList<>(transactionPool);
-
-            for (int i = 0; i < hashes.size(); i++){
-                String hash = hashes.get(i);
-
-                if (pool.checkExists(hash)){
-                    hashes.remove(i);
-                    transactionPool.remove(hash);
-                    i--;
-                }
-            }
-        }
-
-        logger.debug("Transaction pool cleaned!");
+//        logger.debug("About to clean transaction pool...");
+//
+//        synchronized (pool.lock){
+//            //cleanup transaction pool
+//
+//            hashes =  new ArrayList<>(transactionPool);
+//
+//            for (int i = 0; i < hashes.size(); i++){
+//                String hash = hashes.get(i);
+//
+//                if (pool.checkExists(hash)){
+//                    hashes.remove(i);
+//                    transactionPool.remove(hash);
+//                    i--;
+//                }
+//            }
+//        }
+//
+//        logger.debug("Transaction pool cleaned!");
 
         Block block = AppBlockManager.instance().generateAndBroadcastBlock(hashes, privateKey, state);
         if (block != null) {

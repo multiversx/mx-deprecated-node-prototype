@@ -7,8 +7,10 @@ import network.elrond.data.BlockUtil;
 import org.junit.Test;
 
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.List;
 
-public class TransactionsProcessedTest {
+public class TransactionsPoolTest {
     @Test(expected = IllegalArgumentException.class)
     public void testCheckShouldThrowException() {
         TransactionsPool transactionsProcessed = new TransactionsPool();
@@ -49,7 +51,7 @@ public class TransactionsProcessedTest {
     }
 
     @Test
-    public void testAdd5BlocksAnCheck() {
+    public void testAdd5BlocksAndCheck() {
         TransactionsPool transactionsProcessed = new TransactionsPool();
 
         for (BigInteger i = BigInteger.ZERO; i.compareTo(BigInteger.valueOf(5)) < 0; i = i.add(BigInteger.ONE)) {
@@ -71,7 +73,7 @@ public class TransactionsProcessedTest {
     }
 
     @Test
-    public void testAdd7BlocksAnCheck() {
+    public void testAdd7BlocksAndCheck() {
         TransactionsPool transactionsProcessed = new TransactionsPool();
 
         for (BigInteger i = BigInteger.ZERO; i.compareTo(BigInteger.valueOf(7)) < 0; i = i.add(BigInteger.ONE)) {
@@ -91,6 +93,37 @@ public class TransactionsProcessedTest {
         }
         TestCase.assertFalse(transactionsProcessed.checkExists(Util.getDataEncoded64(new byte[]{(byte) 19})));
         TestCase.assertFalse(transactionsProcessed.checkExists(Util.getDataEncoded64(new byte[]{(byte) 70})));
+    }
+
+    @Test
+    public void testAddTransactionAndCheck(){
+        TransactionsPool transactionPool = new TransactionsPool();
+
+        transactionPool.addTransaction("aaa");
+
+        TestCase.assertTrue(transactionPool.checkExists("aaa"));
+        TestCase.assertFalse(transactionPool.checkExists("bbb"));
+    }
+
+    @Test
+    public void testAddTransactionsRemoveListAndCheck(){
+        TransactionsPool transactionPool = new TransactionsPool();
+
+        transactionPool.addTransaction("aaa");
+        transactionPool.addTransaction("bbb");
+
+        TestCase.assertTrue(transactionPool.checkExists("aaa"));
+        TestCase.assertTrue(transactionPool.checkExists("bbb"));
+
+        List<String> transactions = transactionPool.getTransactions();
+        transactionPool.removeTransactions(Arrays.asList("aaa", "bbb"));
+
+        TestCase.assertFalse(transactionPool.checkExists("aaa"));
+        TestCase.assertFalse(transactionPool.checkExists("bbb"));
+
+        TestCase.assertTrue(transactions.contains("aaa"));
+        TestCase.assertTrue(transactions.contains("bbb"));
+
     }
 
 
