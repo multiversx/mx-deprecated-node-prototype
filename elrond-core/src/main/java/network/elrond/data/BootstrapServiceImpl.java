@@ -122,14 +122,13 @@ public class BootstrapServiceImpl implements BootstrapService {
                 String blockHashGot = AppServiceProvider.getP2PObjectService().get(connection, blockNonce, String.class);
 
                 if (!blockHashGot.equals(blockHash)) {
-                    result.combine(new ExecutionReport().ko("Not allowed to override block index " + blockNonce));
+                    result.combine(new ExecutionReport().ko("Not allowed to override block index " + blockNonce + " with hash " + blockHashGot + " with his own generated hash " + blockHash));
                     return result;
                 }
-                else
-                {
-                    logger.debug("Not allowed (BUT IT DOES) to override block index " + blockNonce);
-                }
+
+                logger.debug("Commited first, block index " + blockNonce + " with hash " + blockHashGot + ". There was " + futurePut.result().size() + " peers which have tried to commit the same block index.");
             }
+
             logger.trace("stored block index {}", block.getNonce());
 
             AppServiceProvider.getBlockchainService().put(blockHash, block, blockchain, BlockchainUnitType.BLOCK);
@@ -341,7 +340,7 @@ public class BootstrapServiceImpl implements BootstrapService {
 
                 logger.info("New block synchronized with hash {}", blockHash);
 
-                logger.info("\n" + state.print().render());
+                logger.info("\r\n" + state.print().render());
               //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
                 AppStateUtil.printBlockAndAccounts(block, accounts);
 
