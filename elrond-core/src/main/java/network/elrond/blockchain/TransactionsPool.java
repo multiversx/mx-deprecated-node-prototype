@@ -116,5 +116,7 @@ public class TransactionsPool {
         if (processedBlockNonces.size() + 1 > WINDOW_SIZE) {
             map.remove(processedBlockNonces.get(0));
         }
+
+        cleanTransactionList();
     }
 }
