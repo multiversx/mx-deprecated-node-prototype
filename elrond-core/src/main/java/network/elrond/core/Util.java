@@ -143,6 +143,10 @@ public class Util {
         return (new String(Base64.encode(data)));
     }
 
+    public static byte[] getDataDecoded64(String data) {
+        return Base64.decode(data);
+    }
+
     /**
      * Throws an IllegalArgumentException in case boolean expression is not true
      *

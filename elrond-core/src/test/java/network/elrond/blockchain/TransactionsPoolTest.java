@@ -93,6 +93,15 @@ public class TransactionsPoolTest {
         }
         TestCase.assertFalse(transactionsProcessed.checkExists(Util.getDataEncoded64(new byte[]{(byte) 19})));
         TestCase.assertFalse(transactionsProcessed.checkExists(Util.getDataEncoded64(new byte[]{(byte) 70})));
+
+        transactionsProcessed.addTransaction(Util.getDataEncoded64(new byte[]{(byte) 19}));
+        transactionsProcessed.addTransaction(Util.getDataEncoded64(new byte[]{(byte) 20}));
+        transactionsProcessed.addTransaction(Util.getDataEncoded64(new byte[]{(byte) 21}));
+        transactionsProcessed.addTransaction(Util.getDataEncoded64(new byte[]{(byte) 22}));
+
+        byte[] buff = Util.getDataDecoded64("Ew==");
+
+        transactionsProcessed.getTransactions();
     }
 
     @Test
