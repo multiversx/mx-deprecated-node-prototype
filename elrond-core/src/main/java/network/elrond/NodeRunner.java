@@ -6,7 +6,6 @@ import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.data.BootstrapType;
 
-import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
@@ -25,7 +24,7 @@ public class NodeRunner {
         Integer port = 4001 + nr;
         Integer masterPeerPort = 4000;
         String masterPeerIpAddress = "127.0.0.1";
-        String nodeRunnerPrivateKey = "1111111111111111fa612ecafcfd145cc06c1fb64d7499ef34696ff16b" + Integer.toHexString(nr);
+        String nodeRunnerPrivateKey = "262b03ab41f867e4ac11a18f84297c1ee878195074f1644b7b9681bf1cefdc32";
         if (nodeRunnerPrivateKey.length() % 2 == 1) {
             nodeRunnerPrivateKey += "1";
         }
