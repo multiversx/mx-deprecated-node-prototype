@@ -89,21 +89,21 @@ public class AppBlockManager {
                     .getAll(acceptedTransactions,
                             blockchain,
                             BlockchainUnitType.TRANSACTION);
+
                 blockTransactions.stream()
                     .filter(transaction -> transaction.isCrossShardTransaction())
                         .filter(transaction -> !ObjectUtil.isEqual(shard, transaction.getReceiverShard()))
                     .forEach(transaction -> {
                         P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.XTRANSACTION);
                         AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, transaction);
+                        logger.debug("sent Xtransactions from " + transaction.getReceiverAddress() + " to " + transaction.getSenderAddress());
                     });
-
-                logger.debug("sent Xtransactions");
 
                 sendReceipts(state, block, receipts);
 
                 logger.info("New block proposed with hash {}", hashBlock);
 
-                logger.info("\n" + state.print().render());
+                logger.info("\r\n" + state.print().render());
                 //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
                 AppStateUtil.printBlockAndAccounts(block, accounts);
             }

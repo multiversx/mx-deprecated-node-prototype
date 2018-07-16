@@ -16,8 +16,8 @@ public class AppStateUtil {
 
     public static void printBlockAndAccounts(Block block, Accounts accounts) {
 
-        logger.info("\n" + block.print().render());
-        logger.info("\n" + AsciiTableUtil.listToTables(accounts.getAddresses()
+        logger.info("\r\n" + block.print().render());
+        logger.info("\r\n" + AsciiTableUtil.listToTables(accounts.getAddresses()
                 .stream()
                 .map(accountAddress -> {
                     try {
