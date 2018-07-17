@@ -340,11 +340,10 @@ public class BootstrapServiceImpl implements BootstrapService {
               //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
                 AppStateUtil.printBlockAndAccounts(block, accounts);
 
+                // Update current block
                 blockchain.setCurrentBlockIndex(blockIndex);
                 blockchain.setCurrentBlock(block);
 
-                // Update current block
-                blockchain.setCurrentBlock(block);
                 logger.trace("done updating current block");
 
             } catch (Exception ex) {

@@ -32,7 +32,7 @@ public class TransactionsPool {
             newList = new ArrayList<>(transactions);
         }
 
-        logger.debug("Returned the transactions: {}", newList);
+//        logger.debug("Returned the transactions: {}", newList);
 
         return (newList);
     }
