@@ -49,13 +49,21 @@ public class TransactionsPool {
         }
     }
 
-    public void addTransaction(String transactionHash){
+    public boolean addTransaction(String transactionHash){
         Util.check(transactionHash != null, "transaction != null");
 
         synchronized (locker){
-            transactions.add(transactionHash);
+            if (!checkExistsNoLock(transactionHash)) {
+                transactions.add(transactionHash);
 
-            logger.debug("Added {}", transactionHash);
+                logger.debug("Added {}", transactionHash);
+
+                return(true);
+            } else {
+                logger.debug("Transaction {} already in pool/processed!", transactionHash);
+                return(false);
+            }
+
         }
     }
 
@@ -63,16 +71,20 @@ public class TransactionsPool {
         Util.check(transactionHash != null, "transaction != null");
 
         synchronized (locker){
-            if (transactions.contains(transactionHash)){
-                return true;
-            }
+            return(checkExistsNoLock(transactionHash));
+        }
+    }
 
-            if (lastTransactions.containsKey(transactionHash)){
-                return true;
-            }
+    protected boolean checkExistsNoLock(String transactionHash){
+        if (transactions.contains(transactionHash)){
+            return true;
         }
 
-        return false;
+        if (lastTransactions.containsKey(transactionHash)){
+            return true;
+        }
+
+        return(false);
     }
 
 //    private void cleanTransactionList() {

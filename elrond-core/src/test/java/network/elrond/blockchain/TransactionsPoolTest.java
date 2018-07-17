@@ -71,6 +71,14 @@ public class TransactionsPoolTest {
         TestCase.assertFalse(transactionsProcessed.checkExists(Util.getDataEncoded64(new byte[]{(byte) 50})));
     }
 
+    @Test
+    public void testAddMultipleTimes(){
+        TransactionsPool transactionsPool = new TransactionsPool();
+
+        TestCase.assertTrue(transactionsPool.addTransaction("aaaa"));
+        TestCase.assertFalse(transactionsPool.addTransaction("aaaa"));
+    }
+
 //    @Test
 //    public void testAdd7BlocksAndCheck() {
 //        TransactionsPool transactionsProcessed = new TransactionsPool();
