@@ -1,29 +1,26 @@
 package network.elrond.blockchain;
 
-import network.elrond.core.CollectionUtil;
 import network.elrond.core.Util;
 import network.elrond.data.Block;
 import network.elrond.data.BlockUtil;
+import org.apache.commons.collections4.map.LRUMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class TransactionsPool {
 
-    public static final int WINDOW_SIZE = 5;
+    //public static final int WINDOW_SIZE = 5;
 
     private static final Logger logger = LogManager.getLogger(TransactionsPool.class);
 
     private Object locker = new Object();
 
-    protected final Map<BigInteger, Collection<String>> map = new ConcurrentHashMap<>();
+    protected final Map<String, Object> lastTransactions = new LRUMap<>(100000);
     protected final List<String> transactions = new ArrayList<>();
 
     public List<String> getTransactions(){
@@ -67,13 +64,11 @@ public class TransactionsPool {
 
         synchronized (locker){
             if (transactions.contains(transactionHash)){
-                return(true);
+                return true;
             }
 
-            for (Collection<String> hashes : map.values()) {
-                if (hashes.contains(transactionHash)) {
-                    return true;
-                }
+            if (lastTransactions.containsKey(transactionHash)){
+                return true;
             }
         }
 
@@ -83,9 +78,7 @@ public class TransactionsPool {
     private void cleanTransactionList() {
         logger.debug("About to clean transaction pool. There are {} transactions: {}", transactions.size(), transactions);
 
-        for (Collection<String> hashes : map.values()) {
-            transactions.removeAll(hashes);
-        }
+        transactions.removeAll(lastTransactions.keySet());
 
         logger.debug("Remained {} transactions: {}", transactions.size(), transactions);
     }
@@ -108,20 +101,28 @@ public class TransactionsPool {
             return;
         }
 
+        Object dummyObject = new Object();
+
         synchronized (locker) {
-            List<BigInteger> processedBlockNonces = map.keySet().stream().sorted().collect(Collectors.toList());
-            BigInteger currentBlockNonce = block.getNonce();
-            if (CollectionUtil.contains(processedBlockNonces, currentBlockNonce)) {
-                return;
-            }
-
             Collection<String> hashes = BlockUtil.getTransactionsHashesAsString(block);
-            map.put(currentBlockNonce, hashes);
 
-            if (processedBlockNonces.size() + 1 > WINDOW_SIZE) {
-                map.remove(processedBlockNonces.get(0));
-                logger.debug("Removed from transaction pool block with nonce {}", processedBlockNonces.get(0));
+            for (String hash : hashes){
+                lastTransactions.put(hash, dummyObject);
             }
+
+//            List<BigInteger> processedBlockNonces = map.keySet().stream().sorted().collect(Collectors.toList());
+//            BigInteger currentBlockNonce = block.getNonce();
+//            if (CollectionUtil.contains(processedBlockNonces, currentBlockNonce)) {
+//                return;
+//            }
+//
+//
+//            map.put(currentBlockNonce, hashes);
+//
+//            if (processedBlockNonces.size() + 1 > WINDOW_SIZE) {
+//                map.remove(processedBlockNonces.get(0));
+//                logger.debug("Removed from transaction pool block with nonce {}", processedBlockNonces.get(0));
+//            }
 
             cleanTransactionList();
         }
