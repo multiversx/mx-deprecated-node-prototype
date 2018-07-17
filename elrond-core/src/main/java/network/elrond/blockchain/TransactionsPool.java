@@ -27,7 +27,7 @@ public class TransactionsPool {
         List<String> newList = null;
 
         synchronized (locker){
-            cleanTransactionList();
+            //cleanTransactionList();
 
             newList = new ArrayList<>(transactions);
         }
@@ -75,13 +75,13 @@ public class TransactionsPool {
         return false;
     }
 
-    private void cleanTransactionList() {
-        logger.debug("About to clean transaction pool. There are {} transactions", transactions.size());
-
-        transactions.removeAll(lastTransactions.keySet());
-
-        logger.debug("Remained {} transactions", transactions.size());
-    }
+//    private void cleanTransactionList() {
+//        logger.debug("About to clean transaction pool. There are {} transactions", transactions.size());
+//
+//        transactions.removeAll(lastTransactions.keySet());
+//
+//        logger.debug("Remained {} transactions", transactions.size());
+//    }
 
     //public ArrayBlockingQueue<String> getTransactionPool() {
     //    return (transactions);
@@ -107,6 +107,9 @@ public class TransactionsPool {
                 lastTransactions.put(hash, dummyObject);
             }
 
+            transactions.removeAll(hashes);
+
+
 //            List<BigInteger> processedBlockNonces = map.keySet().stream().sorted().collect(Collectors.toList());
 //            BigInteger currentBlockNonce = block.getNonce();
 //            if (CollectionUtil.contains(processedBlockNonces, currentBlockNonce)) {
@@ -121,7 +124,7 @@ public class TransactionsPool {
 //                logger.debug("Removed from transaction pool block with nonce {}", processedBlockNonces.get(0));
 //            }
 
-            cleanTransactionList();
+            //cleanTransactionList();
         }
     }
 }

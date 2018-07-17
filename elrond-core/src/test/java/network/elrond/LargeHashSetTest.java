@@ -10,6 +10,8 @@ import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class LargeHashSetTest {
@@ -28,16 +30,23 @@ public class LargeHashSetTest {
         int percent = 0;
         int oldPercent = 0;
 
+        List<String> hashesToBeRemoved = new ArrayList<>();
+
         for (int i = 0; i < max; i++){
             Transaction transaction = new Transaction("a","b", BigInteger.valueOf(i),BigInteger.ZERO, new Shard(0), new Shard(0));
             //hashSet.add(AppServiceProvider.getSerializationService().getHashString(transaction));
-            map.put(AppServiceProvider.getSerializationService().getHashString(transaction), dummyObject);
+            String hash = AppServiceProvider.getSerializationService().getHashString(transaction);
+            map.put(hash, dummyObject);
 
             percent = i * 100 / max;
 
             if (percent != oldPercent) {
                 logger.info("Generating...{}%", percent);
                 oldPercent = percent;
+            }
+
+            if (i % 10 == 0){
+                hashesToBeRemoved.add(hash);
             }
         }
 
