@@ -4,13 +4,20 @@ import junit.framework.TestCase;
 import network.elrond.core.Util;
 import network.elrond.data.Block;
 import network.elrond.data.BlockUtil;
+import network.elrond.data.Transaction;
+import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 import java.math.BigInteger;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TransactionsPoolTest {
+    private static Logger logger = LogManager.getLogger(TransactionsPoolTest.class);
+
     @Test(expected = IllegalArgumentException.class)
     public void testCheckShouldThrowException() {
         TransactionsPool transactionsProcessed = new TransactionsPool();
@@ -79,6 +86,47 @@ public class TransactionsPoolTest {
         TestCase.assertFalse(transactionsPool.addTransaction("aaaa"));
     }
 
+    @Test
+    public void testAlotOfTransactions(){
+        TransactionsPool transactionsPool = new TransactionsPool();
+
+        Block block = new Block();
+
+        List<String> list = new ArrayList<>();
+
+        int max = 100000;
+        int percent = 0;
+        int oldPercent = 0;
+
+        for (int i = 0; i < max; i++){
+            Transaction transaction = new Transaction("a","b", BigInteger.valueOf(i),BigInteger.ZERO, new Shard(0), new Shard(0));
+            String hash = AppServiceProvider.getSerializationService().getHashString(transaction);
+            byte[] buff = AppServiceProvider.getSerializationService().getHash(transaction);
+            block.getListTXHashes().add(buff);
+
+            if (i % 10 == 0){
+                transactionsPool.addBlock(block);
+
+                block = new Block();
+            }
+
+            if (i % 13 == 0) {
+                list.add(hash);
+            }
+
+            percent = i * 100 / max;
+            if (percent != oldPercent) {
+                logger.info("Generating...{}%", percent);
+                oldPercent = percent;
+            }
+        }
+        transactionsPool.addBlock(block);
+
+        for (String hash : list){
+            TestCase.assertTrue(transactionsPool.checkExists(hash));
+        }
+    }
+
 //    @Test
 //    public void testAdd7BlocksAndCheck() {
 //        TransactionsPool transactionsProcessed = new TransactionsPool();
@@ -121,26 +169,26 @@ public class TransactionsPoolTest {
         TestCase.assertFalse(transactionPool.checkExists("bbb"));
     }
 
-    @Test
-    public void testAddTransactionsRemoveListAndCheck(){
-        TransactionsPool transactionPool = new TransactionsPool();
-
-        transactionPool.addTransaction("aaa");
-        transactionPool.addTransaction("bbb");
-
-        TestCase.assertTrue(transactionPool.checkExists("aaa"));
-        TestCase.assertTrue(transactionPool.checkExists("bbb"));
-
-        List<String> transactions = transactionPool.getTransactions();
-        transactionPool.removeTransactions(Arrays.asList("aaa", "bbb"));
-
-        TestCase.assertFalse(transactionPool.checkExists("aaa"));
-        TestCase.assertFalse(transactionPool.checkExists("bbb"));
-
-        TestCase.assertTrue(transactions.contains("aaa"));
-        TestCase.assertTrue(transactions.contains("bbb"));
-
-    }
+//    @Test
+//    public void testAddTransactionsRemoveListAndCheck(){
+//        TransactionsPool transactionPool = new TransactionsPool();
+//
+//        transactionPool.addTransaction("aaa");
+//        transactionPool.addTransaction("bbb");
+//
+//        TestCase.assertTrue(transactionPool.checkExists("aaa"));
+//        TestCase.assertTrue(transactionPool.checkExists("bbb"));
+//
+//        List<String> transactions = transactionPool.getTransactions();
+//        transactionPool.removeTransactions(Arrays.asList("aaa", "bbb"));
+//
+//        TestCase.assertFalse(transactionPool.checkExists("aaa"));
+//        TestCase.assertFalse(transactionPool.checkExists("bbb"));
+//
+//        TestCase.assertTrue(transactions.contains("aaa"));
+//        TestCase.assertTrue(transactions.contains("bbb"));
+//
+//    }
 
 
 }

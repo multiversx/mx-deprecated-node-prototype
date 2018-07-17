@@ -37,17 +37,17 @@ public class TransactionsPool {
         return (newList);
     }
 
-    public void removeTransactions(List<String> hashes){
-        Util.check(hashes != null, "hashes != null");
-
-        synchronized (locker){
-            logger.debug("About to remove {} transactions from a total of {} transactions", hashes.size(), transactions.size());
-
-            transactions.removeAll(hashes);
-
-            logger.debug("Remained {} transactions", transactions.size());
-        }
-    }
+//    public void removeTransactions(List<String> hashes){
+//        Util.check(hashes != null, "hashes != null");
+//
+//        synchronized (locker){
+//            logger.debug("About to remove {} transactions from a total of {} transactions", hashes.size(), transactions.size());
+//
+//            transactions.removeAll(hashes);
+//
+//            logger.debug("Remained {} transactions", transactions.size());
+//        }
+//    }
 
     public boolean addTransaction(String transactionHash){
         Util.check(transactionHash != null, "transaction != null");

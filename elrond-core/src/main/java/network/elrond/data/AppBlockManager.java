@@ -7,7 +7,6 @@ import network.elrond.application.AppState;
 import network.elrond.benchmark.Statistic;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
-import network.elrond.blockchain.TransactionsPool;
 import network.elrond.chronology.ChronologyService;
 import network.elrond.chronology.NTPClient;
 import network.elrond.chronology.Round;
@@ -79,9 +78,9 @@ public class AppBlockManager {
             logger.debug("executed block with hash: {}", hashBlock);
 
             if (result.isOk()) {
-                removeAlreadyProcessedTransactionsFromPool(state, block);
+                //removeAlreadyProcessedTransactionsFromPool(state, block);
 
-                logger.debug("removed {} transaction from pool", BlockUtil.getTransactionsCount(block));
+                //logger.debug("removed {} transaction from pool", BlockUtil.getTransactionsCount(block));
 
                 List<String> acceptedTransactions = BlockUtil.getTransactionsHashesAsString(block);
 
@@ -362,13 +361,13 @@ public class AppBlockManager {
         logger.traceExit();
     }
 
-    public void removeAlreadyProcessedTransactionsFromPool(AppState state, Block block){
-        Util.check(state != null, "state != null");
-        Util.check(block != null, "block != null");
-
-        List<String> toBeRemoved = BlockUtil.getTransactionsHashesAsString(block);
-
-        TransactionsPool pool = state.getPool();
-        pool.removeTransactions(toBeRemoved);
-    }
+//    public void removeAlreadyProcessedTransactionsFromPool(AppState state, Block block){
+//        Util.check(state != null, "state != null");
+//        Util.check(block != null, "block != null");
+//
+//        List<String> toBeRemoved = BlockUtil.getTransactionsHashesAsString(block);
+//
+//        TransactionsPool pool = state.getPool();
+//        pool.removeTransactions(toBeRemoved);
+//    }
 }

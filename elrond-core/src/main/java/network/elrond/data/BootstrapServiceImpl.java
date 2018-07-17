@@ -1,6 +1,5 @@
 package network.elrond.data;
 
-import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.FuturePut;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
@@ -10,7 +9,6 @@ import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.blockchain.SettingsType;
 import network.elrond.chronology.NTPClient;
 import network.elrond.core.AppStateUtil;
-import network.elrond.core.AsciiTableUtil;
 import network.elrond.core.Util;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.service.AppServiceProvider;
@@ -20,9 +18,6 @@ import org.mapdb.Fun;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.List;
 
 public class BootstrapServiceImpl implements BootstrapService {
@@ -334,8 +329,9 @@ public class BootstrapServiceImpl implements BootstrapService {
                     return logger.traceExit(result);
                 }
 
-                AppBlockManager.instance().removeAlreadyProcessedTransactionsFromPool(state, block);
+                //AppBlockManager.instance().removeAlreadyProcessedTransactionsFromPool(state, block);
 
+                blockchain.getPool().addBlock(block);
                 result.ok("Added block in blockchain : " + blockHash + " # " + block);
 
                 logger.info("New block synchronized with hash {}", blockHash);
