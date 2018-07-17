@@ -41,11 +41,11 @@ public class TransactionsPool {
         Util.check(hashes != null, "hashes != null");
 
         synchronized (locker){
-            logger.debug("About to remove {} transactions from a total of {} transactions: {}", hashes.size(), transactions.size(), transactions);
+            logger.debug("About to remove {} transactions from a total of {} transactions", hashes.size(), transactions.size());
 
             transactions.removeAll(hashes);
 
-            logger.debug("Remained {} transactions: {}", transactions.size(), transactions);
+            logger.debug("Remained {} transactions", transactions.size());
         }
     }
 
@@ -55,7 +55,7 @@ public class TransactionsPool {
         synchronized (locker){
             transactions.add(transactionHash);
 
-            logger.debug("Added {}, transactions: {}", transactionHash, transactions);
+            logger.debug("Added {}", transactionHash);
         }
     }
 
@@ -76,15 +76,12 @@ public class TransactionsPool {
     }
 
     private void cleanTransactionList() {
-        logger.debug("About to clean transaction pool. There are {} transactions: {}", transactions.size(), transactions);
+        logger.debug("About to clean transaction pool. There are {} transactions", transactions.size());
 
         transactions.removeAll(lastTransactions.keySet());
 
-        logger.debug("Remained {} transactions: {}", transactions.size(), transactions);
+        logger.debug("Remained {} transactions", transactions.size());
     }
-
-
-
 
     //public ArrayBlockingQueue<String> getTransactionPool() {
     //    return (transactions);
