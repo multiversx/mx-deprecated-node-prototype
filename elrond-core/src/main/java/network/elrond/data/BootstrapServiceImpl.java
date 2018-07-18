@@ -34,9 +34,7 @@ public class BootstrapServiceImpl implements BootstrapService {
         }
 
         if (locationType == LocationType.LOCAL) {
-            BigInteger currentBlockIndex = blockchain.getCurrentBlockIndex();
-            BigInteger networkBlockIndex = getNetworkBlockIndex(blockchain);
-            return logger.traceExit(currentBlockIndex.min(networkBlockIndex));
+            return logger.traceExit(blockchain.getCurrentBlockIndex());
         }
 
         if (locationType == LocationType.NETWORK) {

@@ -50,7 +50,6 @@ public class P2PXTransactionsInterceptorProcessor extends AbstractChannelTask<Tr
 
             String hash = AppServiceProvider.getSerializationService().getHashString(transaction);
             P2PConnection connection = state.getConnection();
-//            AppServiceProvider.getP2PObjectService().put(connection, hash, transaction);
             AppServiceProvider.getBlockchainService().put(hash, transaction, blockchain, BlockchainUnitType.TRANSACTION);
 
             P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.TRANSACTION);

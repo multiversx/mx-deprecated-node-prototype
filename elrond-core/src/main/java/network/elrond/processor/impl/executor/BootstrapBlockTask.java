@@ -33,7 +33,7 @@ public class BootstrapBlockTask extends AbstractBlockTask {
             BigInteger localBlockIndex = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.LOCAL, blockchain);
 
             boolean isLeaderInShard = AppShardingManager.instance().isLeaderInShard(state);
-            boolean isMissingGenesisBlock = remoteBlockIndex.compareTo(BigInteger.ZERO) < 0;
+            boolean isMissingGenesisBlock = (remoteBlockIndex.compareTo(BigInteger.ZERO) < 0 && localBlockIndex.compareTo(BigInteger.ZERO) < 0);
             boolean shouldGenerateGenesis = isLeaderInShard && isMissingGenesisBlock;
             if (!shouldGenerateGenesis) {
                 logger.traceExit("should not generate genesis!");
