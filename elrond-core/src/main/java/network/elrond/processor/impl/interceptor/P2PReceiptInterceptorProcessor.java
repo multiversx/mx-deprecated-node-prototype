@@ -34,9 +34,9 @@ public class P2PReceiptInterceptorProcessor extends AbstractChannelTask<Transfer
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
         List<String> receiptHashList = receiptBlock.getDataList();
 
-        receiptHashList.stream().parallel().forEach(hash -> {
+//        receiptHashList.stream().parallel().forEach(hash -> {
+        for (String hash : receiptHashList) {
             try {
-
                 Receipt receipt = FutureUtil.get(() -> {
                     Receipt receiptDHT;
                     do {
@@ -52,8 +52,8 @@ public class P2PReceiptInterceptorProcessor extends AbstractChannelTask<Transfer
             } catch (Exception ex) {
                 logger.catching(ex);
             }
-        });
-
+        }
+//        );
         logger.traceExit();
     }
 }
