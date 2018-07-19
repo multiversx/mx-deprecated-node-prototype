@@ -44,11 +44,11 @@ public class BootstrapBlockTask extends AbstractBlockTask {
 
             switch (bootstrapType) {
                 case START_FROM_SCRATCH:
-                    logger.trace("starting from genesis...");
+                    logger.info("starting from genesis...");
                     AppServiceProvider.getBootstrapService().startFromGenesis(state, context);
                     break;
                 case REBUILD_FROM_DISK:
-                    logger.trace("starting from disk...");
+                    logger.info("starting from disk...");
                     AppServiceProvider.getBootstrapService().restoreFromDisk(localBlockIndex, state, context);
                     break;
                 default:

@@ -50,7 +50,7 @@ public class AppShardingManager {
     }
 
     public Integer getNumberNodesInNetwork(AppState state) {
-        P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.XTRANSACTION);
+        P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.XTRANSACTION_BLOCK);
         Integer nbPeers = getConnectedPeersOnChannel(channel).size();
 
         // account for self

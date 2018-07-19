@@ -4,8 +4,10 @@ import network.elrond.Application;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainService;
+import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.ObjectUtil;
 import network.elrond.data.Transaction;
+import network.elrond.data.TransferDataBlock;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.p2p.P2PConnection;
@@ -16,23 +18,24 @@ import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class P2PXTransactionsInterceptorProcessor extends AbstractChannelTask<Transaction> {
+import java.util.List;
+
+public class P2PXTransactionsInterceptorProcessor extends AbstractChannelTask<TransferDataBlock<Transaction>> {
     private static final Logger logger = LogManager.getLogger(P2PXTransactionsInterceptorProcessor.class);
 
     @Override
     protected P2PBroadcastChannelName getChannelName() {
-        return P2PBroadcastChannelName.XTRANSACTION;
+        return P2PBroadcastChannelName.XTRANSACTION_BLOCK;
     }
 
     @Override
-    protected void process(Transaction transaction, Application application) {
-        logger.traceEntry("params: {} {}", transaction, application);
+    protected void process(TransferDataBlock<Transaction> transactionBlock, Application application) {
+        logger.traceEntry("params: {} {}", transactionBlock, application);
         AppState state = application.getState();
         Blockchain blockchain = state.getBlockchain();
-        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
+        List<Transaction> transactionList = transactionBlock.getDataList();
 
         try {
-
 
             boolean isLeaderInShard = AppShardingManager.instance().isLeaderInShard(state);
             if (!isLeaderInShard) {
@@ -40,23 +43,24 @@ public class P2PXTransactionsInterceptorProcessor extends AbstractChannelTask<Tr
             }
 
             Shard shard = state.getShard();
-            Shard receiverShard = transaction.getReceiverShard();
+            Shard receiverShard = transactionBlock.getDataList().get(0).getReceiverShard();
             boolean isCrossShard = !ObjectUtil.isEqual(shard, receiverShard);
             if (isCrossShard) {
                 return;
             }
-
-
-            String hash = AppServiceProvider.getSerializationService().getHashString(transaction);
-            P2PConnection connection = state.getConnection();
-            AppServiceProvider.getP2PObjectService().put(connection, hash, transaction);
-
             P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.TRANSACTION);
-            AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, hash);
 
+            for (Transaction transaction : transactionList) {
+                String hash = AppServiceProvider.getSerializationService().getHashString(transaction);
+                AppServiceProvider.getBlockchainService().put(hash, transaction, blockchain, BlockchainUnitType.TRANSACTION);
 
-            logger.trace("Got new xtransaction {}", transaction);
+                boolean transactionNew = !blockchain.getPool().checkExists(hash);
 
+                if (transactionNew) {
+                    AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, hash, shard.getIndex());
+                }
+            }
+            logger.trace("Got new xtransactions {}", transactionList);
 
         } catch (Exception ex) {
             logger.catching(ex);

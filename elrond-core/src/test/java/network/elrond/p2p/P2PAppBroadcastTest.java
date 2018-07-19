@@ -38,7 +38,7 @@ public class P2PAppBroadcastTest {
                 }
             }
         });
-        AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, "###");
+        AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, "###", 0);
 
         Thread.sleep(1000);
         Assert.assertEquals(1, messagesCount.get());
@@ -75,7 +75,7 @@ public class P2PAppBroadcastTest {
         thread.start();
 
         P2PBroadcastChanel channel = app.getState().getChanel(P2PBroadcastChannelName.TRANSACTION);
-        AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, "###");
+        AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, "###", 0);
         Thread.sleep(3000);
         Assert.assertEquals(1, messagesCount.get());
     }

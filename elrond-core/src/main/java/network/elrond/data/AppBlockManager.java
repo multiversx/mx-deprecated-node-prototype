@@ -12,7 +12,6 @@ import network.elrond.chronology.ChronologyService;
 import network.elrond.chronology.NTPClient;
 import network.elrond.chronology.Round;
 import network.elrond.chronology.RoundState;
-import network.elrond.core.AsciiTableUtil;
 import network.elrond.core.ObjectUtil;
 import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
@@ -31,9 +30,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.stream.Collectors;
 
 
 //TODO: remove from "data" package
@@ -73,7 +70,7 @@ public class AppBlockManager {
 
             ExecutionReport result = AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
 
-            if (!result.isOk()){
+            if (!result.isOk()) {
                 logger.debug("Could not commit block with hash {}", hashBlock);
                 return logger.traceExit((Block) null);
             }
@@ -89,19 +86,44 @@ public class AppBlockManager {
 
                 List<String> acceptedTransactions = BlockUtil.getTransactionsHashesAsString(block);
 
-                List<Transaction> blockTransactions = AppServiceProvider.getBlockchainService()
-                    .getAll(acceptedTransactions,
-                            blockchain,
-                            BlockchainUnitType.TRANSACTION);
-                blockTransactions.stream()
-                    .filter(transaction -> transaction.isCrossShardTransaction())
-                        .filter(transaction -> !ObjectUtil.isEqual(shard, transaction.getReceiverShard()))
-                    .forEach(transaction -> {
-                        P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.XTRANSACTION);
-                        AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, transaction);
-                    });
+                // group the cross transactions by the receiving shard
+                // to send them in blocks
+                List<TransferDataBlock<Transaction>> xTransactionBlockList = new ArrayList<>();
 
-                logger.debug("sent Xtransactions");
+                for (Integer shardNb = 0; shardNb < AppServiceProvider.getShardingService().getNumberOfShards(); shardNb++) {
+                    TransferDataBlock<Transaction> xDataBloc = new TransferDataBlock<>();
+                    xDataBloc.setHash(hashBlock);
+                    xTransactionBlockList.add(xDataBloc);
+                }
+
+                List<Transaction> blockTransactions = AppServiceProvider.getBlockchainService()
+                        .getAll(acceptedTransactions,
+                                blockchain,
+                                BlockchainUnitType.TRANSACTION);
+                blockTransactions.stream()
+                        .filter(transaction -> transaction.isCrossShardTransaction())
+                        .filter(transaction -> !ObjectUtil.isEqual(shard, transaction.getReceiverShard()))
+                        .forEach(transaction -> {
+                            Integer shardNb = transaction.getReceiverShard().getIndex();
+                            TransferDataBlock transferDataBlock = xTransactionBlockList.get(shardNb);
+                            transferDataBlock.getDataList().add(transaction);
+                        });
+
+                // transmit the cross transaction blocks
+                xTransactionBlockList.stream().parallel().forEach(transactionTransferDataBlock -> {
+                    Integer receiverShardIndex = xTransactionBlockList.indexOf(transactionTransferDataBlock);
+                    boolean isThisShard = receiverShardIndex == state.getShard().getIndex();
+                    boolean isEmpty = transactionTransferDataBlock.getDataList().isEmpty();
+
+                    if (isThisShard || isEmpty) {
+                        return;
+                    }
+
+                    P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.XTRANSACTION_BLOCK);
+                    AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, transactionTransferDataBlock, receiverShardIndex);
+                    logger.warn("sending XTRANSACTION_BLOCK for block {}, with {} transactions", transactionTransferDataBlock.getHash(),
+                            transactionTransferDataBlock.getDataList().size());
+                });
 
                 sendReceipts(state, block, receipts);
 
@@ -123,20 +145,32 @@ public class AppBlockManager {
     private void sendReceipts(AppState state, Block block, List<Receipt> receipts) throws IOException {
         ThreadUtil.submit(() -> {
             String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
-            List<String> txHashes = new ArrayList<>();
+
+            TransferDataBlock<String> receiptTransferDataBlock = new TransferDataBlock<>();
+            receiptTransferDataBlock.setHash(hashBlock);
+            List<String> receiptsDataList = receiptTransferDataBlock.getDataList();
+
+            List<String> receiptHashes = new ArrayList<>();
+
             for (Receipt receipt : receipts) {
                 // add the blockHash to the receipt as the valid hash is only available after signing
                 receipt.setBlockHash(hashBlock);
 
                 try {
-                    sendReceipt(block, receipt, state);
+                    storeReceipt(block, receipt, state);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                txHashes.add(receipt.getTransactionHash());
-            }
-        });
 
+                receiptHashes.add(AppServiceProvider.getSerializationService().getHashString(receipt));
+            }
+
+            receiptsDataList.addAll(receiptHashes);
+            // Broadcast
+            P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.RECEIPT_BLOCK);
+            AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, receiptTransferDataBlock, state.getShard().getIndex());
+            logger.trace("broadcast the receipt block");
+        });
     }
 
     public Pair<Block, List<Receipt>> composeBlock(List<Transaction> transactions, AppState state) throws
@@ -213,7 +247,7 @@ public class AppBlockManager {
             //test whether the system should continue to add transactions or not
             boolean forceFinishAddingTransactions = !AppServiceProvider.getChronologyService().isStillInRoundState(state.getNtpClient(), state.getBlockchain().getGenesisBlock().getTimestamp(),
                     block.getRoundIndex(), RoundState.PROPOSE_BLOCK);
-            if (forceFinishAddingTransactions){
+            if (forceFinishAddingTransactions) {
                 logger.debug("Force exit from add transactions method. Transactions added: {}", BlockUtil.getTransactionsCount(block));
                 break;
             }
@@ -251,8 +285,7 @@ public class AppBlockManager {
     }
 
 
-
-    private void sendReceipt(Block block, Receipt receipt, AppState state) throws IOException {
+    private void storeReceipt(Block block, Receipt receipt, AppState state) throws IOException {
         logger.traceEntry("params: {} {} {}", block, receipt, state);
         Util.check(block != null, "block != null");
         Util.check(receipt != null, "receipt != null");
@@ -260,20 +293,14 @@ public class AppBlockManager {
 
         String blockHash = AppServiceProvider.getSerializationService().getHashString(block);
         String transactionHash = receipt.getTransactionHash();
-        SecureObject<Receipt> secureReceipt = SecureObjectUtil.create(receipt, state.getPrivateKey(), state.getPublicKey());
-        String secureReceiptHash = AppServiceProvider.getSerializationService().getHashString(secureReceipt);
+        String receiptHash = AppServiceProvider.getSerializationService().getHashString(receipt);
 
         // Store on blockchain
         Blockchain blockchain = state.getBlockchain();
         AppServiceProvider.getBlockchainService().put(transactionHash, blockHash, blockchain, BlockchainUnitType.TRANSACTION_BLOCK);
-        AppServiceProvider.getBlockchainService().put(secureReceiptHash, secureReceipt, blockchain, BlockchainUnitType.RECEIPT);
-        AppServiceProvider.getBlockchainService().put(transactionHash, secureReceiptHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
+        AppServiceProvider.getBlockchainService().put(receiptHash, receipt, blockchain, BlockchainUnitType.RECEIPT);
+        AppServiceProvider.getBlockchainService().put(transactionHash, receiptHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
         logger.trace("placed on blockchain (TRANSACTION_RECEIPT, TRANSACTION_BLOCK and secure RECEIPT)");
-
-        // Broadcast
-        P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.RECEIPT);
-        AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, secureReceiptHash);
-        logger.trace("broadcast the receipt hash");
         logger.traceExit();
     }
 
@@ -366,7 +393,7 @@ public class AppBlockManager {
         logger.traceExit();
     }
 
-    public void removeAlreadyProcessedTransactionsFromPool(AppState state, Block block){
+    public void removeAlreadyProcessedTransactionsFromPool(AppState state, Block block) {
         Util.check(state != null, "state != null");
         Util.check(block != null, "block != null");
 
@@ -376,7 +403,7 @@ public class AppBlockManager {
         ArrayBlockingQueue<String> transactionPool = pool.getTransactionPool();
         transactionPool.removeAll(toBeRemoved);
 
-        logger.debug("Removed {} transactions from pool, remaining: {}", toBeRemoved.size(),  transactionPool.size());
+        logger.debug("Removed {} transactions from pool, remaining: {}", toBeRemoved.size(), transactionPool.size());
 
     }
 }

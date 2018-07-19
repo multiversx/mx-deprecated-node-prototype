@@ -79,7 +79,7 @@ public class BootstrappingProcessorNodeProducer {
                     System.out.println("Put tx hash: " + AppServiceProvider.getSerializationService().getHashString(tx));
                     System.out.println(AppServiceProvider.getSerializationService().encodeJSON(tx));
 
-                    AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, tx);
+                    AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, tx, 0);
                 }
             }
             System.out.println("Local height: " + bootstrapService.getCurrentBlockIndex(LocationType.LOCAL, state.getBlockchain()).toString(10) +

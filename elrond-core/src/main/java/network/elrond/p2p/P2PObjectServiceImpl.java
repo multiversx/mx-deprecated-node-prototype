@@ -26,7 +26,7 @@ public class P2PObjectServiceImpl implements P2PObjectService {
         Number160 hash = getDHTHash(connection, key, clazz);
 
         FutureGet futureGet = peer.get(hash).start();
-        futureGet.awaitUninterruptibly();
+        futureGet.awaitUninterruptibly(1000);
 
         if (futureGet.isSuccess()) {
             Iterator<Data> iterator = futureGet.dataMap().values().iterator();
@@ -58,7 +58,7 @@ public class P2PObjectServiceImpl implements P2PObjectService {
         Number160 hash = getDHTHash(connection, key, value.getClass());
 
         PutBuilder builder = peer.put(hash);
-        if (!canOverwrite){
+        if (!canOverwrite) {
             builder.putIfAbsent();
         }
 

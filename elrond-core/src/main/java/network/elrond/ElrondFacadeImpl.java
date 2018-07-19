@@ -67,7 +67,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
         if (application == null) {
             logger.warn("application is null");
-            return(new ResponseObject(false, "Invalid application state, application is null", null));
+            return (new ResponseObject(false, "Invalid application state, application is null", null));
         }
 
         if (address == null) {
@@ -84,7 +84,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
                 Accounts accounts = state.getAccounts();
                 AccountState account = AppServiceProvider.getAccountStateService().getAccountState(address, accounts);
 
-                if (account == null){
+                if (account == null) {
                     return logger.traceExit(new ResponseObject(true, "", BigInteger.ZERO));
                 } else {
                     return logger.traceExit(new ResponseObject(true, "", account.getBalance()));
@@ -100,7 +100,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
             P2PRequestChannel channel = state.getChanel(P2PRequestChannelName.ACCOUNT);
             AccountState account = AppServiceProvider.getP2PRequestService().get(channel, addressShard, P2PRequestChannelName.ACCOUNT, address);
 
-            if (account == null){
+            if (account == null) {
                 return logger.traceExit(new ResponseObject(true, "", BigInteger.ZERO));
             } else {
                 return logger.traceExit(new ResponseObject(true, "", account.getBalance()));
@@ -117,12 +117,12 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
         if (application == null) {
             logger.warn("application is null");
-            return(new ResponseObject(false, "Invalid application state, application is null", null));
+            return (new ResponseObject(false, "Invalid application state, application is null", null));
         }
 
-        if (transactionHash == null){
+        if (transactionHash == null) {
             logger.warn("transactionHash is null");
-            return(new ResponseObject(false, "Transaction hash is null", null));
+            return (new ResponseObject(false, "Transaction hash is null", null));
         }
 
         Blockchain blockchain = application.getState().getBlockchain();
@@ -131,19 +131,18 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
             Receipt receipt = FutureUtil.get(() -> {
 
-                String receiptHash = null;
-                SecureObject<Receipt> secureReceipt = null;
-
+                String receiptHash;
+                Receipt receiptDHT = null;
                 do {
                     receiptHash = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
                     if (receiptHash != null) {
-                        secureReceipt = AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT);
+                        receiptDHT = AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT);
                     }
                     ThreadUtil.sleep(200);
 
-                } while (receiptHash == null || secureReceipt == null);
+                } while (receiptHash == null || receiptDHT == null);
 
-                return secureReceipt.getObject();
+                return receiptDHT;
 
             }, 60L);
 
@@ -190,8 +189,8 @@ public class ElrondFacadeImpl implements ElrondFacade {
             for (int i = 0; i < noTransactions; i++) {
                 ResponseObject responseObject = generateTransaction(receiver, value, application.getState());
 
-                if (responseObject.isSuccess()){
-                    transactions.add((Transaction)responseObject.getPayload());
+                if (responseObject.isSuccess()) {
+                    transactions.add((Transaction) responseObject.getPayload());
                 }
             }
 
@@ -241,7 +240,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
         try {
             ResponseObject responseObjectTransaction = generateTransaction(receiver, value, application.getState());
             if (responseObjectTransaction.isSuccess()) {
-                sendTransaction(application.getState(), (Transaction)responseObjectTransaction.getPayload());
+                sendTransaction(application.getState(), (Transaction) responseObjectTransaction.getPayload());
             }
 
             return logger.traceExit(responseObjectTransaction);
@@ -273,7 +272,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
         PublicKey receiverPublicKey = new PublicKey(receiver.getBytes());
 
-        if (!receiverPublicKey.isValid()){
+        if (!receiverPublicKey.isValid()) {
             // receiver account is invalid
             logger.warn("Receiver account is invalid");
             return logger.traceExit(new ResponseObject(false, "Receiver account is invalid", null));
@@ -282,7 +281,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
         BigInteger nonce = senderAccount.getNonce();
         Transaction transaction = AppServiceProvider.getTransactionService().generateTransaction(senderPublicKey, receiverPublicKey, value, nonce);
         AppServiceProvider.getTransactionService().signTransaction(transaction, senderPrivateKey.getValue(), senderPublicKey.getValue());
-        if (transaction == null){
+        if (transaction == null) {
             return logger.traceExit(new ResponseObject(false, "Error generating transaction", transaction));
         } else {
             return logger.traceExit(new ResponseObject(true, "", transaction));
@@ -295,7 +294,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
         AppServiceProvider.getP2PObjectService().put(connection, hash, transaction);
 
         P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.TRANSACTION);
-        AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, hash);
+        AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, hash, state.getShard().getIndex());
     }
 
     @Override
@@ -339,7 +338,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
             PublicKey publicKey = new PublicKey(privateKey);
 
             return logger.traceExit(new ResponseObject(true, "",
-                            new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue()))));
+                    new PKSKPair(Util.byteArrayToHexString(publicKey.getValue()), Util.byteArrayToHexString(privateKey.getValue()))));
         } catch (Exception ex) {
             logger.catching(ex);
             return logger.traceExit(new ResponseObject(false, ex.getMessage(), null));
@@ -396,8 +395,8 @@ public class ElrondFacadeImpl implements ElrondFacade {
         try {
             Transaction transaction = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION);
 
-            if (transaction == null){
-                return logger.traceExit(new ResponseObject(true, String.format("Transaction with hash %s was not found",  transactionHash), null));
+            if (transaction == null) {
+                return logger.traceExit(new ResponseObject(true, String.format("Transaction with hash %s was not found", transactionHash), null));
             }
 
             return logger.traceExit(new ResponseObject(true, "", transaction));
@@ -413,7 +412,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
         try {
             Block block = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK);
 
-            if (block == null){
+            if (block == null) {
                 return logger.traceExit(new ResponseObject(true, String.format("Block with hash %s was not found", blockHash), null));
             }
 

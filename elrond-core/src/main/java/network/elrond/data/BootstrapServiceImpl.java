@@ -40,8 +40,8 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         if (locationType == LocationType.LOCAL) {
             BigInteger currentBlockIndex = blockchain.getCurrentBlockIndex();
-            BigInteger networkBlockIndex = getNetworkBlockIndex(blockchain);
-            return logger.traceExit(currentBlockIndex.min(networkBlockIndex));
+            //BigInteger networkBlockIndex = getNetworkBlockIndex(blockchain);
+            return logger.traceExit(currentBlockIndex);
         }
 
         if (locationType == LocationType.NETWORK) {
@@ -90,7 +90,7 @@ public class BootstrapServiceImpl implements BootstrapService {
     public String getBlockHashFromIndex(BigInteger blockIndex, Blockchain blockchain) throws Exception {
         logger.traceEntry("params: {} {}", blockIndex, blockchain);
         String identifier = getBlockIndexIdentifier(blockIndex);
-        return logger.traceExit((String)AppServiceProvider.getBlockchainService().get(identifier, blockchain, BlockchainUnitType.BLOCK_INDEX));
+        return logger.traceExit((String) AppServiceProvider.getBlockchainService().get(identifier, blockchain, BlockchainUnitType.BLOCK_INDEX));
     }
 
 
@@ -118,15 +118,13 @@ public class BootstrapServiceImpl implements BootstrapService {
             String blockNonce = getBlockIndexIdentifier(block.getNonce());
             FuturePut futurePut = AppServiceProvider.getP2PObjectService().put(connection, blockNonce, blockHash, true, false);
 
-            if (!futurePut.isSuccess()){
+            if (!futurePut.isSuccess()) {
                 String blockHashGot = AppServiceProvider.getP2PObjectService().get(connection, blockNonce, String.class);
 
                 if (!blockHashGot.equals(blockHash)) {
                     result.combine(new ExecutionReport().ko("Not allowed to override block index " + blockNonce));
                     return result;
-                }
-                else
-                {
+                } else {
                     logger.debug("Not allowed (BUT IT DOES) to override block index " + blockNonce);
                 }
             }
@@ -199,7 +197,7 @@ public class BootstrapServiceImpl implements BootstrapService {
             ExecutionReport reportTransaction = commitTransaction(genesisTransaction, genesisTransactionHash, blockchain);
             result.combine(reportTransaction);
 
-            ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(genesisBlock, accounts, blockchain,  state.getStatisticsManager());
+            ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(genesisBlock, accounts, blockchain, state.getStatisticsManager());
             result.combine(executionReport);
 
             if (result.isOk()) {
@@ -258,7 +256,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                 Block block = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK);
 
                 logger.trace("re-running block to update internal state...");
-                ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain,  state.getStatisticsManager());
+                ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain, state.getStatisticsManager());
                 result.combine(executionReport);
 
                 if (!result.isOk()) {
@@ -327,7 +325,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                 }
 
 
-                ExecutionReport executionReport = executionService.processBlock(block, accounts, blockchain,  state.getStatisticsManager());
+                ExecutionReport executionReport = executionService.processBlock(block, accounts, blockchain, state.getStatisticsManager());
                 result.combine(executionReport);
 
                 if (!result.isOk()) {
@@ -342,7 +340,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                 logger.info("New block synchronized with hash {}", blockHash);
 
                 logger.info("\n" + state.print().render());
-              //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
+                //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
                 AppStateUtil.printBlockAndAccounts(block, accounts);
 
                 blockchain.setCurrentBlockIndex(blockIndex);
@@ -364,7 +362,7 @@ public class BootstrapServiceImpl implements BootstrapService {
     }
 
     @Override
-    public SyncState getSyncState(Blockchain blockchain) throws Exception{
+    public SyncState getSyncState(Blockchain blockchain) throws Exception {
         SyncState syncState = new SyncState();
 
         syncState.setRemoteBlockIndex(AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.NETWORK, blockchain));
@@ -374,8 +372,6 @@ public class BootstrapServiceImpl implements BootstrapService {
         boolean isNewBlockRemote = syncState.getRemoteBlockIndex().compareTo(syncState.getLocalBlockIndex()) > 0;
         syncState.setSyncRequired(isBlocAvailable && isNewBlockRemote);
 
-        return(syncState);
+        return (syncState);
     }
-
-
 }

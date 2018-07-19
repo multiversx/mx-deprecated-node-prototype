@@ -15,7 +15,9 @@ public interface P2PBroadcastService {
 
     HashSet<PeerAddress> getPeersOnChannel(P2PBroadcastChanel channel);
 
-    boolean publishToChannel(P2PBroadcastChanel chanel, Serializable obj);
+    HashSet<PeerAddress> getPeersOnChannel(P2PBroadcastChanel globalChannel, Integer destinationShard);
+
+    boolean publishToChannel(P2PBroadcastChanel chanel, Serializable obj, Integer destinationShard);
 
     boolean unsubscribeFromChannel(P2PBroadcastChanel chanel);
 

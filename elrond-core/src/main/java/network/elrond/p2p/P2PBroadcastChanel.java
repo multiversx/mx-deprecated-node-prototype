@@ -1,5 +1,8 @@
 package network.elrond.p2p;
 
+import network.elrond.core.Util;
+import network.elrond.service.AppServiceProvider;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,11 +41,20 @@ public class P2PBroadcastChanel {
         this.listeners = listeners;
     }
 
-    public String getChannelIdentifier() {
+    public String getChannelIdentifier(Integer destinationShard) {
         String indent = name.toString();
+        Integer shardIndex = connection.getShard().getIndex();
+
         if (P2PChannelType.SHARD_LEVEL.equals(name.getType())) {
             indent += connection.getShard().getIndex();
+        } else if (P2PChannelType.GLOBAL_LEVEL.equals(name.getType())) {
+            if (destinationShard < shardIndex) {
+                indent += destinationShard + "" + connection.getShard().getIndex();
+            } else if (destinationShard > shardIndex) {
+                indent += connection.getShard().getIndex() + "" + destinationShard;
+            }
         }
+
         return indent;
     }
 

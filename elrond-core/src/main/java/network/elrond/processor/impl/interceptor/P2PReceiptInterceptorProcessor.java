@@ -9,50 +9,55 @@ import network.elrond.core.FutureUtil;
 import network.elrond.core.ThreadUtil;
 import network.elrond.data.Receipt;
 import network.elrond.data.SecureObject;
+import network.elrond.data.TransferDataBlock;
 import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.processor.impl.AbstractChannelTask;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class P2PReceiptInterceptorProcessor extends AbstractChannelTask<String> {
+import java.util.List;
+
+public class P2PReceiptInterceptorProcessor extends AbstractChannelTask<TransferDataBlock<String>> {
 
     private static final Logger logger = LogManager.getLogger(P2PReceiptInterceptorProcessor.class);
 
     @Override
     protected P2PBroadcastChannelName getChannelName() {
-        return P2PBroadcastChannelName.RECEIPT;
+        return P2PBroadcastChannelName.RECEIPT_BLOCK;
     }
 
     @Override
-    protected void process(String hash, Application application) {
-        logger.traceEntry("params: {} {}", hash, application);
+    protected void process(TransferDataBlock<String> receiptBlock, Application application) {
+        logger.traceEntry("params: {} {}", receiptBlock, application);
         AppState state = application.getState();
         Blockchain blockchain = state.getBlockchain();
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
+        List<String> receiptHashList = receiptBlock.getDataList();
 
-        try {
+        for (String hash : receiptHashList) {
+            try {
 
-            SecureObject<Receipt> secureReceipt = FutureUtil.get(() -> {
-                SecureObject<Receipt> result;
-                do {
-                    result = blockchainService.get(hash, blockchain, BlockchainUnitType.RECEIPT);
-                    ThreadUtil.sleep(200);
-                } while (result == null);
-                return result;
-            }, 60L);
+                Receipt receipt = FutureUtil.get(() -> {
+                    Receipt receiptDHT;
+                    do {
+                        receiptDHT = blockchainService.get(hash, blockchain, BlockchainUnitType.RECEIPT);
+                        ThreadUtil.sleep(200);
+                    } while (receiptDHT == null);
+                    return receiptDHT;
+                }, 60L);
 
 
-            if (secureReceipt == null) {
-                logger.warn("Receipt with hash {} was not found!", hash);
-                logger.traceExit();
-                return;
+                if (receipt == null) {
+                    logger.warn("Receipt with hash {} was not found!", hash);
+                    continue;
+                }
+
+                logger.info("Got new receipt with hash {}", hash);
+
+            } catch (Exception ex) {
+                logger.catching(ex);
             }
-
-            logger.trace("Got new receipt with hash {}", hash);
-
-        } catch (Exception ex) {
-            logger.catching(ex);
         }
         logger.traceExit();
     }

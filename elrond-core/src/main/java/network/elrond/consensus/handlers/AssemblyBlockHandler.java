@@ -32,6 +32,7 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
 
         if (!isLeader(state)) {
             logger.info("Round: {}, subRound: {}> Not this node's turn to process ...", data.getRound().getIndex(), data.getRoundState().name());
+            logger.traceExit();
             return;
         }
         logger.info("Round: {}, subRound: {}> This node will assemble block.", data.getRound().getIndex(), data.getRoundState().name());
@@ -39,6 +40,7 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
         if (state.getBlockchain().getCurrentBlock() == null) {
             // Require synchronize
             logger.info("Round: {}, subRound: {}> Can't execute, synchronize required!", data.getRound().getIndex(), data.getRoundState().name());
+            logger.traceExit();
             return;
         }
 

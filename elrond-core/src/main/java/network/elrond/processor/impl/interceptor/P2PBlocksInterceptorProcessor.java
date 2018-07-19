@@ -41,7 +41,7 @@ public class P2PBlocksInterceptorProcessor extends AbstractChannelTask<String> {
                 blockchainService.put(block.getNonce(), hash, blockchain, BlockchainUnitType.BLOCK_INDEX);
                 AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain,  state.getStatisticsManager());
 
-                logger.trace("Got new block with hash {}", hash);
+                logger.info("Got new block with hash {}", hash);
             } else {
                 logger.warn("Block with hash {} was not found!", hash);
             }
