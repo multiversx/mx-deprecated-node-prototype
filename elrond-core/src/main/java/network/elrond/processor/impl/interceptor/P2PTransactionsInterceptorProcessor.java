@@ -32,7 +32,7 @@ public class P2PTransactionsInterceptorProcessor extends AbstractChannelTask<Str
             TransactionsPool pool = blockchain.getPool();
 
             if (pool.checkExists(hash)){
-                logger.debug("Transaction hash {} already processed/fetched!", hash);
+                logger.trace("Transaction hash {} already processed/fetched!", hash);
                 logger.traceExit();
                 return;
             }

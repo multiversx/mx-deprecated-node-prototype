@@ -149,8 +149,7 @@ public class AppBlockManager {
 
             List<String> receiptHashes = new ArrayList<>();
 
-            for (Receipt receipt : receipts) {
-                // add the blockHash to the receipt as the valid hash is only available after signing
+            receipts.stream().parallel().forEach(receipt -> {
                 receipt.setBlockHash(hashBlock);
 
                 try {
@@ -160,7 +159,7 @@ public class AppBlockManager {
                 }
 
                 receiptHashes.add(AppServiceProvider.getSerializationService().getHashString(receipt));
-            }
+            });
 
             receiptsDataList.addAll(receiptHashes);
             // Broadcast

@@ -8,6 +8,7 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.storage.Data;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.AppShardingManager;
 import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,6 +24,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
 
 
     @Override
+    @SuppressWarnings("unchecked")
     public P2PRequestChannel createChannel(P2PConnection connection, Shard shard, P2PRequestChannelName channelName) {
         logger.traceEntry("params: {} {}", connection, channelName);
         try {
@@ -77,16 +79,26 @@ public class P2PRequestServiceImpl implements P2PRequestService {
             PeerDHT dht = connection.getDht();
             Number160 hash = Number160.createHash(channel.getChannelIdentifier(shard));
 
-
             FutureGet futureGet = dht.get(hash).start();
-            futureGet.awaitUninterruptibly();
+            futureGet.awaitUninterruptibly(1000);
             if (futureGet.isSuccess() && !futureGet.isEmpty()) {
 
-                HashSet<PeerAddress> peersOnChannel = (HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object();
-                List<R> responses = new ArrayList<R>();
+                //filter the channel peers
+                HashSet<PeerAddress> peersOnChannel = (HashSet<PeerAddress>) futureGet.dataMap()
+                        .values()
+                        .iterator()
+                        .next()
+                        .object();
+
+                // remove self from channel peer list
+                PeerAddress self = connection.getPeer().peerAddress();
+                peersOnChannel.remove(self);
+
+                List<R> responses = new ArrayList<>();
+                Peer peer = dht.peer();
 
                 peersOnChannel.stream().parallel().forEach(peerAddress -> {
-                    FutureDirect futureDirect = dht.peer()
+                    FutureDirect futureDirect = peer
                             .sendDirect(peerAddress)
                             .object(new P2PRequestMessage(key, channelName, shard))
                             .start();

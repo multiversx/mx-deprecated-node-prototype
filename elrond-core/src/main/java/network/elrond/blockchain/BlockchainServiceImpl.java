@@ -105,7 +105,7 @@ public class BlockchainServiceImpl implements BlockchainService {
     }
 
     @Override
-    public <H extends Object, B extends Serializable> List<B> getAll(List<H> hashes, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
+    public synchronized <H extends Object, B extends Serializable> List<B> getAll(List<H> hashes, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
         logger.traceEntry("params: {} {} {}", hashes, blockchain, type);
 
         Util.check(hashes != null, "hashes!=null");

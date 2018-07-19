@@ -41,7 +41,7 @@ public class P2PReceiptInterceptorProcessor extends AbstractChannelTask<Transfer
                     Receipt receiptDHT;
                     do {
                         receiptDHT = blockchainService.get(hash, blockchain, BlockchainUnitType.RECEIPT);
-                        ThreadUtil.sleep(20);
+                        ThreadUtil.sleep(200);
                     } while (receiptDHT == null);
                     return receiptDHT;
                 }, 60L);
