@@ -157,7 +157,7 @@ public class AppState implements Serializable, AsciiPrintable {
     }
 
     public StatisticsManager getStatisticsManager() {
-        logger.warn("Transactions in Pool: {}", getPool().getTransactionPool().size());
+        logger.warn("Transactions in Pool: {}", getPool().getTransactions().size());
         if(statisticsManagers == null){
           statisticsManagers  = new StatisticsManager(new ElrondSystemTimerImpl(), getShard().getIndex());
         }
@@ -184,7 +184,7 @@ public class AppState implements Serializable, AsciiPrintable {
 
         AsciiTable.Row row1 = new AsciiTable.Row();
         row1.getValues().add("Pool");
-        row1.getValues().add(String.valueOf(getPool().getTransactionPool().size()));
+        row1.getValues().add(String.valueOf(getPool().getTransactions().size()));
         table.getData().add(row1);
 
         table.calculateColumnWidth();

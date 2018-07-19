@@ -1,6 +1,5 @@
 package network.elrond.data;
 
-import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.FuturePut;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
@@ -10,7 +9,6 @@ import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.blockchain.SettingsType;
 import network.elrond.chronology.NTPClient;
 import network.elrond.core.AppStateUtil;
-import network.elrond.core.AsciiTableUtil;
 import network.elrond.core.Util;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.service.AppServiceProvider;
@@ -20,9 +18,6 @@ import org.mapdb.Fun;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.List;
 
 public class BootstrapServiceImpl implements BootstrapService {
@@ -40,7 +35,6 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         if (locationType == LocationType.LOCAL) {
             BigInteger currentBlockIndex = blockchain.getCurrentBlockIndex();
-            //BigInteger networkBlockIndex = getNetworkBlockIndex(blockchain);
             return logger.traceExit(currentBlockIndex);
         }
 
@@ -122,12 +116,13 @@ public class BootstrapServiceImpl implements BootstrapService {
                 String blockHashGot = AppServiceProvider.getP2PObjectService().get(connection, blockNonce, String.class);
 
                 if (!blockHashGot.equals(blockHash)) {
-                    result.combine(new ExecutionReport().ko("Not allowed to override block index " + blockNonce));
+                    result.combine(new ExecutionReport().ko("Not allowed to override block index " + blockNonce + " with hash " + blockHashGot + " with his own generated hash " + blockHash));
                     return result;
-                } else {
-                    logger.debug("Not allowed (BUT IT DOES) to override block index " + blockNonce);
                 }
+
+                logger.debug("Commited first, block index " + blockNonce + " with hash " + blockHashGot + ". There was " + futurePut.result().size() + " peers which have tried to commit the same block index.");
             }
+
             logger.trace("stored block index {}", block.getNonce());
 
             AppServiceProvider.getBlockchainService().put(blockHash, block, blockchain, BlockchainUnitType.BLOCK);
@@ -333,21 +328,20 @@ public class BootstrapServiceImpl implements BootstrapService {
                     return logger.traceExit(result);
                 }
 
-                AppBlockManager.instance().removeAlreadyProcessedTransactionsFromPool(state, block);
+                //AppBlockManager.instance().removeAlreadyProcessedTransactionsFromPool(state, block);
 
+                blockchain.getPool().addBlock(block);
                 result.ok("Added block in blockchain : " + blockHash + " # " + block);
 
                 logger.info("New block synchronized with hash {}", blockHash);
-
-                logger.info("\n" + state.print().render());
-                //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
+                logger.info("\r\n" + state.print().render());
+              //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
                 AppStateUtil.printBlockAndAccounts(block, accounts);
 
+                // Update current block
                 blockchain.setCurrentBlockIndex(blockIndex);
                 blockchain.setCurrentBlock(block);
 
-                // Update current block
-                blockchain.setCurrentBlock(block);
                 logger.trace("done updating current block");
 
             } catch (Exception ex) {

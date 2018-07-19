@@ -3,14 +3,12 @@ package network.elrond.processor.impl.interceptor;
 import network.elrond.Application;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
-import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.ObjectUtil;
 import network.elrond.data.Transaction;
 import network.elrond.data.TransferDataBlock;
 import network.elrond.p2p.P2PBroadcastChanel;
 import network.elrond.p2p.P2PBroadcastChannelName;
-import network.elrond.p2p.P2PConnection;
 import network.elrond.processor.impl.AbstractChannelTask;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.AppShardingManager;
@@ -48,6 +46,7 @@ public class P2PXTransactionsInterceptorProcessor extends AbstractChannelTask<Tr
             if (isCrossShard) {
                 return;
             }
+
             P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.TRANSACTION);
 
             for (Transaction transaction : transactionList) {

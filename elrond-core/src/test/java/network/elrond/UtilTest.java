@@ -8,7 +8,6 @@ import network.elrond.account.Accounts;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.consensus.Validator;
 import network.elrond.core.Util;
-import network.elrond.crypto.PublicKey;
 import network.elrond.data.Block;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
@@ -18,6 +17,7 @@ import org.junit.Test;
 
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -85,6 +85,11 @@ public class UtilTest {
         String strAddr = "025f37d20e5b18909361e0ead7ed17c69b417bee70746c9e9c2bcb1394d921d4ae";
 
         TestCase.assertEquals(strAddr, Util.getAddressFromPublicKey(Util.hexStringToByteArray(strPubKeyHexa)));
+    }
+
+    @Test
+    public void testPrint01(){
+        logger.debug("{}", Arrays.asList("aaa", "bbb", "ccc"));
     }
 
     @Test

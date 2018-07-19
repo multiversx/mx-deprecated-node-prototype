@@ -53,7 +53,7 @@ public class AsciiTable {
             sb.append(String.format(" %-" + (column.width) + "s", column.name));
             sb.append("|");
         }
-        sb.append("\n");
+        sb.append("\r\n");
     }
 
     private void writeSeparator(final List<Column> columns, final StringBuilder sb) {
@@ -62,7 +62,7 @@ public class AsciiTable {
             sb.append(String.format("%-" + (column.width + 1) + "s", "").replace(' ', '-'));
             sb.append("+");
         }
-        sb.append("\n");
+        sb.append("\r\n");
     }
 
     private void writeValues(final List<Column> columns, final List<Row> rows, final StringBuilder sb) {
@@ -79,7 +79,7 @@ public class AsciiTable {
 
                 columnIdx++;
             }
-            sb.append("\n");
+            sb.append("\r\n");
         }
     }
 
