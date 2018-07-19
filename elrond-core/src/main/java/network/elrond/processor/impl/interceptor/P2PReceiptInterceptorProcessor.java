@@ -8,7 +8,6 @@ import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.FutureUtil;
 import network.elrond.core.ThreadUtil;
 import network.elrond.data.Receipt;
-import network.elrond.data.SecureObject;
 import network.elrond.data.TransferDataBlock;
 import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.processor.impl.AbstractChannelTask;
@@ -35,30 +34,26 @@ public class P2PReceiptInterceptorProcessor extends AbstractChannelTask<Transfer
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
         List<String> receiptHashList = receiptBlock.getDataList();
 
-        for (String hash : receiptHashList) {
+        receiptHashList.stream().parallel().forEach(hash -> {
             try {
 
                 Receipt receipt = FutureUtil.get(() -> {
                     Receipt receiptDHT;
                     do {
                         receiptDHT = blockchainService.get(hash, blockchain, BlockchainUnitType.RECEIPT);
-                        ThreadUtil.sleep(200);
+                        ThreadUtil.sleep(20);
                     } while (receiptDHT == null);
                     return receiptDHT;
                 }, 60L);
 
-
                 if (receipt == null) {
                     logger.warn("Receipt with hash {} was not found!", hash);
-                    continue;
                 }
-
-                logger.info("Got new receipt with hash {}", hash);
-
             } catch (Exception ex) {
                 logger.catching(ex);
             }
-        }
+        });
+
         logger.traceExit();
     }
 }

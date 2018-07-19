@@ -243,7 +243,7 @@ public class BlockchainServiceImpl implements BlockchainService {
 
         response = AppServiceProvider.getP2PRequestService().get(channel, shard, channelName, hashStr);
 
-        logger.warn("REQUESTED {} WITH HASH {}. RECEIVED: {}", channel.getName(), hash, response);
+        logger.warn("Requested {} with hash {}. Received: {}", channel.getName(), hash, response);
         return logger.traceExit(response);
     }
 }

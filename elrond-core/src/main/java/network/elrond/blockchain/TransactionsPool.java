@@ -21,10 +21,10 @@ public class TransactionsPool {
     protected final Map<String, Object> lastTransactions = new LRUMap<>(100000);
     protected final List<String> transactions = new ArrayList<>();
 
-    public List<String> getTransactions(){
+    public List<String> getTransactions() {
         List<String> newList = null;
 
-        synchronized (locker){
+        synchronized (locker) {
 
             newList = new ArrayList<>(transactions);
         }
@@ -32,42 +32,42 @@ public class TransactionsPool {
         return (newList);
     }
 
-    public boolean addTransaction(String transactionHash){
+    public boolean addTransaction(String transactionHash) {
         Util.check(transactionHash != null, "transaction != null");
 
-        synchronized (locker){
+        synchronized (locker) {
             if (!checkExistsNoLock(transactionHash)) {
                 transactions.add(transactionHash);
 
-                logger.debug("Added {}", transactionHash);
+                logger.trace("Added {}", transactionHash);
 
-                return(true);
+                return (true);
             } else {
                 logger.debug("Transaction {} already in pool/processed!", transactionHash);
-                return(false);
+                return (false);
             }
 
         }
     }
 
-    public boolean checkExists(String transactionHash){
+    public boolean checkExists(String transactionHash) {
         Util.check(transactionHash != null, "transaction != null");
 
-        synchronized (locker){
-            return(checkExistsNoLock(transactionHash));
+        synchronized (locker) {
+            return (checkExistsNoLock(transactionHash));
         }
     }
 
-    protected boolean checkExistsNoLock(String transactionHash){
-        if (transactions.contains(transactionHash)){
+    protected boolean checkExistsNoLock(String transactionHash) {
+        if (transactions.contains(transactionHash)) {
             return true;
         }
 
-        if (lastTransactions.containsKey(transactionHash)){
+        if (lastTransactions.containsKey(transactionHash)) {
             return true;
         }
 
-        return(false);
+        return (false);
     }
 
     public void addBlock(Block block) {
@@ -82,7 +82,7 @@ public class TransactionsPool {
         synchronized (locker) {
             Collection<String> hashes = BlockUtil.getTransactionsHashesAsString(block);
 
-            for (String hash : hashes){
+            for (String hash : hashes) {
                 lastTransactions.put(hash, dummyObject);
             }
 
