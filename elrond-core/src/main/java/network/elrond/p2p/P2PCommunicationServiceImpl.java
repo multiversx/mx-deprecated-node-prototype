@@ -8,14 +8,13 @@ import org.apache.logging.log4j.Logger;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 
 public class P2PCommunicationServiceImpl implements P2PCommunicationService {
     private static final Logger logger = LogManager.getLogger(P2PCommunicationServiceImpl.class);
 
     private final int pingConnectionTimeOut = 2000;
-    private final int pingAltConnectionTimeOut = 1000;
     private final int portConnectionTimeOut = 1000;
-    private final int altPortForPingEmulation = 445;
 
     public PingResponse getPingResponse(String address, int port, boolean throwOnPortClosed) throws Exception {
         logger.traceEntry("params: {} {}", address, port);
@@ -96,7 +95,12 @@ public class P2PCommunicationServiceImpl implements P2PCommunicationService {
         ProcessBuilder processBuilder = new ProcessBuilder("ping", isWindows? "-n" : "-c", "1", host);
         Process proc = processBuilder.start();
 
-        int returnVal = proc.waitFor();
-        return returnVal == 0;
+        boolean result = proc.waitFor(pingConnectionTimeOut, TimeUnit.MILLISECONDS);
+
+        if (!result){
+            return false;
+        }
+
+        return proc.exitValue() == 0;
     }
 }
