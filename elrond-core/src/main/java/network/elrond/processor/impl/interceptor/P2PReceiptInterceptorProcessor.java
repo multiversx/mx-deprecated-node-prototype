@@ -34,14 +34,14 @@ public class P2PReceiptInterceptorProcessor extends AbstractChannelTask<Transfer
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
         List<String> receiptHashList = receiptBlock.getDataList();
 
-        receiptHashList.stream().parallel().forEach(hash -> {
-//        for (String hash : receiptHashList) {
+//        receiptHashList.stream().parallel().forEach(hash -> {
+        for (String hash : receiptHashList) {
             try {
                 Receipt receipt = FutureUtil.get(() -> {
                     Receipt receiptDHT;
                     do {
                         receiptDHT = blockchainService.get(hash, blockchain, BlockchainUnitType.RECEIPT);
-                        ThreadUtil.sleep(10);
+                        ThreadUtil.sleep(100);
                     } while (receiptDHT == null);
                     return receiptDHT;
                 }, 60L);
@@ -52,8 +52,8 @@ public class P2PReceiptInterceptorProcessor extends AbstractChannelTask<Transfer
             } catch (Exception ex) {
                 logger.catching(ex);
             }
-//        }
-        });
+        }
+//        });
         logger.traceExit();
     }
 }
