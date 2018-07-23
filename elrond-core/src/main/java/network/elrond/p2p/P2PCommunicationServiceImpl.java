@@ -6,17 +6,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.OutputStream;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 
 public class P2PCommunicationServiceImpl implements P2PCommunicationService {
     private static final Logger logger = LogManager.getLogger(P2PCommunicationServiceImpl.class);
 
     private final int pingConnectionTimeOut = 2000;
-    private final int pingAltConnectionTimeOut = 1000;
     private final int portConnectionTimeOut = 1000;
-    private final int altPortForPingEmulation = 445;
 
     public PingResponse getPingResponse(String address, int port, boolean throwOnPortClosed) throws Exception {
         logger.traceEntry("params: {} {}", address, port);
@@ -45,18 +43,11 @@ public class P2PCommunicationServiceImpl implements P2PCommunicationService {
         }
 
         //step 1. plain ping
-        InetAddress inet = InetAddress.getByName(address);
-        timeStampStartPing = System.currentTimeMillis();
+        if (!ping(address)){
+            timeStampEnd = System.currentTimeMillis();
+            logger.debug("Ping timeout! Took {} ms", timeStampEnd - timeStampStart);
 
-        if (!inet.isReachable(pingConnectionTimeOut)) {
-            //try to connect to altPortForPingEmulation
-            timeStampStartPing = System.currentTimeMillis();
-            if (!isPortReachable(address, altPortForPingEmulation, pingAltConnectionTimeOut)){
-                timeStampEnd = System.currentTimeMillis();
-                logger.debug("Ping timeout! Took {} ms", timeStampEnd - timeStampStart);
-
-                throw new Exception("Ping timeout!");
-            }
+            throw new Exception("Ping timeout!");
         }
         timeStampEnd = System.currentTimeMillis();
 
@@ -96,5 +87,20 @@ public class P2PCommunicationServiceImpl implements P2PCommunicationService {
         }
 
         return(false);
+    }
+
+    private boolean ping(String host) throws Exception {
+        boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
+
+        ProcessBuilder processBuilder = new ProcessBuilder("ping", isWindows? "-n" : "-c", "1", host);
+        Process proc = processBuilder.start();
+
+        boolean result = proc.waitFor(pingConnectionTimeOut, TimeUnit.MILLISECONDS);
+
+        if (!result){
+            return false;
+        }
+
+        return proc.exitValue() == 0;
     }
 }

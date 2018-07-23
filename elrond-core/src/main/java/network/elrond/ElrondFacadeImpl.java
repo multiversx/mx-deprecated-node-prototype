@@ -14,7 +14,6 @@ import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.Block;
 import network.elrond.data.Receipt;
-import network.elrond.data.SecureObject;
 import network.elrond.data.Transaction;
 import network.elrond.p2p.*;
 import network.elrond.service.AppServiceProvider;
@@ -372,13 +371,19 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
         ArrayList<StatisticsManager> statisticsManagers = new ArrayList<>();
 
+        int currentShard = state.getShard().getIndex();
         for (int i = 0; i < numberOfShards; i++) {
-            Shard addressShard = new Shard(i);
-            StatisticsManager statisticsManager = AppServiceProvider.getP2PRequestService().get(channel, addressShard, P2PRequestChannelName.STATISTICS, null);
-            if (statisticsManager != null) {
-                statisticsManagers.add(statisticsManager);
-            } else {
-                statisticsManagers.add(new StatisticsManager(new ElrondSystemTimerImpl(), i));
+            if(i == currentShard){
+                statisticsManagers.add(state.getStatisticsManager());
+            }
+            else {
+                Shard addressShard = new Shard(i);
+                StatisticsManager statisticsManager = AppServiceProvider.getP2PRequestService().get(channel, addressShard, P2PRequestChannelName.STATISTICS, null);
+                if (statisticsManager != null) {
+                    statisticsManagers.add(statisticsManager);
+                } else {
+                    statisticsManagers.add(new StatisticsManager(new ElrondSystemTimerImpl(), i));
+                }
             }
         }
 
