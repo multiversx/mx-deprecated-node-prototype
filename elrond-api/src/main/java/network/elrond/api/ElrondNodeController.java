@@ -75,18 +75,18 @@ public class ElrondNodeController {
             @RequestParam(defaultValue = "127.0.0.1", required = false) String masterPeerIpAddress,
             @RequestParam(defaultValue = "026c00d83e0dc47e6b626ed6c42f636b", required = true) String privateKey,
             @RequestParam(defaultValue = "21000000", required = false) String mintValue,
-            @RequestParam(defaultValue = "START_FROM_SCRATCH", required = true) BootstrapType bootstrapType,
-            @RequestParam(defaultValue = "elrond-node-1", required = false) String blockchainPath,
-            @RequestParam(defaultValue = "elrond-node-1", required = false) String blockchainRestorePath
+            @RequestParam(defaultValue = "START_FROM_SCRATCH", required = true) BootstrapType bootstrapType//,
+            //@RequestParam(defaultValue = "elrond-node-1", required = false) String blockchainPath,
+            //@RequestParam(defaultValue = "elrond-node-1", required = false) String blockchainRestorePath
 
     ) throws IOException {
-        logger.traceEntry("params: {} {} {} {} {} {} {} {} {}", nodeName, port, masterPeerPort, masterPeerIpAddress,
-                privateKey, mintValue, bootstrapType, blockchainPath, blockchainRestorePath);
+        logger.traceEntry("params: {} {} {} {} {} {} {}", nodeName, port, masterPeerPort, masterPeerIpAddress,
+                privateKey, mintValue, bootstrapType);
         //Reuploaded
         AppContext context = ContextCreator.createAppContext(nodeName, privateKey, masterPeerIpAddress,
-                masterPeerPort, port, bootstrapType, blockchainPath);
+                masterPeerPort, port, bootstrapType, nodeName);
 
-        return logger.traceExit(elrondApiNode.start(context, blockchainPath, blockchainRestorePath));
+        return logger.traceExit(elrondApiNode.start(context, nodeName, nodeName));
     }
 
 

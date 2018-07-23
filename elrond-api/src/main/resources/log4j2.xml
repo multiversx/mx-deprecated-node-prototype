@@ -60,12 +60,16 @@
             <!--<AppenderRef ref="WebSocketAppender"/>-->
         <!--</AsyncLogger>-->
 
-        <Root level="ERROR">
-            <AppenderRef ref="ConsoleAppender"/>
-            <AppenderRef ref="FileAppender"/>
+        <Root level="OFF">
             <AppenderRef ref="WebSocketAppender"/>
         </Root>
 
-        <Logger name="network.elrond" level="DEBUG"></Logger>
+        <Root level="ERROR">
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="FileAppender"/>
+        </Root>
+
+        <Logger name="network.elrond" level="DEBUG">
+        </Logger>
     </Loggers>
 </Configuration>

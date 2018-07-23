@@ -106,9 +106,7 @@ public class ElrondApiApplication {
                                     data.get("peer_ip").toString(),
                                     data.get("node_private_key").toString(),
                                     null,
-                                    (BootstrapType)data.get("startup_type"),
-                                    data.get("blockchain_path").toString(),
-                                    data.get("blockchain_restore_path").toString());
+                                    (BootstrapType)data.get("startup_type"));
                         } catch (Exception ex) {
                             logger.catching(ex);
                             logger.error("Can not auto-start node!");
