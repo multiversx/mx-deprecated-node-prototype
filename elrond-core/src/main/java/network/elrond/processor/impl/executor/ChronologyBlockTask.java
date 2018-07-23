@@ -76,6 +76,7 @@ public class ChronologyBlockTask implements AppTask {
                     }
 
                     if (maxRemoteBlockIndex.compareTo(syncState.getRemoteBlockIndex()) > 0) {
+                        ThreadUtil.sleep(100);
                         nTries++;
                         if (nTries < 100) {
                             logger.debug("Tries: {}", nTries);
