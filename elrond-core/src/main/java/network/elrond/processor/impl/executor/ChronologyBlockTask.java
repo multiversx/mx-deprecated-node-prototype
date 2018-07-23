@@ -38,7 +38,7 @@ public class ChronologyBlockTask implements AppTask {
 
             long genesisTimeStampCached = Long.MIN_VALUE;
             BigInteger maxRemoteBlockIndex = Util.BIG_INT_MIN_ONE;
-            long nTries = 0;
+            long nRetries = 0;
 
             while (state.isStillRunning()) {
                 ThreadUtil.sleep(1);
@@ -67,7 +67,7 @@ public class ChronologyBlockTask implements AppTask {
 
                     if (syncState.getRemoteBlockIndex().compareTo(maxRemoteBlockIndex) > 0) {
                         maxRemoteBlockIndex = syncState.getRemoteBlockIndex();
-                        nTries = 0;
+                        nRetries = 0;
                         logger.debug("Max remote block index: {} and local block index: {}", maxRemoteBlockIndex, syncState.getLocalBlockIndex());
                     }
 
@@ -77,16 +77,16 @@ public class ChronologyBlockTask implements AppTask {
 
                     if (maxRemoteBlockIndex.compareTo(syncState.getRemoteBlockIndex()) > 0) {
                         ThreadUtil.sleep(100);
-                        nTries++;
-                        if (nTries < 100) {
-                            logger.debug("Tries: {}", nTries);
+                        nRetries++;
+                        if (nRetries < Util.MAX_RETRIES) {
+                            logger.debug("Tries: {}", nRetries);
                             continue;
                         }
 
-                        logger.debug("############### Max tries have reached: {} #############", nTries);
+                        logger.debug("############### Max tries have reached: {} #############", nRetries);
                     }
 
-                    nTries = 0;
+                    nRetries = 0;
 
                     synchronized (state.lockerSyncPropose) {
                         long globalTimeStamp = chronologyService.getSynchronizedTime(state.getNtpClient());
