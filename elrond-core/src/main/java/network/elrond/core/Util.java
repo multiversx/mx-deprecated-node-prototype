@@ -42,6 +42,7 @@ public class Util {
     public static SHA256.Digest SHA256 = new SHA256.Digest();
 
     public static BigInteger BIG_INT_MIN_ONE = BigInteger.valueOf(-1);
+    public static final long MAX_RETRIES = 100;
 
     public static byte[] EMPTY_BYTE_ARRAY;
     public static byte[] EMPTY_DATA_HASH;

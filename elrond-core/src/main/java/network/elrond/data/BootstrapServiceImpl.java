@@ -120,7 +120,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                     return result;
                 }
 
-                logger.debug("Commited first, block index " + blockNonce + " with hash " + blockHashGot + ". There was " + futurePut.result().size() + " peers which have tried to commit the same block index.");
+                logger.debug("Commited first, block index " + blockNonce + " with hash " + blockHashGot + ". There was " + futurePut.rawResult().size() + " peers which have tried to commit the same block index.");
             }
 
             logger.trace("stored block index {}", block.getNonce());
