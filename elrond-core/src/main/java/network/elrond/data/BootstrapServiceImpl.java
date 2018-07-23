@@ -342,6 +342,11 @@ public class BootstrapServiceImpl implements BootstrapService {
                 blockchain.setCurrentBlockIndex(blockIndex);
                 blockchain.setCurrentBlock(block);
 
+//                if (state.getStatisticsManager() != null){
+//                    state.getStatisticsManager().addStatistic(
+//                            new Statistic(block.getListTXHashes().size(), block.getTimestamp()));
+//                }
+
                 logger.trace("done updating current block");
 
             } catch (Exception ex) {

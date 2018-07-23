@@ -2,7 +2,6 @@ package network.elrond.consensus.handlers;
 
 import network.elrond.TimeWatch;
 import network.elrond.application.AppState;
-import network.elrond.benchmark.Statistic;
 import network.elrond.blockchain.TransactionsPool;
 import network.elrond.chronology.SubRound;
 import network.elrond.consensus.ConsensusState;
@@ -56,7 +55,7 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
         if (hashes.isEmpty()) {
             logger.info("Round: {}, subRound: {}> Can't execute, no transactions!",
                     data.getRound().getIndex(), data.getRoundState().name());
-            state.getStatisticsManager().addStatistic(new Statistic(0));
+            //state.getStatisticsManager().addStatistic(new Statistic(0));
             return;
         }
 
