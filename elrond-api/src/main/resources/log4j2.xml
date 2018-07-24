@@ -22,6 +22,11 @@
             <!--<PatternLayout pattern="${ALT_LOG_PATTERN}"/>-->
         </WebSocketAppender>
 
+        <MySQLAppender name="MySQLAppender" connection="jdbc:mysql://46.101.242.65:3306/LOGS?useSSL=false&amp;useServerPrepStmts=false&amp;rewriteBatchedStatements=true&amp;user=loguser&amp;password=elrondCaps67">
+            <PatternLayout pattern="${MAIN_LOG_PATTERN}"/>
+            <!--<PatternLayout pattern="${ALT_LOG_PATTERN}"/>-->
+        </MySQLAppender>
+
         <!-- Rolling File Appender -->
         <RollingFile name="FileAppender" fileName="${ctx:LOG_FOLDER}/elrond.log"
                      filePattern="${ctx:LOG_FOLDER}/elrond-%d{yyyy-MM-dd}-%i.log">
@@ -54,12 +59,6 @@
     </Appenders>
 
     <Loggers>
-        <!--<AsyncLogger name="network.elrond" level="debug" additivity="false">-->
-            <!--<AppenderRef ref="ConsoleAppender"/>-->
-            <!--<AppenderRef ref="FileAppender"/>-->
-            <!--<AppenderRef ref="WebSocketAppender"/>-->
-        <!--</AsyncLogger>-->
-
         <Root level="OFF">
             <AppenderRef ref="WebSocketAppender"/>
         </Root>
@@ -67,6 +66,7 @@
         <Root level="ERROR">
             <AppenderRef ref="ConsoleAppender"/>
             <AppenderRef ref="FileAppender"/>
+            <AppenderRef ref="MySQLAppender"/>
         </Root>
 
         <Logger name="network.elrond" level="DEBUG">
