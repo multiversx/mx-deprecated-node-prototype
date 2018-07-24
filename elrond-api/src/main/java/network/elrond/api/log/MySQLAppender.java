@@ -12,8 +12,8 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -184,7 +184,7 @@ public class MySQLAppender extends AbstractAppender {
         }
     }
 
-    private String getNodeName(){
+    public static String getNodeName(){
         try {
             URL whatismyip = new URL("http://checkip.amazonaws.com");
             BufferedReader in = new BufferedReader(new InputStreamReader(
@@ -192,8 +192,8 @@ public class MySQLAppender extends AbstractAppender {
 
             String globalIP = in.readLine();
 
-            final DatagramSocket socket = new DatagramSocket();
-            socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+            Socket socket = new Socket();
+            socket.connect(new InetSocketAddress("google.com", 80));
             String localPrefIP = socket.getLocalAddress().getHostAddress();
 
             return globalIP + " / " + localPrefIP; //you get the IP as a String

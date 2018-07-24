@@ -1,5 +1,6 @@
 package network.elrond.api;
 
+import network.elrond.api.log.MySQLAppender;
 import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import org.apache.logging.log4j.LogManager;
@@ -38,6 +39,11 @@ public class WriteLogTest {
 
         ThreadUtil.sleep(5000);
 
+    }
+
+    @Test
+    public void testIPAddr(){
+        logger.info("IP: {}", MySQLAppender.getNodeName());
     }
 
 }
