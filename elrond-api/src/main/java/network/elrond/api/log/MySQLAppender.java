@@ -15,11 +15,11 @@ import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
+import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @Plugin(name = "MySQLAppender", category = "Core", elementType = "appender", printObject = false)
@@ -33,6 +33,7 @@ public class MySQLAppender extends AbstractAppender {
     private static final int BUCKET_SIZE = 1000;
 
     private String nodeName = null;
+    private String tableName = null;
 
     protected MySQLAppender(String name, Filter filter, Layout<? extends Serializable> layout) {
         super(name, filter, layout);
@@ -92,19 +93,74 @@ public class MySQLAppender extends AbstractAppender {
                 continue;
             }
 
+            if (nodeName == null){
+                nodeName = getNodeName();
+            }
+
+            if (nodeName == null){
+                SimpleDateFormat sdfSource = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
+                nodeName = "ELROND-NODE-" + sdfSource.format(new Date());
+            }
+
+            if (tableName == null) {
+                System.out.println("MySQL logging system: nodeName = " + nodeName);
+
+                try {
+                    String databaseName = connection.getCatalog();
+
+                    Statement statement = connection.createStatement();
+                    ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) AS cnt\n" +
+                            "FROM `information_schema`.`tables` \n" +
+                            "WHERE `table_schema` = '" + databaseName +
+                            "' AND table_name ='APP_LOGS " + nodeName + "';");
+
+                    if (!resultSet.next()) {
+                        throw new Exception("no row");
+                    }
+
+                    int counts = resultSet.getInt("cnt");
+
+                    statement.close();
+
+                    if (counts != 0) {
+                        tableName = "`APP_LOGS " + nodeName + "`";
+                    } else {
+                        statement = connection.createStatement();
+                        statement.execute("create table `" + databaseName +
+                                "`.`APP_LOGS " + nodeName + "`(\n" +
+                                "    LOG_ID BIGINT AUTO_INCREMENT PRIMARY KEY,\n" +
+                                "    NODE_NAME varchar(250),\n" +
+                                "    ENTRY_DATE timestamp,\n" +
+                                "    LOGGER varchar(100),\n" +
+                                "    LOG_LEVEL varchar(100),\n" +
+                                "    THREAD TEXT,\n" +
+                                "    MESSAGE TEXT,\n" +
+                                "    EXCEPTION TEXT\n" +
+                                ");\n");
+
+                        tableName = "`APP_LOGS " + nodeName + "`";
+
+                        statement.close();
+                    }
+
+                } catch (Exception ex) {
+                    tableName = "`APP_LOGS`";
+                }
+
+                System.out.println("MySQL logging system: table = " + tableName);
+            }
+
             while (listWork.size() > 0) {
                 try {
                     PreparedStatement preparedStatement =
-                            connection.prepareStatement("INSERT INTO APP_LOGS (NODE_NAME, ENTRY_DATE, LOGGER, LOG_LEVEL, MESSAGE, EXCEPTION) VALUES (?, ?, ?, ?, ?, ?)");
+                            connection.prepareStatement("INSERT INTO " + tableName + " (NODE_NAME, ENTRY_DATE, LOGGER, LOG_LEVEL, THREAD, MESSAGE, EXCEPTION) VALUES (?, ?, ?, ?, ?, ?, ?)");
 
                     int limit = 0;
 
                     for (int i = 0; i < listWork.size(); i++) {
                         LogEvent logEvent = listWork.get(i);
 
-                        if (nodeName == null){
-                            nodeName = getNodeName();
-                        }
+
 
                         if (nodeName != null){
                             preparedStatement.setString(1, nodeName);
@@ -114,12 +170,14 @@ public class MySQLAppender extends AbstractAppender {
                         preparedStatement.setTimestamp(2, new Timestamp(logEvent.getTimeMillis()));
                         preparedStatement.setString(3, logEvent.getLoggerName());
                         preparedStatement.setString(4, logEvent.getLevel().toString());
-                        preparedStatement.setString(5, logEvent.getMessage().getFormattedMessage());
+                        preparedStatement.setString(5, logEvent.getThreadName());
+                        preparedStatement.setString(6, logEvent.getMessage().getFormattedMessage());
                         Throwable throwable = logEvent.getThrown();
                         if (throwable != null){
-                            preparedStatement.setString(6, throwable.getMessage());
+                            preparedStatement.setString(7, throwable.getMessage() + " > " +
+                                    Arrays.toString(throwable.getStackTrace()));
                         } else {
-                            preparedStatement.setString(6, "");
+                            preparedStatement.setString(7, "");
                         }
                         preparedStatement.addBatch();
 

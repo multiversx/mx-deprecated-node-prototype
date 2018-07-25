@@ -7,6 +7,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
+import java.util.Arrays;
+
 public class WriteLogTest {
 
     private static Logger logger = LogManager.getLogger(WriteLogTest.class);
@@ -36,6 +38,14 @@ public class WriteLogTest {
         long dtEnd = System.currentTimeMillis();
 
         logger.info("Took: {} ms", dtEnd - dtStart);
+
+        try{
+            throw new Exception("manual exception");
+        } catch (Exception ex){
+            logger.throwing(ex);
+            logger.fatal("Fatal stack: {}", Arrays.toString(ex.getStackTrace()));
+        }
+
 
         ThreadUtil.sleep(5000);
 
