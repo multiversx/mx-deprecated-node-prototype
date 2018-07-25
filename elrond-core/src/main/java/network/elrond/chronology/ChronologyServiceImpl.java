@@ -12,7 +12,7 @@ public class ChronologyServiceImpl implements ChronologyService {
     private static final Logger logger = LogManager.getLogger(ChronologyServiceImpl.class);
 
     public ChronologyServiceImpl(){
-        roundTimeDuration = 4000; //4 seconds
+        roundTimeDuration = 6000; //4 seconds
     }
 
     public ChronologyServiceImpl(long roundTimeDuration) throws IllegalArgumentException{

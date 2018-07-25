@@ -69,7 +69,7 @@ public class BlockchainServiceImpl implements BlockchainService {
      */
     @Override
     public synchronized <H extends Object, B extends Serializable> void put(H hash, B object, Blockchain blockchain, BlockchainUnitType type) throws IOException {
-        boolean await = false;
+        boolean await = true;
         put(hash, object, blockchain, type, await);
     }
 

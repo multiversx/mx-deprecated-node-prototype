@@ -80,7 +80,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
             Number160 hash = Number160.createHash(channel.getChannelIdentifier(shard));
 
             FutureGet futureGet = dht.get(hash).start();
-            futureGet.awaitUninterruptibly(1000);
+            futureGet.awaitUninterruptibly();
             if (futureGet.isSuccess() && !futureGet.isEmpty()) {
 
                 //filter the channel peers
@@ -103,7 +103,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
                             .object(new P2PRequestMessage(key, channelName, shard))
                             .start();
 
-                    futureDirect.awaitUninterruptibly(1000);
+                    futureDirect.awaitUninterruptibly();
 
                     if (futureDirect.isCompleted() && futureDirect.isSuccess()) {
                         try {

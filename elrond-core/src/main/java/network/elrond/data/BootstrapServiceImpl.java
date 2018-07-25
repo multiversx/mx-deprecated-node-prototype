@@ -75,6 +75,7 @@ public class BootstrapServiceImpl implements BootstrapService {
             BigInteger currentBlockIndexOnNetwork = getCurrentBlockIndex(LocationType.NETWORK, blockchain);
             BigInteger max = currentBlockIndex.max(currentBlockIndexOnNetwork);
             AppServiceProvider.getP2PObjectService().put(blockchain.getConnection(), SettingsType.MAX_BLOCK_HEIGHT.toString(), max);
+
         }
 
         logger.traceExit();
@@ -113,10 +114,19 @@ public class BootstrapServiceImpl implements BootstrapService {
             FuturePut futurePut = AppServiceProvider.getP2PObjectService().put(connection, blockNonce, blockHash, true, false);
 
             if (!futurePut.isSuccess()) {
-                String blockHashGot = AppServiceProvider.getP2PObjectService().get(connection, blockNonce, String.class);
+                String blockHashGot;
+                long retrials = Util.MAX_RETRIES;
 
-                if (!blockHashGot.equals(blockHash)) {
+                do {
+                    blockHashGot = AppServiceProvider.getP2PObjectService().get(connection, blockNonce, String.class);
+                    retrials--;
+                } while (blockHashGot == null && retrials > 0);
+
+                if (blockHashGot != null && !blockHashGot.equals(blockHash)) {
                     result.combine(new ExecutionReport().ko("Not allowed to override block index " + blockNonce + " with hash " + blockHashGot + " with his own generated hash " + blockHash));
+                    return result;
+                } else if (blockHashGot == null) {
+                    result.combine(new ExecutionReport().ko("block with hash " + blockHash + " could not be committed"));
                     return result;
                 }
 
@@ -335,7 +345,7 @@ public class BootstrapServiceImpl implements BootstrapService {
 
                 logger.info("New block synchronized with hash {}", blockHash);
                 logger.info("\r\n" + state.print().render());
-              //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
+                //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
                 AppStateUtil.printBlockAndAccounts(block, accounts);
 
                 // Update current block
