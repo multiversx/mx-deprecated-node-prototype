@@ -4,9 +4,9 @@ import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.p2p.handlers.*;
 
 public enum P2PRequestChannelName {
-
     ACCOUNT("ACCOUNT", new AccountRequestHandler()),
     BLOCK(BlockchainUnitType.BLOCK.name(), new BlockRequestHandler()),
+    BLOCK_INDEX(BlockchainUnitType.BLOCK_INDEX.name(), new BlockIndexRequestHandler()),
     TRANSACTION(BlockchainUnitType.TRANSACTION.name(), new TransactionRequestHandler()),
     STATISTICS("STATISTICS", new StatisticsRequestHandler()),;
 

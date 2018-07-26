@@ -84,7 +84,7 @@ public class BootstrapServiceImpl implements BootstrapService {
     public String getBlockHashFromIndex(BigInteger blockIndex, Blockchain blockchain) throws Exception {
         logger.traceEntry("params: {} {}", blockIndex, blockchain);
         String identifier = getBlockIndexIdentifier(blockIndex);
-        return logger.traceExit((String) AppServiceProvider.getBlockchainService().get(identifier, blockchain, BlockchainUnitType.BLOCK_INDEX));
+        return logger.traceExit((String) AppServiceProvider.getBlockchainService().getLocal(identifier, blockchain, BlockchainUnitType.BLOCK_INDEX));
     }
 
 
@@ -113,10 +113,15 @@ public class BootstrapServiceImpl implements BootstrapService {
             FuturePut futurePut = AppServiceProvider.getP2PObjectService().put(connection, blockNonce, blockHash, true, false);
 
             if (!futurePut.isSuccess()) {
-                String blockHashGot = AppServiceProvider.getP2PObjectService().get(connection, blockNonce, String.class);
+                String blockHashGot;
 
-                if (!blockHashGot.equals(blockHash)) {
+                blockHashGot = AppServiceProvider.getP2PObjectService().get(connection, blockNonce, String.class);
+
+                if (blockHashGot != null && !blockHashGot.equals(blockHash)) {
                     result.combine(new ExecutionReport().ko("Not allowed to override block index " + blockNonce + " with hash " + blockHashGot + " with his own generated hash " + blockHash));
+                    return result;
+                } else if (blockHashGot == null) {
+                    result.combine(new ExecutionReport().ko("block with hash " + blockHash + " could not be committed"));
                     return result;
                 }
 
@@ -248,7 +253,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                 result.combine(new ExecutionReport().ok("Put block with height: " + index.toString(10) + "..."));
 
                 String blockHash = getBlockHashFromIndex(index, blockchain);
-                Block block = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK);
+                Block block = AppServiceProvider.getBlockchainService().getLocal(blockHash, blockchain, BlockchainUnitType.BLOCK);
 
                 logger.trace("re-running block to update internal state...");
                 ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain, state.getStatisticsManager());
@@ -281,7 +286,7 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         List<String> hashes = BlockUtil.getTransactionsHashesAsString(block);
         for (String transactionHash : hashes) {
-            Transaction transaction = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION);
+            Transaction transaction = AppServiceProvider.getBlockchainService().getLocal(transactionHash, blockchain, BlockchainUnitType.TRANSACTION);
             commitTransaction(transaction, transactionHash, blockchain);
         }
 
@@ -312,7 +317,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                     return logger.traceExit(result);
                 }
 
-                Block block = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK);
+                Block block = AppServiceProvider.getBlockchainService().getLocal(blockHash, blockchain, BlockchainUnitType.BLOCK);
                 if (block == null) {
                     result.ko("Can not find block hash " + blockHash + " on LOCAL!");
                     logger.trace("Synchronized FAILED at index {}!", blockIndex);
@@ -335,7 +340,7 @@ public class BootstrapServiceImpl implements BootstrapService {
 
                 logger.info("New block synchronized with hash {}", blockHash);
                 logger.info("\r\n" + state.print().render());
-              //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
+                //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
                 AppStateUtil.printBlockAndAccounts(block, accounts);
 
                 // Update current block

@@ -34,14 +34,13 @@ public class BlockchainServiceImpl implements BlockchainService {
         Util.check(hash != null, "hash!=null");
         Util.check(blockchain != null, "blockchain!=null");
         BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
-        P2PConnection connection = blockchain.getConnection();
         LRUMap<H, B> cache = unit.getCache();
 
         if (cache.contains(hash)) {
             logger.trace("cache contains hash");
             return logger.traceExit(true);
         }
-        B block = get(hash, blockchain, type);
+        B block = getLocal(hash, blockchain, type);
         return logger.traceExit(block != null);
     }
 
@@ -73,18 +72,31 @@ public class BlockchainServiceImpl implements BlockchainService {
         put(hash, object, blockchain, type, await);
     }
 
-    private <H extends Object, B extends Serializable> void put(H hash, B object, Blockchain blockchain, BlockchainUnitType type, boolean await) throws IOException {
+    @Override
+    public synchronized <H extends Object, B extends Serializable> void putLocal(H hash, B object, Blockchain blockchain, BlockchainUnitType type) {
         logger.traceEntry("params: {} {} {} {}", hash, object, blockchain, type);
 
         Util.check(hash != null, "hash!=null");
         Util.check(object != null, "object!=null");
         Util.check(blockchain != null, "blockchain!=null");
 
-//        if (object == null || hash == null) {
-//            logger.trace("object or hash is null");
-//            logger.traceExit();
-//            return;
-//        }
+        BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
+
+        unit.getCache().put(hash, object);
+        String strJSONData = AppServiceProvider.getSerializationService().encodeJSON(object);
+        unit.put(bytes(hash.toString()), bytes(strJSONData));
+
+        logger.trace("Locally stored!");
+        logger.traceExit();
+    }
+
+
+    private <H extends Object, B extends Serializable> void put(H hash, B object, Blockchain blockchain, BlockchainUnitType type, boolean await) throws IOException {
+        logger.traceEntry("params: {} {} {} {}", hash, object, blockchain, type);
+
+        Util.check(hash != null, "hash!=null");
+        Util.check(object != null, "object!=null");
+        Util.check(blockchain != null, "blockchain!=null");
 
         BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
         P2PConnection connection = blockchain.getConnection();
@@ -114,7 +126,7 @@ public class BlockchainServiceImpl implements BlockchainService {
         List<B> list = new ArrayList<>();
 
         for (H hash : hashes) {
-            list.add(get(hash, blockchain, type));
+            list.add(getLocal(hash, blockchain, type));
         }
 
         return logger.traceExit(list);
@@ -171,12 +183,16 @@ public class BlockchainServiceImpl implements BlockchainService {
         Util.check(blockchain != null, "blockchain!=null");
 
         BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
+        P2PConnection connection = blockchain.getConnection();
 
         LRUMap<H, B> cache = unit.getCache();
 
         boolean exists = cache.get(hash) != null;
         if (!exists) {
             B object = getDataFromDatabase(hash, unit);
+            if (object == null) {
+                object = requestData(hash, type, connection);
+            }
 
             if (object != null) {
                 cache.put(hash, object);

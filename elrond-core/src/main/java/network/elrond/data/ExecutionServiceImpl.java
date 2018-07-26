@@ -70,6 +70,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             signersPublicKeys.add(Util.hexStringToByteArray(signer));
         }
 
+        logger.debug("signature: {} commitment {} message {} bitmap {}", signature, commitment, message, bitmap);
         return logger.traceExit(signatureService.verifyAggregatedSignature(signersPublicKeys, signature, commitment, message, bitmap));
     }
 
@@ -188,8 +189,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             }
 
             return logger.traceExit(blockExecutionReport);
-        }
-        finally {
+        } finally {
 //            if(statisticsManager!=null) {
 //                statisticsManager.addStatistic(new Statistic(nrProcessedTransactions));
 //            }
@@ -247,7 +247,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
 
     }
-
 
 
 }

@@ -6,6 +6,7 @@ import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
+import network.elrond.core.Util;
 import network.elrond.data.Block;
 import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.processor.impl.AbstractChannelTask;
@@ -15,7 +16,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 
-public class P2PBlocksInterceptorProcessor extends AbstractChannelTask<String> {
+public class P2PBlocksInterceptorProcessor extends AbstractChannelTask<Block> {
 
     private static final Logger logger = LogManager.getLogger(P2PBlocksInterceptorProcessor.class);
 
@@ -25,29 +26,21 @@ public class P2PBlocksInterceptorProcessor extends AbstractChannelTask<String> {
     }
 
     @Override
-    protected void process(String hash, Application application) {
-        logger.traceEntry("params: {} {}", hash, application);
+    protected void process(Block block, Application application) {
+        logger.traceEntry("params: {} {}", block, application);
+        Util.check(block != null, "block != null");
+
+        String hash = AppServiceProvider.getSerializationService().getHashString(block);
         AppState state = application.getState();
         Blockchain blockchain = state.getBlockchain();
         Accounts accounts = state.getAccounts();
 
         BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
 
-        try {
+        blockchainService.putLocal(hash, block, blockchain, BlockchainUnitType.BLOCK);
+        blockchainService.putLocal(block.getNonce(), hash, blockchain, BlockchainUnitType.BLOCK_INDEX);
 
-            // This will retrieve block from network if required
-            Block block = blockchainService.get(hash, blockchain, BlockchainUnitType.BLOCK);
-            if (block != null) {
-                blockchainService.put(block.getNonce(), hash, blockchain, BlockchainUnitType.BLOCK_INDEX);
-                AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain,  state.getStatisticsManager());
-
-                logger.info("Got new block with hash {}", hash);
-            } else {
-                logger.warn("Block with hash {} was not found!", hash);
-            }
-
-        } catch (IOException | ClassNotFoundException e) {
-            logger.catching(e);
-        }
+        AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain, state.getStatisticsManager());
+        logger.info("Got new block with hash {}", hash);
     }
 }

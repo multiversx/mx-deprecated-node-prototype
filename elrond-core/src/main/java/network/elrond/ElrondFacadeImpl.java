@@ -131,17 +131,17 @@ public class ElrondFacadeImpl implements ElrondFacade {
             Receipt receipt = FutureUtil.get(() -> {
 
                 String receiptHash;
-                Receipt receiptDHT = null;
+                Receipt receiptLocal = null;
                 do {
-                    receiptHash = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
+                    receiptHash = AppServiceProvider.getBlockchainService().getLocal(transactionHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
                     if (receiptHash != null) {
-                        receiptDHT = AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT);
+                        receiptLocal = AppServiceProvider.getBlockchainService().getLocal(receiptHash, blockchain, BlockchainUnitType.RECEIPT);
                     }
                     ThreadUtil.sleep(200);
 
-                } while (receiptHash == null || receiptDHT == null);
+                } while (receiptHash == null || receiptLocal == null);
 
-                return receiptDHT;
+                return receiptLocal;
 
             }, 60L);
 
@@ -288,12 +288,12 @@ public class ElrondFacadeImpl implements ElrondFacade {
     }
 
     private void sendTransaction(AppState state, Transaction transaction) throws java.io.IOException {
-        String hash = AppServiceProvider.getSerializationService().getHashString(transaction);
-        P2PConnection connection = state.getConnection();
-        AppServiceProvider.getP2PObjectService().put(connection, hash, transaction);
+        //String hash = AppServiceProvider.getSerializationService().getHashString(transaction);
+        //P2PConnection connection = state.getConnection();
+        //AppServiceProvider.getP2PObjectService().put(connection, hash, transaction);
 
         P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.TRANSACTION);
-        AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, hash, state.getShard().getIndex());
+        AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, transaction, state.getShard().getIndex());
     }
 
     @Override
@@ -373,10 +373,9 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
         int currentShard = state.getShard().getIndex();
         for (int i = 0; i < numberOfShards; i++) {
-            if(i == currentShard){
+            if (i == currentShard) {
                 statisticsManagers.add(state.getStatisticsManager());
-            }
-            else {
+            } else {
                 Shard addressShard = new Shard(i);
                 StatisticsManager statisticsManager = AppServiceProvider.getP2PRequestService().get(channel, addressShard, P2PRequestChannelName.STATISTICS, null);
                 if (statisticsManager != null) {
@@ -398,7 +397,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
     public ResponseObject getTransactionFromHash(String transactionHash, Blockchain blockchain) {
         logger.traceEntry("params: {} {}", transactionHash, blockchain);
         try {
-            Transaction transaction = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION);
+            Transaction transaction = AppServiceProvider.getBlockchainService().getLocal(transactionHash, blockchain, BlockchainUnitType.TRANSACTION);
 
             if (transaction == null) {
                 return logger.traceExit(new ResponseObject(true, String.format("Transaction with hash %s was not found", transactionHash), null));
@@ -415,7 +414,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
     public ResponseObject getBlockFromHash(String blockHash, Blockchain blockchain) {
         logger.traceEntry("params: {} {}", blockchain, blockchain);
         try {
-            Block block = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK);
+            Block block = AppServiceProvider.getBlockchainService().getLocal(blockHash, blockchain, BlockchainUnitType.BLOCK);
 
             if (block == null) {
                 return logger.traceExit(new ResponseObject(true, String.format("Block with hash %s was not found", blockHash), null));

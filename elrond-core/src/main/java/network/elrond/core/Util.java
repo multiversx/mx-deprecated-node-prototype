@@ -43,6 +43,8 @@ public class Util {
 
     public static BigInteger BIG_INT_MIN_ONE = BigInteger.valueOf(-1);
     public static final long MAX_RETRIES = 100;
+    public static final int MAX_RETRIES_PUT = 10;
+    public static final int MAX_RETRIES_GET = 10;
 
     public static byte[] EMPTY_BYTE_ARRAY;
     public static byte[] EMPTY_DATA_HASH;

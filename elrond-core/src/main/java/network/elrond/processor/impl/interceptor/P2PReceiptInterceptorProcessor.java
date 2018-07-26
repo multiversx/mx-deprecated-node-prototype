@@ -17,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
-public class P2PReceiptInterceptorProcessor extends AbstractChannelTask<TransferDataBlock<String>> {
+public class P2PReceiptInterceptorProcessor extends AbstractChannelTask<TransferDataBlock<Receipt>> {
 
     private static final Logger logger = LogManager.getLogger(P2PReceiptInterceptorProcessor.class);
 
@@ -27,33 +27,22 @@ public class P2PReceiptInterceptorProcessor extends AbstractChannelTask<Transfer
     }
 
     @Override
-    protected void process(TransferDataBlock<String> receiptBlock, Application application) {
+    protected void process(TransferDataBlock<Receipt> receiptBlock, Application application) {
         logger.traceEntry("params: {} {}", receiptBlock, application);
         AppState state = application.getState();
         Blockchain blockchain = state.getBlockchain();
-        BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
-        List<String> receiptHashList = receiptBlock.getDataList();
+        List<Receipt> receiptList = receiptBlock.getDataList();
 
-//        receiptHashList.stream().parallel().forEach(hash -> {
-        for (String hash : receiptHashList) {
-            try {
-                Receipt receipt = FutureUtil.get(() -> {
-                    Receipt receiptDHT;
-                    do {
-                        receiptDHT = blockchainService.get(hash, blockchain, BlockchainUnitType.RECEIPT);
-                        ThreadUtil.sleep(100);
-                    } while (receiptDHT == null);
-                    return receiptDHT;
-                }, 60L);
-
-                if (receipt == null) {
-                    logger.warn("Receipt with hash {} was not found!", hash);
-                }
-            } catch (Exception ex) {
-                logger.catching(ex);
+        receiptList.stream().parallel().forEach(receipt -> {
+            if (receipt == null) {
+                logger.warn("Null receiptreceived!");
+            } else {
+                String receiptHash = AppServiceProvider.getSerializationService().getHashString(receipt);
+                String transactionHash = receipt.getTransactionHash();
+                AppServiceProvider.getBlockchainService().putLocal(receiptHash, receipt, blockchain, BlockchainUnitType.RECEIPT);
+                AppServiceProvider.getBlockchainService().putLocal(transactionHash, receiptHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
             }
-        }
-//        });
+        });
         logger.traceExit();
     }
 }
