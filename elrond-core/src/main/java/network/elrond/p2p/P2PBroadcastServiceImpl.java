@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -96,8 +97,11 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
                         result = false;
                         continue;
                     }
-                    HashSet<PeerAddress> peersOnChannel;
-                    peersOnChannel = (HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object();
+                    HashSet<PeerAddress> peersOnChannel = new HashSet<>();
+                    Collection<Data> peers = futureGet.dataMap().values();
+                    if (!peers.isEmpty()) {
+                        peersOnChannel = (HashSet<PeerAddress>) peers.iterator().next().object();
+                    }
                     peersOnChannel.add(dht.peer().peerAddress());
                     dht.put(hash).data(new Data(peersOnChannel)).start().awaitUninterruptibly();
 
@@ -128,8 +132,11 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
                 FutureGet futureGet = dht.get(hash).start();
                 futureGet.awaitUninterruptibly();
                 if (futureGet.isSuccess()) {
-                    HashSet<PeerAddress> peersOnChannel;
-                    peersOnChannel = (HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object();
+                    HashSet<PeerAddress> peersOnChannel = new HashSet<>();
+                    Collection<Data> peers = futureGet.dataMap().values();
+                    if (!peers.isEmpty()) {
+                        peersOnChannel = (HashSet<PeerAddress>) peers.iterator().next().object();
+                    }
 
                     if (!peersOnChannel.contains(connection.getPeer().peerAddress())) {
                         peersOnChannel.add(dht.peer().peerAddress());
@@ -166,8 +173,11 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
             FutureGet futureGet = dht.get(hash).start();
             futureGet.awaitUninterruptibly();
             if (futureGet.isSuccess()) {
-                HashSet<PeerAddress> peersOnChannel;
-                peersOnChannel = (HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object();
+                HashSet<PeerAddress> peersOnChannel = new HashSet<>();
+                Collection<Data> peers = futureGet.dataMap().values();
+                if (!peers.isEmpty()) {
+                    peersOnChannel = (HashSet<PeerAddress>) peers.iterator().next().object();
+                }
 
                 if (!peersOnChannel.contains(connection.getPeer().peerAddress())) {
                     peersOnChannel.add(dht.peer().peerAddress());
@@ -202,9 +212,17 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
             FutureGet futureGet = dht.get(hash).start();
             futureGet.awaitUninterruptibly();
             if (futureGet.isSuccess()) {
-                HashSet<PeerAddress> peersOnChannel;
-                peersOnChannel = (HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object();
+                HashSet<PeerAddress> peersOnChannel = new HashSet<>();
+                Collection<Data> peers = futureGet.dataMap().values();
+                if (!peers.isEmpty()) {
+                    peersOnChannel = (HashSet<PeerAddress>) peers.iterator().next().object();
+                }
 
+                if (!peersOnChannel.contains(connection.getPeer().peerAddress())) {
+                    peersOnChannel.add(dht.peer().peerAddress());
+                    dht.put(hash).data(new Data(peersOnChannel)).start().awaitUninterruptibly();
+                    logger.warn("not found self on channel. Added again!");
+                }
                 // send in parallel
                 peersOnChannel.stream().parallel().forEach(peerAddress -> dht.peer()
                         .sendDirect(peerAddress)
@@ -242,8 +260,11 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
                     if (futureGet.isEmpty()) {
                         result = false;
                     }
-                    HashSet<PeerAddress> peersOnChannel;
-                    peersOnChannel = (HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object();
+                    HashSet<PeerAddress> peersOnChannel = new HashSet<>();
+                    Collection<Data> peers = futureGet.dataMap().values();
+                    if (!peers.isEmpty()) {
+                        peersOnChannel = (HashSet<PeerAddress>) peers.iterator().next().object();
+                    }
                     peersOnChannel.remove(dht.peer().peerAddress());
                     dht.put(hash).data(new Data(peersOnChannel)).start().awaitUninterruptibly();
                     logger.trace("unsubscribed from channel!");
