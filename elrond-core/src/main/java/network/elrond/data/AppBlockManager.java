@@ -4,6 +4,7 @@ import javafx.util.Pair;
 import network.elrond.TimeWatch;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppState;
+import network.elrond.benchmark.Statistic;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.chronology.ChronologyService;
@@ -48,7 +49,7 @@ public class AppBlockManager {
 
         if (hashes.isEmpty()) {
             logger.info("Can't execute, no transaction!");
-            //state.getStatisticsManager().addStatistic(new Statistic(0));
+            state.getStatisticsManager().addStatistic(new Statistic(0));
             return null;
         }
 
