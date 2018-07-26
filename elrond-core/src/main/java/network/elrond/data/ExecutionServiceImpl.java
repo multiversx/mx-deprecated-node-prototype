@@ -2,6 +2,7 @@ package network.elrond.data;
 
 import network.elrond.account.Accounts;
 import network.elrond.account.AccountsManager;
+import network.elrond.benchmark.Statistic;
 import network.elrond.benchmark.StatisticsManager;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainService;
@@ -190,9 +191,9 @@ public class ExecutionServiceImpl implements ExecutionService {
 
             return logger.traceExit(blockExecutionReport);
         } finally {
-//            if(statisticsManager!=null) {
-//                statisticsManager.addStatistic(new Statistic(nrProcessedTransactions));
-//            }
+            if(statisticsManager!=null) {
+                statisticsManager.addStatistic(new Statistic(nrProcessedTransactions));
+            }
         }
     }
 
