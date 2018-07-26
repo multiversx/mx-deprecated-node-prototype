@@ -131,10 +131,13 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
                     HashSet<PeerAddress> peersOnChannel;
                     peersOnChannel = (HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object();
 
-                    if (peersOnChannel == null || peersOnChannel.isEmpty()) {
-                        logger.debug("peers on channel {} for channel ID: {}", channelId);
-                        continue;
+                    if (!peersOnChannel.contains(connection.getPeer().peerAddress())) {
+                        peersOnChannel.add(dht.peer().peerAddress());
+                        dht.put(hash).data(new Data(peersOnChannel)).start().awaitUninterruptibly();
+                        logger.warn("not found self on channel. Added again!");
                     }
+
+
                     totalPeers.addAll(peersOnChannel);
                 } else {
                     logger.warn(futureGet.failedReason());
@@ -142,6 +145,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
             } catch (Exception e) {
                 logger.catching(e);
             }
+
         }
         return logger.traceExit(totalPeers);
     }
@@ -165,8 +169,10 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
                 HashSet<PeerAddress> peersOnChannel;
                 peersOnChannel = (HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object();
 
-                if (peersOnChannel == null || peersOnChannel.isEmpty()) {
-                    logger.debug("peers on channel: {} for channel ID: {}", channelIdentifier);
+                if (!peersOnChannel.contains(connection.getPeer().peerAddress())) {
+                    peersOnChannel.add(dht.peer().peerAddress());
+                    dht.put(hash).data(new Data(peersOnChannel)).start().awaitUninterruptibly();
+                    logger.warn("not found self on channel. Added again!");
                 }
 
                 return logger.traceExit(peersOnChannel);
