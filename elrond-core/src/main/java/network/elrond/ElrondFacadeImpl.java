@@ -96,7 +96,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
         try {
 
-            P2PRequestChannel channel = state.getChanel(P2PRequestChannelName.ACCOUNT);
+            P2PRequestChannel channel = state.getChannel(P2PRequestChannelName.ACCOUNT);
             AccountState account = AppServiceProvider.getP2PRequestService().get(channel, addressShard, P2PRequestChannelName.ACCOUNT, address);
 
             if (account == null) {
@@ -292,7 +292,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
         //P2PConnection connection = state.getConnection();
         //AppServiceProvider.getP2PObjectService().put(connection, hash, transaction);
 
-        P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.TRANSACTION);
+        P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.TRANSACTION);
         AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, transaction, state.getShard().getIndex());
     }
 
@@ -365,7 +365,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
             return logger.traceExit(new ResponseObject(false, "Invalid application state, state is null", null));
         }
 
-        P2PRequestChannel channel = state.getChanel(P2PRequestChannelName.STATISTICS);
+        P2PRequestChannel channel = state.getChannel(P2PRequestChannelName.STATISTICS);
         Integer numberOfShards = AppServiceProvider.getShardingService().getNumberOfShards();
         Integer numberNodesInNetwork = AppShardingManager.instance().getNumberNodesInNetwork(application.getState());
 

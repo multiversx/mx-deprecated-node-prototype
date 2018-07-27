@@ -19,19 +19,19 @@ public class AppP2PManager {
     }
 
 
-    public P2PBroadcastChanel subscribeToChannel(Application application, P2PBroadcastChannelName channelName, P2PChannelListener listener) {
+    public P2PBroadcastChannel subscribeToChannel(Application application, P2PBroadcastChannelName channelName, P2PChannelListener listener) {
         logger.traceEntry("params: {} {} {}", application, channelName, listener);
 
         AppState state = application.getState();
         P2PConnection connection = state.getConnection();
 
-        P2PBroadcastChanel channel = state.getChanel(channelName);
+        P2PBroadcastChannel channel = state.getChannel(channelName);
         if (channel == null) {
             logger.trace("channel NULL, creating...");
             channel = AppServiceProvider.getP2PBroadcastService().createChannel(connection, channelName);
         }
         AppServiceProvider.getP2PBroadcastService().subscribeToChannel(channel);
-        state.addChanel(channel);
+        state.addChannel(channel);
 
         channel.getListeners().add(listener);
 

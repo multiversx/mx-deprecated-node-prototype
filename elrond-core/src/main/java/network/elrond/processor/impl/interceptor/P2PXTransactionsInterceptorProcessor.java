@@ -7,7 +7,7 @@ import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.ObjectUtil;
 import network.elrond.data.Transaction;
 import network.elrond.data.TransferDataBlock;
-import network.elrond.p2p.P2PBroadcastChanel;
+import network.elrond.p2p.P2PBroadcastChannel;
 import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.processor.impl.AbstractChannelTask;
 import network.elrond.service.AppServiceProvider;
@@ -47,7 +47,7 @@ public class P2PXTransactionsInterceptorProcessor extends AbstractChannelTask<Tr
                 return;
             }
 
-            P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.TRANSACTION);
+            P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.TRANSACTION);
 
             for (Transaction transaction : transactionList) {
                 String hash = AppServiceProvider.getSerializationService().getHashString(transaction);

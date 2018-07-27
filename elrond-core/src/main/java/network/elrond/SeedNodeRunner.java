@@ -39,6 +39,12 @@ public class SeedNodeRunner {
         Thread thread = new Thread(() -> {
 
             do {
+                ThreadUtil.sleep(1);
+
+                if (application.getState().getBlockchain().getPool().getTransactions().size() > 1000){
+                    continue;
+                }
+
                 PublicKey key = application.getState().getPublicKey();
                 AccountAddress address = AccountAddress.fromHexString(Util.TEST_ADDRESS);
                 //AccountAddress address = AccountAddress.fromHexString(Util.getAddressFromPublicKey(key.getValue()));
@@ -53,7 +59,7 @@ public class SeedNodeRunner {
 //                    logger.info(responseObjectReceipt);
                 }
 
-                ThreadUtil.sleep(1);
+
             } while (true);
 
         });

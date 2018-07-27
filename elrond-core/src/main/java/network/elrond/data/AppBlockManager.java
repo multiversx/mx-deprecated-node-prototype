@@ -18,7 +18,7 @@ import network.elrond.core.Util;
 import network.elrond.crypto.MultiSignatureService;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
-import network.elrond.p2p.P2PBroadcastChanel;
+import network.elrond.p2p.P2PBroadcastChannel;
 import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
@@ -116,7 +116,7 @@ public class AppBlockManager {
                         return;
                     }
 
-                    P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.XTRANSACTION_BLOCK);
+                    P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.XTRANSACTION_BLOCK);
                     AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, transactionTransferDataBlock, receiverShardIndex);
                     logger.warn("sending XTRANSACTION_BLOCK for block {}, with {} transactions", transactionTransferDataBlock.getHash(),
                             transactionTransferDataBlock.getDataList().size());
@@ -159,7 +159,7 @@ public class AppBlockManager {
 
             receiptsDataList.addAll(receipts);
             // Broadcast
-            P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.RECEIPT_BLOCK);
+            P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.RECEIPT_BLOCK);
             AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, receiptTransferDataBlock, state.getShard().getIndex());
             logger.trace("broadcast the receipt block");
         });
