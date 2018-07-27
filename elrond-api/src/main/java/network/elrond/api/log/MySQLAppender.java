@@ -134,8 +134,8 @@ public class MySQLAppender extends AbstractAppender {
                                 "    LOGGER varchar(100),\n" +
                                 "    LOG_LEVEL varchar(100),\n" +
                                 "    THREAD TEXT,\n" +
-                                "    MESSAGE TEXT,\n" +
-                                "    EXCEPTION TEXT\n" +
+                                "    MESSAGE LONGTEXT,\n" +
+                                "    EXCEPTION LONGTEXT\n" +
                                 ");\n");
 
                         tableName = "`APP_LOGS " + nodeName + "`";
