@@ -51,12 +51,12 @@ public class P2PXTransactionsInterceptorProcessor extends AbstractChannelTask<Tr
 
             for (Transaction transaction : transactionList) {
                 String hash = AppServiceProvider.getSerializationService().getHashString(transaction);
-                AppServiceProvider.getBlockchainService().put(hash, transaction, blockchain, BlockchainUnitType.TRANSACTION);
+                AppServiceProvider.getBlockchainService().putLocal(hash, transaction, blockchain, BlockchainUnitType.TRANSACTION);
 
                 boolean transactionNew = !blockchain.getPool().checkExists(hash);
 
                 if (transactionNew) {
-                    AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, hash, shard.getIndex());
+                    AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, transaction, shard.getIndex());
                 }
             }
             logger.trace("Got new xtransactions {}", transactionList);

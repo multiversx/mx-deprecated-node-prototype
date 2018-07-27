@@ -108,7 +108,9 @@ public class P2PRequestServiceImpl implements P2PRequestService {
                     if (futureDirect.isCompleted() && futureDirect.isSuccess()) {
                         try {
                             if (futureDirect.object() != null) {
-                                responses.add((R) futureDirect.object());
+                                synchronized (responses) {
+                                    responses.add((R) futureDirect.object());
+                                }
                             }
                         } catch (ClassNotFoundException | IOException e) {
                             logger.catching(e);
@@ -123,7 +125,8 @@ public class P2PRequestServiceImpl implements P2PRequestService {
                 Map<R, String> objectToHash = responses.stream().collect(
                         Collectors.toMap(
                                 response -> response,
-                                response -> AppServiceProvider.getSerializationService().getHashString(response)));
+                                response -> AppServiceProvider.getSerializationService().getHashString(response),
+                                (response1, response2) -> response1));
 
                 Map<String, Long> counts = objectToHash.entrySet()
                         .stream()

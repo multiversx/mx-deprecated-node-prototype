@@ -4,6 +4,7 @@ import javafx.util.Pair;
 import network.elrond.TimeWatch;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppState;
+import network.elrond.benchmark.Statistic;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.chronology.ChronologyService;
@@ -48,7 +49,7 @@ public class AppBlockManager {
 
         if (hashes.isEmpty()) {
             logger.info("Can't execute, no transaction!");
-            //state.getStatisticsManager().addStatistic(new Statistic(0));
+            state.getStatisticsManager().addStatistic(new Statistic(0));
             return null;
         }
 
@@ -142,11 +143,9 @@ public class AppBlockManager {
         ThreadUtil.submit(() -> {
             String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
 
-            TransferDataBlock<String> receiptTransferDataBlock = new TransferDataBlock<>();
+            TransferDataBlock<Receipt> receiptTransferDataBlock = new TransferDataBlock<>();
             receiptTransferDataBlock.setHash(hashBlock);
-            List<String> receiptsDataList = receiptTransferDataBlock.getDataList();
-
-            List<String> receiptHashes = new ArrayList<>();
+            List<Receipt> receiptsDataList = receiptTransferDataBlock.getDataList();
 
             receipts.stream().parallel().forEach(receipt -> {
                 receipt.setBlockHash(hashBlock);
@@ -156,11 +155,9 @@ public class AppBlockManager {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-                receiptHashes.add(AppServiceProvider.getSerializationService().getHashString(receipt));
             });
 
-            receiptsDataList.addAll(receiptHashes);
+            receiptsDataList.addAll(receipts);
             // Broadcast
             P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.RECEIPT_BLOCK);
             AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, receiptTransferDataBlock, state.getShard().getIndex());
@@ -286,16 +283,14 @@ public class AppBlockManager {
         Util.check(receipt != null, "receipt != null");
         Util.check(state != null, "state != null");
 
-        String blockHash = AppServiceProvider.getSerializationService().getHashString(block);
         String transactionHash = receipt.getTransactionHash();
         String receiptHash = AppServiceProvider.getSerializationService().getHashString(receipt);
 
         // Store on blockchain
         Blockchain blockchain = state.getBlockchain();
-        AppServiceProvider.getBlockchainService().put(transactionHash, blockHash, blockchain, BlockchainUnitType.TRANSACTION_BLOCK);
-        AppServiceProvider.getBlockchainService().put(receiptHash, receipt, blockchain, BlockchainUnitType.RECEIPT);
-        AppServiceProvider.getBlockchainService().put(transactionHash, receiptHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
-        logger.trace("placed on blockchain (TRANSACTION_RECEIPT, TRANSACTION_BLOCK and secure RECEIPT)");
+        AppServiceProvider.getBlockchainService().putLocal(receiptHash, receipt, blockchain, BlockchainUnitType.RECEIPT);
+        AppServiceProvider.getBlockchainService().putLocal(transactionHash, receiptHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
+        logger.trace("placed on blockchain (RECEIPT, TRANSACTION_RECEIPT)");
         logger.traceExit();
     }
 

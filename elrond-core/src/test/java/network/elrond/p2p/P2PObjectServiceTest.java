@@ -12,10 +12,15 @@ import network.elrond.data.BootstrapType;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class P2PObjectServiceTest {
 
     @Test
-    public void testPutIfAbsentOnDHT() throws Exception{
+    public void testPutIfAbsentOnDHT() throws Exception {
         String nodeName = "elrond-seeder";
 
         Integer port = 4000;
@@ -23,7 +28,7 @@ public class P2PObjectServiceTest {
         String masterPeerIpAddress = "127.0.0.1";
         String seedNodeRunnerPrivateKey = Util.byteArrayToHexString(new PrivateKey("elrond-node-1").getValue());
 
-        AppContext appContext =  ContextCreator.createAppContext(nodeName, seedNodeRunnerPrivateKey, masterPeerIpAddress, masterPeerPort, port,
+        AppContext appContext = ContextCreator.createAppContext(nodeName, seedNodeRunnerPrivateKey, masterPeerIpAddress, masterPeerPort, port,
                 BootstrapType.START_FROM_SCRATCH, nodeName);
 
         P2PConnection connection = AppServiceProvider.getP2PConnectionService().createConnection(appContext);

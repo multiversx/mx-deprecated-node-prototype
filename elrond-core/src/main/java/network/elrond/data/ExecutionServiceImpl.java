@@ -2,6 +2,7 @@ package network.elrond.data;
 
 import network.elrond.account.Accounts;
 import network.elrond.account.AccountsManager;
+import network.elrond.benchmark.Statistic;
 import network.elrond.benchmark.StatisticsManager;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainService;
@@ -70,6 +71,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             signersPublicKeys.add(Util.hexStringToByteArray(signer));
         }
 
+        logger.debug("signature: {} commitment {} message {} bitmap {}", signature, commitment, message, bitmap);
         return logger.traceExit(signatureService.verifyAggregatedSignature(signersPublicKeys, signature, commitment, message, bitmap));
     }
 
@@ -188,11 +190,10 @@ public class ExecutionServiceImpl implements ExecutionService {
             }
 
             return logger.traceExit(blockExecutionReport);
-        }
-        finally {
-//            if(statisticsManager!=null) {
-//                statisticsManager.addStatistic(new Statistic(nrProcessedTransactions));
-//            }
+        } finally {
+            if(statisticsManager!=null) {
+                statisticsManager.addStatistic(new Statistic(nrProcessedTransactions));
+            }
         }
     }
 
@@ -247,7 +248,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
 
     }
-
 
 
 }
