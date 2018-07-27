@@ -5,6 +5,7 @@ import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
+import network.elrond.blockchain.BlockchainPersistenceUnit;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.blockchain.SettingsType;
 import network.elrond.chronology.NTPClient;
@@ -110,42 +111,63 @@ public class BootstrapServiceImpl implements BootstrapService {
             // Put index <=> hash mapping only on DHT
             P2PConnection connection = blockchain.getConnection();
             String blockNonce = getBlockIndexIdentifier(block.getNonce());
-            FuturePut futurePut = AppServiceProvider.getP2PObjectService().put(connection, blockNonce, blockHash, true, false);
+            String blockHashRemote = AppServiceProvider.getP2PObjectService().get(connection, blockNonce, String.class);
 
-            if (!futurePut.isSuccess()) {
-                String blockHashGot;
+            if (blockHashRemote != null) {
+                result.combine(new ExecutionReport().ko("put block in blockchain failed! " + blockNonce + "already has " + blockHashRemote));
 
-                blockHashGot = AppServiceProvider.getP2PObjectService().get(connection, blockNonce, String.class);
+            } else {
 
-                if (blockHashGot != null && !blockHashGot.equals(blockHash)) {
-                    result.combine(new ExecutionReport().ko("Not allowed to override block index " + blockNonce + " with hash " + blockHashGot + " with his own generated hash " + blockHash));
-                    return result;
-                } else if (blockHashGot == null) {
-                    result.combine(new ExecutionReport().ko("block with hash " + blockHash + " could not be committed"));
-                    return result;
+                FuturePut futurePut = AppServiceProvider.getP2PObjectService().put(connection, blockNonce, blockHash, true, false);
+
+                if (!futurePut.isSuccess()) {
+                    String blockHashGot;
+
+                    blockHashGot = AppServiceProvider.getP2PObjectService().get(connection, blockNonce, String.class);
+
+                    if (blockHashGot != null && !blockHashGot.equals(blockHash)) {
+                        result.combine(new ExecutionReport().ko("Not allowed to override block index " + blockNonce + " with hash " + blockHashGot + " with his own generated hash " + blockHash));
+                        return result;
+                    } else if (blockHashGot == null) {
+                        result.combine(new ExecutionReport().ko("block with hash " + blockHash + " could not be committed"));
+                        return result;
+                    }
+
+                    logger.debug("Commited first, block index " + blockNonce + " with hash " + blockHashGot + ". There was " + futurePut.rawResult().size() + " peers which have tried to commit the same block index.");
                 }
 
-                logger.debug("Commited first, block index " + blockNonce + " with hash " + blockHashGot + ". There was " + futurePut.rawResult().size() + " peers which have tried to commit the same block index.");
+                logger.trace("stored block index {}", block.getNonce());
+
+                AppServiceProvider.getBlockchainService().putLocal(blockHash, block, blockchain, BlockchainUnitType.BLOCK);
+                setBlockHashWithIndex(block.getNonce(), blockHash, blockchain);
+                logger.trace("stored block {}", blockHash);
+
+                // Update max index
+                setCurrentBlockIndex(LocationType.BOTH, block.getNonce(), blockchain);
+                logger.trace("done updating maxblock to {}", block.getNonce());
+
+                // Update current block
+                blockchain.setCurrentBlock(block);
+                logger.trace("done updating current block");
+
+                //Maintain processed transactions
+                blockchain.getPool().addBlock(block);
+
+                //TODO: remove! DEBUG ONLY
+                String blockHashPrev;
+                BigInteger nonce = block.getNonce();
+                for (int i = 1; i <= 3; i++) {
+                    BigInteger nonceIdx = nonce.subtract(BigInteger.valueOf(i));
+                    if (nonceIdx.compareTo(BigInteger.ZERO) >= 0) {
+                        String nonceID = getBlockIndexIdentifier(nonceIdx);
+                        blockHashPrev = AppServiceProvider.getP2PObjectService().get(connection, nonceID, String.class);
+                        logger.debug("{} with hash: {}", nonceID, blockHashPrev);
+                    } else {
+                        break;
+                    }
+                }
+                result.combine(new ExecutionReport().ok("Put block in blockchain : " + blockHash + " # " + block));
             }
-
-            logger.trace("stored block index {}", block.getNonce());
-
-            AppServiceProvider.getBlockchainService().putLocal(blockHash, block, blockchain, BlockchainUnitType.BLOCK);
-            setBlockHashWithIndex(block.getNonce(), blockHash, blockchain);
-            logger.trace("stored block {}", blockHash);
-
-            // Update max index
-            setCurrentBlockIndex(LocationType.BOTH, block.getNonce(), blockchain);
-            logger.trace("done updating maxblock to {}", block.getNonce());
-
-            // Update current block
-            blockchain.setCurrentBlock(block);
-            logger.trace("done updating current block");
-
-            //Maintain processed transactions
-            blockchain.getPool().addBlock(block);
-
-            result.combine(new ExecutionReport().ok("Put block in blockchain : " + blockHash + " # " + block));
         } catch (Exception ex) {
             result.combine(new ExecutionReport().ko(ex));
         }
