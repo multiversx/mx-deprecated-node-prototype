@@ -202,7 +202,7 @@ public class BlockchainServiceImpl implements BlockchainService {
             logger.traceExit();
             return null;
         }
-        return AppServiceProvider.getP2PObjectService().get(connection, hash.toString(), unit.clazz);
+        return AppServiceProvider.getP2PObjectService().get(connection, hash.toString(), unit.clazz).getObject();
     }
 
     private <B extends Serializable, H extends Object> B getDataFromDatabase(H hash, BlockchainPersistenceUnit<H, B> unit) {

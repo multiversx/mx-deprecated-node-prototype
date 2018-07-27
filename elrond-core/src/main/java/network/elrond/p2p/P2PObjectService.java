@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 public interface P2PObjectService {
 
-    <T> T get(P2PConnection connection, String key, Class<T> clazz) throws ClassNotFoundException, IOException;
+    <T> DHTResponseObject<T> get(P2PConnection connection, String key, Class<T> clazz) throws ClassNotFoundException, IOException;
 
     <T extends Serializable> FuturePut put(P2PConnection connection, String key, T value) throws IOException;
 

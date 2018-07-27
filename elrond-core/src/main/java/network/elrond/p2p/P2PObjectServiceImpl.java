@@ -14,12 +14,13 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.concurrent.TimeoutException;
 
 public class P2PObjectServiceImpl implements P2PObjectService {
     private static final Logger logger = LogManager.getLogger(P2PObjectServiceImpl.class);
 
     @Override
-    public <T> T get(P2PConnection connection, String key, Class<T> clazz) throws ClassNotFoundException, IOException {
+    public <T> DHTResponseObject<T> get(P2PConnection connection, String key, Class<T> clazz) throws ClassNotFoundException, IOException {
         logger.traceEntry("params: {} {} {}", connection, key, clazz);
 
         PeerDHT peer = connection.getDht();
@@ -37,18 +38,19 @@ public class P2PObjectServiceImpl implements P2PObjectService {
         if (futureGet.isSuccess()) {
             Iterator<Data> iterator = futureGet.dataMap().values().iterator();
             if (!iterator.hasNext()) {
-                return null;
+                logger.warn("DHT data null on success");
+                return logger.traceExit(new DHTResponseObject<>(null, ResponseDHT.SUCCESS));
             }
             Data data = iterator.next();
             T object = (T) data.object();
             logger.trace("Retrieved key: {} => {}", key, object);
-            return logger.traceExit(object);
+            return logger.traceExit(new DHTResponseObject<>(object, ResponseDHT.SUCCESS));
 
         } else {
             logger.warn("Timeout getting data with hash {}", key);
         }
 
-        return logger.traceExit((T) null);
+        return logger.traceExit(new DHTResponseObject<>(null, ResponseDHT.TIMEOUT));
     }
 
     @Override
