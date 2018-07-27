@@ -7,13 +7,12 @@ import net.tomp2p.p2p.Peer;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.storage.Data;
+import network.elrond.core.ThreadUtil;
 import network.elrond.service.AppServiceProvider;
-import network.elrond.sharding.AppShardingManager;
 import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -97,26 +96,56 @@ public class P2PRequestServiceImpl implements P2PRequestService {
                 List<R> responses = new ArrayList<>();
                 Peer peer = dht.peer();
 
+                List<DirectBaseFutureListener> listOfFutureGets = new ArrayList<>();
+
                 peersOnChannel.stream().parallel().forEach(peerAddress -> {
                     FutureDirect futureDirect = peer
                             .sendDirect(peerAddress)
-                            .object(new P2PRequestMessage(key, channelName, shard))
-                            .start();
+                            .object(new P2PRequestMessage(key, channelName, shard)).start();
 
-                    futureDirect.awaitUninterruptibly(1000);
+                    DirectBaseFutureListener<FutureGet> directBaseFutureListener = new DirectBaseFutureListener<>();
 
-                    if (futureDirect.isCompleted() && futureDirect.isSuccess()) {
-                        try {
-                            if (futureDirect.object() != null) {
-                                synchronized (responses) {
-                                    responses.add((R) futureDirect.object());
-                                }
-                            }
-                        } catch (ClassNotFoundException | IOException e) {
-                            logger.catching(e);
-                        }
+                    futureDirect.addListener(directBaseFutureListener);
+
+                    synchronized (listOfFutureGets){
+                        listOfFutureGets.add(directBaseFutureListener);
                     }
                 });
+
+                long maxWaitTimeToMonitorResponses = 1000;
+                long startTimeStamp = System.currentTimeMillis();
+
+                while (startTimeStamp + maxWaitTimeToMonitorResponses > System.currentTimeMillis()) {
+                    ThreadUtil.sleep(1);
+
+                    synchronized (listOfFutureGets) {
+                        //not sent to all
+                        if (listOfFutureGets.size() != peersOnChannel.size()) {
+                            continue;
+                        }
+
+                        //got all responses, not waiting
+                        boolean isDone = true;
+                        for (DirectBaseFutureListener directBaseFutureListener : listOfFutureGets) {
+                            if (directBaseFutureListener.getObject() == null) {
+                                isDone = false;
+                                break;
+                            }
+                        }
+
+                        if (isDone) {
+                            break;
+                        }
+                    }
+                }
+
+                synchronized (listOfFutureGets){
+                    for (DirectBaseFutureListener directBaseFutureListener : listOfFutureGets) {
+                        if (directBaseFutureListener.getObject() != null) {
+                            responses.add((R)directBaseFutureListener.getObject());
+                        }
+                    }
+                }
 
                 if (responses.isEmpty()) {
                     return logger.traceExit((R) null);

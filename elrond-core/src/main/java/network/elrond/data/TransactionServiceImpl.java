@@ -98,13 +98,15 @@ public class TransactionServiceImpl implements TransactionService {
                 (transaction.getReceiverAddress().length() != Util.MAX_LEN_ADDR * 2) ||
                 (transaction.getPubKey().length() != Util.MAX_LEN_PUB_KEY * 2)
                 ) {
-            logger.trace("Failed at conistency check (negative nonce, negative value, sig null or empty, wrong lengths for addresses and pub key)");
+            logger.debug("Failed at conistency check (negative nonce, negative value, sig null or empty, wrong lengths for addresses and pub key)");
+            logger.debug(transaction.print().render());
             return logger.traceExit(false);
         }
 
         //test 2. verify if sender address is generated from public key used to sign tx
         if (!transaction.getSenderAddress().equals(Util.getAddressFromPublicKey(Util.hexStringToByteArray(transaction.getPubKey())))) {
-            logger.trace("Failed at sender address not being generated (or equal) to public key");
+            logger.debug("Failed at sender address not being generated (or equal) to public key");
+            logger.debug(transaction.print().render());
             return (false);
         }
 
@@ -125,7 +127,8 @@ public class TransactionServiceImpl implements TransactionService {
         boolean isSignatureVerified = schnorr.verifySignature(transaction.getSignature(), transaction.getChallenge(), message, Util.hexStringToByteArray(transaction.getPubKey()));
 
         if (!isSignatureVerified){
-            logger.trace("Failed at signature verify");
+            logger.debug("Failed at signature verify");
+            logger.debug(transaction.print().render());
         }
 
         return logger.traceExit(isSignatureVerified);

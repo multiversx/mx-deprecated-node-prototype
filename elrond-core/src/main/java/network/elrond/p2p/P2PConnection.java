@@ -19,7 +19,7 @@ public class P2PConnection {
     private Shard shard;
 
     private ObjectDataReply dataReplyCallback;
-    private List<P2PBroadcastChanel> broadcastChannels = new ArrayList<>();
+    private List<P2PBroadcastChannel> broadcastChannels = new ArrayList<>();
     private List<P2PRequestChannel> requestChannels = new ArrayList<>();
 
     public P2PConnection(String nodeName, Peer peer, PeerDHT dht) {
@@ -60,12 +60,12 @@ public class P2PConnection {
 
     private Object handleBroadcast(PeerAddress sender, P2PBroadcastMessage request) throws InterruptedException {
 
-        for (P2PBroadcastChanel chanel : broadcastChannels) {
-            for (P2PChannelListener listener : chanel.getListeners()) {
+        for (P2PBroadcastChannel channel : broadcastChannels) {
+            for (P2PChannelListener listener : channel.getListeners()) {
 
                 // Filter response for channel
                 P2PBroadcastMessage message = request;
-                if (!message.isForChannel(chanel.getName())) {
+                if (!message.isForChannel(channel.getName())) {
                     continue;
                 }
 
@@ -101,7 +101,7 @@ public class P2PConnection {
         this.shard = shard;
     }
 
-    public ObjectDataReply registerChannel(P2PBroadcastChanel channel) {
+    public ObjectDataReply registerChannel(P2PBroadcastChannel channel) {
         broadcastChannels.add(channel);
         return dataReplyCallback;
     }

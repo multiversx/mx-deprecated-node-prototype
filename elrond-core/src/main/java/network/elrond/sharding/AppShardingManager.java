@@ -3,9 +3,8 @@ package network.elrond.sharding;
 import net.tomp2p.peers.PeerAddress;
 import network.elrond.application.AppState;
 import network.elrond.core.CollectionUtil;
-import network.elrond.p2p.P2PBroadcastChanel;
+import network.elrond.p2p.P2PBroadcastChannel;
 import network.elrond.p2p.P2PBroadcastChannelName;
-import network.elrond.p2p.P2PConnection;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,7 +13,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class AppShardingManager {
@@ -32,7 +30,7 @@ public class AppShardingManager {
     public boolean isLeaderInShard(AppState state) {
 
         if (isSeedNode == null) {
-            P2PBroadcastChanel chanel = state.getChanel(P2PBroadcastChannelName.BLOCK);
+            P2PBroadcastChannel chanel = state.getChannel(P2PBroadcastChannelName.BLOCK);
             HashSet<PeerAddress> peers = AppServiceProvider.getP2PBroadcastService().getPeersOnChannel(chanel);
             isSeedNode = CollectionUtil.size(peers) <= 1;
         }
@@ -42,7 +40,7 @@ public class AppShardingManager {
 
     public Integer getNumberNodesInShard(AppState state) {
 
-        P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.BLOCK);
+        P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.BLOCK);
         Integer nbPeers = getConnectedPeersOnChannel(channel).size();
 
         // account for self
@@ -50,7 +48,7 @@ public class AppShardingManager {
     }
 
     public Integer getNumberNodesInNetwork(AppState state) {
-        P2PBroadcastChanel channel = state.getChanel(P2PBroadcastChannelName.XTRANSACTION_BLOCK);
+        P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.XTRANSACTION_BLOCK);
         Integer nbPeers = getConnectedPeersOnChannel(channel).size();
 
         // account for self
@@ -58,7 +56,7 @@ public class AppShardingManager {
     }
 
 
-    public List<String> getConnectedPeersOnChannel(P2PBroadcastChanel channel) {
+    public List<String> getConnectedPeersOnChannel(P2PBroadcastChannel channel) {
         // get only alive nodes
         List<PeerAddress> allConnectedPeers = new ArrayList<>(channel.getConnection().getDht().peerBean().peerMap().all());
 
@@ -72,7 +70,7 @@ public class AppShardingManager {
 
 
     public List<String> getPeersOnShard(AppState state) {
-        P2PBroadcastChanel chanel = state.getChanel(P2PBroadcastChannelName.BLOCK);
+        P2PBroadcastChannel chanel = state.getChannel(P2PBroadcastChannelName.BLOCK);
 
         List<PeerAddress> allPeers = state.getConnection().getPeer().peerBean().peerMap().all();
 
