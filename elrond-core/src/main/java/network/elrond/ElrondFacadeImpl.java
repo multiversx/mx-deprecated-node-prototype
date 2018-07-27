@@ -135,7 +135,11 @@ public class ElrondFacadeImpl implements ElrondFacade {
                 do {
                     receiptHash = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
                     if (receiptHash != null) {
+                        AppServiceProvider.getBlockchainService().putLocal(transactionHash, receiptHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
                         receiptLocal = AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT);
+                        if (receiptLocal != null) {
+                            AppServiceProvider.getBlockchainService().putLocal(receiptHash, receiptLocal, blockchain, BlockchainUnitType.RECEIPT);
+                        }
                     }
                     ThreadUtil.sleep(200);
 
@@ -402,6 +406,8 @@ public class ElrondFacadeImpl implements ElrondFacade {
             if (transaction == null) {
                 return logger.traceExit(new ResponseObject(true, String.format("Transaction with hash %s was not found", transactionHash), null));
             }
+
+            AppServiceProvider.getBlockchainService().putLocal(transactionHash, transaction, blockchain, BlockchainUnitType.TRANSACTION);
 
             return logger.traceExit(new ResponseObject(true, "", transaction));
         } catch (Exception ex) {

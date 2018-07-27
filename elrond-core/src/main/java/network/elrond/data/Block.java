@@ -196,8 +196,8 @@ public class Block implements Serializable, AsciiPrintable {
 
     @Override
     public String toString() {
-        return (String.format("Block{shard=%s,nonce=%d, appStateHash='%s', listTXHashes.size=%d, roundIndex=%d, timestamp=%d}",
-                shard, nonce, Util.byteArrayToHexString(appStateHash), listTXHashes.size(), roundIndex, timestamp));
+        return (String.format("Block{shard=%s, nonce=%d, signature='%s', commitment='%s', appStateHash='%s', listTXHashes.size=%d, roundIndex=%d, timestamp=%d}",
+                shard, nonce, Util.byteArrayToHexString(signature), Util.byteArrayToHexString(commitment), Util.byteArrayToHexString(appStateHash), listTXHashes.size(), roundIndex, timestamp));
     }
 
     @Override

@@ -88,7 +88,13 @@ public class BootstrapServiceImpl implements BootstrapService {
     public String getBlockHashFromIndex(BigInteger blockIndex, Blockchain blockchain) throws Exception {
         logger.traceEntry("params: {} {}", blockIndex, blockchain);
         String identifier = getBlockIndexIdentifier(blockIndex);
-        return logger.traceExit((String) AppServiceProvider.getBlockchainService().get(identifier, blockchain, BlockchainUnitType.BLOCK_INDEX));
+        String blockHash = AppServiceProvider.getBlockchainService().get(identifier, blockchain, BlockchainUnitType.BLOCK_INDEX);
+
+        if (blockHash != null) {
+            AppServiceProvider.getBlockchainService().putLocal(identifier, blockHash, blockchain, BlockchainUnitType.BLOCK_INDEX);
+        }
+
+        return logger.traceExit(blockHash);
     }
 
 
@@ -363,6 +369,8 @@ public class BootstrapServiceImpl implements BootstrapService {
                     logger.trace("Synchronized FAILED at index {}!", blockIndex);
                     return logger.traceExit(result);
                 }
+
+                AppServiceProvider.getBlockchainService().putLocal(blockHash, block, blockchain, BlockchainUnitType.BLOCK);
 
                 //AppBlockManager.instance().removeAlreadyProcessedTransactionsFromPool(state, block);
 

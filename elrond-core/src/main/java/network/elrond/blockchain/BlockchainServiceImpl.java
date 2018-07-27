@@ -159,10 +159,12 @@ public class BlockchainServiceImpl implements BlockchainService {
                 object = requestData(hash, type, connection);
             }
 
-            if (object != null) {
-                cache.put(hash, object);
-                logger.trace("Got from local storace");
-            }
+            return object;
+
+//            if (object != null) {
+//                cache.put(hash, object);
+//                logger.trace("Got from local storace");
+//            }
         }
 
         B result = cache.get(hash);

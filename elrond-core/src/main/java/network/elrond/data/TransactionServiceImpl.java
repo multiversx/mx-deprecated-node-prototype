@@ -150,6 +150,9 @@ public class TransactionServiceImpl implements TransactionService {
                 logger.warn("Found null transaction for hash {}", transactionHash);
                 continue;
             }
+
+            AppServiceProvider.getBlockchainService().putLocal(transactionHash, transaction, blockchain, BlockchainUnitType.TRANSACTION);
+
             transactions.add(transaction);
             //appPersistenceService.put(hashString, transaction, blockchain, BlockchainUnitType.TRANSACTION);
         }
