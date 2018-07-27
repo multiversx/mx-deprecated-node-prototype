@@ -81,7 +81,12 @@ public class P2PObjectServiceImpl implements P2PObjectService {
                 fp = builder.data(new Data(value)).start();
                 fp.awaitUninterruptibly();
             }
-            logger.warn("put finished with {} retries", Util.MAX_RETRIES_PUT - retries);
+
+            if (fp.isSuccess()) {
+                logger.warn("put finished with {} retries", Util.MAX_RETRIES_PUT - retries);
+            } else {
+                logger.warn("put not successful after {} retries", Util.MAX_RETRIES_PUT);
+            }
         }
 
         return logger.traceExit(fp);

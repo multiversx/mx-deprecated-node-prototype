@@ -84,7 +84,7 @@ public class BootstrapServiceImpl implements BootstrapService {
     public String getBlockHashFromIndex(BigInteger blockIndex, Blockchain blockchain) throws Exception {
         logger.traceEntry("params: {} {}", blockIndex, blockchain);
         String identifier = getBlockIndexIdentifier(blockIndex);
-        return logger.traceExit((String) AppServiceProvider.getBlockchainService().getLocal(identifier, blockchain, BlockchainUnitType.BLOCK_INDEX));
+        return logger.traceExit((String) AppServiceProvider.getBlockchainService().get(identifier, blockchain, BlockchainUnitType.BLOCK_INDEX));
     }
 
 
@@ -130,7 +130,7 @@ public class BootstrapServiceImpl implements BootstrapService {
 
             logger.trace("stored block index {}", block.getNonce());
 
-            AppServiceProvider.getBlockchainService().put(blockHash, block, blockchain, BlockchainUnitType.BLOCK);
+            AppServiceProvider.getBlockchainService().putLocal(blockHash, block, blockchain, BlockchainUnitType.BLOCK);
             setBlockHashWithIndex(block.getNonce(), blockHash, blockchain);
             logger.trace("stored block {}", blockHash);
 
@@ -158,7 +158,7 @@ public class BootstrapServiceImpl implements BootstrapService {
         ExecutionReport result = new ExecutionReport();
 
         try {
-            AppServiceProvider.getBlockchainService().put(transactionHash, transaction, blockchain, BlockchainUnitType.TRANSACTION);
+            AppServiceProvider.getBlockchainService().putLocal(transactionHash, transaction, blockchain, BlockchainUnitType.TRANSACTION);
             result.combine(new ExecutionReport().ok("Put transaction in blockchain with hash: " + transactionHash));
         } catch (Exception ex) {
             result.combine(new ExecutionReport().ko(ex));
@@ -253,7 +253,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                 result.combine(new ExecutionReport().ok("Put block with height: " + index.toString(10) + "..."));
 
                 String blockHash = getBlockHashFromIndex(index, blockchain);
-                Block block = AppServiceProvider.getBlockchainService().getLocal(blockHash, blockchain, BlockchainUnitType.BLOCK);
+                Block block = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK);
 
                 logger.trace("re-running block to update internal state...");
                 ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain, state.getStatisticsManager());
@@ -286,7 +286,7 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         List<String> hashes = BlockUtil.getTransactionsHashesAsString(block);
         for (String transactionHash : hashes) {
-            Transaction transaction = AppServiceProvider.getBlockchainService().getLocal(transactionHash, blockchain, BlockchainUnitType.TRANSACTION);
+            Transaction transaction = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION);
             commitTransaction(transaction, transactionHash, blockchain);
         }
 
@@ -317,7 +317,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                     return logger.traceExit(result);
                 }
 
-                Block block = AppServiceProvider.getBlockchainService().getLocal(blockHash, blockchain, BlockchainUnitType.BLOCK);
+                Block block = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK);
                 if (block == null) {
                     result.ko("Can not find block hash " + blockHash + " on LOCAL!");
                     logger.trace("Synchronized FAILED at index {}!", blockIndex);

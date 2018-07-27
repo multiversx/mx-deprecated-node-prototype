@@ -145,7 +145,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         List<String> hashes = BlockUtil.getTransactionsHashesAsString(block);
         for (String transactionHash : hashes) {
-            Transaction transaction = AppServiceProvider.getBlockchainService().getLocal(transactionHash, blockchain, BlockchainUnitType.TRANSACTION);
+            Transaction transaction = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION);
             if (transaction == null) {
                 logger.warn("Found null transaction for hash {}", transactionHash);
                 continue;

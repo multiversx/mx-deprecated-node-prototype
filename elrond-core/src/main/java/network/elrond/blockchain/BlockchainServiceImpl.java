@@ -156,18 +156,12 @@ public class BlockchainServiceImpl implements BlockchainService {
         if (!exists) {
             B object = getDataFromDatabase(hash, unit);
             if (object == null) {
-                logger.trace("Getting from DHT...");
-                object = getDataFromNetwork(hash, unit, connection);
-                if (object == null) {
-                    object = requestData(hash, type, connection);
-                }
+                object = requestData(hash, type, connection);
             }
 
             if (object != null) {
                 cache.put(hash, object);
-                String strJSONData = AppServiceProvider.getSerializationService().encodeJSON(object);
-                unit.put(bytes(hash.toString()), bytes(strJSONData));
-                logger.trace("Got from local storace, placed on DHT!");
+                logger.trace("Got from local storace");
             }
         }
 
@@ -183,16 +177,11 @@ public class BlockchainServiceImpl implements BlockchainService {
         Util.check(blockchain != null, "blockchain!=null");
 
         BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
-        P2PConnection connection = blockchain.getConnection();
-
         LRUMap<H, B> cache = unit.getCache();
 
         boolean exists = cache.get(hash) != null;
         if (!exists) {
             B object = getDataFromDatabase(hash, unit);
-            if (object == null) {
-                object = requestData(hash, type, connection);
-            }
 
             if (object != null) {
                 cache.put(hash, object);
