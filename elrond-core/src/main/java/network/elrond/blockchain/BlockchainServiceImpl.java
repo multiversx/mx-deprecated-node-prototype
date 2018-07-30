@@ -126,7 +126,11 @@ public class BlockchainServiceImpl implements BlockchainService {
         List<B> list = new ArrayList<>();
 
         for (H hash : hashes) {
-            list.add(getLocal(hash, blockchain, type));
+
+            B val = getLocal(hash, blockchain, type);
+            if (val != null) {
+                list.add(val);
+            }
         }
 
         return logger.traceExit(list);

@@ -14,7 +14,7 @@ public enum BlockchainUnitType {
     SETTINGS(String.class, String.class),
     RECEIPT(String.class, Receipt.class),
     TRANSACTION_RECEIPT(String.class, String.class),
-    ;
+    BLOCK_TRANSACTIONS(String.class, String.class),;
 
     private Class<?> keyType;
     private Class<?> valueType;

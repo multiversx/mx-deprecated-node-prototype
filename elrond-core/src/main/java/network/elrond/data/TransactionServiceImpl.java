@@ -126,7 +126,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         boolean isSignatureVerified = schnorr.verifySignature(transaction.getSignature(), transaction.getChallenge(), message, Util.hexStringToByteArray(transaction.getPubKey()));
 
-        if (!isSignatureVerified){
+        if (!isSignatureVerified) {
             logger.debug("Failed at signature verify");
             logger.debug(transaction.print().render());
         }
@@ -141,25 +141,20 @@ public class TransactionServiceImpl implements TransactionService {
         Util.check(blockchain != null, "blockchain is null");
         Util.check(block != null, "block is null");
 
-        List<Transaction> transactions = new ArrayList<>();
+        List<Transaction> transactions;
 
         //JLS 2018.05.29 - need to store fetched transaction!
         //BlockchainService appPersistenceService = AppServiceProvider.getAppPersistanceService();
+        String blockHash = AppServiceProvider.getSerializationService().getHashString(block);
 
         List<String> hashes = BlockUtil.getTransactionsHashesAsString(block);
-        for (String transactionHash : hashes) {
-            Transaction transaction = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION);
-            if (transaction == null) {
-                logger.warn("Found null transaction for hash {}", transactionHash);
-                continue;
-            }
 
-            AppServiceProvider.getBlockchainService().putLocal(transactionHash, transaction, blockchain, BlockchainUnitType.TRANSACTION);
+        transactions = AppServiceProvider.getBlockchainService().getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
 
-            transactions.add(transaction);
-            //appPersistenceService.put(hashString, transaction, blockchain, BlockchainUnitType.TRANSACTION);
+        logger.info("Getting transactions... transactions size: {} hashes size: {}", transactions.size(), hashes.size());
+        if (transactions.size() != hashes.size()) {
+            transactions = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK_TRANSACTIONS);
         }
-
         return logger.traceExit(transactions);
     }
 
@@ -172,7 +167,7 @@ public class TransactionServiceImpl implements TransactionService {
     public Transaction generateTransaction(PublicKey sender, PublicKey receiver, BigInteger value, BigInteger nonce) {
         logger.traceEntry("params: {} {} {} {}", sender, receiver, value, nonce);
 
-        Shard senderShard= AppServiceProvider.getShardingService().getShard(sender.getValue());
+        Shard senderShard = AppServiceProvider.getShardingService().getShard(sender.getValue());
         Shard receiverShard = AppServiceProvider.getShardingService().getShard(receiver.getValue());
 
         Transaction t = new Transaction(Util.getAddressFromPublicKey(sender.getValue()),
