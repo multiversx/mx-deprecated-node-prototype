@@ -1,6 +1,5 @@
 package network.elrond.data;
 
-import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
@@ -32,4 +31,6 @@ public interface BootstrapService {
     ExecutionReport commitTransaction(Transaction transaction, String transactionHash, Blockchain blockchain);
 
     SyncState getSyncState(Blockchain blockchain) throws Exception;
+
+    void fetchNetworkBlockIndex(Blockchain blockchain) throws java.io.IOException, ClassNotFoundException;
 }

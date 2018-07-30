@@ -28,6 +28,14 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
 
         Util.check(state != null, "state is null while trying to get full nodes list!");
 
+        ConsensusState consensusState = state.getConsensusState();
+
+        if (consensusState.isSyncReq()){
+            logger.info("Round: {}, subRound: {}> Sync req ...", data.getRound().getIndex(), data.getRoundState().name());
+            logger.traceExit();
+            return;
+        }
+
         if (!isLeader(state)) {
             logger.info("Round: {}, subRound: {}> Not this node's turn to process ...", data.getRound().getIndex(), data.getRoundState().name());
             logger.traceExit();

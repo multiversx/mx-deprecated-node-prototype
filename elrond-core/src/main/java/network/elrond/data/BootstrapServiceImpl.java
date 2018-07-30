@@ -5,12 +5,10 @@ import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
-import network.elrond.blockchain.BlockchainPersistenceUnit;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.blockchain.SettingsType;
 import network.elrond.chronology.NTPClient;
 import network.elrond.core.AppStateUtil;
-import network.elrond.core.ResponseObject;
 import network.elrond.core.Util;
 import network.elrond.p2p.DHTResponseObject;
 import network.elrond.p2p.P2PConnection;
@@ -26,6 +24,8 @@ import java.util.List;
 
 public class BootstrapServiceImpl implements BootstrapService {
     private static final Logger logger = LogManager.getLogger(BootstrapServiceImpl.class);
+
+    private BigInteger networkBlockHeight = Util.BIG_INT_MIN_ONE;
 
     @Override
     public BigInteger getCurrentBlockIndex(LocationType locationType, Blockchain blockchain) throws IOException, ClassNotFoundException {
@@ -43,7 +43,8 @@ public class BootstrapServiceImpl implements BootstrapService {
         }
 
         if (locationType == LocationType.NETWORK) {
-            return logger.traceExit(getNetworkBlockIndex(blockchain));
+            return(networkBlockHeight);
+            //return logger.traceExit(getNetworkBlockIndex(blockchain));
         }
 
         RuntimeException ex = new RuntimeException("Unimplemented location type: " + locationType.toString() + "!");
@@ -51,8 +52,9 @@ public class BootstrapServiceImpl implements BootstrapService {
         throw ex;
     }
 
-    private BigInteger getNetworkBlockIndex(Blockchain blockchain) throws java.io.IOException, ClassNotFoundException {
+    public void fetchNetworkBlockIndex(Blockchain blockchain) throws java.io.IOException, ClassNotFoundException{
         logger.traceEntry("params: {}", blockchain);
+
         BigInteger maxHeight = AppServiceProvider.getP2PObjectService().get(
                 blockchain.getConnection(),
                 SettingsType.MAX_BLOCK_HEIGHT.toString(),
@@ -60,10 +62,11 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         if (maxHeight == null) {
             logger.trace("maxHeight == null");
-            return logger.traceExit(Util.BIG_INT_MIN_ONE);
+            networkBlockHeight = Util.BIG_INT_MIN_ONE;
+            return;
         }
 
-        return logger.traceExit(maxHeight);
+        networkBlockHeight = maxHeight;
     }
 
     @Override

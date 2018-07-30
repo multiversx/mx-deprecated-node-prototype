@@ -5,6 +5,7 @@ import network.elrond.chronology.SubRound;
 import network.elrond.consensus.ConsensusState;
 import network.elrond.core.EventHandler;
 import network.elrond.core.Util;
+import network.elrond.data.SyncState;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.AppShardingManager;
 import org.apache.logging.log4j.LogManager;
@@ -23,6 +24,22 @@ public class StartRoundHandler implements EventHandler<SubRound> {
         ConsensusState consensusState = state.getConsensusState();
         consensusState.setSelectedLeaderPeerID(null);
         logger.debug("Round: {}, subRound: {}> initialized!", data.getRound().getIndex(), data.getRoundState().name());
+
+        //compute and check sync required
+
+        SyncState syncState = null;
+        try {
+            AppServiceProvider.getBootstrapService().fetchNetworkBlockIndex(state.getBlockchain());
+            syncState = AppServiceProvider.getBootstrapService().getSyncState(state.getBlockchain());
+            consensusState.setSyncReq(syncState.isSyncRequired());
+        } catch (Exception ex){
+            logger.catching(ex);
+            consensusState.setSyncReq(true);
+            return;
+        }
+
+        logger.debug("Round: {}, subround: {}> Sync req? {}, local: {}, network: {}", data.getRound().getIndex(), data.getRoundState().name(),
+                consensusState.isSyncReq(), syncState.getLocalBlockIndex(), syncState.getRemoteBlockIndex());
 
         List<String> nodeList = AppShardingManager.instance().getPeersOnShard(state);
 
