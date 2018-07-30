@@ -53,6 +53,12 @@ public class ChronologyBlockTask implements AppTask {
                         //Periodically (but not to often) push a log message
                         logger.info("No genesis block, can not compute current round! Waiting 1s and retrying...");
 
+                        try{
+                            AppServiceProvider.getBootstrapService().fetchNetworkBlockIndex(state.getBlockchain());
+                        } catch (Exception ex){
+                            logger.catching(ex);
+                        }
+
                         ThreadUtil.sleep(1000);
 
                         continue;
@@ -71,9 +77,9 @@ public class ChronologyBlockTask implements AppTask {
                         logger.debug("Max remote block index: {} and local block index: {}", maxRemoteBlockIndex, syncState.getLocalBlockIndex());
                     }
 
-                    if (syncState.isSyncRequired()){
-                        continue;
-                    }
+//                    if (syncState.isSyncRequired()){
+//                        continue;
+//                    }
 
                     if (maxRemoteBlockIndex.compareTo(syncState.getRemoteBlockIndex()) > 0) {
                         ThreadUtil.sleep(100);
