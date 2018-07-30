@@ -72,21 +72,10 @@ public class AppShardingManager {
     public List<String> getPeersOnShard(AppState state) {
         P2PBroadcastChannel chanel = state.getChannel(P2PBroadcastChannelName.BLOCK);
 
-        List<PeerAddress> allPeers = state.getConnection().getPeer().peerBean().peerMap().all();
-
-        // add self to the list
-        allPeers.add(state.getConnection().getPeer().peerAddress());
-
-        List<PeerAddress> peersOnChannel = AppServiceProvider.getP2PBroadcastService().getPeersOnChannel(chanel)
+        return AppServiceProvider.getP2PBroadcastService().getPeersOnChannel(chanel)
                 .stream()
-                .filter(Objects::nonNull)
-                .sorted()
-                .collect(Collectors.toList());
-
-        peersOnChannel.retainAll(allPeers);
-
-        return peersOnChannel.stream()
                 .map(peerAddress -> peerAddress.peerId().toString())
+                .filter(Objects::nonNull)
                 .sorted()
                 .collect(Collectors.toList());
     }
