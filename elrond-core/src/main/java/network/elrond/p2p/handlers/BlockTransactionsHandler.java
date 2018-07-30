@@ -38,7 +38,7 @@ public class BlockTransactionsHandler implements RequestHandler<ArrayList<Transa
                 }
             }
 
-            logger.info("requested transaction with hash {} : {}", blockHash, block);
+            logger.trace("requested transaction with hash {} : {}", blockHash, block);
         }
         return logger.traceExit(transactionList);
     }

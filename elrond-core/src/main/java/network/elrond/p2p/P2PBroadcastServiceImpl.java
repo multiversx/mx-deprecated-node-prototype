@@ -139,7 +139,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
                         }
                     }
 
-                    logger.debug("Found {} peers: {}", futureGet.rawData().values().iterator().next().values().toArray().length,
+                    logger.trace("Found {} peers: {}", futureGet.rawData().values().iterator().next().values().toArray().length,
                             totalPeers);
                 }
             } catch (Exception ex) {
