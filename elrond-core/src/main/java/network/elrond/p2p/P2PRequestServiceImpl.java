@@ -43,6 +43,16 @@ public class P2PRequestServiceImpl implements P2PRequestService {
                 // Create new
                 FuturePut futurePut = dht.put(hash).data(new Data(dht.peer().peerAddress())).versionKey(version).start();
                 futurePut.awaitUninterruptibly();
+
+                if (!futureGet.isEmpty()) {
+                    for (Object object : futureGet.rawData().values().iterator().next().values().toArray()) {
+                        Data data = (Data) object;
+                        PeerAddress peerAddress = (PeerAddress) data.object();
+                        version = peerAddress.peerId();
+                        futurePut = dht.put(hash).data(new Data(peerAddress)).versionKey(version).start().awaitUninterruptibly();
+                    }
+                }
+
                 logger.trace("created new channel");
             } else {
                 logger.warn(futureGet.failedReason());
@@ -69,7 +79,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
 
         try {
 
-            FutureGet futureGet = dht.get(hash).getLatest().start();
+            FutureGet futureGet = dht.get(hash).all().start();
             futureGet.awaitUninterruptibly(1000);
 
             if (futureGet.isSuccess() && !futureGet.isEmpty()) {
