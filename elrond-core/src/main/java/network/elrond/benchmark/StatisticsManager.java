@@ -48,24 +48,35 @@ public class StatisticsManager implements Serializable {
         numberNodesInShard = AppShardingManager.instance().getNumberNodesInShard(state);
     }
 
-    public void addStatistic(Statistic statistic) {
-        logger.traceEntry("params: {}", statistic);
+    Statistic currentStatistic = null;
 
-        long ellapsedMillis = statistic.getCurrentTimeMillis() - currentMillis;
+    public void addStatistic(Statistic statistic){
+        currentStatistic = statistic;
+    }
+
+    public void processStatistic() {
+        logger.traceEntry("params: {}", currentStatistic);
+
+        if(currentStatistic == null){
+            return;
+        }
+
+        long newTime  = timer.getCurrentTime();
+        long ellapsedMillis = newTime - currentMillis;
         liveRoundTime = ellapsedMillis;
-        currentMillis = statistic.getCurrentTimeMillis();
+        currentMillis = newTime;
 
-        statistics.add(statistic);
+        statistics.add(currentStatistic);
         if (statistics.size() > maxStatistics) {
             statistics.remove(0);
         }
 
-        totalProcessedTransactions += statistic.getNrTransactionsInBlock();
-        liveTps = statistic.getNrTransactionsInBlock() * 1000.0 / ellapsedMillis;
+        totalProcessedTransactions += currentStatistic.getNrTransactionsInBlock();
+        liveTps = currentStatistic.getNrTransactionsInBlock() * 1000.0 / ellapsedMillis;
         logger.trace("currentTps is " + liveTps);
         ComputeTps(liveTps);
 
-        liveNrTransactionsInBlock = statistic.getNrTransactionsInBlock();
+        liveNrTransactionsInBlock = currentStatistic.getNrTransactionsInBlock();
         computeNrTransactionsInBlock(liveNrTransactionsInBlock);
 
         computeAverageRoundTime(ellapsedMillis);

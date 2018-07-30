@@ -8,6 +8,7 @@ public class EndRoundHandler implements EventHandler<SubRound> {
     @Override
     public void onEvent(AppState state, SubRound data) {
         state.getStatisticsManager().updateNetworkStats(state);
+        state.getStatisticsManager().processStatistic();
 
 //        if (state.getStatisticsManager() != null) {
 //            boolean isLastBlockFromCurentRound = (state.getBlockchain().getCurrentBlock() != null) &&
