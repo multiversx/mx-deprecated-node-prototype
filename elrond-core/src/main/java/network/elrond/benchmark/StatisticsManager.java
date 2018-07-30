@@ -31,6 +31,7 @@ public class StatisticsManager implements Serializable {
     private long maxNrTransactionsInBlock = 0;
     private long minNrTransactionsInBlock = Integer.MAX_VALUE;
     private long liveNrTransactionsInBlock = 0;
+    private long currentBlockNonce = 0;
 
     private long averageRoundTime = 0;
     private long liveRoundTime = 0;
@@ -80,6 +81,10 @@ public class StatisticsManager implements Serializable {
         computeNrTransactionsInBlock(liveNrTransactionsInBlock);
 
         computeAverageRoundTime(ellapsedMillis);
+
+        if(currentBlockNonce < currentStatistic.getCurrentBlockNonce()){
+            currentBlockNonce = currentStatistic.getCurrentBlockNonce();
+        }
 
         currentIndex++;
         logger.traceExit();
@@ -168,4 +173,6 @@ public class StatisticsManager implements Serializable {
     public Integer getCurrentShardNumber() {
         return currentShardNumber;
     }
+
+    public long getCurrentBlockNonce() { return currentBlockNonce;     }
 }

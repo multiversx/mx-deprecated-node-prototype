@@ -33,7 +33,7 @@ public class BenchmarkManager {
             statistic.setLiveTps(statisticsManager.getLiveTps());
             statistic.setLiveRoundTime(statisticsManager.getLiveRoundTime());
             statistic.setTotalNrProcessedTransactions(statisticsManager.getTotalNrProcessedTransactions());
-
+            statistic.setCurrentBlockNonce(statisticsManager.getCurrentBlockNonce());
             Double shardPeakTps = maxPeakTpsPerShard.get(statisticsManager.getCurrentShardNumber());
             if(shardPeakTps==null || shardPeakTps < statisticsManager.getMaxTps()){
                 shardPeakTps = statisticsManager.getMaxTps();

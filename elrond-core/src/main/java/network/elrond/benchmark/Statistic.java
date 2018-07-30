@@ -4,8 +4,13 @@ import java.io.Serializable;
 
 public class Statistic implements Serializable {
     private long nrTransactionsInBlock;
-    private long tps;
+    private long currentBlockNonce;
     private long currentTimeMillis;
+
+    public Statistic(long nrTransactionsInBlock, long blockNonce) {
+        this(nrTransactionsInBlock);
+        this.currentBlockNonce = blockNonce;
+    }
 
     public Statistic(long nrTransactionsInBlock) {
         this.nrTransactionsInBlock = nrTransactionsInBlock;
@@ -30,6 +35,10 @@ public class Statistic implements Serializable {
 
     public long getCurrentTimeMillis() {
         return currentTimeMillis;
+    }
+
+    public long getCurrentBlockNonce() {
+        return currentBlockNonce;
     }
 //
 //    public void setCurrentTimeMillis(long currentTimeMillis) {

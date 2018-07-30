@@ -11,6 +11,7 @@ public class ShardStatistic {
     private Double averageTps;
     private long liveNrTransactionsPerBlock;
     private long totalNrProcessedTransactions;
+    private long currentBlockNonce;
 
     public Double getLiveTps() {
         return liveTps;
@@ -90,5 +91,13 @@ public class ShardStatistic {
 
     public void setCurrentShardNumber(long currentShardNumber) {
         this.currentShardNumber = currentShardNumber;
+    }
+
+    public long getCurrentBlockNonce() {
+        return currentBlockNonce;
+    }
+
+    public void setCurrentBlockNonce(long currentBlockNonce) {
+        this.currentBlockNonce = currentBlockNonce;
     }
 }
