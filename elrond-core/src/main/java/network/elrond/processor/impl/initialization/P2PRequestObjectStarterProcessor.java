@@ -27,7 +27,7 @@ public class P2PRequestObjectStarterProcessor implements AppTask {
             RequestHandler requestHandler = requestChannel.getHandler();
 
             channel.setHandler(request -> requestHandler.onRequest(state, request));
-            state.addChanel(channel);
+            state.addChannel(channel);
             logger.info("added request handler for {}", requestChannel);
         }
         logger.traceExit();

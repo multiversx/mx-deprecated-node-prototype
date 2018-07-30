@@ -5,7 +5,7 @@ import net.tomp2p.p2p.Peer;
 import network.elrond.account.Accounts;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.crypto.PrivateKey;
-import network.elrond.p2p.P2PBroadcastChanel;
+import network.elrond.p2p.P2PBroadcastChannel;
 import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.p2p.P2PConnection;
 import org.junit.Assert;
@@ -27,26 +27,26 @@ public class AppStateTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testGetChannelWithNullChannelNameShouldThrowException(){
-        appState.getChanel((P2PBroadcastChannelName) null);
+        appState.getChannel((P2PBroadcastChannelName) null);
     }
 
     @Test
     public void testGetChannelWithUnknownChannel(){
-        P2PBroadcastChanel channel = appState.getChanel(P2PBroadcastChannelName.BLOCK);
+        P2PBroadcastChannel channel = appState.getChannel(P2PBroadcastChannelName.BLOCK);
         Assert.assertNull(channel);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testAddChannelWithNullChannelShouldThrowException(){
-        appState.addChanel((P2PBroadcastChanel) null);
+        appState.addChannel((P2PBroadcastChannel) null);
     }
 
     @Test
     public void testAddChannel(){
-        P2PBroadcastChanel test = new P2PBroadcastChanel(P2PBroadcastChannelName.BLOCK, null);
-        Assert.assertNull(appState.getChanel(P2PBroadcastChannelName.BLOCK));
-        appState.addChanel(test);
-        Assert.assertNotNull(appState.getChanel(P2PBroadcastChannelName.BLOCK));
+        P2PBroadcastChannel test = new P2PBroadcastChannel(P2PBroadcastChannelName.BLOCK, null);
+        Assert.assertNull(appState.getChannel(P2PBroadcastChannelName.BLOCK));
+        appState.addChannel(test);
+        Assert.assertNotNull(appState.getChannel(P2PBroadcastChannelName.BLOCK));
     }
 
     @Test(expected = IllegalArgumentException.class)

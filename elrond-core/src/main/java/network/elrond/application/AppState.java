@@ -39,36 +39,36 @@ public class AppState implements Serializable, AsciiPrintable {
     private P2PConnection connection;
 
 
-    private Map<P2PBroadcastChannelName, P2PBroadcastChanel> broadcastChannels = new HashMap<>();
+    private Map<P2PBroadcastChannelName, P2PBroadcastChannel> broadcastChannels = new HashMap<>();
     private Map<P2PRequestChannelName, P2PRequestChannel> requestChannels = new HashMap<>();
 
     private ConsensusState consensusState = new ConsensusState();
 
     private StatisticsManager statisticsManagers;
 
-    public P2PRequestChannel getChanel(P2PRequestChannelName channelName) {
+    public P2PRequestChannel getChannel(P2PRequestChannelName channelName) {
         logger.traceEntry("params: {}", channelName);
         Util.check(channelName != null, "channelName!=null");
         return logger.traceExit(requestChannels.get(channelName));
     }
 
-    public void addChanel(P2PRequestChannel requestChanel) {
+    public void addChannel(P2PRequestChannel requestChanel) {
         logger.traceEntry("params: {}", requestChanel);
         Util.check(requestChanel != null, "requestChanel!=null");
         this.requestChannels.put(requestChanel.getName(), requestChanel);
         logger.traceExit();
     }
 
-    public P2PBroadcastChanel getChanel(P2PBroadcastChannelName channelName) {
+    public P2PBroadcastChannel getChannel(P2PBroadcastChannelName channelName) {
         logger.traceEntry("params: {}", channelName);
         Util.check(channelName != null, "channelName!=null");
         return logger.traceExit(broadcastChannels.get(channelName));
     }
 
-    public void addChanel(P2PBroadcastChanel broadcastChanel) {
-        logger.traceEntry("params: {}", broadcastChanel);
-        Util.check(broadcastChanel != null, "broadcastChanel!=null");
-        this.broadcastChannels.put(broadcastChanel.getName(), broadcastChanel);
+    public void addChannel(P2PBroadcastChannel broadcastChannel) {
+        logger.traceEntry("params: {}", broadcastChannel);
+        Util.check(broadcastChannel != null, "broadcastChanel!=null");
+        this.broadcastChannels.put(broadcastChannel.getName(), broadcastChannel);
         logger.traceExit();
     }
 

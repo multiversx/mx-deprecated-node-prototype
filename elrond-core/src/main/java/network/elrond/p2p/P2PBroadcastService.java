@@ -9,18 +9,18 @@ import java.util.List;
 
 public interface P2PBroadcastService {
 
-    P2PBroadcastChanel createChannel(P2PConnection connection, P2PBroadcastChannelName chanelName);
+    P2PBroadcastChannel createChannel(P2PConnection connection, P2PBroadcastChannelName chanelName);
 
-    boolean subscribeToChannel(P2PBroadcastChanel chanel);
+    boolean subscribeToChannel(P2PBroadcastChannel chanel);
 
-    HashSet<PeerAddress> getPeersOnChannel(P2PBroadcastChanel channel);
+    HashSet<PeerAddress> getPeersOnChannel(P2PBroadcastChannel channel);
 
-    HashSet<PeerAddress> getPeersOnChannel(P2PBroadcastChanel globalChannel, Integer destinationShard);
+    HashSet<PeerAddress> getPeersOnChannel(P2PBroadcastChannel globalChannel, Integer destinationShard);
 
-    boolean publishToChannel(P2PBroadcastChanel chanel, Serializable obj, Integer destinationShard);
+    boolean publishToChannel(P2PBroadcastChannel chanel, Serializable obj, Integer destinationShard);
 
-    boolean unsubscribeFromChannel(P2PBroadcastChanel chanel);
+    boolean unsubscribeFromChannel(P2PBroadcastChannel chanel);
 
-    boolean leaveNetwork(List<P2PBroadcastChanel> chanel);
+    boolean leaveNetwork(List<P2PBroadcastChannel> chanel);
 
 }

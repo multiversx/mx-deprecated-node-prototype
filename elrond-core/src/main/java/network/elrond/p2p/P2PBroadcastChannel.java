@@ -1,18 +1,15 @@
 package network.elrond.p2p;
 
-import network.elrond.core.Util;
-import network.elrond.service.AppServiceProvider;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class P2PBroadcastChanel {
+public class P2PBroadcastChannel {
 
     private P2PBroadcastChannelName name;
     private P2PConnection connection;
     private List<P2PChannelListener> listeners = new ArrayList<>();
 
-    public P2PBroadcastChanel(P2PBroadcastChannelName chanelName, P2PConnection connection) {
+    public P2PBroadcastChannel(P2PBroadcastChannelName chanelName, P2PConnection connection) {
         this.name = chanelName;
         this.connection = connection;
     }
