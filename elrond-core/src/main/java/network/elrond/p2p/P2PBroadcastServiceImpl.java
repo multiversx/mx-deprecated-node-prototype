@@ -13,7 +13,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -55,7 +54,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
                 //hash object where peers are subscribed
                 Number160 hash = Number160.createHash(channelId);
 
-                FutureGet futureGet = dht.get(hash).start();
+                FutureGet futureGet = dht.get(hash).all().start();
                 futureGet.awaitUninterruptibly();
                 if (futureGet.isSuccess() && futureGet.isEmpty()) {
                     //put nothing
@@ -87,11 +86,24 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
             //hash object where peers are subscribed
             Number160 hash = Number160.createHash(channelId);
             //the version where to store data
-            Number160 version = dht.peer().peerAddress().peerId();
+            Number160 version = connection.getPeer().peerAddress().peerId();
+
+            FutureGet futureGet = dht.get(hash).all().start();
+            futureGet.awaitUninterruptibly();
 
             try {
-                FuturePut futurePut = dht.put(hash).data(new Data(dht.peer().peerAddress())).versionKey(version).start().awaitUninterruptibly();
-                logger.info("subscribed to channel {}", channelId);
+                FuturePut futurePut = dht.put(hash).data(new Data(connection.getPeer().peerAddress())).versionKey(version).start().awaitUninterruptibly();
+
+                if (!futureGet.isEmpty()) {
+                    for (Object object : futureGet.rawData().values().iterator().next().values().toArray()) {
+                        Data data = (Data) object;
+                        PeerAddress peerAddress = (PeerAddress) data.object();
+                        version = peerAddress.peerId();
+                        futurePut = dht.put(hash).data(new Data(peerAddress)).versionKey(version).start().awaitUninterruptibly();
+                    }
+                }
+
+                logger.info("subscribed to channel {}, peer {}", channelId, dht.peer().peerAddress());
             } catch (Exception ex){
                 logger.catching(ex);
                 result = false;
@@ -115,7 +127,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
             Number160 hash = Number160.createHash(channelId);
 
             try {
-                FutureGet futureGet = dht.get(hash).getLatest().start();
+                FutureGet futureGet = dht.get(hash).all().start();
                 futureGet.awaitUninterruptibly();
                 if (futureGet.isSuccess()) {
                     //iterate through all contained versions
@@ -126,6 +138,9 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
                             totalPeers.add(peerAddress);
                         }
                     }
+
+                    logger.debug("Found {} peers: {}", futureGet.rawData().values().iterator().next().values().toArray().length,
+                            totalPeers);
                 }
             } catch (Exception ex) {
                 logger.catching(ex);
@@ -155,7 +170,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
 
             HashSet<PeerAddress> peersOnChannel = new HashSet<>();
 
-            FutureGet futureGet = dht.get(hash).getLatest().start();
+            FutureGet futureGet = dht.get(hash).all().start();
             futureGet.awaitUninterruptibly();
             if (futureGet.isSuccess()) {
                 //iterate through all contained versions
@@ -228,10 +243,10 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
                 Number160 hash = Number160.createHash(channelId);
 
                 //the version where to store data
-                Number160 version = dht.peer().peerAddress().peerId();
+                Number160 version = connection.getPeer().peerID();
                 dht.remove(hash).versionKey(version).start().awaitUninterruptibly();
 
-                logger.debug("unsubscribed from channel: {}!", channelId);
+                logger.debug("unsubscribed from channel: {}, peer: {}!", channelId, connection.getPeer().peerAddress());
 
                 result = true;
             } catch (Exception ex) {

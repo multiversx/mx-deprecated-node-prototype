@@ -1,13 +1,18 @@
 package network.elrond.p2p;
 
 import junit.framework.TestCase;
+import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
+import net.tomp2p.p2p.PeerBuilder;
+import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
+import network.elrond.sharding.ShardingServiceImpl;
 import org.junit.Test;
 
 import java.util.HashSet;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
 public class P2PBroadcastServiceTest {
@@ -28,6 +33,11 @@ public class P2PBroadcastServiceTest {
         P2PBroadcastChannel p2PBroadcastChannel = p2PBroadcastService.createChannel(p2PConnection, P2PBroadcastChannelName.BLOCK);
 
         TestCase.assertNotNull(p2PBroadcastChannel);
+
+
+        for (PeerDHT peer: peers) {
+            peer.shutdown();
+        }
     }
 
     @Test
@@ -60,12 +70,18 @@ public class P2PBroadcastServiceTest {
         TestCase.assertTrue(peersSubscribed.contains(channels[0].getConnection().getPeer().peerAddress()));
         TestCase.assertTrue(peersSubscribed.contains(channels[4].getConnection().getPeer().peerAddress()));
         TestCase.assertFalse(peersSubscribed.contains(channels[1].getConnection().getPeer().peerAddress()));
+
+        for (PeerDHT peer: peers) {
+            peer.shutdown();
+        }
     }
 
     @Test
     public void testCreateChannelAndSubscribeGlobalLevel() throws Exception {
         final int nrPeers = 10;
         final int port = 4001;
+
+        ((ShardingServiceImpl)AppServiceProvider.getShardingService()).MAX_ACTIVE_SHARDS_CONT = 10;
 
         PeerDHT[] peers = ExampleUtils.createAndAttachPeersDHT(nrPeers, port);
         ExampleUtils.bootstrap(peers);
@@ -92,6 +108,10 @@ public class P2PBroadcastServiceTest {
         TestCase.assertTrue(peersSubscribed.contains(channels[0].getConnection().getPeer().peerAddress()));
         TestCase.assertTrue(peersSubscribed.contains(channels[4].getConnection().getPeer().peerAddress()));
         TestCase.assertFalse(peersSubscribed.contains(channels[1].getConnection().getPeer().peerAddress()));
+
+        for (PeerDHT peer: peers) {
+            peer.shutdown();
+        }
     }
 
     @Test
@@ -130,6 +150,10 @@ public class P2PBroadcastServiceTest {
         TestCase.assertTrue(peersSubscribed.contains(channels[2].getConnection().getPeer().peerAddress()));
         TestCase.assertTrue(peersSubscribed.contains(channels[4].getConnection().getPeer().peerAddress()));
         TestCase.assertFalse(peersSubscribed.contains(channels[1].getConnection().getPeer().peerAddress()));
+
+        for (PeerDHT peer: peers) {
+            peer.shutdown();
+        }
     }
 
     @Test
@@ -179,8 +203,48 @@ public class P2PBroadcastServiceTest {
         for (int i = 0; i < peers.length; i++){
             TestCase.assertTrue(peersSubscribed.contains(channels[i].getConnection().getPeer().peerAddress()));
         }
+
+        for (PeerDHT peer: peers) {
+            peer.shutdown();
+        }
     }
 
 
+    @Test
+    public void testLazyConnection() throws Exception{
+        PeerDHT[] peers = new PeerDHT[2];
+
+        Random RND = new Random( 42L );
+        P2PBroadcastService p2PBroadcastService = AppServiceProvider.getP2PBroadcastService();
+
+        peers[0] = new PeerBuilderDHT(new PeerBuilder( new Number160( RND ) ).ports( 4000 ).start()).start();
+
+        P2PConnection[] connections = new P2PConnection[peers.length];
+        connections[0] = new P2PConnection("dummy" + String.valueOf(0), peers[0].peer(), peers[0]);
+        connections[0].setShard(new Shard(0));
+
+        P2PBroadcastChannel[] channels = new P2PBroadcastChannel[peers.length];
+        channels[0] = p2PBroadcastService.createChannel(connections[0], P2PBroadcastChannelName.BLOCK);
+
+        p2PBroadcastService.subscribeToChannel(channels[0]);
+
+        Thread.sleep(5000);
+
+        peers[1] = new PeerBuilderDHT(new PeerBuilder( new Number160( RND ) ).masterPeer( peers[0].peer() ).start()).start();
+        ExampleUtils.bootstrap(peers);
+
+        connections[1] = new P2PConnection("dummy" + String.valueOf(1), peers[1].peer(), peers[1]);
+        connections[1].setShard(new Shard(0));
+        channels[1] = p2PBroadcastService.createChannel(connections[1], P2PBroadcastChannelName.BLOCK);
+
+        p2PBroadcastService.subscribeToChannel(channels[1]);
+
+        HashSet<PeerAddress> peersSubscribed = p2PBroadcastService.getPeersOnChannel(channels[0]);
+        TestCase.assertEquals(2, peersSubscribed.size());
+
+        for (PeerDHT peer: peers) {
+            peer.shutdown();
+        }
+    }
 
 }
