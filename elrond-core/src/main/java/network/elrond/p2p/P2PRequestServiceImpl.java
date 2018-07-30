@@ -1,6 +1,7 @@
 package network.elrond.p2p;
 
 import net.tomp2p.dht.FutureGet;
+import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.p2p.Peer;
@@ -37,18 +38,10 @@ public class P2PRequestServiceImpl implements P2PRequestService {
             FutureGet futureGet = dht.get(hash).start();
             futureGet.awaitUninterruptibly();
             if (futureGet.isSuccess()) {
-
-                if (futureGet.isEmpty()) {
-                    // Create new
-                    HashSet<PeerAddress> peersOnChannel = new HashSet<>();
-                    peersOnChannel.add(dht.peer().peerAddress());
-                    dht.put(hash).data(new Data(peersOnChannel)).start().awaitUninterruptibly();
-                } else {
-                    // Addon existing one
-                    HashSet<PeerAddress> peersOnChannel = (HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object();
-                    peersOnChannel.add(dht.peer().peerAddress());
-                    dht.put(hash).data(new Data(peersOnChannel)).start().awaitUninterruptibly();
-                }
+                //the version where to store data
+                Number160 version = dht.peer().peerAddress().peerId();
+                // Create new
+                FuturePut futurePut = dht.put(hash).data(new Data(dht.peer().peerAddress())).versionKey(version).start().awaitUninterruptibly();
 
                 logger.trace("created new channel");
             } else {
@@ -78,17 +71,22 @@ public class P2PRequestServiceImpl implements P2PRequestService {
             PeerDHT dht = connection.getDht();
             Number160 hash = Number160.createHash(channel.getChannelIdentifier(shard));
 
-            FutureGet futureGet = dht.get(hash).start();
+            FutureGet futureGet = dht.get(hash).getLatest().start();
             futureGet.awaitUninterruptibly(1000);
+            HashSet<PeerAddress> peersOnChannel = new HashSet<>();
+
             if (futureGet.isSuccess() && !futureGet.isEmpty()) {
+                //iterate through all contained versions
+                for (Object object : futureGet.rawData().values().iterator().next().values().toArray()) {
+                    Data data = (Data) object;
+                    PeerAddress peerAddress = (PeerAddress)data.object();
+                    if (!peersOnChannel.contains(peerAddress)) {
+                        peersOnChannel.add(peerAddress);
+                    }
+                }
+            }
 
-                //filter the channel peers
-                HashSet<PeerAddress> peersOnChannel = (HashSet<PeerAddress>) futureGet.dataMap()
-                        .values()
-                        .iterator()
-                        .next()
-                        .object();
-
+            if (peersOnChannel.size() > 0) {
                 // remove self from channel peer list
                 PeerAddress self = connection.getPeer().peerAddress();
                 peersOnChannel.remove(self);
