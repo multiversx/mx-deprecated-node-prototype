@@ -35,7 +35,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
 
             Number160 hash = Number160.createHash(channel.getChannelIdentifier(shard));
 
-            FutureGet futureGet = dht.get(hash).start();
+            FutureGet futureGet = dht.get(hash).all().start();
             futureGet.awaitUninterruptibly();
             if (futureGet.isSuccess()) {
                 //the version where to store data
