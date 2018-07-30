@@ -14,6 +14,7 @@ import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,7 +22,6 @@ import java.util.stream.Collectors;
 public class P2PRequestServiceImpl implements P2PRequestService {
 
     private static final Logger logger = LogManager.getLogger(P2PRequestServiceImpl.class);
-
 
     @Override
     @SuppressWarnings("unchecked")
@@ -41,8 +41,8 @@ public class P2PRequestServiceImpl implements P2PRequestService {
                 //the version where to store data
                 Number160 version = dht.peer().peerAddress().peerId();
                 // Create new
-                FuturePut futurePut = dht.put(hash).data(new Data(dht.peer().peerAddress())).versionKey(version).start().awaitUninterruptibly();
-
+                FuturePut futurePut = dht.put(hash).data(new Data(dht.peer().peerAddress())).versionKey(version).start();
+                futurePut.awaitUninterruptibly();
                 logger.trace("created new channel");
             } else {
                 logger.warn(futureGet.failedReason());
@@ -60,118 +60,131 @@ public class P2PRequestServiceImpl implements P2PRequestService {
     }
 
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <K extends Serializable, R extends Serializable> R get(P2PRequestChannel channel, Shard shard, P2PRequestChannelName channelName, K key) {
+    private HashSet<PeerAddress> getPeersOnChannel(P2PRequestChannel channel, Shard shard) {
+        logger.traceEntry("params: {} {}", channel, shard);
+        P2PConnection connection = channel.getConnection();
+        PeerDHT dht = connection.getDht();
+        Number160 hash = Number160.createHash(channel.getChannelIdentifier(shard));
+        HashSet<PeerAddress> peersOnChannel = new HashSet<>();
 
-        logger.traceEntry("params: {} {} {} {}", channel, shard, channelName, key);
         try {
-
-            P2PConnection connection = channel.getConnection();
-            PeerDHT dht = connection.getDht();
-            Number160 hash = Number160.createHash(channel.getChannelIdentifier(shard));
 
             FutureGet futureGet = dht.get(hash).getLatest().start();
             futureGet.awaitUninterruptibly(1000);
-            HashSet<PeerAddress> peersOnChannel = new HashSet<>();
 
             if (futureGet.isSuccess() && !futureGet.isEmpty()) {
                 //iterate through all contained versions
                 for (Object object : futureGet.rawData().values().iterator().next().values().toArray()) {
                     Data data = (Data) object;
-                    PeerAddress peerAddress = (PeerAddress)data.object();
+                    PeerAddress peerAddress = (PeerAddress) data.object();
                     if (!peersOnChannel.contains(peerAddress)) {
                         peersOnChannel.add(peerAddress);
                     }
                 }
             }
+        } catch (ClassNotFoundException | IOException e) {
+            logger.warn(e);
+        }
+        return peersOnChannel;
+    }
 
-            if (peersOnChannel.size() > 0) {
-                // remove self from channel peer list
-                PeerAddress self = connection.getPeer().peerAddress();
-                peersOnChannel.remove(self);
 
-                List<R> responses = new ArrayList<>();
-                Peer peer = dht.peer();
+    private <K extends Serializable, R extends Serializable> List<R> sendRequestMessage(P2PRequestChannel channel, Shard shard, P2PRequestMessage message) {
+        P2PConnection connection = channel.getConnection();
+        PeerDHT dht = connection.getDht();
 
-                List<DirectBaseFutureListener> listOfFutureGets = new ArrayList<>();
+        //get all peers on channel
+        HashSet<PeerAddress> peersOnChannel = getPeersOnChannel(channel, shard);
 
-                peersOnChannel.stream().parallel().forEach(peerAddress -> {
-                    FutureDirect futureDirect = peer
-                            .sendDirect(peerAddress)
-                            .object(new P2PRequestMessage(key, channelName, shard)).start();
+        if (peersOnChannel.size() > 0) {
+            List<R> responses = new ArrayList<>();
+            // remove self from channel peer list
+            PeerAddress self = connection.getPeer().peerAddress();
+            peersOnChannel.remove(self);
+            Peer peer = dht.peer();
 
-                    DirectBaseFutureListener<FutureGet> directBaseFutureListener = new DirectBaseFutureListener<>();
+            List<DirectBaseFutureListener> listOfFutureGets = new ArrayList<>();
 
-                    futureDirect.addListener(directBaseFutureListener);
+            peersOnChannel.stream().parallel().forEach(peerAddress -> {
+                FutureDirect futureDirect = peer
+                        .sendDirect(peerAddress)
+                        .object(message).start();
 
-                    synchronized (listOfFutureGets){
-                        listOfFutureGets.add(directBaseFutureListener);
+                DirectBaseFutureListener<FutureGet> directBaseFutureListener = new DirectBaseFutureListener<>();
+
+                futureDirect.addListener(directBaseFutureListener);
+
+                synchronized (listOfFutureGets) {
+                    listOfFutureGets.add(directBaseFutureListener);
+                }
+            });
+
+            long maxWaitTimeToMonitorResponses = 1000;
+            long startTimeStamp = System.currentTimeMillis();
+
+            while (startTimeStamp + maxWaitTimeToMonitorResponses > System.currentTimeMillis()) {
+                ThreadUtil.sleep(1);
+
+                synchronized (listOfFutureGets) {
+                    //not sent to all
+                    if (listOfFutureGets.size() != peersOnChannel.size()) {
+                        continue;
                     }
-                });
-
-                long maxWaitTimeToMonitorResponses = 1000;
-                long startTimeStamp = System.currentTimeMillis();
-
-                while (startTimeStamp + maxWaitTimeToMonitorResponses > System.currentTimeMillis()) {
-                    ThreadUtil.sleep(1);
-
-                    synchronized (listOfFutureGets) {
-                        //not sent to all
-                        if (listOfFutureGets.size() != peersOnChannel.size()) {
-                            continue;
-                        }
-
-                        //got all responses, not waiting
-                        boolean isDone = true;
-                        for (DirectBaseFutureListener directBaseFutureListener : listOfFutureGets) {
-                            if (directBaseFutureListener.getObject() == null) {
-                                isDone = false;
-                                break;
-                            }
-                        }
-
-                        if (isDone) {
+                    //got all responses, not waiting
+                    boolean isDone = true;
+                    for (DirectBaseFutureListener directBaseFutureListener : listOfFutureGets) {
+                        if (directBaseFutureListener.getObject() == null) {
+                            isDone = false;
                             break;
                         }
                     }
-                }
 
-                synchronized (listOfFutureGets){
-                    for (DirectBaseFutureListener directBaseFutureListener : listOfFutureGets) {
-                        if (directBaseFutureListener.getObject() != null) {
-                            responses.add((R)directBaseFutureListener.getObject());
-                        }
+                    if (isDone) {
+                        break;
                     }
                 }
-
-                if (responses.isEmpty()) {
-                    return logger.traceExit((R) null);
-                }
-
-                Map<R, String> objectToHash = responses.stream().collect(
-                        Collectors.toMap(
-                                response -> response,
-                                response -> AppServiceProvider.getSerializationService().getHashString(response),
-                                (response1, response2) -> response1));
-
-                Map<String, Long> counts = objectToHash.entrySet()
-                        .stream()
-                        .collect(Collectors.groupingBy(Map.Entry::getValue, Collectors.counting()));
-
-                String element = Collections.max(counts.entrySet(), Map.Entry.comparingByValue()).getKey();
-
-                List<R> results = objectToHash.entrySet()
-                        .stream()
-                        .filter(entry -> Objects.equals(entry.getValue(), element))
-                        .map(Map.Entry::getKey)
-                        .collect(Collectors.toList());
-                R result = (results.size() > 0) ? results.get(0) : null;
-
-                return logger.traceExit(result);
             }
-        } catch (Exception e) {
-            logger.catching(e);
+
+            synchronized (listOfFutureGets) {
+                for (DirectBaseFutureListener directBaseFutureListener : listOfFutureGets) {
+                    if (directBaseFutureListener.getObject() != null) {
+                        responses.add((R) directBaseFutureListener.getObject());
+                    }
+                }
+            }
+            return responses;
+        }
+        return null;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <K extends Serializable, R extends Serializable> R get(P2PRequestChannel channel, Shard shard, P2PRequestChannelName channelName, K key) {
+        logger.traceEntry("params: {} {} {} {}", channel, shard, channelName, key);
+
+        List<R> responses = sendRequestMessage(channel, shard, new P2PRequestMessage(key, channelName, shard));
+
+        if (responses != null && !responses.isEmpty()) {
+            Map<R, String> objectToHash = responses.stream().collect(
+                    Collectors.toMap(
+                            response -> response,
+                            response -> AppServiceProvider.getSerializationService().getHashString(response),
+                            (response1, response2) -> response1));
+
+            Map<String, Long> counts = objectToHash.entrySet()
+                    .stream()
+                    .collect(Collectors.groupingBy(Map.Entry::getValue, Collectors.counting()));
+
+            String element = Collections.max(counts.entrySet(), Map.Entry.comparingByValue()).getKey();
+
+            List<R> results = objectToHash.entrySet()
+                    .stream()
+                    .filter(entry -> Objects.equals(entry.getValue(), element))
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList());
+            R result = (results.size() > 0) ? results.get(0) : null;
+
+            return logger.traceExit(result);
         }
         return logger.traceExit((R) null);
     }
