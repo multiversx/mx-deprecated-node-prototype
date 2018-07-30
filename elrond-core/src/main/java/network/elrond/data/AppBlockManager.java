@@ -65,6 +65,19 @@ public class AppBlockManager {
             logger.debug("signed block with hash: {}", hashBlock);
             ExecutionService executionService = AppServiceProvider.getExecutionService();
 
+            //test whether I can broadcast the block
+            ChronologyService chronologyService =  AppServiceProvider.getChronologyService();
+            long globalTimeStamp = chronologyService.getSynchronizedTime(state.getNtpClient());
+            long genesisTimeStampCached = 0;
+            if (blockchain.getGenesisBlock() != null){
+                genesisTimeStampCached = blockchain.getGenesisBlock().getTimestamp();
+            }
+            Round currentRound = chronologyService.getRoundFromDateTime(genesisTimeStampCached, globalTimeStamp);
+            if (block.getRoundIndex() != currentRound.getIndex()){
+                logger.warn("Force exit for block with hash {}, nonce: {}, round: {}", hashBlock, block.getNonce(), block.getRoundIndex());
+                return logger.traceExit((Block) null);
+            }
+
             ExecutionReport result = AppServiceProvider.getBootstrapService().commitBlock(block, hashBlock, blockchain);
 
             if (!result.isOk()) {
