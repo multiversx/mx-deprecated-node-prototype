@@ -2,7 +2,7 @@ package network.elrond.consensus.handlers;
 
 import network.elrond.application.AppState;
 import network.elrond.chronology.SubRound;
-import network.elrond.consensus.ConsensusState;
+import network.elrond.consensus.ConsensusData;
 import network.elrond.core.EventHandler;
 import network.elrond.core.Util;
 import network.elrond.data.SyncState;
@@ -21,8 +21,8 @@ public class StartRoundHandler implements EventHandler<SubRound> {
 
         Util.check(state != null, "application state is null");
 
-        ConsensusState consensusState = state.getConsensusState();
-        consensusState.setSelectedLeaderPeerID(null);
+        ConsensusData consensusData = state.getConsensusData();
+        consensusData.setSelectedLeaderPeerID(null);
         logger.debug("Round: {}, subRound: {}> initialized!", data.getRound().getIndex(), data.getRoundState().name());
 
         //compute and check sync required
@@ -31,27 +31,27 @@ public class StartRoundHandler implements EventHandler<SubRound> {
         try {
             AppServiceProvider.getBootstrapService().fetchNetworkBlockIndex(state.getBlockchain());
             syncState = AppServiceProvider.getBootstrapService().getSyncState(state.getBlockchain());
-            consensusState.setSyncReq(syncState.isSyncRequired());
+            consensusData.setSyncReq(syncState.isSyncRequired());
         } catch (Exception ex){
             logger.catching(ex);
-            consensusState.setSyncReq(true);
+            consensusData.setSyncReq(true);
             return;
         }
 
         logger.debug("Round: {}, subround: {}> Sync req? {}, local: {}, network: {}", data.getRound().getIndex(), data.getRoundState().name(),
-                consensusState.isSyncReq(), syncState.getLocalBlockIndex(), syncState.getRemoteBlockIndex());
+                consensusData.isSyncReq(), syncState.getLocalBlockIndex(), syncState.getRemoteBlockIndex());
 
         List<String> nodeList = AppShardingManager.instance().getPeersOnShard(state);
 
         logger.debug("Round: {}, subRound: {}> computed list as: {}", data.getRound().getIndex(), data.getRoundState().name(), nodeList);
 
         String computedLeaderPeerID = AppServiceProvider.getConsensusService().computeLeader(nodeList, data.getRound());
-        consensusState.setSelectedLeaderPeerID(computedLeaderPeerID);
+        consensusData.setSelectedLeaderPeerID(computedLeaderPeerID);
 
         logger.debug("Round: {}, subRound: {}> current leader: {}",
                 data.getRound().getIndex(),
                 data.getRoundState().name(),
-                consensusState.getSelectedLeaderPeerID());
+                consensusData.getSelectedLeaderPeerID());
 
         logger.traceExit();
     }

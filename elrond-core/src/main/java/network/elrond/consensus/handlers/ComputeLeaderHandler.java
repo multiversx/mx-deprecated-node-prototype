@@ -2,7 +2,7 @@ package network.elrond.consensus.handlers;
 
 import network.elrond.application.AppState;
 import network.elrond.chronology.SubRound;
-import network.elrond.consensus.ConsensusState;
+import network.elrond.consensus.ConsensusData;
 import network.elrond.core.EventHandler;
 import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
@@ -25,13 +25,13 @@ public class ComputeLeaderHandler implements EventHandler<SubRound> {
         logger.debug("Round: {}, subRound: {}> computed list as: {}", data.getRound().getIndex(), data.getRoundState().name(), nodeList);
 
         String computedLeaderPeerID = AppServiceProvider.getConsensusService().computeLeader(nodeList, data.getRound());
-        ConsensusState consensusState = state.getConsensusState();
-        consensusState.setSelectedLeaderPeerID(computedLeaderPeerID);
+        ConsensusData consensusData = state.getConsensusData();
+        consensusData.setSelectedLeaderPeerID(computedLeaderPeerID);
 
         logger.debug("Round: {}, subRound: {}> current leader: {}",
                 data.getRound().getIndex(),
                 data.getRoundState().name(),
-                consensusState.getSelectedLeaderPeerID());
+                consensusData.getSelectedLeaderPeerID());
 
         logger.traceExit();
     }

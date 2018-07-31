@@ -7,7 +7,7 @@ import network.elrond.benchmark.StatisticsManager;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.TransactionsPool;
 import network.elrond.chronology.NTPClient;
-import network.elrond.consensus.ConsensusState;
+import network.elrond.consensus.ConsensusData;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
@@ -42,7 +42,7 @@ public class AppState implements Serializable, AsciiPrintable {
     private Map<P2PBroadcastChannelName, P2PBroadcastChannel> broadcastChannels = new HashMap<>();
     private Map<P2PRequestChannelName, P2PRequestChannel> requestChannels = new HashMap<>();
 
-    private ConsensusState consensusState = new ConsensusState();
+    private ConsensusData consensusData = new ConsensusData();
 
     private StatisticsManager statisticsManagers;
 
@@ -144,8 +144,8 @@ public class AppState implements Serializable, AsciiPrintable {
         this.ntpClient = ntpClient;
     }
 
-    public ConsensusState getConsensusState() {
-        return consensusState;
+    public ConsensusData getConsensusData() {
+        return consensusData;
     }
 
     public Shard getShard() {
