@@ -159,7 +159,7 @@ public class ElrondNodeController {
     public @ResponseBody
     ResponseObject getStats(
             HttpServletResponse response) {
-        return logger.traceExit(elrondApiNode.getBenchmarkResult(""));
+        return logger.traceExit(elrondApiNode.getBenchmarkResult());
 
     }
 
