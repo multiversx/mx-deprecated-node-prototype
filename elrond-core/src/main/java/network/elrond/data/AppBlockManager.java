@@ -1,6 +1,7 @@
 package network.elrond.data;
 
 import javafx.util.Pair;
+import net.tomp2p.peers.PeerAddress;
 import network.elrond.TimeWatch;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppState;
@@ -28,7 +29,10 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 //TODO: remove from "data" package
 public class AppBlockManager {
@@ -207,6 +211,31 @@ public class AppBlockManager {
 
         receipts = addTransactions(transactions, block, state);
         logger.trace("done added {} transactions to block", transactions.size());
+
+        P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.BLOCK);
+        HashSet<PeerAddress> totalPeers = AppServiceProvider.getP2PBroadcastService().getPeersOnChannel(channel);
+        HashSet<String> nodeList = new HashSet<String>();
+
+        for (PeerAddress peer : totalPeers) {
+            nodeList.add(peer.peerId().toString());
+        }
+
+        if (blockchain.getCurrentBlock() != null) {
+            nodeList.addAll(blockchain.getCurrentBlock().getPeers());
+        }
+
+        String self = state.getConnection().getPeer().peerID().toString();
+
+        if (!nodeList.contains(self)) {
+            nodeList.add(self);
+        }
+
+        block.setPeers(nodeList.stream()
+                .filter(Objects::nonNull)
+                .sorted()
+                .collect(Collectors.toList()));
+
+        logger.debug("done added {} peers to block", block.getPeers());
 
         block.setAppStateHash(accounts.getAccountsPersistenceUnit().getRootHash());
         logger.trace("done added state root hash to block as {}", block.getAppStateHash());
