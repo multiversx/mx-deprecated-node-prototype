@@ -29,6 +29,8 @@ public class BootstrapBlockTask extends AbstractBlockTask {
         AppContext context = application.getContext();
 
         try {
+            AppServiceProvider.getBootstrapService().fetchNetworkBlockIndex(state.getBlockchain());
+
             BigInteger remoteBlockIndex = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.NETWORK, blockchain);
             BigInteger localBlockIndex = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.LOCAL, blockchain);
 
