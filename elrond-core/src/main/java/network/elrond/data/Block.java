@@ -34,7 +34,7 @@ public class Block implements Serializable, AsciiPrintable {
     //listToTable of transaction hashes included in block
     protected List<byte[]> listTXHashes;
     //hashset of peers addresses included in block
-    protected List<PeerAddress> peers;
+    protected List<String> peerId;
 
     //int shard ID
     protected Shard shard;
@@ -50,7 +50,7 @@ public class Block implements Serializable, AsciiPrintable {
         listPubKeys = new ArrayList<String>();
         prevBlockHash = new byte[0];
         listTXHashes = new ArrayList<byte[]>();
-        peers = new ArrayList<PeerAddress>();
+        peerId = new ArrayList<String>();
         appStateHash = new byte[0];
         signature = new byte[0];
         commitment = new byte[0];
@@ -87,12 +87,12 @@ public class Block implements Serializable, AsciiPrintable {
         this.listTXHashes = listTXHashes;
     }
 
-    public List<PeerAddress> getPeers() {
-        return peers;
+    public List<String> getPeers() {
+        return peerId;
     }
 
-    public void setPeers(List<PeerAddress> peers) {
-        this.peers = peers;
+    public void setPeers(List<String> peerId) {
+        this.peerId = peerId;
     }
 
     /**
@@ -282,7 +282,7 @@ public class Block implements Serializable, AsciiPrintable {
 
         AsciiTable.Row row9 = new AsciiTable.Row();
         row9.getValues().add("Peers in block");
-        row9.getValues().add(peers.size() + "");
+        row9.getValues().add(peerId.size() + "");
         table.getData().add(row9);
 
         AsciiTable.Row row10 = new AsciiTable.Row();
@@ -292,11 +292,11 @@ public class Block implements Serializable, AsciiPrintable {
 
         int index = 0;
 
-        for (PeerAddress node : peers) {
+        for (String peerId : peerId) {
             index++;
             AsciiTable.Row row11 = new AsciiTable.Row();
             row11.getValues().add("#" + index);
-            row11.getValues().add(node.peerId().toString());
+            row11.getValues().add(peerId);
             table.getData().add(row11);
         }
 

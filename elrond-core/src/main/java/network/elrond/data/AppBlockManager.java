@@ -215,30 +215,30 @@ public class AppBlockManager {
 
         P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.BLOCK);
         HashSet<PeerAddress> totalPeers = AppServiceProvider.getP2PBroadcastService().getPeersOnChannel(channel);
+        HashSet<String> peerId = new HashSet<String>();
+
+        for (PeerAddress peer : totalPeers) {
+            peerId.add(peer.peerId().toString());
+        }
 
         if (blockchain.getCurrentBlock() != null) {
-            totalPeers.addAll(blockchain.getCurrentBlock().getPeers());
+            peerId.addAll(blockchain.getCurrentBlock().getPeers());
         } else if (blockchain.getGenesisBlock() != null) {
-            totalPeers.addAll(blockchain.getGenesisBlock().getPeers());
+            peerId.addAll(blockchain.getGenesisBlock().getPeers());
         }
 
-        PeerAddress self = state.getConnection().getPeer().peerAddress();
+        String self = state.getConnection().getPeer().peerID().toString();
 
-        if (!totalPeers.contains(self)) {
-            totalPeers.add(self);
+        if (!peerId.contains(self)) {
+            peerId.add(self);
         }
 
-        block.setPeers(totalPeers.stream()
+        block.setPeers(peerId.stream()
                 .filter(Objects::nonNull)
                 .sorted()
                 .collect(Collectors.toList()));
 
-        logger.debug("done added {} peers to block", block.getPeers()
-                .stream()
-                .map(peerAddress -> peerAddress.peerId().toString())
-                .filter(Objects::nonNull)
-                .sorted()
-                .collect(Collectors.toList()));
+        logger.debug("done added {} peers to block", block.getPeers());
 
         block.setAppStateHash(accounts.getAccountsPersistenceUnit().getRootHash());
         logger.trace("done added state root hash to block as {}", block.getAppStateHash());

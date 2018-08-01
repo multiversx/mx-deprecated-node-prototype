@@ -189,25 +189,20 @@ public class AccountStateServiceImpl implements AccountStateService {
         genesisBlock.setTimestamp(AppServiceProvider.getChronologyService().getSynchronizedTime(ntpClient));
         genesisBlock.setRoundIndex(0);
 
-        HashSet<PeerAddress> totalPeers = new HashSet<PeerAddress>();
+        HashSet<String> peerId = new HashSet<String>();
 
-        PeerAddress self = state.getConnection().getPeer().peerAddress();
+        String self = state.getConnection().getPeer().peerID().toString();
 
-        if(!totalPeers.contains(self)) {
-            totalPeers.add(self);
+        if(!peerId.contains(self)) {
+            peerId.add(self);
         }
 
-        genesisBlock.setPeers(totalPeers.stream()
+        genesisBlock.setPeers(peerId.stream()
                 .filter(Objects::nonNull)
                 .sorted()
                 .collect(Collectors.toList()));
 
-        logger.debug("done added {} peers to genesis block", genesisBlock.getPeers()
-                .stream()
-                .map(peerAddress -> peerAddress.peerId().toString())
-                .filter(Objects::nonNull)
-                .sorted()
-                .collect(Collectors.toList()));
+        logger.debug("done added {} peers to genesis block", genesisBlock.getPeers());
 
         logger.trace("Computing state root hash...");
         try {

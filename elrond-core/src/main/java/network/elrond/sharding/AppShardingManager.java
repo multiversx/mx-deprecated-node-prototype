@@ -73,23 +73,27 @@ public class AppShardingManager {
 
         P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.BLOCK);
         HashSet<PeerAddress> totalPeers = AppServiceProvider.getP2PBroadcastService().getPeersOnChannel(channel);
+        HashSet<String> peerId = new HashSet<String>();
+
+        for (PeerAddress peer : totalPeers) {
+            peerId.add(peer.peerId().toString());
+        }
 
         if (state.getBlockchain() != null) {
             if (state.getBlockchain().getCurrentBlock() != null) {
-                totalPeers.addAll(state.getBlockchain().getCurrentBlock().getPeers());
+                peerId.addAll(state.getBlockchain().getCurrentBlock().getPeers());
             } else if (state.getBlockchain().getGenesisBlock() != null) {
-                totalPeers.addAll(state.getBlockchain().getGenesisBlock().getPeers());
+                peerId.addAll(state.getBlockchain().getGenesisBlock().getPeers());
             }
         }
 
-        PeerAddress self = state.getConnection().getPeer().peerAddress();
+        String self = state.getConnection().getPeer().peerID().toString();
 
-        if (!totalPeers.contains(self)) {
-            totalPeers.add(self);
+        if (!peerId.contains(self)) {
+            peerId.add(self);
         }
 
-        return totalPeers.stream()
-                .map(peerAddress -> peerAddress.peerId().toString())
+        return peerId.stream()
                 .filter(Objects::nonNull)
                 .sorted()
                 .collect(Collectors.toList());
