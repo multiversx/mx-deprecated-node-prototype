@@ -9,6 +9,7 @@ import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.blockchain.SettingsType;
 import network.elrond.chronology.NTPClient;
 import network.elrond.core.AppStateUtil;
+import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.p2p.DHTResponseObject;
 import network.elrond.p2p.P2PConnection;
@@ -43,7 +44,7 @@ public class BootstrapServiceImpl implements BootstrapService {
         }
 
         if (locationType == LocationType.NETWORK) {
-            return(networkBlockHeight);
+            return networkBlockHeight;
             //return logger.traceExit(getNetworkBlockIndex(blockchain));
         }
 
@@ -55,18 +56,22 @@ public class BootstrapServiceImpl implements BootstrapService {
     public void fetchNetworkBlockIndex(Blockchain blockchain) throws java.io.IOException, ClassNotFoundException{
         logger.traceEntry("params: {}", blockchain);
 
-        BigInteger maxHeight = AppServiceProvider.getP2PObjectService().get(
-                blockchain.getConnection(),
-                SettingsType.MAX_BLOCK_HEIGHT.toString(),
-                BigInteger.class).getObject();
+        BigInteger maxNetworkBlockHeight;
+        int nRetries = 0;
 
-        if (maxHeight == null) {
-            logger.trace("maxHeight == null");
-            networkBlockHeight = Util.BIG_INT_MIN_ONE;
-            return;
+        do {
+            nRetries++;
+            if (nRetries > 1) ThreadUtil.sleep(100);
+            maxNetworkBlockHeight = AppServiceProvider.getP2PObjectService().get(
+                    blockchain.getConnection(),
+                    SettingsType.MAX_BLOCK_HEIGHT.toString(),
+                    BigInteger.class).getObject();
+        } while (networkBlockHeight.compareTo(maxNetworkBlockHeight) > 0 && nRetries < Util.MAX_RETRIES_GET);
+
+        if (networkBlockHeight.compareTo(maxNetworkBlockHeight) < 0) {
+            logger.warn("fetch network block index: {} with {} tries", maxNetworkBlockHeight, nRetries);
+            networkBlockHeight = maxNetworkBlockHeight;
         }
-
-        networkBlockHeight = maxHeight;
     }
 
     @Override
