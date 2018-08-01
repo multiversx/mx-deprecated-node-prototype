@@ -61,7 +61,7 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         do {
             nRetries++;
-            if (nRetries > 1) ThreadUtil.sleep(100);
+            if (nRetries > 1) ThreadUtil.sleep(1);
             maxNetworkBlockHeight = AppServiceProvider.getP2PObjectService().get(
                     blockchain.getConnection(),
                     SettingsType.MAX_BLOCK_HEIGHT.toString(),

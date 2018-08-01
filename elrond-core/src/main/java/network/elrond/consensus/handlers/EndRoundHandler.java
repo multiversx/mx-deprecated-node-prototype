@@ -1,13 +1,21 @@
 package network.elrond.consensus.handlers;
 
 import network.elrond.application.AppState;
-import network.elrond.chronology.SubRound;
 import network.elrond.core.EventHandler;
+import network.elrond.core.ThreadUtil;
 
-public class EndRoundHandler implements EventHandler<SubRound> {
+public class EndRoundHandler extends EventHandler {
+
+    public EndRoundHandler(long currentRoundIndex){
+        super(currentRoundIndex);
+    }
+
     @Override
-    public void onEvent(AppState state, SubRound data) {
-        state.getStatisticsManager().updateNetworkStats(state);
-        state.getStatisticsManager().processStatistic();
+    public EventHandler execute(AppState state, long genesisTimeStamp) {
+        while (isStillInRound(state, genesisTimeStamp)){
+            ThreadUtil.sleep(10);
+        }
+
+        return new StartRoundHandler(0);
     }
 }

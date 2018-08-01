@@ -107,8 +107,8 @@ public class Application implements Serializable {
         logger.debug("Starting bootstrapping processor...");
         AppTasks.BLOCKCHAIN_BOOTSTRAP.process(this);
 
-        logger.debug("Starting blockchain synchronization...");
-        AppTasks.BLOCKCHAIN_SYNCRONIZATION.process(this);
+//        logger.debug("Starting blockchain synchronization...");
+//        AppTasks.BLOCKCHAIN_SYNCRONIZATION.process(this);
 
         //logger.debug("Execute transactions and emit blocks...");
         //AppTasks.BLOCK_ASSEMBLY_PROCESSOR.process(this);
