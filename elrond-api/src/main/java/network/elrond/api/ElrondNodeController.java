@@ -167,7 +167,7 @@ public class ElrondNodeController {
             return logger.traceExit(elrondApiNode.sendMultipleTransactionsToAllShards(value, nrTransactions));
         } catch (Exception ex){
             logger.catching(ex);
-            return logger.traceExit(new ResponseObject(false, ex.getMessage(), null));
+            return logger.traceExit(new ResponseObject(false, ex.getMessage(), ex.getMessage()));
         }
     }
 
