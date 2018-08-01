@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -189,18 +190,12 @@ public class AccountStateServiceImpl implements AccountStateService {
         genesisBlock.setTimestamp(AppServiceProvider.getChronologyService().getSynchronizedTime(ntpClient));
         genesisBlock.setRoundIndex(0);
 
-        HashSet<String> nodeList = new HashSet<String>();
+        List<String> nodeList = new ArrayList<>();
 
         String self = state.getConnection().getPeer().peerID().toString();
+        nodeList.add(self);
 
-        if (!nodeList.contains(self)) {
-            nodeList.add(self);
-        }
-
-        genesisBlock.setPeers(nodeList.stream()
-                .filter(Objects::nonNull)
-                .sorted()
-                .collect(Collectors.toList()));
+        genesisBlock.setPeers(nodeList);
 
         logger.debug("done added {} peers to genesis block", genesisBlock.getPeers());
 
