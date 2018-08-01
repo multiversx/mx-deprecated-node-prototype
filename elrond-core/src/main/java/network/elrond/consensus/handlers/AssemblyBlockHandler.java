@@ -73,27 +73,6 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
 
         PrivateKey privateKey = state.getPrivateKey();
 
-
-//        logger.debug("About to clean transaction pool...");
-//
-//        synchronized (pool.lock){
-//            //cleanup transaction pool
-//
-//            hashes =  new ArrayList<>(transactionPool);
-//
-//            for (int i = 0; i < hashes.size(); i++){
-//                String hash = hashes.get(i);
-//
-//                if (pool.checkExists(hash)){
-//                    hashes.remove(i);
-//                    transactionPool.remove(hash);
-//                    i--;
-//                }
-//            }
-//        }
-//
-//        logger.debug("Transaction pool cleaned!");
-
         Block block = AppBlockManager.instance().generateAndBroadcastBlock(hashes, privateKey, state);
         if (block != null) {
             size = BlockUtil.getTransactionsCount(block);
@@ -103,14 +82,6 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
             logger.info(" ###### Executed {} transactions in {}ms  TPS:{}   ###### ",
                     size, time, tps);
         }
-
-//        Statistic stats = new Statistic();
-//
-//        stats.setNrTransactionsInBlock(size);
-//        stats.setTps(tps);
-//        stats.setCurrentTimeMillis(System.currentTimeMillis());
-//
-//        state.getStatisticsManager().addStatistic(stats);
 
         logger.traceExit();
     }

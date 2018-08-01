@@ -124,6 +124,19 @@ public class P2PConnection {
         return null;
     }
 
+    public P2PBroadcastChannel getBroadcastChannel(String channelName) {
+        Util.check(channelName != null, "channelName != null");
+
+        for (P2PBroadcastChannel broadcastChannel : broadcastChannels) {
+            P2PBroadcastChannelName broadcastChannelName = broadcastChannel.getName();
+            if (channelName.equals(broadcastChannelName.toString())) {
+                return broadcastChannel;
+            }
+        }
+
+        return null;
+    }
+
     @Override
     public String toString() {
         return (String.format("P2PConnection{MEM=%s, nodeName=%s, shard=%s}", (Object) dht, nodeName, shard));

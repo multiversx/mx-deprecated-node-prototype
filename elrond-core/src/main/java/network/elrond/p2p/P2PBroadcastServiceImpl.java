@@ -104,7 +104,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
                 }
 
                 logger.info("subscribed to channel {}, peer {}", channelId, dht.peer().peerAddress());
-            } catch (Exception ex){
+            } catch (Exception ex) {
                 logger.catching(ex);
                 result = false;
             }
@@ -133,7 +133,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
                     //iterate through all contained versions
                     for (Object object : futureGet.rawData().values().iterator().next().values().toArray()) {
                         Data data = (Data) object;
-                        PeerAddress peerAddress = (PeerAddress)data.object();
+                        PeerAddress peerAddress = (PeerAddress) data.object();
                         if (!totalPeers.contains(peerAddress)) {
                             totalPeers.add(peerAddress);
                         }
@@ -151,8 +151,16 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
             logger.fatal("Not found self on channel!");
         }
 
+        updatePeersOnChannel(totalPeers, channel);
+        totalPeers = channel.getPeerAddresses();
+
         return logger.traceExit(totalPeers);
     }
+
+    private void updatePeersOnChannel(HashSet<PeerAddress> nodes, P2PBroadcastChannel channel) {
+        channel.addPeerAddresses(nodes);
+    }
+
 
     @SuppressWarnings("unchecked")
     @Override
@@ -176,7 +184,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
                 //iterate through all contained versions
                 for (Object object : futureGet.rawData().values().iterator().next().values().toArray()) {
                     Data data = (Data) object;
-                    PeerAddress peerAddress = (PeerAddress)data.object();
+                    PeerAddress peerAddress = (PeerAddress) data.object();
                     if (!peersOnChannel.contains(peerAddress)) {
                         peersOnChannel.add(peerAddress);
                     }
@@ -186,6 +194,9 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
                     logger.fatal("Not found self on channel!");
                 }
 
+                updatePeersOnChannel(peersOnChannel, globalChannel);
+                peersOnChannel = globalChannel.getPeerAddresses();
+
                 return logger.traceExit(peersOnChannel);
             } else {
                 logger.warn(futureGet.failedReason());
@@ -194,7 +205,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
             logger.catching(e);
         }
 
-        return logger.traceExit((HashSet<PeerAddress>) null);
+        return logger.traceExit(globalChannel.getPeerAddresses());
     }
 
     @SuppressWarnings("unchecked")
@@ -202,9 +213,9 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
     public boolean publishToChannel(P2PBroadcastChannel channel, Serializable object, Integer destinationShard) {
         logger.traceEntry("params: {} {}", channel, object);
 
-        HashSet<PeerAddress> peersOnChannel = getPeersOnChannel( channel, destinationShard);
+        HashSet<PeerAddress> peersOnChannel = getPeersOnChannel(channel, destinationShard);
 
-        try{
+        try {
             P2PConnection connection = channel.getConnection();
             P2PBroadcastChannelName channelName = channel.getName();
 
@@ -218,7 +229,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
 
             logger.trace("published to channel!");
             return logger.traceExit(true);
-        } catch (Exception ex){
+        } catch (Exception ex) {
             logger.catching(ex);
         }
         return logger.traceExit(false);
