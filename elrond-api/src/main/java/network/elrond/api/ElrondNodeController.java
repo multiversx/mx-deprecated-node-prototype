@@ -74,7 +74,7 @@ public class ElrondNodeController {
             @RequestParam(defaultValue = "4001") Integer port,
             @RequestParam(defaultValue = "4000", required = false) Integer masterPeerPort,
             @RequestParam(defaultValue = "127.0.0.1", required = false) String masterPeerIpAddress,
-            @RequestParam(defaultValue = "026c00d83e0dc47e6b626ed6c42f636b", required = true) String privateKey,
+            @RequestParam(defaultValue = "00e15fc71adc4832c56c4e6a8b50a9503a4ede9485c4efbc585def0c657d93066a", required = true) String privateKey,
             @RequestParam(defaultValue = "21000000", required = false) String mintValue,
             @RequestParam(defaultValue = "START_FROM_SCRATCH", required = true) BootstrapType bootstrapType//,
             //@RequestParam(defaultValue = "elrond-node-1", required = false) String blockchainPath,
@@ -247,6 +247,15 @@ public class ElrondNodeController {
 
         logger.traceEntry("params: {}", blockHash);
         return logger.traceExit(elrondApiNode.getBlockFromHash(blockHash));
+    }
+
+    @RequestMapping(path = "/node/getprivatepublickeyshard", method = RequestMethod.GET)
+    public @ResponseBody
+    ResponseObject getPrivatePublicKeyShard(
+            HttpServletResponse response) {
+
+        logger.traceEntry();
+        return logger.traceExit(elrondApiNode.getPrivatePublicKeyShard());
     }
 
     @RequestMapping(path = "/node/getNextPrivateKey", method = RequestMethod.GET)
