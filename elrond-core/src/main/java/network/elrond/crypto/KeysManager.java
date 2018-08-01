@@ -42,13 +42,13 @@ public class KeysManager {
 
         try {
             sendToPeers = Files.readAllLines(sendToKez);
-            logger.info("Read a number sendToKez of " + privateKeys.size());
+            logger.info("Read a number sendToKez of " + sendToPeers.size());
         } catch (IOException e) {
             logger.info("Cannot read sendToKez.txt. " + e.getMessage());
         }
     }
 
-    public String getNextPrivateKey(String remoteAddress) {
+    public synchronized String getNextPrivateKey(String remoteAddress) {
         if(privateKeys.size() > 0){
             String pk = privateKeys.get(0);
             getConnectedPeers().add(remoteAddress +";"+pk);

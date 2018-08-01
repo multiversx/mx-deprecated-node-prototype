@@ -21,7 +21,9 @@ public class BenchmarkManager {
         res.getStatisticList().clear();
         Double peakTps = 0.0;
         Double liveTps = 0.0;
+        long processedTx = 0;
         Integer activeNodes=0;
+        long totalBlocks = 0;
         for (StatisticsManager statisticsManager : statisticsManagers) {
             ShardStatistic statistic = new ShardStatistic();
             statistic.setCurrentShardNumber(statisticsManager.getCurrentShardNumber());
@@ -44,9 +46,21 @@ public class BenchmarkManager {
             peakTps += shardPeakTps;
             liveTps += statisticsManager.getLiveTps();
             activeNodes+=statisticsManager.getNumberNodesInShard();
+            processedTx += statisticsManager.getTotalNrProcessedTransactions();
+            totalBlocks += statisticsManager.getCurrentBlockNonce();
 
             res.getStatisticList().add(statistic);
         }
+
+        ShardStatistic globalStatistic = new ShardStatistic();
+        globalStatistic.setLiveTps(liveTps);
+        globalStatistic.setPeakTps(peakTps);
+        globalStatistic.setShardActiveNodes(activeNodes);
+        globalStatistic.setTotalNrProcessedTransactions(processedTx);
+        globalStatistic.setCurrentBlockNonce(totalBlocks);
+
+        res.getStatisticList().add(0, globalStatistic);
+
         res.setGlobalPeakTps(peakTps);
         res.setGlobalLiveTps(liveTps);
         res.setNetworkActiveNodes(activeNodes);

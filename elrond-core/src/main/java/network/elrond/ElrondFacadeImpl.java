@@ -22,15 +22,12 @@ import network.elrond.sharding.AppShardingManager;
 import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -226,42 +223,66 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
     @Override
     public ResponseObject sendMultipleTransactionsToAllShards(BigInteger value, Integer nrTransactions, Application application) {
-        for(String peer: KeysManager.getInstance().getConnectedPeers()){
-            String[] splitPeer = peer.split(";");
-            URL url = null;
-            try {
-                String address = KeysManager.getInstance().getSendToPeers().get(Integer.parseInt(splitPeer[1])).split(";")[2];
+        boolean success = true;
+        String lastError = "";
 
-                url = new URL("http://"+splitPeer[0]+":8080/node/sendMultipleTransactions" +
-                        "?address=" + address+
-                        "&value="+value +
-                        "&nrTransactions=" + nrTransactions);
-
-
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
-
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(con.getInputStream()));
-            String inputLine;
-            StringBuffer content = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                content.append(inputLine);
-            }
-
-            JSONObject obj = new JSONObject(content.toString());
-            String pageName = obj.getString("payload");
-
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (ProtocolException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        port = 8080;
+        List<String> currentPeers = KeysManager.getInstance().getConnectedPeers();
+        String local = "127.0.0.1;" + application.getState().getShard().getIndex().toString();
+        if(!currentPeers.contains(local)) {
+            currentPeers.add(0, local);
         }
 
-        return new ResponseObject();
+        currentPeers.parallelStream().forEach( peer -> {
+
+            Runnable myrunnable = new Runnable() {
+                public void run() {
+                    String[] splitPeer = peer.split(";");
+                    URL url = null;
+                    try {
+                        String address = KeysManager.getInstance().getSendToPeers().get(Integer.parseInt(splitPeer[1])).split(";")[2];
+
+                        url = new URL("http://" + splitPeer[0] + ":" + getport() +"/node/sendMultipleTransactions" +
+                                "?address=" + address +
+                                "&value=" + value +
+                                "&nrTransactions=" + nrTransactions);
+
+                        logger.info(url);
+                        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                        con.setRequestMethod("GET");
+
+                        BufferedReader in = new BufferedReader(
+                                new InputStreamReader(con.getInputStream()));
+                        String inputLine;
+                        StringBuffer content = new StringBuffer();
+                        while ((inputLine = in.readLine()) != null) {
+                            content.append(inputLine);
+                        }
+
+                        logger.info(content.toString());
+                    } catch (Exception ex) {
+                        logger.throwing(ex);
+//                lastError = "Error sending transactions: " + ex.getMessage();
+//                success = false;
+                    }
+                }
+            };
+
+            new Thread(myrunnable).start();
+
+
+        });
+
+        if (!success){
+            return new ResponseObject(false, lastError, "Not Successful");
+        }
+
+        return new ResponseObject(true, "", "Successful sent transactions to all nodes");
+    }
+    int port = 0;
+    synchronized int getport(){
+        return 8080;
+        //return port;
     }
 
     @Override
@@ -484,6 +505,32 @@ public class ElrondFacadeImpl implements ElrondFacade {
     @Override
     public ResponseObject getNextPrivateKey(String remoteAddress) {
         return logger.traceExit(new ResponseObject(true, "", KeysManager.getInstance().getNextPrivateKey(remoteAddress) ));
+    }
+
+    @Override
+    public ResponseObject getPrivatePublicKeyShard(Application application){
+        if (application == null){
+            return new ResponseObject(false, "Node not started!", null);
+        }
+
+        PublicKey publicKey = application.getState().getPublicKey();
+        PrivateKey privateKey = application.getContext().getPrivateKey();
+        Shard shard = application.getState().getShard();
+
+        if (privateKey == null){
+            return new ResponseObject(false, "Error reading data from node! [private key]", null);
+        }
+
+        if (publicKey == null){
+            return new ResponseObject(false, "Error reading data from node! [public key]", null);
+        }
+
+        if (shard == null){
+            return new ResponseObject(false, "Error reading data from node! [shard]", null);
+        }
+
+        return new ResponseObject(true, "", new String[]{Util.byteArrayToHexString(privateKey.getValue()),
+                Util.byteArrayToHexString(publicKey.getValue()), shard.getIndex().toString()});
     }
 
 }
