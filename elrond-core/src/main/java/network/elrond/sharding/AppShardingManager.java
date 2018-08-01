@@ -75,6 +75,14 @@ public class AppShardingManager {
         if (state.getBlockchain() != null && state.getBlockchain().getCurrentBlock() != null) {
             nodeList.addAll(state.getBlockchain().getCurrentBlock().getPeers());
         }
+        else {
+            P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.BLOCK);
+            HashSet<PeerAddress> totalPeers = AppServiceProvider.getP2PBroadcastService().getPeersOnChannel(channel);
+
+            for (PeerAddress peer : totalPeers) {
+                nodeList.add(peer.peerId().toString());
+            }
+        }
 
         String self = state.getConnection().getPeer().peerID().toString();
 
