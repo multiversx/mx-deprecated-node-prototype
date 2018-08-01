@@ -184,6 +184,12 @@ class ElrondApiNode {
         return logger.traceExit(facade.getBlockFromHash(blockHash, blockchain));
     }
 
+    ResponseObject getPrivatePublicKeyShard(){
+        ElrondFacade facade = getFacade();
+
+        return facade.getPrivatePublicKeyShard(application);
+    }
+
     private void setupRestoreDir(File sourceDir, File destinationDir) throws IOException {
         logger.traceEntry("params: {} {}", sourceDir, destinationDir);
         if (!sourceDir.getAbsolutePath().equals(destinationDir.getAbsolutePath())) {

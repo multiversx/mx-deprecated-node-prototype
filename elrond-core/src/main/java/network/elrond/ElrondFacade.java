@@ -103,4 +103,6 @@ public interface ElrondFacade {
     ResponseObject getTransactionFromHash(String transactionHash, Blockchain blockchain);
 
     ResponseObject getBlockFromHash(String blockHash, Blockchain blockchain);
+
+    ResponseObject getPrivatePublicKeyShard(Application application);
 }
