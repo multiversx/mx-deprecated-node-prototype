@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -154,6 +155,21 @@ public class ElrondNodeController {
         }
     }
 
+    @RequestMapping(path = "/node/sendMultipleTransactionsToAllShards", method = RequestMethod.GET)
+    public @ResponseBody
+    ResponseObject sendMultipleTransactionsToAllShards(
+            HttpServletResponse response,
+            @RequestParam(defaultValue = "1") BigInteger value,
+            @RequestParam(defaultValue = "1") Integer nrTransactions) {
+        logger.traceEntry("params: {} {}", value, nrTransactions);
+
+        try {
+            return logger.traceExit(elrondApiNode.sendMultipleTransactionsToAllShards(value, nrTransactions));
+        } catch (Exception ex){
+            logger.catching(ex);
+            return logger.traceExit(new ResponseObject(false, ex.getMessage(), null));
+        }
+    }
 
     @RequestMapping(path = "/node/getStats", method = RequestMethod.GET)
     public @ResponseBody
@@ -231,6 +247,13 @@ public class ElrondNodeController {
 
         logger.traceEntry("params: {}", blockHash);
         return logger.traceExit(elrondApiNode.getBlockFromHash(blockHash));
+    }
+
+    @RequestMapping(path = "/node/getNextPrivateKey", method = RequestMethod.GET)
+    public @ResponseBody
+    ResponseObject getNextPrivateKey(HttpServletRequest request, HttpServletResponse response) {
+        logger.traceEntry();
+        return logger.traceExit(elrondApiNode.getNextPrivateKey(request.getRemoteAddr()));
     }
 
     @RequestMapping(path = "/node/exit", method = RequestMethod.GET)
