@@ -69,7 +69,7 @@ public class AppShardingManager {
     }
 
 
-    public List<String> getPeersInBlock(AppState state) {
+    public List<String> getPeersOnShardInBlock(AppState state) {
         HashSet<String> nodeList = new HashSet<String>();
 
         if (state.getBlockchain() != null && state.getBlockchain().getCurrentBlock() != null) {

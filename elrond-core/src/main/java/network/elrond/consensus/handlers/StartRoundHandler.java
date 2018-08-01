@@ -41,7 +41,7 @@ public class StartRoundHandler implements EventHandler<SubRound> {
         logger.debug("Round: {}, subround: {}> Sync req? {}, local: {}, network: {}", data.getRound().getIndex(), data.getRoundState().name(),
                 consensusState.isSyncReq(), syncState.getLocalBlockIndex(), syncState.getRemoteBlockIndex());
 
-        List<String> nodeList = AppShardingManager.instance().getPeersInBlock(state);
+        List<String> nodeList = AppShardingManager.instance().getPeersOnShardInBlock(state);
 
         logger.debug("Round: {}, subRound: {}> computed list as: {}", data.getRound().getIndex(), data.getRoundState().name(), nodeList);
 

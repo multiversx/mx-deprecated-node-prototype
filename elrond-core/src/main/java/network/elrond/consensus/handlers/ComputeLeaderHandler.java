@@ -20,7 +20,7 @@ public class ComputeLeaderHandler implements EventHandler<SubRound> {
 
         Util.check(state != null, "application state is null");
 
-        List<String> nodeList = AppShardingManager.instance().getPeersInBlock(state);
+        List<String> nodeList = AppShardingManager.instance().getPeersOnShardInBlock(state);
 
         logger.debug("Round: {}, subRound: {}> computed list as: {}", data.getRound().getIndex(), data.getRoundState().name(), nodeList);
 
