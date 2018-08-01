@@ -66,12 +66,15 @@ public class BootstrapServiceImpl implements BootstrapService {
                     blockchain.getConnection(),
                     SettingsType.MAX_BLOCK_HEIGHT.toString(),
                     BigInteger.class).getObject();
-        } while (networkBlockHeight.compareTo(maxNetworkBlockHeight) > 0 && nRetries < Util.MAX_RETRIES_GET);
 
-        if (networkBlockHeight.compareTo(maxNetworkBlockHeight) < 0) {
-            logger.warn("fetch network block index: {} with {} tries", maxNetworkBlockHeight, nRetries);
-            networkBlockHeight = maxNetworkBlockHeight;
-        }
+                if (maxNetworkBlockHeight != null) {
+                    if (networkBlockHeight.compareTo(maxNetworkBlockHeight) < 0) {
+                        logger.warn("fetch network block index: {} with {} tries", maxNetworkBlockHeight, nRetries);
+                        networkBlockHeight = maxNetworkBlockHeight;
+                        break;
+                    }
+                }
+        } while (nRetries < Util.MAX_RETRIES_GET);
     }
 
     @Override
