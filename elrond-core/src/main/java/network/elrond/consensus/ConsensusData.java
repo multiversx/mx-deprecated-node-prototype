@@ -1,10 +1,10 @@
 package network.elrond.consensus;
 
-public class ConsensusState {
+public class ConsensusData {
     String selectedLeaderPeerID;
     boolean syncReq = true;
 
-    public ConsensusState(){
+    public ConsensusData(){
         selectedLeaderPeerID = "";
         syncReq = true;
     }

@@ -9,6 +9,7 @@ import network.elrond.api.manager.ElrondWebSocketManager;
 import network.elrond.application.AppContext;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.core.ResponseObject;
+import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.data.BootstrapType;
 import org.apache.commons.io.FileUtils;
@@ -29,6 +30,32 @@ class ElrondApiNode {
     private ElrondWebSocketManager elrondWebSocketManager;
 
     private Application application;
+
+    private ResponseObject cachedBenchMarkResultResponse = null;
+
+    private Thread thrBenchmarkResultSolver = new Thread(() -> {
+
+        while (true){
+            ThreadUtil.sleep(2000);
+
+            if (application == null){
+                continue;
+            }
+
+            if (application.getState() == null){
+                continue;
+            }
+
+            if (!application.getState().isStillRunning()){
+                return;
+            }
+
+            ElrondFacade facade = getFacade();
+            cachedBenchMarkResultResponse = facade.getBenchmarkResult("", application);
+
+            logger.debug("Got cachedBenchmarkResultResponse: {}", cachedBenchMarkResultResponse);
+        }
+    });
 
     public Application getApplication() {
         return application;
@@ -71,10 +98,19 @@ class ElrondApiNode {
         return logger.traceExit(facade.getBalance(address, application));
     }
 
-    ResponseObject getBenchmarkResult(String benchmarkId) {
-        logger.traceEntry("params: {}", benchmarkId);
-        ElrondFacade facade = getFacade();
-        return logger.traceExit(facade.getBenchmarkResult(benchmarkId, application));
+    ResponseObject getBenchmarkResult() {
+        if (thrBenchmarkResultSolver.getState() == Thread.State.NEW){
+            //thread is not started
+
+            ElrondFacade facade = getFacade();
+            cachedBenchMarkResultResponse = facade.getBenchmarkResult("", application);
+
+            thrBenchmarkResultSolver.start();
+
+            return cachedBenchMarkResultResponse;
+        }
+
+        return cachedBenchMarkResultResponse;
     }
 
     ResponseObject sendMultipleTransactions(AccountAddress receiver, BigInteger value, Integer nrTransactions) {

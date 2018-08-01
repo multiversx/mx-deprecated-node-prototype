@@ -5,7 +5,7 @@ import network.elrond.application.AppState;
 import network.elrond.benchmark.Statistic;
 import network.elrond.blockchain.TransactionsPool;
 import network.elrond.chronology.SubRound;
-import network.elrond.consensus.ConsensusState;
+import network.elrond.consensus.ConsensusData;
 import network.elrond.core.EventHandler;
 import network.elrond.core.ObjectUtil;
 import network.elrond.core.Util;
@@ -28,9 +28,9 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
 
         Util.check(state != null, "state is null while trying to get full nodes list!");
 
-        ConsensusState consensusState = state.getConsensusState();
+        ConsensusData consensusData = state.getConsensusData();
 
-        if (consensusState.isSyncReq()){
+        if (consensusData.isSyncReq()){
             logger.info("Round: {}, subRound: {}> Sync req ...", data.getRound().getIndex(), data.getRoundState().name());
             logger.traceExit();
             return;
@@ -116,9 +116,9 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
     }
 
     private boolean isLeader(AppState state){
-        ConsensusState consensusState = state.getConsensusState();
+        ConsensusData consensusData = state.getConsensusData();
         String currentNodePeerID = AppShardingManager.instance().getCurrentPeerID(state);
-        String selectedLeaderPeerID = consensusState.getSelectedLeaderPeerID();
+        String selectedLeaderPeerID = consensusData.getSelectedLeaderPeerID();
         return ObjectUtil.isEqual(selectedLeaderPeerID, currentNodePeerID);
     }
 }
