@@ -22,10 +22,6 @@ public class SyncRoundHandler extends EventHandler {
         ChronologyService chronologyService = AppServiceProvider.getChronologyService();
         BootstrapService bootstrapService = AppServiceProvider.getBootstrapService();
 
-        if (!isStillInRound(state, genesisTimeStamp)){
-            return new StartRoundHandler(0);
-        }
-
         logger.debug("Round: {}, subRound: {}> initialized!", currentRoundIndex, this.getClass().getName());
 
         SyncState syncState = null;
@@ -48,8 +44,14 @@ public class SyncRoundHandler extends EventHandler {
                 ThreadUtil.sleep(100);
             }
 
-            return(this);
+            return this;
         } else {
+            if (!isStillInRound(state, genesisTimeStamp)){
+                logger.debug("Genesis: {}, current: {}, computed round: {}", genesisTimeStamp, state.getNtpClient().currentTimeMillis(),
+                        chronologyService.getRoundFromDateTime(genesisTimeStamp, state.getNtpClient().currentTimeMillis()).getIndex());
+                return new StartRoundHandler(0);
+            }
+
             return new AssemblyBlockHandler(currentRoundIndex);
         }
     }

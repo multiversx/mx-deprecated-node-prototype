@@ -6,6 +6,7 @@ import network.elrond.blockchain.Blockchain;
 import network.elrond.chronology.Round;
 import network.elrond.chronology.RoundState;
 import network.elrond.consensus.handlers.StartRoundHandler;
+import network.elrond.consensus.handlers.SyncRoundHandler;
 import network.elrond.core.EventHandler;
 import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
@@ -49,6 +50,11 @@ public class ChronologyBlockTask implements AppTask {
 
                         try {
                             AppServiceProvider.getBootstrapService().fetchNetworkBlockIndex(state.getBlockchain());
+
+                            SyncRoundHandler syncRoundHandler = new SyncRoundHandler(0);
+                            syncRoundHandler.execute(state, 0);
+
+
                         } catch (Exception ex) {
                             logger.catching(ex);
                         }

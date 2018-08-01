@@ -6,11 +6,9 @@ import network.elrond.benchmark.Statistic;
 import network.elrond.blockchain.TransactionsPool;
 import network.elrond.chronology.ChronologyService;
 import network.elrond.chronology.RoundState;
-import network.elrond.chronology.SubRound;
 import network.elrond.consensus.ConsensusData;
 import network.elrond.core.EventHandler;
 import network.elrond.core.ObjectUtil;
-import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.data.AppBlockManager;
 import network.elrond.data.Block;
@@ -36,7 +34,7 @@ public class AssemblyBlockHandler extends EventHandler {
         BootstrapService bootstrapService = AppServiceProvider.getBootstrapService();
 
         if (!chronologyService.isStillInRoundState(state.getNtpClient(), genesisTimeStamp, currentRoundIndex, RoundState.PROPOSE_BLOCK)){
-            return new StartRoundHandler(0);
+            return new EndRoundHandler(currentRoundIndex);
         }
 
         ConsensusData consensusData = state.getConsensusData();
