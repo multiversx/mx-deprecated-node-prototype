@@ -23,9 +23,9 @@ public class BlockRequestHandler implements RequestHandler<Block, P2PRequestMess
         Blockchain blockchain = state.getBlockchain();
         Block block = AppServiceProvider.getBlockchainService().getLocal(blockHash, blockchain, BlockchainUnitType.BLOCK);
         if (block == null) {
-            logger.info("Replying to request: block with hash {} not found", blockHash);
+            logger.info("Replying to request: BLOCK with hash {} not found", blockHash);
         } else {
-            logger.info("Replying to request: block with hash {} : {}", blockHash, block);
+            logger.info("Replying to request: BLOCK with hash {} : {}", blockHash, block);
         }
         return logger.traceExit(block);
     }

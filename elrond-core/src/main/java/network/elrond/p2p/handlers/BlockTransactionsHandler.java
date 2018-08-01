@@ -26,7 +26,7 @@ public class BlockTransactionsHandler implements RequestHandler<ArrayList<Transa
         Blockchain blockchain = state.getBlockchain();
         Block block = AppServiceProvider.getBlockchainService().getLocal(blockHash, blockchain, BlockchainUnitType.BLOCK);
         if (block == null) {
-            logger.warn("Replying to request: block transactions for block hash {} not found", blockHash);
+            logger.warn("Replying to request: BLOCK_TRANSACTIONS for block hash {} not found", blockHash);
         } else {
             // get list of transactions
             for (byte[] transactionHash : block.getListTXHashes()) {
@@ -34,11 +34,11 @@ public class BlockTransactionsHandler implements RequestHandler<ArrayList<Transa
                 if (transaction != null) {
                     transactionList.add(transaction);
                 } else {
-                    logger.warn("Replying to request: transaction {} for block hash {} not found", transactionHash, blockHash);
+                    logger.warn("Replying to request: BLOCK_TRANSACTIONS {} for block hash {} not found", transactionHash, blockHash);
                 }
             }
 
-            logger.warn("Replying to request: transaction with hash {} : {}", blockHash, block);
+            logger.warn("Replying to request: BLOCK_TRANSACTIONS with hash {} and {} transactions", blockHash, transactionList.size());
         }
         return logger.traceExit(transactionList);
     }
