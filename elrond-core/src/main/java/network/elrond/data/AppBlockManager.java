@@ -223,9 +223,10 @@ public class AppBlockManager {
 
         if (blockchain.getCurrentBlock() != null) {
             peerId.addAll(blockchain.getCurrentBlock().getPeers());
-        } else if (blockchain.getGenesisBlock() != null) {
-            peerId.addAll(blockchain.getGenesisBlock().getPeers());
         }
+//        else if (blockchain.getGenesisBlock() != null) {
+//            peerId.addAll(blockchain.getGenesisBlock().getPeers());
+//        }
 
         String self = state.getConnection().getPeer().peerID().toString();
 

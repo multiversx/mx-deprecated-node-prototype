@@ -82,9 +82,10 @@ public class AppShardingManager {
         if (state.getBlockchain() != null) {
             if (state.getBlockchain().getCurrentBlock() != null) {
                 peerId.addAll(state.getBlockchain().getCurrentBlock().getPeers());
-            } else if (state.getBlockchain().getGenesisBlock() != null) {
-                peerId.addAll(state.getBlockchain().getGenesisBlock().getPeers());
             }
+//            else if (state.getBlockchain().getGenesisBlock() != null) {
+//                peerId.addAll(state.getBlockchain().getGenesisBlock().getPeers());
+//            }
         }
 
         String self = state.getConnection().getPeer().peerID().toString();
