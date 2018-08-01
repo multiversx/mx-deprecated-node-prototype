@@ -66,6 +66,16 @@ public interface ElrondFacade {
     ResponseObject sendMultipleTransactions(AccountAddress receiver, BigInteger value, Integer nrTransactions, Application application);
 
     /**
+     * Send multiple transactions of value to account
+     *
+     * @param value
+     * @param nrTransactions
+     * @param application
+     * @return result with successfultransactions and failedtransactions number
+     */
+    ResponseObject sendMultipleTransactionsToAllShards(BigInteger value, Integer nrTransactions, Application application);
+
+    /**
      * Pings an IP address and checks if port is open
      *
      * @param ipAddress
@@ -103,4 +113,6 @@ public interface ElrondFacade {
     ResponseObject getTransactionFromHash(String transactionHash, Blockchain blockchain);
 
     ResponseObject getBlockFromHash(String blockHash, Blockchain blockchain);
+
+    ResponseObject getNextPrivateKey(String requestAddress);
 }

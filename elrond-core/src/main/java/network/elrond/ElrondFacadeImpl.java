@@ -9,6 +9,7 @@ import network.elrond.benchmark.*;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.*;
+import network.elrond.crypto.KeysManager;
 import network.elrond.crypto.PKSKPair;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
@@ -21,9 +22,16 @@ import network.elrond.sharding.AppShardingManager;
 import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -214,6 +222,46 @@ public class ElrondFacadeImpl implements ElrondFacade {
         }
 
         return logger.traceExit(new ResponseObject(true, "", result));
+    }
+
+    @Override
+    public ResponseObject sendMultipleTransactionsToAllShards(BigInteger value, Integer nrTransactions, Application application) {
+        for(String peer: KeysManager.getInstance().getConnectedPeers()){
+            String[] splitPeer = peer.split(";");
+            URL url = null;
+            try {
+                String address = KeysManager.getInstance().getSendToPeers().get(Integer.parseInt(splitPeer[1])).split(";")[2];
+
+                url = new URL("http://"+splitPeer[0]+":8080/node/sendMultipleTransactions" +
+                        "?address=" + address+
+                        "&value="+value +
+                        "&nrTransactions=" + nrTransactions);
+
+
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer content = new StringBuffer();
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
+            }
+
+            JSONObject obj = new JSONObject(content.toString());
+            String pageName = obj.getString("payload");
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (ProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return new ResponseObject();
     }
 
     @Override
@@ -431,6 +479,11 @@ public class ElrondFacadeImpl implements ElrondFacade {
             logger.throwing(ex);
             return logger.traceExit(new ResponseObject(false, ex.getMessage(), null));
         }
+    }
+
+    @Override
+    public ResponseObject getNextPrivateKey(String remoteAddress) {
+        return logger.traceExit(new ResponseObject(true, "", KeysManager.getInstance().getNextPrivateKey(remoteAddress) ));
     }
 
 }

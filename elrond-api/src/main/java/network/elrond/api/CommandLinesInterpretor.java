@@ -10,9 +10,14 @@ import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.ShardingService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -74,13 +79,15 @@ public class CommandLinesInterpretor {
             else{
 
                 String[] generateSplit = generateFor.split(";");
-                if(generateSplit.length !=2){
+                if(generateSplit.length !=3){
                     System.out.println("Error generating! Can not start!");
                     return logger.traceExit(new ResponseObject(false, "Error generating!", null));
                 }
 
                 Integer nrShards = Integer.parseInt(generateSplit[0]);
                 Integer nodesPerShard = Integer.parseInt(generateSplit[1]);
+
+                Boolean shouldStartAutomatically = Boolean.parseBoolean(generateSplit[2]);
 
                 Map<Integer, List<String>> shardPrivateKeys = new HashMap<>();
 
@@ -90,10 +97,12 @@ public class CommandLinesInterpretor {
 
                 String fileName = GenerateCommandFile(configs);
 
-                try {
-                    Runtime.getRuntime().exec("cmd /c start "+fileName);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if(shouldStartAutomatically) {
+                    try {
+                        Runtime.getRuntime().exec("cmd /c start " + fileName);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 return logger.traceExit(new ResponseObject(false, "generate", properties));
@@ -158,7 +167,7 @@ public class CommandLinesInterpretor {
 
     public static void GeneratePrivateKeysPerShard(Integer nrShards, Integer nodesPerShard, Map<Integer, List<String>> shardPrivateKeys) {
         ElrondApiNode node = new ElrondApiNode();
-        List<String> publicPrivateKeysList = new ArrayList<>();
+        String[] publicPrivateKeysList = new String[nrShards*nodesPerShard];
         for(int i = 0;i<nrShards;i++){
             List<String> privateKeysList = new ArrayList<>();
             for(int j = 0; j<nodesPerShard ;j++){
@@ -172,14 +181,14 @@ public class CommandLinesInterpretor {
                    shardNumber = shardingService.getShard(publicKeyBytes).getIndex();
                }while(shardNumber!=i);
                privateKeysList.add(pair.getPrivateKey());
-                publicPrivateKeysList.add(String.format("Shard: %d  Private: %s / Public: %s", i, pair.getPrivateKey(), pair.getPublicKey()));
+               publicPrivateKeysList[j*nodesPerShard + i]  = String.format("Shard: %d  Private: %s / Public: %s", i, pair.getPrivateKey(), pair.getPublicKey());
             }
             shardPrivateKeys.put(i, privateKeysList);
         }
 
         Path file = Paths.get("generatedKeys.txt");
         try {
-            Files.write(file, publicPrivateKeysList, Charset.forName("UTF-8"));
+            Files.write(file, Arrays.asList(publicPrivateKeysList), Charset.forName("UTF-8"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -243,7 +252,7 @@ public class CommandLinesInterpretor {
         System.out.println("                   start the UI app");
         System.out.println(" -h --h -H --H -help -HELP --help --HELP :  Display this help message");
         System.out.println(" -config=configfile.cfg :  Loads the config file from disk and automatically starts the node");
-        System.out.println(" -config=configfile.cfg -generate=nrShards;nodesInShard:  Loads the config file from disk and generates scripts for nrShards x nodesInShardInstances");
+        System.out.println(" -config=configfile.cfg -generate=nrShards;nodesInShard;autoStart:  Loads the config file from disk and generates scripts for nrShards x nodesInShardInstances");
         System.out.println();
         System.out.println("Sample of a config file:");
         System.out.println("------------------------");
@@ -303,6 +312,31 @@ public class CommandLinesInterpretor {
             }
             if (privateKey.toUpperCase().equals("AUTO")){
                 privateKey = Util.byteArrayToHexString(new PrivateKey().getValue());
+            }
+            if (privateKey.toUpperCase().startsWith("REQUESTFROMSEED")){
+                try {
+                    String uri = "http://"+ipAddress+":"+privateKey.toUpperCase().split(":")[1]+"/node/getNextPrivateKey";
+                    logger.info("Requesting from " + uri);
+                    URL url = new URL(uri);
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                    con.setRequestMethod("GET");
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(con.getInputStream()));
+                    String inputLine;
+                    StringBuffer content = new StringBuffer();
+                    while ((inputLine = in.readLine()) != null) {
+                        content.append(inputLine);
+                    }
+                    in.close();
+
+                    JSONObject obj = new JSONObject(content.toString());
+                    String pageName = obj.getString("payload");
+
+                    privateKey = pageName.split(";")[1];
+                    logger.info("Got PK: " + privateKey);
+                }catch (Exception ex){
+                    logger.info("Failed to get privateKey " + ex.getMessage()  );
+                }
             }
             data.put("node_private_key", privateKey);
 

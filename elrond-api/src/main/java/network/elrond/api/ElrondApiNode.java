@@ -82,6 +82,11 @@ class ElrondApiNode {
         return logger.traceExit(getFacade().sendMultipleTransactions(receiver, value, nrTransactions, application));
     }
 
+    ResponseObject sendMultipleTransactionsToAllShards(BigInteger value, Integer nrTransactions) {
+        logger.traceEntry("params: {} {}", value, nrTransactions);
+        return logger.traceExit(getFacade().sendMultipleTransactionsToAllShards(value, nrTransactions, application));
+    }
+
     ResponseObject send(AccountAddress receiver, BigInteger value) {
         logger.traceEntry("params: {} {}", receiver, value);
         return logger.traceExit(getFacade().send(receiver, value, application));
@@ -146,6 +151,33 @@ class ElrondApiNode {
         Blockchain blockchain = application.getState().getBlockchain();
 
         return logger.traceExit(facade.getBlockFromHash(blockHash, blockchain));
+    }
+
+    ResponseObject getNextPrivateKey(String requestAddress ){
+        logger.traceEntry();
+        ElrondFacade facade = getFacade();
+        ResponseObject ro = facade.getNextPrivateKey(requestAddress);
+        String nextPrivateKey = ro.getPayload().toString();
+
+        SendBalanceToNewNode(nextPrivateKey);
+
+        return logger.traceExit(ro);
+    }
+
+    private void SendBalanceToNewNode(String nextPrivateKey) {
+        Runnable myrunnable = new Runnable() {
+            public void run() {
+                try {
+                    Thread.sleep(20000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                String publicKey = nextPrivateKey.split(";")[2];
+                send(AccountAddress.fromHexString(publicKey), BigInteger.valueOf(1000000000));
+            }
+        };
+
+        new Thread(myrunnable).start();
     }
 
     private void setupRestoreDir(File sourceDir, File destinationDir) throws IOException {
