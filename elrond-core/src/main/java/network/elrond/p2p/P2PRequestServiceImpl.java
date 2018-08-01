@@ -80,7 +80,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         try {
 
             FutureGet futureGet = dht.get(hash).all().start();
-            futureGet.awaitUninterruptibly(1000);
+            futureGet.awaitUninterruptibly(3000);
 
             if (futureGet.isSuccess() && !futureGet.isEmpty()) {
                 //iterate through all contained versions
@@ -133,7 +133,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
                 }
             });
 
-            long maxWaitTimeToMonitorResponses = 1000;
+            long maxWaitTimeToMonitorResponses = 3000;
             long startTimeStamp = System.currentTimeMillis();
 
             while (startTimeStamp + maxWaitTimeToMonitorResponses > System.currentTimeMillis()) {
@@ -166,8 +166,14 @@ public class P2PRequestServiceImpl implements P2PRequestService {
                     }
                 }
             }
+
+            logger.warn("sendRequestMessage: {}", responses.size());
+
             return responses;
         }
+
+        logger.warn("peersOnChannel: {} on channel {} and shard {}", peersOnChannel.size(), channel.getName(), shard.getIndex());
+
         return null;
     }
 
