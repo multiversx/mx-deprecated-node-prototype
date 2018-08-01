@@ -29,8 +29,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -226,42 +224,51 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
     @Override
     public ResponseObject sendMultipleTransactionsToAllShards(BigInteger value, Integer nrTransactions, Application application) {
-        for(String peer: KeysManager.getInstance().getConnectedPeers()){
+        boolean success = true;
+        String lastError = "";
+
+        String addressCrtShard = KeysManager.getInstance().getSendToPeers().get(Integer.parseInt(application.getState().getShard().getIndex().toString())).
+                split(";")[2];
+        ResponseObject responseObjectResult = sendMultipleTransactions(AccountAddress.fromHexString(addressCrtShard), value, nrTransactions, application);
+        success = success & responseObjectResult.isSuccess();
+
+        for (String peer : KeysManager.getInstance().getConnectedPeers()) {
             String[] splitPeer = peer.split(";");
             URL url = null;
             try {
                 String address = KeysManager.getInstance().getSendToPeers().get(Integer.parseInt(splitPeer[1])).split(";")[2];
 
-                url = new URL("http://"+splitPeer[0]+":8080/node/sendMultipleTransactions" +
-                        "?address=" + address+
-                        "&value="+value +
+                url = new URL("http://" + splitPeer[0] + ":8080/node/sendMultipleTransactions" +
+                        "?address=" + address +
+                        "&value=" + value +
                         "&nrTransactions=" + nrTransactions);
 
 
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setRequestMethod("GET");
 
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(con.getInputStream()));
-            String inputLine;
-            StringBuffer content = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                content.append(inputLine);
-            }
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(con.getInputStream()));
+                String inputLine;
+                StringBuffer content = new StringBuffer();
+                while ((inputLine = in.readLine()) != null) {
+                    content.append(inputLine);
+                }
 
-            JSONObject obj = new JSONObject(content.toString());
-            String pageName = obj.getString("payload");
-
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (ProtocolException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+                JSONObject obj = new JSONObject(content.toString());
+                String pageName = obj.getString("payload");
+            } catch (Exception ex) {
+                logger.throwing(ex);
+                lastError = "Error sending transactions: " + ex.getMessage();
+                success = false;
             }
         }
 
-        return new ResponseObject();
+        if (!success){
+            return new ResponseObject(false, lastError, null);
+        }
+
+        return new ResponseObject(true, "", null);
     }
 
     @Override
