@@ -1,6 +1,8 @@
 package network.elrond.api.log;
 
 import network.elrond.core.ThreadUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
@@ -25,6 +27,8 @@ import java.util.List;
 @Plugin(name = "MySQLAppender", category = "Core", elementType = "appender", printObject = false)
 public class MySQLAppender extends AbstractAppender {
 
+    private static final Logger logger = LogManager.getLogger(MySQLAppender.class);
+
     private Thread threadWork;
 
     private Object locker = new Object();
@@ -34,6 +38,8 @@ public class MySQLAppender extends AbstractAppender {
 
     private String nodeName = null;
     private String tableName = null;
+
+    private long lastEmittedErrorTimeStamp = -1;
 
     protected MySQLAppender(String name, Filter filter, Layout<? extends Serializable> layout) {
         super(name, filter, layout);
@@ -103,7 +109,7 @@ public class MySQLAppender extends AbstractAppender {
             }
 
             if (tableName == null) {
-                System.out.println("MySQL logging system: nodeName = " + nodeName);
+                logger.info("MySQL logging system: nodeName = {}", nodeName);
 
                 try {
                     String databaseName = connection.getCatalog();
@@ -147,7 +153,7 @@ public class MySQLAppender extends AbstractAppender {
                     tableName = "`APP_LOGS`";
                 }
 
-                System.out.println("MySQL logging system: table = " + tableName);
+                logger.info("MySQL logging system: table = {}", tableName);
             }
 
             while (listWork.size() > 0) {
@@ -193,9 +199,20 @@ public class MySQLAppender extends AbstractAppender {
                     preparedStatement.executeBatch();
                     preparedStatement.close();
 
+                    lastEmittedErrorTimeStamp = -1;
                 } catch (Exception ex) {
-                    ex.printStackTrace();
                     listWork.clear();
+
+                    //emit exceptions once at 30 seconds
+                    boolean needToEmitMessage = (System.currentTimeMillis() - lastEmittedErrorTimeStamp) > 30000;
+
+                    if (needToEmitMessage){
+                        lastEmittedErrorTimeStamp = System.currentTimeMillis();
+
+                        logger.throwing(ex);
+                        logger.error("MySQL write error! Message list dumped!");
+                    }
+
                 }
             }
         }
