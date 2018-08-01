@@ -23,9 +23,9 @@ public class BlockIndexRequestHandler implements RequestHandler<String, P2PReque
         Blockchain blockchain = state.getBlockchain();
         String blockIndex = AppServiceProvider.getBlockchainService().getLocal(blockHash, blockchain, BlockchainUnitType.BLOCK_INDEX);
         if (blockIndex == null) {
-            logger.info("requested block index with hash {} not found", blockHash);
+            logger.info("Replying to request: block index with hash {} not found", blockHash);
         } else {
-            logger.info("requested block index with hash {} : {}", blockHash, blockIndex);
+            logger.info("Replying to request: block index with hash {} : {}", blockHash, blockIndex);
         }
         return logger.traceExit(blockIndex);
     }
