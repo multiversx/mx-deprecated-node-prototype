@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 //TODO: remove from "data" package
@@ -214,28 +215,30 @@ public class AppBlockManager {
 
         P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.BLOCK);
         HashSet<PeerAddress> totalPeers = AppServiceProvider.getP2PBroadcastService().getPeersOnChannel(channel);
-        HashSet<String> nodeList = new HashSet<String>();
-
-        for (PeerAddress peer : totalPeers) {
-            nodeList.add(peer.peerId().toString());
-        }
 
         if (blockchain.getCurrentBlock() != null) {
-            nodeList.addAll(blockchain.getCurrentBlock().getPeers());
+            totalPeers.addAll(blockchain.getCurrentBlock().getPeers());
+        } else if (blockchain.getGenesisBlock() != null) {
+            totalPeers.addAll(blockchain.getGenesisBlock().getPeers());
         }
 
-        String self = state.getConnection().getPeer().peerID().toString();
+        PeerAddress self = state.getConnection().getPeer().peerAddress();
 
-        if (!nodeList.contains(self)) {
-            nodeList.add(self);
+        if (!totalPeers.contains(self)) {
+            totalPeers.add(self);
         }
 
-        block.setPeers(nodeList.stream()
+        block.setPeers(totalPeers.stream()
                 .filter(Objects::nonNull)
                 .sorted()
                 .collect(Collectors.toList()));
 
-        logger.debug("done added {} peers to block", block.getPeers());
+        logger.debug("done added {} peers to block", block.getPeers()
+                .stream()
+                .map(peerAddress -> peerAddress.peerId().toString())
+                .filter(Objects::nonNull)
+                .sorted()
+                .collect(Collectors.toList()));
 
         block.setAppStateHash(accounts.getAccountsPersistenceUnit().getRootHash());
         logger.trace("done added state root hash to block as {}", block.getAppStateHash());

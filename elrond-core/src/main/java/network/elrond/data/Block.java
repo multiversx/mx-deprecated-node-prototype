@@ -34,7 +34,7 @@ public class Block implements Serializable, AsciiPrintable {
     //listToTable of transaction hashes included in block
     protected List<byte[]> listTXHashes;
     //hashset of peers addresses included in block
-    protected List<String> peers;
+    protected List<PeerAddress> peers;
 
     //int shard ID
     protected Shard shard;
@@ -50,7 +50,7 @@ public class Block implements Serializable, AsciiPrintable {
         listPubKeys = new ArrayList<String>();
         prevBlockHash = new byte[0];
         listTXHashes = new ArrayList<byte[]>();
-        peers = new ArrayList<String>();
+        peers = new ArrayList<PeerAddress>();
         appStateHash = new byte[0];
         signature = new byte[0];
         commitment = new byte[0];
@@ -87,11 +87,11 @@ public class Block implements Serializable, AsciiPrintable {
         this.listTXHashes = listTXHashes;
     }
 
-    public List<String> getPeers() {
+    public List<PeerAddress> getPeers() {
         return peers;
     }
 
-    public void setPeers(List<String> peers) {
+    public void setPeers(List<PeerAddress> peers) {
         this.peers = peers;
     }
 
@@ -292,11 +292,11 @@ public class Block implements Serializable, AsciiPrintable {
 
         int index = 0;
 
-        for (String node : peers) {
+        for (PeerAddress node : peers) {
             index++;
             AsciiTable.Row row11 = new AsciiTable.Row();
             row11.getValues().add("#" + index);
-            row11.getValues().add(node);
+            row11.getValues().add(node.peerId().toString());
             table.getData().add(row11);
         }
 

@@ -80,7 +80,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         try {
 
             FutureGet futureGet = dht.get(hash).all().start();
-            futureGet.awaitUninterruptibly(1000);
+            futureGet.awaitUninterruptibly(3000);
 
             if (futureGet.isSuccess() && !futureGet.isEmpty()) {
                 //iterate through all contained versions
@@ -95,6 +95,14 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         } catch (ClassNotFoundException | IOException e) {
             logger.warn(e);
         }
+
+        logger.warn("peers on channel {} in shard {} : {}", channel.getName(), shard.getIndex(), peersOnChannel
+                .stream()
+                .map(peerAddress -> peerAddress.peerId().toString())
+                .filter(Objects::nonNull)
+                .sorted()
+                .collect(Collectors.toList()));
+
         return peersOnChannel;
     }
 
