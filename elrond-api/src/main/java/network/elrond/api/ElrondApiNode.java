@@ -189,6 +189,12 @@ class ElrondApiNode {
         return logger.traceExit(facade.getBlockFromHash(blockHash, blockchain));
     }
 
+    ResponseObject getPrivatePublicKeyShard(){
+        ElrondFacade facade = getFacade();
+
+        return facade.getPrivatePublicKeyShard(application);
+    }
+
     ResponseObject getNextPrivateKey(String requestAddress ){
         logger.traceEntry();
         ElrondFacade facade = getFacade();

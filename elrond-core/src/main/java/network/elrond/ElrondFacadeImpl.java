@@ -486,4 +486,30 @@ public class ElrondFacadeImpl implements ElrondFacade {
         return logger.traceExit(new ResponseObject(true, "", KeysManager.getInstance().getNextPrivateKey(remoteAddress) ));
     }
 
+    @Override
+    public ResponseObject getPrivatePublicKeyShard(Application application){
+        if (application == null){
+            return new ResponseObject(false, "Node not started!", null);
+        }
+
+        PublicKey publicKey = application.getState().getPublicKey();
+        PrivateKey privateKey = application.getContext().getPrivateKey();
+        Shard shard = application.getState().getShard();
+
+        if (privateKey == null){
+            return new ResponseObject(false, "Error reading data from node! [private key]", null);
+        }
+
+        if (publicKey == null){
+            return new ResponseObject(false, "Error reading data from node! [public key]", null);
+        }
+
+        if (shard == null){
+            return new ResponseObject(false, "Error reading data from node! [shard]", null);
+        }
+
+        return new ResponseObject(true, "", new String[]{Util.byteArrayToHexString(privateKey.getValue()),
+                Util.byteArrayToHexString(publicKey.getValue()), shard.getIndex().toString()});
+    }
+
 }
