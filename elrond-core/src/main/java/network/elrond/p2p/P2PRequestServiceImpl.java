@@ -95,6 +95,10 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         } catch (ClassNotFoundException | IOException e) {
             logger.warn(e);
         }
+
+        channel.addPeerAddresses(peersOnChannel);
+        peersOnChannel = channel.getPeerAddresses();
+
         return peersOnChannel;
     }
 

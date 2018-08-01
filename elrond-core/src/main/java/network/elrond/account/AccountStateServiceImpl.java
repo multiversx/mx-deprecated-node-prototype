@@ -1,5 +1,6 @@
 package network.elrond.account;
 
+import net.tomp2p.peers.PeerAddress;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.chronology.NTPClient;
@@ -9,6 +10,8 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.*;
+import network.elrond.p2p.P2PBroadcastChannel;
+import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,6 +19,11 @@ import org.mapdb.Fun;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class AccountStateServiceImpl implements AccountStateService {
     private static final Logger logger = LogManager.getLogger(AccountStateServiceImpl.class);
@@ -181,6 +189,15 @@ public class AccountStateServiceImpl implements AccountStateService {
         NTPClient ntpClient = state.getNtpClient();
         genesisBlock.setTimestamp(AppServiceProvider.getChronologyService().getSynchronizedTime(ntpClient));
         genesisBlock.setRoundIndex(0);
+
+        List<String> nodeList = new ArrayList<>();
+
+        String self = state.getConnection().getPeer().peerID().toString();
+        nodeList.add(self);
+
+        genesisBlock.setPeers(nodeList);
+
+        logger.debug("done added {} peers to genesis block", genesisBlock.getPeers());
 
         logger.trace("Computing state root hash...");
         try {

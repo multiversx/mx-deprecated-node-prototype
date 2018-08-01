@@ -1,5 +1,6 @@
 package network.elrond.data;
 
+import net.tomp2p.peers.PeerAddress;
 import network.elrond.AsciiTable;
 import network.elrond.core.Util;
 import network.elrond.sharding.Shard;
@@ -7,7 +8,10 @@ import network.elrond.sharding.Shard;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * The Block abstract class implements a block of data that contains hashes of transaction
@@ -29,6 +33,9 @@ public class Block implements Serializable, AsciiPrintable {
     protected byte[] prevBlockHash;
     //listToTable of transaction hashes included in block
     protected List<byte[]> listTXHashes;
+    //hashset of peers addresses included in block
+    protected List<String> peers;
+
     //int shard ID
     protected Shard shard;
     //app state hash
@@ -43,6 +50,7 @@ public class Block implements Serializable, AsciiPrintable {
         listPubKeys = new ArrayList<String>();
         prevBlockHash = new byte[0];
         listTXHashes = new ArrayList<byte[]>();
+        peers = new ArrayList<String>();
         appStateHash = new byte[0];
         signature = new byte[0];
         commitment = new byte[0];
@@ -77,6 +85,14 @@ public class Block implements Serializable, AsciiPrintable {
 
     public void setListTXHashes(List<byte[]> listTXHashes) {
         this.listTXHashes = listTXHashes;
+    }
+
+    public List<String> getPeers() {
+        return peers;
+    }
+
+    public void setPeers(List<String> peers) {
+        this.peers = peers;
     }
 
     /**
@@ -240,7 +256,6 @@ public class Block implements Serializable, AsciiPrintable {
         row4.getValues().add(Util.getDataEncoded64(prevBlockHash));
         table.getData().add(row4);
 
-
         AsciiTable.Row row5 = new AsciiTable.Row();
         row5.getValues().add("Transactions in block");
         row5.getValues().add(listTXHashes.size() + "");
@@ -260,6 +275,30 @@ public class Block implements Serializable, AsciiPrintable {
             table.getData().add(row7);
         }
 
+        AsciiTable.Row row8 = new AsciiTable.Row();
+        row8.getValues().add("----------------------");
+        row8.getValues().add("----------------------------------------------------------------");
+        table.getData().add(row8);
+
+        AsciiTable.Row row9 = new AsciiTable.Row();
+        row9.getValues().add("Peers in block");
+        row9.getValues().add(peers.size() + "");
+        table.getData().add(row9);
+
+        AsciiTable.Row row10 = new AsciiTable.Row();
+        row10.getValues().add("----------------------");
+        row10.getValues().add("----------------------------------------------------------------");
+        table.getData().add(row10);
+
+        int index = 0;
+
+        for (String node : peers) {
+            index++;
+            AsciiTable.Row row11 = new AsciiTable.Row();
+            row11.getValues().add("#" + index);
+            row11.getValues().add(node);
+            table.getData().add(row11);
+        }
 
         table.calculateColumnWidth();
         return table;

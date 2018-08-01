@@ -37,8 +37,8 @@ public class ChronologyBlockTask implements AppTask {
             ChronologyService chronologyService = AppServiceProvider.getChronologyService();
 
             long genesisTimeStampCached = Long.MIN_VALUE;
-            BigInteger maxRemoteBlockIndex = Util.BIG_INT_MIN_ONE;
-            long nRetries = 0;
+//            BigInteger maxRemoteBlockIndex = Util.BIG_INT_MIN_ONE;
+//            long nRetries = 0;
 
             while (state.isStillRunning()) {
                 ThreadUtil.sleep(1);
@@ -69,6 +69,7 @@ public class ChronologyBlockTask implements AppTask {
                 }
 
                 try {
+/*
                     SyncState syncState = AppServiceProvider.getBootstrapService().getSyncState(blockchain);
 
                     if (syncState.getRemoteBlockIndex().compareTo(maxRemoteBlockIndex) > 0) {
@@ -93,7 +94,7 @@ public class ChronologyBlockTask implements AppTask {
                     }
 
                     nRetries = 0;
-
+*/
                     synchronized (state.lockerSyncPropose) {
                         long globalTimeStamp = chronologyService.getSynchronizedTime(state.getNtpClient());
 

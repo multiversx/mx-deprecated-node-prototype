@@ -23,9 +23,9 @@ public class TransactionRequestHandler implements RequestHandler<Transaction, P2
         Blockchain blockchain = state.getBlockchain();
         Transaction transaction = AppServiceProvider.getBlockchainService().getLocal(transactionHash, blockchain, BlockchainUnitType.TRANSACTION);
         if (transaction == null) {
-            logger.info("requested transaction with hash {} not found", transactionHash);
+            logger.info("Replying to request: TRANSACTION with hash {} not found", transactionHash);
         } else {
-            logger.info("requested transaction with hash {} : {}", transactionHash, transaction);
+            logger.info("Replying to request: TRANSACTION with hash {} : {}", transactionHash, transaction);
         }
 
         return logger.traceExit(transaction);

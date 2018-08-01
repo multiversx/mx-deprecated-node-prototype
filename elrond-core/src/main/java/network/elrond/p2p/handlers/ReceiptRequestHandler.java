@@ -24,9 +24,9 @@ public class ReceiptRequestHandler implements RequestHandler<Receipt, P2PRequest
         Blockchain blockchain = state.getBlockchain();
         Receipt receipt = AppServiceProvider.getBlockchainService().getLocal(receiptHash, blockchain, BlockchainUnitType.RECEIPT);
         if (receipt == null) {
-            logger.info("requested receipt with hash {} not found", receiptHash);
+            logger.info("Replying to request: RECEIPT with hash {} not found", receiptHash);
         } else {
-            logger.info("requested receipt with hash {} : {}", receiptHash, receipt);
+            logger.info("Replying to request: RECEIPT with hash {} : {}", receiptHash, receipt);
         }
         return logger.traceExit(receipt);
     }
