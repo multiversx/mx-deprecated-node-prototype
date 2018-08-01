@@ -16,6 +16,9 @@ public class EndRoundHandler extends EventHandler {
             ThreadUtil.sleep(10);
         }
 
+        state.getStatisticsManager().updateNetworkStats(state);
+        state.getStatisticsManager().processStatistic();
+
         return new StartRoundHandler(0);
     }
 }
