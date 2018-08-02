@@ -5,7 +5,7 @@ import java.util.EnumSet;
 public enum RoundState {
     START_ROUND(0),
     SYNC_ROUND(0),
-    PROPOSE_BLOCK(2500),
+    PROPOSE_BLOCK(3500),
     END_ROUND(0);
 
     private final int roundStateDuration;
