@@ -72,6 +72,8 @@ public class StatisticsManager implements Serializable {
             statistics.remove(0);
         }
 
+        logger.info("Live Round Time is: " + liveRoundTime + "and processed " + currentStatistic.getNrTransactionsInBlock() + " transactions");
+
         totalProcessedTransactions += currentStatistic.getNrTransactionsInBlock();
         liveTps = currentStatistic.getNrTransactionsInBlock() * 1000.0 / ellapsedMillis;
         logger.trace("currentTps is " + liveTps);
