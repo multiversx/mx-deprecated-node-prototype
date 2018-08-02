@@ -74,7 +74,8 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         logger.traceEntry("params: {} {}", channel, shard);
         P2PConnection connection = channel.getConnection();
         PeerDHT dht = connection.getDht();
-        Number160 hash = Number160.createHash(channel.getChannelIdentifier(shard));
+        String channelId = channel.getChannelIdentifier(shard);
+        Number160 hash = Number160.createHash(channelId);
         HashSet<PeerAddress> peersOnChannel = new HashSet<>();
 
         try {
@@ -96,8 +97,8 @@ public class P2PRequestServiceImpl implements P2PRequestService {
             logger.warn(e);
         }
 
-        channel.addPeerAddresses(peersOnChannel);
-        peersOnChannel = channel.getPeerAddresses();
+        channel.addPeerAddresses(channelId, peersOnChannel);
+        peersOnChannel = channel.getPeerAddresses(channelId);
 
         return peersOnChannel;
     }
