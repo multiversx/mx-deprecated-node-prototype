@@ -26,7 +26,7 @@ public class SyncRoundHandler extends EventHandler {
 
         SyncState syncState = null;
         try {
-            bootstrapService.fetchNetworkBlockIndex(state.getBlockchain());
+            //bootstrapService.fetchNetworkBlockIndex(state.getBlockchain());
             syncState = bootstrapService.getSyncState(state.getBlockchain());
             logger.debug("Round: {}, subRound: {}> network height: {}, local height: {}!", currentRoundIndex, this.getClass().getName(),
                     syncState.getRemoteBlockIndex(), syncState.getLocalBlockIndex());

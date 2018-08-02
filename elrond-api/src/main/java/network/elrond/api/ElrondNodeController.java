@@ -87,6 +87,8 @@ public class ElrondNodeController {
         AppContext context = ContextCreator.createAppContext(nodeName, privateKey, masterPeerIpAddress,
                 masterPeerPort, port, bootstrapType, nodeName);
 
+        logger.info("Node name: {}", nodeName);
+
         return logger.traceExit(elrondApiNode.start(context, nodeName, nodeName));
     }
 
