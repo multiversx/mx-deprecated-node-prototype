@@ -155,6 +155,12 @@ public class TransactionServiceImpl implements TransactionService {
         if (transactions.size() != hashes.size()) {
             transactions = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK_TRANSACTIONS);
         }
+        if (transactions != null) {
+            for (Transaction transaction : transactions) {
+                String transactionHash = AppServiceProvider.getSerializationService().getHashString(transaction);
+                AppServiceProvider.getBlockchainService().putLocal(transactionHash, transaction, blockchain, BlockchainUnitType.TRANSACTION);
+            }
+        }
         return logger.traceExit(transactions);
     }
 

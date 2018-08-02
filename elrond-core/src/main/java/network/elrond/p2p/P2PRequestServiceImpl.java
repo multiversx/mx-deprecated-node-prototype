@@ -185,11 +185,14 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         List<R> responses = sendRequestMessage(channel, shard, new P2PRequestMessage(key, channelName, shard));
 
         if (responses != null && !responses.isEmpty()) {
-            Map<R, String> objectToHash = responses.stream().collect(
-                    Collectors.toMap(
-                            response -> response,
-                            response -> AppServiceProvider.getSerializationService().getHashString(response),
-                            (response1, response2) -> response1));
+            Map<R, String> objectToHash = responses.stream()
+                    .filter(entry -> !(entry instanceof Collection) || !((Collection) entry).isEmpty())
+                    .filter(Objects::nonNull)
+                    .collect(
+                            Collectors.toMap(
+                                    response -> response,
+                                    response -> AppServiceProvider.getSerializationService().getHashString(response),
+                                    (response1, response2) -> response1));
 
             logger.trace("objectToHash: {}", objectToHash.toString());
 
@@ -202,7 +205,6 @@ public class P2PRequestServiceImpl implements P2PRequestService {
             List<R> results = objectToHash.entrySet()
                     .stream()
                     .filter(entry -> Objects.equals(entry.getValue(), element))
-                    .filter(Objects::nonNull)
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
             R result = (results.size() > 0) ? results.get(0) : null;
