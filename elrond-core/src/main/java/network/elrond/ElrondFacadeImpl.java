@@ -495,6 +495,8 @@ public class ElrondFacadeImpl implements ElrondFacade {
                 return logger.traceExit(new ResponseObject(true, String.format("Block with hash %s was not found", blockHash), null));
             }
 
+            AppServiceProvider.getBlockchainService().putLocal(blockHash, block, blockchain, BlockchainUnitType.BLOCK);
+
             return logger.traceExit(new ResponseObject(true, "", block));
         } catch (Exception ex) {
             logger.throwing(ex);

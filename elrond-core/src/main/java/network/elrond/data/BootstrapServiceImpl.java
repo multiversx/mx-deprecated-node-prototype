@@ -301,7 +301,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                 result.combine(new ExecutionReport().ok("Put block with height: " + index.toString(10) + "..."));
 
                 String blockHash = getBlockHashFromIndex(index, blockchain);
-                Block block = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK);
+                Block block = AppServiceProvider.getBlockchainService().getLocal(blockHash, blockchain, BlockchainUnitType.BLOCK);
 
                 logger.trace("re-running block to update internal state...");
                 ExecutionReport executionReport = AppServiceProvider.getExecutionService().processBlock(block, accounts, blockchain, state.getStatisticsManager());
