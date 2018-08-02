@@ -80,7 +80,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         try {
 
             FutureGet futureGet = dht.get(hash).all().start();
-            futureGet.awaitUninterruptibly(3000);
+            futureGet.awaitUninterruptibly(1000);
 
             if (futureGet.isSuccess() && !futureGet.isEmpty()) {
                 //iterate through all contained versions
@@ -133,7 +133,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
                 }
             });
 
-            long maxWaitTimeToMonitorResponses = 3000;
+            long maxWaitTimeToMonitorResponses = 1000;
             long startTimeStamp = System.currentTimeMillis();
 
             while (startTimeStamp + maxWaitTimeToMonitorResponses > System.currentTimeMillis()) {
@@ -191,6 +191,8 @@ public class P2PRequestServiceImpl implements P2PRequestService {
                             response -> AppServiceProvider.getSerializationService().getHashString(response),
                             (response1, response2) -> response1));
 
+            logger.trace("objectToHash: {}", objectToHash.toString());
+
             Map<String, Long> counts = objectToHash.entrySet()
                     .stream()
                     .collect(Collectors.groupingBy(Map.Entry::getValue, Collectors.counting()));
@@ -200,6 +202,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
             List<R> results = objectToHash.entrySet()
                     .stream()
                     .filter(entry -> Objects.equals(entry.getValue(), element))
+                    .filter(Objects::nonNull)
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
             R result = (results.size() > 0) ? results.get(0) : null;
