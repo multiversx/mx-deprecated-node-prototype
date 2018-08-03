@@ -14,7 +14,6 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Iterator;
-import java.util.concurrent.TimeoutException;
 
 public class P2PObjectServiceImpl implements P2PObjectService {
     private static final Logger logger = LogManager.getLogger(P2PObjectServiceImpl.class);
@@ -43,7 +42,7 @@ public class P2PObjectServiceImpl implements P2PObjectService {
             }
             Data data = iterator.next();
             T object = (T) data.object();
-            logger.warn("Retrieved key: {} => {}", key, object);
+            logger.trace("Retrieved key: {} => {}", key, object);
             return logger.traceExit(new DHTResponseObject<>(object, ResponseDHT.SUCCESS));
 
         } else {

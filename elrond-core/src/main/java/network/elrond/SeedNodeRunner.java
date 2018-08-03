@@ -23,8 +23,8 @@ public class SeedNodeRunner {
         Util.changeLogsPath("logs/" + Util.getHostName() + " - " + sdfSource.format(new Date()));
 
         String nodeName = "elrond-node-1";
-        Integer port = 4000;
-        Integer masterPeerPort = 4000;
+        Integer port = 31201;
+        Integer masterPeerPort = 31201;
         String masterPeerIpAddress = "127.0.0.1";
         String seedNodeRunnerPrivateKey = "1111111111111111fa612ecafcfd145cc06c1fb64d7499ef34696ff16b82cbc1";
 
