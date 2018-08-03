@@ -27,36 +27,10 @@ public class P2PRequestServiceImpl implements P2PRequestService {
     @SuppressWarnings("unchecked")
     public P2PRequestChannel createChannel(P2PConnection connection, Shard shard, P2PRequestChannelName channelName) {
         logger.traceEntry("params: {} {}", connection, channelName);
+
+        P2PRequestChannel channel = new P2PRequestChannel(channelName, connection);
         try {
-            PeerDHT dht = connection.getDht();
-            logger.trace("got connection...");
-
-            P2PRequestChannel channel = new P2PRequestChannel(channelName, connection);
-
-            Number160 hash = Number160.createHash(channel.getChannelIdentifier(shard));
-
-            FutureGet futureGet = dht.get(hash).all().start();
-            futureGet.awaitUninterruptibly();
-            if (futureGet.isSuccess()) {
-                //the version where to store data
-                Number160 version = dht.peer().peerAddress().peerId();
-                // Create new
-                FuturePut futurePut = dht.put(hash).data(new Data(dht.peer().peerAddress())).versionKey(version).start();
-                futurePut.awaitUninterruptibly();
-
-                if (!futureGet.isEmpty()) {
-                    for (Object object : futureGet.rawData().values().iterator().next().values().toArray()) {
-                        Data data = (Data) object;
-                        PeerAddress peerAddress = (PeerAddress) data.object();
-                        version = peerAddress.peerId();
-                        futurePut = dht.put(hash).data(new Data(peerAddress)).versionKey(version).start().awaitUninterruptibly();
-                    }
-                }
-
-                logger.trace("created new channel");
-            } else {
-                logger.warn(futureGet.failedReason());
-            }
+            subscribeToChannel(connection, shard, channelName);
 
             Peer peer = connection.getPeer();
             peer.objectDataReply(connection.registerChannel(channel));
@@ -69,6 +43,37 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         return logger.traceExit((P2PRequestChannel) null);
     }
 
+    private void subscribeToChannel(P2PConnection connection, Shard shard, P2PRequestChannelName channelName) throws Exception{
+        PeerDHT dht = connection.getDht();
+        logger.trace("got connection...");
+
+        P2PRequestChannel channel = new P2PRequestChannel(channelName, connection);
+
+        Number160 hash = Number160.createHash(channel.getChannelIdentifier(shard));
+
+        FutureGet futureGet = dht.get(hash).all().start();
+        futureGet.awaitUninterruptibly();
+        if (futureGet.isSuccess()) {
+            //the version where to store data
+            Number160 version = dht.peer().peerAddress().peerId();
+            // Create new
+            FuturePut futurePut = dht.put(hash).data(new Data(dht.peer().peerAddress())).versionKey(version).start();
+            futurePut.awaitUninterruptibly();
+
+            if (!futureGet.isEmpty()) {
+                for (Object object : futureGet.rawData().values().iterator().next().values().toArray()) {
+                    Data data = (Data) object;
+                    PeerAddress peerAddress = (PeerAddress) data.object();
+                    version = peerAddress.peerId();
+                    futurePut = dht.put(hash).data(new Data(peerAddress)).versionKey(version).start().awaitUninterruptibly();
+                }
+            }
+
+            logger.debug("Added self to channel {}", channel.getChannelIdentifier(shard));
+        } else {
+            logger.warn(futureGet.failedReason());
+        }
+    }
 
     private HashSet<PeerAddress> getPeersOnChannel(P2PRequestChannel channel, Shard shard) {
         logger.traceEntry("params: {} {}", channel, shard);
@@ -97,8 +102,22 @@ public class P2PRequestServiceImpl implements P2PRequestService {
             logger.warn(e);
         }
 
+        //testing whether self is still on channel
+        if (!peersOnChannel.contains(channel.getConnection().getPeer().peerAddress())){
+            //something happened with self, re-adding
+            logger.warn("Not found self on channel {}...re-adding", channel.getChannelIdentifier(shard));
+
+            try{
+                subscribeToChannel(connection, shard, channel.getName());
+            } catch (Exception ex){
+                logger.catching(ex);
+            }
+        }
+
         channel.addPeerAddresses(channelId, peersOnChannel);
         peersOnChannel = channel.getPeerAddresses(channelId);
+
+
 
         return peersOnChannel;
     }
