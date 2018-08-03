@@ -24,17 +24,16 @@ public class SyncRoundHandler extends EventHandler {
 
         logger.debug("Round: {}, subRound: {}> initialized!", currentRoundIndex, this.getClass().getName());
 
-        SyncState syncState = null;
-        try {
-            //bootstrapService.fetchNetworkBlockIndex(state.getBlockchain());
-            syncState = bootstrapService.getSyncState(state.getBlockchain());
-            logger.debug("Round: {}, subRound: {}> network height: {}, local height: {}!", currentRoundIndex, this.getClass().getName(),
-                    syncState.getRemoteBlockIndex(), syncState.getLocalBlockIndex());
-        } catch (Exception ex){
-            logger.catching(ex);
+        SyncState syncState = bootstrapService.getSyncState(state.getBlockchain());
+
+        if (!syncState.isValid()){
             ThreadUtil.sleep(100);
+            logger.warn("SyncState not valid! Retrying...");
             return this;
         }
+
+        logger.debug("Round: {}, subRound: {}> network height: {}, local height: {}!", currentRoundIndex, this.getClass().getName(),
+                syncState.getRemoteBlockIndex(), syncState.getLocalBlockIndex());
 
         if (syncState.isSyncRequired()){
             ExecutionReport report = AppServiceProvider.getBootstrapService().synchronize(syncState.getLocalBlockIndex(), syncState.getRemoteBlockIndex(), state);

@@ -1,6 +1,7 @@
 package network.elrond.benchmark;
 
 import network.elrond.application.AppState;
+import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.AppShardingManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -61,21 +62,26 @@ public class StatisticsManager implements Serializable {
         if(currentStatistic == null){
             return;
         }
+        long roundTimeDuration = AppServiceProvider.getChronologyService().getRoundTimeDuration();
 
         long newTime  = timer.getCurrentTime();
         long ellapsedMillis = newTime - currentMillis;
         liveRoundTime = ellapsedMillis;
         currentMillis = newTime;
 
+        liveRoundTime = roundTimeDuration;
+
         statistics.add(currentStatistic);
         if (statistics.size() > maxStatistics) {
             statistics.remove(0);
         }
 
-        logger.info("Live Round Time is: " + liveRoundTime + "and processed " + currentStatistic.getNrTransactionsInBlock() + " transactions");
 
         totalProcessedTransactions += currentStatistic.getNrTransactionsInBlock();
-        liveTps = currentStatistic.getNrTransactionsInBlock() * 1000.0 / ellapsedMillis;
+        liveTps = currentStatistic.getNrTransactionsInBlock() * 1000.0 / liveRoundTime;
+
+        logger.info("Live Round Time is: " + liveRoundTime + " and processed " + currentStatistic.getNrTransactionsInBlock() + " transactions at a TPS of: " + liveTps);
+
         logger.trace("currentTps is " + liveTps);
         ComputeTps(liveTps);
 

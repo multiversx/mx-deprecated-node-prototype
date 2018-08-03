@@ -160,6 +160,8 @@ public class TransactionServiceImpl implements TransactionService {
                 String transactionHash = AppServiceProvider.getSerializationService().getHashString(transaction);
                 AppServiceProvider.getBlockchainService().putLocal(transactionHash, transaction, blockchain, BlockchainUnitType.TRANSACTION);
             }
+        } else {
+            transactions = new ArrayList<>();
         }
         return logger.traceExit(transactions);
     }

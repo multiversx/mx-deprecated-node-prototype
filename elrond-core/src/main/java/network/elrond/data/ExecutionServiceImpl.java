@@ -191,7 +191,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
             return logger.traceExit(blockExecutionReport);
         } finally {
-            if(statisticsManager!=null) {
+            if (statisticsManager != null) {
                 statisticsManager.addStatistic(new Statistic(nrProcessedTransactions, block.getNonce().longValue()));
             }
         }

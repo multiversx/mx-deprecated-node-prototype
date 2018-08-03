@@ -26,54 +26,69 @@ import java.util.List;
 public class BootstrapServiceImpl implements BootstrapService {
     private static final Logger logger = LogManager.getLogger(BootstrapServiceImpl.class);
 
-    private BigInteger networkBlockHeight = Util.BIG_INT_MIN_ONE;
+    private DHTResponseObject<BigInteger> networkBlockHeight = new DHTResponseObject<>(Util.BIG_INT_MIN_ONE, ResponseDHT.FAIL);
 
     @Override
-    public BigInteger getCurrentBlockIndex(LocationType locationType, Blockchain blockchain) throws IOException, ClassNotFoundException {
+    public DHTResponseObject<BigInteger> getCurrentBlockIndex(LocationType locationType, Blockchain blockchain) {
         logger.traceEntry("params: {} {}", locationType, blockchain);
 
         if (locationType == LocationType.BOTH) {
-            RuntimeException ex = new RuntimeException("Decide from where to get the data!");
-            logger.throwing(ex);
-            throw ex;
+            logger.error("Decide from where to get the data!");
+            return new DHTResponseObject<>(Util.BIG_INT_MIN_ONE, ResponseDHT.FAIL);
         }
 
         if (locationType == LocationType.LOCAL) {
             BigInteger currentBlockIndex = blockchain.getCurrentBlockIndex();
-            return logger.traceExit(currentBlockIndex);
+            return logger.traceExit(new DHTResponseObject<>(currentBlockIndex, ResponseDHT.SUCCESS));
         }
 
         if (locationType == LocationType.NETWORK) {
-            return networkBlockHeight;
-            //return logger.traceExit(getNetworkBlockIndex(blockchain));
+            synchronized(networkBlockHeight) {
+                return networkBlockHeight;
+            }
         }
 
-        RuntimeException ex = new RuntimeException("Unimplemented location type: " + locationType.toString() + "!");
-        logger.throwing(ex);
-        throw ex;
+        logger.error("Unimplemented location type: {}!", locationType.toString());
+        return new DHTResponseObject<>(Util.BIG_INT_MIN_ONE, ResponseDHT.FAIL);
     }
 
-    public void fetchNetworkBlockIndex(Blockchain blockchain) throws java.io.IOException, ClassNotFoundException{
+    public void fetchNetworkBlockIndex(Blockchain blockchain) throws java.io.IOException, ClassNotFoundException {
         logger.traceEntry("params: {}", blockchain);
 
-        BigInteger maxNetworkBlockHeight;
+        DHTResponseObject<BigInteger> result;
         int nRetries = 0;
 
         do {
             nRetries++;
-            if (nRetries > 1) ThreadUtil.sleep(1);
-            maxNetworkBlockHeight = AppServiceProvider.getP2PObjectService().get(
+            if (nRetries > 1)
+                ThreadUtil.sleep(1);
+            result = AppServiceProvider.getP2PObjectService().get(
                     blockchain.getConnection(),
                     SettingsType.MAX_BLOCK_HEIGHT.toString(),
-                    BigInteger.class).getObject();
+                    BigInteger.class);
 
-                if (maxNetworkBlockHeight != null) {
-                    if (networkBlockHeight.compareTo(maxNetworkBlockHeight) < 0) {
-                        logger.warn("fetch network block index: {} with {} tries", maxNetworkBlockHeight, nRetries);
-                        networkBlockHeight = maxNetworkBlockHeight;
+            synchronized(networkBlockHeight) {
+                networkBlockHeight.setResponse(ResponseDHT.FAIL);
+
+                if ((result.getObject() == null) && (result.getResponse() == ResponseDHT.SUCCESS) &&
+                        (networkBlockHeight.getObject().compareTo(Util.BIG_INT_MIN_ONE) == 0)){
+                    logger.warn("Is seeder on shard? fetch network block index: {} with {} tries", result.getObject(), nRetries);
+                    networkBlockHeight.setResponse(result.getResponse());
+                    break;
+                }
+
+                if (result.getObject() != null){
+                    networkBlockHeight.setResponse(result.getResponse());
+
+                    if (networkBlockHeight.getObject().compareTo(result.getObject()) < 0) {
+                        logger.warn("fetch network block index: {} with {} tries", result.getObject(), nRetries);
+                        networkBlockHeight.setObject(result.getObject());
                         break;
                     }
+                } else {
+                    logger.warn("Error getting max height with staus {}", result.getResponse());
                 }
+            }
         } while (nRetries < Util.MAX_RETRIES_GET);
     }
 
@@ -87,8 +102,16 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         if ((locationType.getIndex() & 1) != 0) {
             logger.trace("put on network");
-            BigInteger currentBlockIndexOnNetwork = getCurrentBlockIndex(LocationType.NETWORK, blockchain);
-            BigInteger max = currentBlockIndex.max(currentBlockIndexOnNetwork);
+
+            BigInteger value = Util.BIG_INT_MIN_ONE;
+            synchronized(networkBlockHeight) {
+                if (networkBlockHeight.getResponse() != ResponseDHT.SUCCESS){
+                    throw new Exception("Inconsistent data found on DHT while getting max height!");
+                }
+
+                value = networkBlockHeight.getObject();
+            }
+            BigInteger max = currentBlockIndex.max(value);
             AppServiceProvider.getP2PObjectService().put(blockchain.getConnection(), SettingsType.MAX_BLOCK_HEIGHT.toString(), max);
         }
 
@@ -335,7 +358,9 @@ public class BootstrapServiceImpl implements BootstrapService {
         List<String> hashes = BlockUtil.getTransactionsHashesAsString(block);
         for (String transactionHash : hashes) {
             Transaction transaction = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION);
-            commitTransaction(transaction, transactionHash, blockchain);
+            if (transaction != null) {
+                commitTransaction(transaction, transactionHash, blockchain);
+            }
         }
 
         logger.trace("Done, {} transactions processed!", BlockUtil.getTransactionsCount(block));
@@ -416,11 +441,16 @@ public class BootstrapServiceImpl implements BootstrapService {
     }
 
     @Override
-    public SyncState getSyncState(Blockchain blockchain) throws Exception {
+    public SyncState getSyncState(Blockchain blockchain){
         SyncState syncState = new SyncState();
 
-        syncState.setRemoteBlockIndex(AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.NETWORK, blockchain));
-        syncState.setLocalBlockIndex(AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.LOCAL, blockchain));
+        DHTResponseObject<BigInteger> localHeight = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.LOCAL, blockchain);
+        DHTResponseObject<BigInteger> networkHeight = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.NETWORK, blockchain);
+
+        syncState.setValid((localHeight.getResponse() == ResponseDHT.SUCCESS) && (networkHeight.getResponse() == ResponseDHT.SUCCESS));
+
+        syncState.setLocalBlockIndex(localHeight.getObject());
+        syncState.setRemoteBlockIndex(networkHeight.getObject());
 
         boolean isBlocAvailable = syncState.getRemoteBlockIndex().compareTo(BigInteger.ZERO) >= 0;
         boolean isNewBlockRemote = syncState.getRemoteBlockIndex().compareTo(syncState.getLocalBlockIndex()) > 0;
