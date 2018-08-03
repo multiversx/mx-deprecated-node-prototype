@@ -82,8 +82,8 @@ public class BootstrappingProcessorNodeProducer {
                     AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, tx, 0);
                 }
             }
-            System.out.println("Local height: " + bootstrapService.getCurrentBlockIndex(LocationType.LOCAL, state.getBlockchain()).toString(10) +
-                            ", network height: " + bootstrapService.getCurrentBlockIndex(LocationType.NETWORK, state.getBlockchain()).toString(10) +
+            System.out.println("Local height: " + bootstrapService.getCurrentBlockIndex(LocationType.LOCAL, state.getBlockchain()).getObject().toString(10) +
+                            ", network height: " + bootstrapService.getCurrentBlockIndex(LocationType.NETWORK, state.getBlockchain()).getObject().toString(10) +
                     ", app state hash: " + new String(Base64.encode(state.getAccounts().getAccountsPersistenceUnit().getRootHash())));
         }
 

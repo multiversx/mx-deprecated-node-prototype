@@ -187,7 +187,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
                 }
             }
 
-            logger.warn("sendRequestMessage: {}", responses.size());
+            logger.trace("sendRequestMessage: {}", responses.size());
 
             return responses;
         }

@@ -4,8 +4,9 @@ import network.elrond.Application;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
+import network.elrond.data.BootstrapService;
 import network.elrond.data.BootstrapType;
-import network.elrond.data.LocationType;
+import network.elrond.data.SyncState;
 import network.elrond.processor.impl.AbstractBlockTask;
 import network.elrond.processor.impl.initialization.BlockchainStarterProcessor;
 import network.elrond.service.AppServiceProvider;
@@ -29,13 +30,19 @@ public class BootstrapBlockTask extends AbstractBlockTask {
         AppContext context = application.getContext();
 
         try {
-            AppServiceProvider.getBootstrapService().fetchNetworkBlockIndex(state.getBlockchain());
+            BootstrapService bootstrapService = AppServiceProvider.getBootstrapService();
 
-            BigInteger remoteBlockIndex = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.NETWORK, blockchain);
-            BigInteger localBlockIndex = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.LOCAL, blockchain);
+            bootstrapService.fetchNetworkBlockIndex(state.getBlockchain());
+
+            SyncState syncState = bootstrapService.getSyncState(state.getBlockchain());
+
+            if (!syncState.isValid()){
+                logger.warn("SyncState not valid! Retrying...");
+                return;
+            }
 
             boolean isLeaderInShard = AppShardingManager.instance().isLeaderInShard(state);
-            boolean isMissingGenesisBlock = (remoteBlockIndex.compareTo(BigInteger.ZERO) < 0 && localBlockIndex.compareTo(BigInteger.ZERO) < 0);
+            boolean isMissingGenesisBlock = (syncState.getRemoteBlockIndex().compareTo(BigInteger.ZERO) < 0 && syncState.getLocalBlockIndex().compareTo(BigInteger.ZERO) < 0);
             boolean shouldGenerateGenesis = isLeaderInShard && isMissingGenesisBlock;
             if (!shouldGenerateGenesis) {
                 logger.traceExit("should not generate genesis!");
@@ -51,7 +58,7 @@ public class BootstrapBlockTask extends AbstractBlockTask {
                     break;
                 case REBUILD_FROM_DISK:
                     logger.info("starting from disk...");
-                    AppServiceProvider.getBootstrapService().restoreFromDisk(localBlockIndex, state, context);
+                    AppServiceProvider.getBootstrapService().restoreFromDisk(syncState.getRemoteBlockIndex(), state, context);
                     break;
                 default:
                     RuntimeException ex = new RuntimeException("Not supported type" + bootstrapType);

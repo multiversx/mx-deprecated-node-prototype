@@ -3,13 +3,14 @@ package network.elrond.data;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
+import network.elrond.p2p.DHTResponseObject;
 
 import java.math.BigInteger;
 
 public interface BootstrapService {
 
     //returns max block height from location
-    BigInteger getCurrentBlockIndex(LocationType locationType, Blockchain blockchain) throws Exception;
+    DHTResponseObject<BigInteger> getCurrentBlockIndex(LocationType locationType, Blockchain blockchain);
 
     //sets max block height in location
     void setCurrentBlockIndex(LocationType locationType, BigInteger height, Blockchain blockchain) throws Exception;
@@ -30,7 +31,7 @@ public interface BootstrapService {
 
     ExecutionReport commitTransaction(Transaction transaction, String transactionHash, Blockchain blockchain);
 
-    SyncState getSyncState(Blockchain blockchain) throws Exception;
+    SyncState getSyncState(Blockchain blockchain);
 
     void fetchNetworkBlockIndex(Blockchain blockchain) throws java.io.IOException, ClassNotFoundException;
 }
