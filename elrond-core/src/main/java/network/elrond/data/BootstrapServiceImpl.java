@@ -52,7 +52,7 @@ public class BootstrapServiceImpl implements BootstrapService {
         return new DHTResponseObject<>(Util.BIG_INT_MIN_ONE, ResponseDHT.FAIL);
     }
 
-    public void fetchNetworkBlockIndex(Blockchain blockchain) throws java.io.IOException, ClassNotFoundException{
+    public void fetchNetworkBlockIndex(Blockchain blockchain) throws java.io.IOException, ClassNotFoundException {
         logger.traceEntry("params: {}", blockchain);
 
         DHTResponseObject<BigInteger> result;
@@ -358,7 +358,9 @@ public class BootstrapServiceImpl implements BootstrapService {
         List<String> hashes = BlockUtil.getTransactionsHashesAsString(block);
         for (String transactionHash : hashes) {
             Transaction transaction = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION);
-            commitTransaction(transaction, transactionHash, blockchain);
+            if (transaction != null) {
+                commitTransaction(transaction, transactionHash, blockchain);
+            }
         }
 
         logger.trace("Done, {} transactions processed!", BlockUtil.getTransactionsCount(block));
