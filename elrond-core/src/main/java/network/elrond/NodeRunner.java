@@ -43,7 +43,7 @@ public class NodeRunner {
                 AccountAddress address = AccountAddress.fromHexString(Util.TEST_ADDRESS);
                 //facade.send(address, BigInteger.TEN, application);
                 ThreadUtil.sleep(10000);
-                System.out.println(facade.getBalance(address, application));
+                //System.out.println(facade.getBalance(address, application));
             } while (true);
 
         });
