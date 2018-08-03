@@ -88,7 +88,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                     break;
 
                 } else {
-                    logger.warn("Error getting max height with staus {}", result.getResponse());
+                    logger.warn("Error getting max height with status {}", result.getResponse());
                 }
             }
         } while (nRetries < Util.MAX_RETRIES_GET);

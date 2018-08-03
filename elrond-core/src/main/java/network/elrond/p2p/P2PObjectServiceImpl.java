@@ -26,13 +26,16 @@ public class P2PObjectServiceImpl implements P2PObjectService {
 
         Number160 hash = getDHTHash(connection, key, clazz);
         FutureGet futureGet;
-        int retries = Util.MAX_RETRIES_GET;
+//        int retries = Util.MAX_RETRIES_GET;
+//
+//        do {
+//            retries--;
+//            futureGet = peer.get(hash).start();
+//            futureGet.awaitUninterruptibly(3000);
+//        } while (!futureGet.isSuccess() && retries > 0);
 
-        do {
-            retries--;
-            futureGet = peer.get(hash).start();
-            futureGet.awaitUninterruptibly(3000);
-        } while (!futureGet.isSuccess() && retries > 0);
+        futureGet = peer.get(hash).start();
+        futureGet.awaitUninterruptibly(1000);
 
         if (futureGet.isSuccess()) {
             Iterator<Data> iterator = futureGet.dataMap().values().iterator();
