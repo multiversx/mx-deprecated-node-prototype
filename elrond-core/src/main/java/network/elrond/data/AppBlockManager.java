@@ -48,7 +48,7 @@ public class AppBlockManager {
         logger.traceEntry("params: {} {} {}", queue, privateKey, state);
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();
-
+        long proposeStart = System.currentTimeMillis();
         List<String> hashes = new ArrayList<>(queue);
 
         if (hashes.isEmpty()) {
@@ -97,7 +97,8 @@ public class AppBlockManager {
                 //removeAlreadyProcessedTransactionsFromPool(state, block);
 
                 //logger.debug("removed {} transaction from pool", BlockUtil.getTransactionsCount(block));
-
+                long start = System.currentTimeMillis();
+                logger.info("Started broadcasting all on " + start);
                 List<String> acceptedTransactions = BlockUtil.getTransactionsHashesAsString(block);
 
                 // group the cross transactions by the receiving shard
@@ -140,8 +141,10 @@ public class AppBlockManager {
                 });
 
                 sendReceipts(state, block, receipts);
+                long end = System.currentTimeMillis();
 
-                logger.info("New block proposed with hash {}", hashBlock);
+                logger.info("New block proposed with hash {} ");
+                logger.info("Proposed in {} ms and sent in {} ms", hashBlock, end-proposeStart, end-start);
 
                 logger.info("\r\n" + state.print().render());
                 //logger.info("\n" + AsciiTableUtil.listToTables(transactions));

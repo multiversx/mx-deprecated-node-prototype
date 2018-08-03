@@ -206,6 +206,12 @@ class ElrondApiNode {
         return logger.traceExit(ro);
     }
 
+    void getLog(){
+        logger.traceEntry();
+
+        ElrondFacade facade = getFacade();
+    }
+
     private void SendBalanceToNewNode(String nextPrivateKey) {
         Runnable myrunnable = new Runnable() {
             public void run() {
