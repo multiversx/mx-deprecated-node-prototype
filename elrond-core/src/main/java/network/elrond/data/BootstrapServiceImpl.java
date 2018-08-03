@@ -53,7 +53,7 @@ public class BootstrapServiceImpl implements BootstrapService {
         throw ex;
     }
 
-    public void fetchNetworkBlockIndex(Blockchain blockchain) throws java.io.IOException, ClassNotFoundException{
+    public void fetchNetworkBlockIndex(Blockchain blockchain) throws java.io.IOException, ClassNotFoundException {
         logger.traceEntry("params: {}", blockchain);
 
         BigInteger maxNetworkBlockHeight;
@@ -67,13 +67,13 @@ public class BootstrapServiceImpl implements BootstrapService {
                     SettingsType.MAX_BLOCK_HEIGHT.toString(),
                     BigInteger.class).getObject();
 
-                if (maxNetworkBlockHeight != null) {
-                    if (networkBlockHeight.compareTo(maxNetworkBlockHeight) < 0) {
-                        logger.warn("fetch network block index: {} with {} tries", maxNetworkBlockHeight, nRetries);
-                        networkBlockHeight = maxNetworkBlockHeight;
-                        break;
-                    }
+            if (maxNetworkBlockHeight != null) {
+                if (networkBlockHeight.compareTo(maxNetworkBlockHeight) < 0) {
+                    logger.warn("fetch network block index: {} with {} tries", maxNetworkBlockHeight, nRetries);
+                    networkBlockHeight = maxNetworkBlockHeight;
+                    break;
                 }
+            }
         } while (nRetries < Util.MAX_RETRIES_GET);
     }
 
@@ -335,7 +335,9 @@ public class BootstrapServiceImpl implements BootstrapService {
         List<String> hashes = BlockUtil.getTransactionsHashesAsString(block);
         for (String transactionHash : hashes) {
             Transaction transaction = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION);
-            commitTransaction(transaction, transactionHash, blockchain);
+            if (transaction != null) {
+                commitTransaction(transaction, transactionHash, blockchain);
+            }
         }
 
         logger.trace("Done, {} transactions processed!", BlockUtil.getTransactionsCount(block));

@@ -184,6 +184,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         logger.traceEntry("params: {} {} {} {}", channel, shard, channelName, key);
 
         List<R> responses = sendRequestMessage(channel, shard, new P2PRequestMessage(key, channelName, shard));
+        List<R> results = new ArrayList<>();
 
         if (responses != null && !responses.isEmpty()) {
             Map<R, String> objectToHash = responses.stream()
@@ -197,17 +198,20 @@ public class P2PRequestServiceImpl implements P2PRequestService {
 
             logger.trace("objectToHash: {}", objectToHash.toString());
 
-            Map<String, Long> counts = objectToHash.entrySet()
-                    .stream()
-                    .collect(Collectors.groupingBy(Map.Entry::getValue, Collectors.counting()));
+            if (!objectToHash.isEmpty()) {
+                Map<String, Long> counts = objectToHash.entrySet()
+                        .stream()
+                        .collect(Collectors.groupingBy(Map.Entry::getValue, Collectors.counting()));
 
-            String element = Collections.max(counts.entrySet(), Map.Entry.comparingByValue()).getKey();
+                String element = Collections.max(counts.entrySet(), Map.Entry.comparingByValue()).getKey();
 
-            List<R> results = objectToHash.entrySet()
-                    .stream()
-                    .filter(entry -> Objects.equals(entry.getValue(), element))
-                    .map(Map.Entry::getKey)
-                    .collect(Collectors.toList());
+                results = objectToHash.entrySet()
+                        .stream()
+                        .filter(entry -> Objects.equals(entry.getValue(), element))
+                        .map(Map.Entry::getKey)
+                        .collect(Collectors.toList());
+            }
+
             R result = (results.size() > 0) ? results.get(0) : null;
 
             return logger.traceExit(result);
