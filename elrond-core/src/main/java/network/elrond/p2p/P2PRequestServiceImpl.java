@@ -1,20 +1,17 @@
 package network.elrond.p2p;
 
 import net.tomp2p.dht.FutureGet;
-import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
-import net.tomp2p.storage.Data;
 import network.elrond.core.ThreadUtil;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,7 +27,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
 
         P2PRequestChannel channel = new P2PRequestChannel(channelName, connection);
         try {
-            subscribeToChannel(connection, shard, channelName);
+            subscribeToChannel(connection, shard, channel);
 
             Peer peer = connection.getPeer();
             peer.objectDataReply(connection.registerChannel(channel));
@@ -43,72 +40,58 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         return logger.traceExit((P2PRequestChannel) null);
     }
 
-    private void subscribeToChannel(P2PConnection connection, Shard shard, P2PRequestChannelName channelName) throws Exception{
-        PeerDHT dht = connection.getDht();
-        logger.trace("got connection...");
-
-        P2PRequestChannel channel = new P2PRequestChannel(channelName, connection);
-
+    @SuppressWarnings("unchecked")
+    private void subscribeToChannel(P2PConnection connection, Shard shard, P2PRequestChannel channel) throws Exception{
         Number160 hash = Number160.createHash(channel.getChannelIdentifier(shard));
 
-        FutureGet futureGet = dht.get(hash).all().start();
-        futureGet.awaitUninterruptibly();
-        if (futureGet.isSuccess()) {
-            //the version where to store data
-            Number160 version = dht.peer().peerAddress().peerId();
-            // Create new
-            FuturePut futurePut = dht.put(hash).data(new Data(dht.peer().peerAddress())).versionKey(version).start();
-            futurePut.awaitUninterruptibly();
+        HashSet<PeerAddress> hashSetPeers = new HashSet<>();
 
-            if (!futureGet.isEmpty()) {
-                for (Object object : futureGet.rawData().values().iterator().next().values().toArray()) {
-                    Data data = (Data) object;
-                    PeerAddress peerAddress = (PeerAddress) data.object();
-                    version = peerAddress.peerId();
-                    futurePut = dht.put(hash).data(new Data(peerAddress)).versionKey(version).start().awaitUninterruptibly();
-                }
-            }
-
-            logger.debug("Added self to channel {}", channel.getChannelIdentifier(shard));
-        } else {
-            logger.warn(futureGet.failedReason());
+        DHTResponseObject<HashSet<PeerAddress>> response = AppServiceProvider.getP2PObjectService().get(connection, hash.toString(), (Class<HashSet<PeerAddress>>)hashSetPeers.getClass());
+        if (response.getResponse() != ResponseDHT.SUCCESS){
+            logger.warn("Error getting subscribed peers from request channel {}", channel.getChannelIdentifier(shard));
+            return;
         }
+
+        if (response.getObject() != null){
+            hashSetPeers.addAll(response.getObject());
+        }
+
+        hashSetPeers.add(connection.getPeer().peerAddress());
+
+        AppServiceProvider.getP2PObjectService().put(connection, hash.toString(), hashSetPeers);
+        logger.debug("Added self to request channel {}", channel.getChannelIdentifier(shard));
     }
 
+    @SuppressWarnings("unchecked")
     private HashSet<PeerAddress> getPeersOnChannel(P2PRequestChannel channel, Shard shard) {
         logger.traceEntry("params: {} {}", channel, shard);
         P2PConnection connection = channel.getConnection();
-        PeerDHT dht = connection.getDht();
+
         String channelId = channel.getChannelIdentifier(shard);
-        Number160 hash = Number160.createHash(channelId);
+
         HashSet<PeerAddress> peersOnChannel = new HashSet<>();
+        Number160 hash = Number160.createHash(channelId);
 
         try {
-
-            FutureGet futureGet = dht.get(hash).all().start();
-            futureGet.awaitUninterruptibly(1000);
-
-            if (futureGet.isSuccess() && !futureGet.isEmpty()) {
-                //iterate through all contained versions
-                for (Object object : futureGet.rawData().values().iterator().next().values().toArray()) {
-                    Data data = (Data) object;
-                    PeerAddress peerAddress = (PeerAddress) data.object();
-                    if (!peersOnChannel.contains(peerAddress)) {
-                        peersOnChannel.add(peerAddress);
-                    }
+            DHTResponseObject<HashSet<PeerAddress>> response = AppServiceProvider.getP2PObjectService().get(connection, hash.toString(), (Class<HashSet<PeerAddress>>) peersOnChannel.getClass());
+            if (response.getResponse() != ResponseDHT.SUCCESS) {
+                logger.warn("Error getting subscribed peers from request channel {}", channel.getChannelIdentifier(shard));
+            } else {
+                if (response.getObject() != null) {
+                    peersOnChannel.addAll(response.getObject());
                 }
             }
-        } catch (ClassNotFoundException | IOException e) {
-            logger.warn(e);
+        } catch (Exception ex){
+            logger.catching(ex);
         }
 
         //testing whether self is still on channel
         if (!peersOnChannel.contains(channel.getConnection().getPeer().peerAddress())){
             //something happened with self, re-adding
-            logger.warn("Not found self on channel {}...re-adding", channel.getChannelIdentifier(shard));
+            logger.warn("Not found self on request channel {}...re-adding", channel.getChannelIdentifier(shard));
 
             try{
-                subscribeToChannel(connection, shard, channel.getName());
+                subscribeToChannel(connection, shard, channel);
             } catch (Exception ex){
                 logger.catching(ex);
             }
@@ -116,8 +99,6 @@ public class P2PRequestServiceImpl implements P2PRequestService {
 
         channel.addPeerAddresses(channelId, peersOnChannel);
         peersOnChannel = channel.getPeerAddresses(channelId);
-
-
 
         return peersOnChannel;
     }
@@ -192,7 +173,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
             return responses;
         }
 
-        logger.warn("peersOnChannel: {} on channel {} and shard {}", peersOnChannel.size(), channel.getName(), shard.getIndex());
+        logger.warn("peersOnChannel: {} on request channel {} and shard {}", peersOnChannel.size(), channel.getName(), shard.getIndex());
 
         return null;
     }

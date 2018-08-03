@@ -1,12 +1,9 @@
 package network.elrond.p2p;
 
-import net.tomp2p.dht.FutureGet;
-import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
-import net.tomp2p.storage.Data;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,22 +47,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         List<String> channelIds = getChannelIdentifiers(connection, channelName);
 
         for (String channelId : channelIds) {
-            try {
-                //hash object where peers are subscribed
-                Number160 hash = Number160.createHash(channelId);
-
-                FutureGet futureGet = dht.get(hash).all().start();
-                futureGet.awaitUninterruptibly();
-                if (futureGet.isSuccess() && futureGet.isEmpty()) {
-                    //put nothing
-                    logger.info("created new channel with id {}", channelId);
-                } else {
-                    logger.warn(futureGet.failedReason());
-                }
-            } catch (Exception e) {
-                logger.catching(e);
-                return logger.traceExit((P2PBroadcastChannel) null);
-            }
+            subscribeToChannel(connection, channelId);
         }
         Peer peer = connection.getPeer();
         peer.objectDataReply(connection.registerChannel(channel));
@@ -79,8 +61,6 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         List<String> channelIds = getChannelIdentifiers(channel.getConnection(), channel.getName());
         boolean result = true;
         P2PConnection connection = channel.getConnection();
-        PeerDHT dht = connection.getDht();
-        logger.trace("got connection...");
 
         for (String channelId : channelIds) {
             boolean resultSubscribed = subscribeToChannel(connection, channelId);
@@ -89,35 +69,33 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         return logger.traceExit(result);
     }
 
+    @SuppressWarnings("unchecked")
     private boolean subscribeToChannel(P2PConnection connection, String channelId){
-        //hash object where peers are subscribed
         Number160 hash = Number160.createHash(channelId);
-        //the version where to store data
-        Number160 version = connection.getPeer().peerAddress().peerId();
-        PeerDHT dht = connection.getDht();
-        FutureGet futureGet = dht.get(hash).all().start();
-        futureGet.awaitUninterruptibly();
+
+        HashSet<PeerAddress> hashSetPeers = new HashSet<>();
 
         try {
-            FuturePut futurePut = dht.put(hash).data(new Data(connection.getPeer().peerAddress())).versionKey(version).start().awaitUninterruptibly();
-
-            if (!futureGet.isEmpty()) {
-                for (Object object : futureGet.rawData().values().iterator().next().values().toArray()) {
-                    Data data = (Data) object;
-                    PeerAddress peerAddress = (PeerAddress) data.object();
-                    version = peerAddress.peerId();
-                    futurePut = dht.put(hash).data(new Data(peerAddress)).versionKey(version).start().awaitUninterruptibly();
-                }
+            DHTResponseObject<HashSet<PeerAddress>> response = AppServiceProvider.getP2PObjectService().get(connection, hash.toString(), (Class<HashSet<PeerAddress>>) hashSetPeers.getClass());
+            if (response.getResponse() != ResponseDHT.SUCCESS) {
+                logger.warn("Error getting subscribed peers from broadcast channel {}", channelId);
+                return false;
             }
 
-            logger.info("subscribed to channel {}, peer {}", channelId, dht.peer().peerAddress());
-            return true;
-        } catch (Exception ex) {
+            if (response.getObject() != null) {
+                hashSetPeers.addAll(response.getObject());
+            }
+
+            hashSetPeers.add(connection.getPeer().peerAddress());
+
+            AppServiceProvider.getP2PObjectService().put(connection, hash.toString(), hashSetPeers);
+            logger.debug("Added self to broadcast channel {}", channelId);
+            return (true);
+        } catch (Exception ex){
             logger.catching(ex);
             return false;
         }
     }
-
 
     @SuppressWarnings("unchecked")
     @Override
@@ -130,37 +108,28 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         logger.trace("got connection...");
 
         for (String channelId : channelIds) {
-            //hash object where peers are subscribed
             Number160 hash = Number160.createHash(channelId);
             HashSet<PeerAddress> tempPeers = new HashSet<>();
             try {
-                FutureGet futureGet = dht.get(hash).all().start();
-                futureGet.awaitUninterruptibly();
-                if (futureGet.isSuccess()) {
-                    //iterate through all contained versions
-                    for (Object object : futureGet.rawData().values().iterator().next().values().toArray()) {
-                        Data data = (Data) object;
-                        PeerAddress peerAddress = (PeerAddress) data.object();
-                        if (!totalPeers.contains(peerAddress)) {
-                            totalPeers.add(peerAddress);
-                            tempPeers.add(peerAddress);
-                        }
+                DHTResponseObject<HashSet<PeerAddress>> response = AppServiceProvider.getP2PObjectService().get(connection, hash.toString(), (Class<HashSet<PeerAddress>>) totalPeers.getClass());
+                if (response.getResponse() != ResponseDHT.SUCCESS) {
+                    logger.warn("Error getting subscribed peers from broadcast channel {}", channelId);
+                } else {
+                    if (response.getObject() != null) {
+                        tempPeers.addAll(response.getObject());
                     }
 
-                    if (!tempPeers.contains(dht.peer().peerAddress())) {
-                        logger.warn("Not found self on channel {}...re-adding", channelId);
+                    if (!tempPeers.contains(connection.getPeer().peerAddress())) {
+                        logger.warn("Not found self on broadcast channel {}...re-adding", channelId);
 
                         subscribeToChannel(connection, channelId);
-
-                        tempPeers.add(dht.peer().peerAddress());
+                        tempPeers.add(connection.getPeer().peerAddress());
                     }
-
-                    channel.addPeerAddresses(channelId, tempPeers);
-                    totalPeers.addAll(channel.getPeerAddresses(channelId));
-
-                    logger.trace("Found {} peers: {}", futureGet.rawData().values().iterator().next().values().toArray().length,
-                            totalPeers);
                 }
+
+                channel.addPeerAddresses(hash.toString(), tempPeers);
+
+                totalPeers.addAll(channel.getPeerAddresses(hash.toString()));
             } catch (Exception ex) {
                 logger.catching(ex);
             }
@@ -173,57 +142,40 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         return logger.traceExit(totalPeers);
     }
 
-
     @SuppressWarnings("unchecked")
     @Override
     public HashSet<PeerAddress> getPeersOnChannel(P2PBroadcastChannel globalChannel, Integer destinationShard) {
         logger.traceEntry("params: {}", globalChannel);
         String channelId = globalChannel.getChannelIdentifier(destinationShard);
+        P2PConnection connection = globalChannel.getConnection();
         //hash object where peers are subscribed
         Number160 hash = Number160.createHash(channelId);
 
+        HashSet<PeerAddress> tempPeers = new HashSet<>();
         try {
-            P2PConnection connection = globalChannel.getConnection();
-
-            PeerDHT dht = connection.getDht();
-            logger.trace("got connection...");
-            HashSet<PeerAddress> peersOnChannel = new HashSet<>();
-
-            FutureGet futureGet = dht.get(hash).all().start();
-            futureGet.awaitUninterruptibly();
-            if (futureGet.isSuccess()) {
-                //iterate through all contained versions
-                for (Object object : futureGet.rawData().values().iterator().next().values().toArray()) {
-                    Data data = (Data) object;
-                    PeerAddress peerAddress = (PeerAddress) data.object();
-                    if (!peersOnChannel.contains(peerAddress)) {
-                        peersOnChannel.add(peerAddress);
-                    }
+            DHTResponseObject<HashSet<PeerAddress>> response = AppServiceProvider.getP2PObjectService().get(connection, hash.toString(), (Class<HashSet<PeerAddress>>) tempPeers.getClass());
+            if (response.getResponse() != ResponseDHT.SUCCESS) {
+                logger.warn("Error getting subscribed peers from broadcast channel {}", channelId);
+            } else {
+                if (response.getObject() != null) {
+                    tempPeers.addAll(response.getObject());
                 }
 
-                if (!peersOnChannel.contains(dht.peer().peerAddress())) {
-                    logger.warn("Not found self on channel {}...re-adding", channelId);
+                if (!tempPeers.contains(connection.getPeer().peerAddress())) {
+                    logger.warn("Not found self on broadcast channel {}...re-adding", channelId);
 
                     subscribeToChannel(connection, channelId);
-
-                    peersOnChannel.add(dht.peer().peerAddress());
+                    tempPeers.add(connection.getPeer().peerAddress());
                 }
-
-                globalChannel.addPeerAddresses(channelId, peersOnChannel);
-
-                if (!peersOnChannel.contains(dht.peer().peerAddress())) {
-                    logger.fatal("Not found self on channel!");
-                }
-
-                return logger.traceExit(globalChannel.getPeerAddresses(channelId));
-            } else {
-                logger.warn(futureGet.failedReason());
             }
-        } catch (Exception e) {
-            logger.catching(e);
+
+            globalChannel.addPeerAddresses(hash.toString(), tempPeers);
+
+        } catch (Exception ex) {
+            logger.catching(ex);
         }
 
-        return logger.traceExit(globalChannel.getPeerAddresses(hash.toString()));
+        return globalChannel.getPeerAddresses(hash.toString());
     }
 
     @SuppressWarnings("unchecked")
