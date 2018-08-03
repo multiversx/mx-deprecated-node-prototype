@@ -77,14 +77,16 @@ public class BootstrapServiceImpl implements BootstrapService {
                     break;
                 }
 
-                if (result.getObject() != null){
+                if (result.getObject() != null) {
                     networkBlockHeight.setResponse(result.getResponse());
 
                     if (networkBlockHeight.getObject().compareTo(result.getObject()) < 0) {
                         logger.warn("fetch network block index: {} with {} tries", result.getObject(), nRetries);
                         networkBlockHeight.setObject(result.getObject());
-                        break;
                     }
+
+                    break;
+
                 } else {
                     logger.warn("Error getting max height with staus {}", result.getResponse());
                 }
@@ -151,6 +153,11 @@ public class BootstrapServiceImpl implements BootstrapService {
         ExecutionReport result = new ExecutionReport();
 
         try {
+            if (block.getNonce().compareTo(networkBlockHeight.getObject()) <= 0) {
+                result.combine(new ExecutionReport().ko("put block in blockchain failed! block nonce to be propossed is: " + block.getNonce() + " and network block height is: " + networkBlockHeight.getObject()));
+                return logger.traceExit(result);
+            }
+
             // Put index <=> hash mapping only on DHT
             P2PConnection connection = blockchain.getConnection();
             String blockNonce = getBlockIndexIdentifier(block.getNonce());
