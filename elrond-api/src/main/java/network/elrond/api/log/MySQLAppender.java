@@ -30,7 +30,7 @@ public class MySQLAppender extends AbstractAppender {
     private Object locker = new Object();
     private List<LogEvent> logEventList = new ArrayList<>();
 
-    private static final int BUCKET_SIZE = 1000;
+    private static final int BUCKET_SIZE = 500;
 
     private String nodeName = null;
     private String tableName = null;
