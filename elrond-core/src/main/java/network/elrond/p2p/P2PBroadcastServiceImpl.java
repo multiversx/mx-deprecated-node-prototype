@@ -80,7 +80,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         try {
             PeerDHT dht = connection.getDht();
             FutureGet futureGet = dht.get(hash).start();
-            futureGet.awaitUninterruptibly();
+            futureGet.awaitUninterruptibly(3000);
             if (!futureGet.isSuccess()) {
                 logger.warn("Error getting subscribed peers from broadcast channel {}: {}", channelId, futureGet.failedReason());
                 return false;
@@ -116,7 +116,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
             HashSet<PeerAddress> tempPeers = new HashSet<>();
             try {
                 FutureGet futureGet = dht.get(hash).start();
-                futureGet.awaitUninterruptibly();
+                futureGet.awaitUninterruptibly(3000);
                 if (!futureGet.isSuccess()) {
                     logger.warn("Error getting subscribed peers from broadcast channel {}", channelId);
                 } else {
@@ -160,7 +160,7 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         try {
             PeerDHT dht = connection.getDht();
             FutureGet futureGet = dht.get(hash).start();
-            futureGet.awaitUninterruptibly();
+            futureGet.awaitUninterruptibly(3000);
             if (!futureGet.isSuccess()) {
                 logger.warn("Error getting subscribed peers from broadcast channel {}", channelId);
             } else {

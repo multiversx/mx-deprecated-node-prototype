@@ -48,7 +48,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         HashSet<PeerAddress> hashSetPeers = new HashSet<>();
         PeerDHT dht = connection.getDht();
         FutureGet futureGet = dht.get(hash).start();
-        futureGet.awaitUninterruptibly();
+        futureGet.awaitUninterruptibly(3000);
         if (!futureGet.isSuccess()) {
             logger.warn("Error getting subscribed peers from request channel {}: {}", channel.getChannelIdentifier(shard), futureGet.failedReason());
             return;
@@ -77,7 +77,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         try {
             PeerDHT dht = connection.getDht();
             FutureGet futureGet = dht.get(hash).start();
-            futureGet.awaitUninterruptibly();
+            futureGet.awaitUninterruptibly(3000);
             if (!futureGet.isSuccess()) {
                 logger.warn("Error getting subscribed peers from request channel {}", channel.getChannelIdentifier(shard));
             } else {
