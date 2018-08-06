@@ -6,6 +6,7 @@ import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
+import net.tomp2p.storage.Data;
 import network.elrond.core.ThreadUtil;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
@@ -41,24 +42,25 @@ public class P2PRequestServiceImpl implements P2PRequestService {
     }
 
     @SuppressWarnings("unchecked")
-    private void subscribeToChannel(P2PConnection connection, Shard shard, P2PRequestChannel channel) throws Exception{
+    private void subscribeToChannel(P2PConnection connection, Shard shard, P2PRequestChannel channel) throws Exception {
         Number160 hash = Number160.createHash(channel.getChannelIdentifier(shard));
 
         HashSet<PeerAddress> hashSetPeers = new HashSet<>();
-
-        DHTResponseObject<HashSet<PeerAddress>> response = AppServiceProvider.getP2PObjectService().get(connection, hash.toString(), (Class<HashSet<PeerAddress>>)hashSetPeers.getClass());
-        if (response.getResponse() != ResponseDHT.SUCCESS){
-            logger.warn("Error getting subscribed peers from request channel {}", channel.getChannelIdentifier(shard));
+        PeerDHT dht = connection.getDht();
+        FutureGet futureGet = dht.get(hash).start();
+        futureGet.awaitUninterruptibly();
+        if (!futureGet.isSuccess()) {
+            logger.warn("Error getting subscribed peers from request channel {}: {}", channel.getChannelIdentifier(shard), futureGet.failedReason());
             return;
         }
 
-        if (response.getObject() != null){
-            hashSetPeers.addAll(response.getObject());
+        if (futureGet.dataMap().values().iterator().hasNext()) {
+            hashSetPeers.addAll((HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object());
         }
 
         hashSetPeers.add(connection.getPeer().peerAddress());
 
-        AppServiceProvider.getP2PObjectService().put(connection, hash.toString(), hashSetPeers);
+        dht.put(hash).data(new Data(hashSetPeers)).start().awaitUninterruptibly();
         logger.debug("Added self to request channel {}", channel.getChannelIdentifier(shard));
     }
 
@@ -73,28 +75,30 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         Number160 hash = Number160.createHash(channelId);
 
         try {
-            DHTResponseObject<HashSet<PeerAddress>> response = AppServiceProvider.getP2PObjectService().get(connection, hash.toString(), (Class<HashSet<PeerAddress>>) peersOnChannel.getClass());
-            if (response.getResponse() != ResponseDHT.SUCCESS) {
+            PeerDHT dht = connection.getDht();
+            FutureGet futureGet = dht.get(hash).start();
+            futureGet.awaitUninterruptibly();
+            if (!futureGet.isSuccess()) {
                 logger.warn("Error getting subscribed peers from request channel {}", channel.getChannelIdentifier(shard));
             } else {
-                if (response.getObject() != null) {
-                    peersOnChannel.addAll(response.getObject());
+                if (futureGet.dataMap().values().iterator().hasNext()) {
+                    peersOnChannel.addAll((HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object());
                 }
 
-                if (!peersOnChannel.contains(channel.getConnection().getPeer().peerAddress())){
+                if (!peersOnChannel.contains(channel.getConnection().getPeer().peerAddress())) {
                     //something happened with self, re-adding
                     logger.warn("Not found self on request channel {}...re-adding", channel.getChannelIdentifier(shard));
 
-                    try{
+                    try {
                         subscribeToChannel(connection, shard, channel);
-                    } catch (Exception ex){
+                    } catch (Exception ex) {
                         logger.catching(ex);
                     }
 
                     peersOnChannel.add(channel.getConnection().getPeer().peerAddress());
                 }
             }
-        } catch (Exception ex){
+        } catch (Exception ex) {
             logger.catching(ex);
         }
 
