@@ -3,7 +3,7 @@ package network.elrond.processor.impl.executor;
 import network.elrond.Application;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
-import network.elrond.data.LocationType;
+import network.elrond.core.ThreadUtil;
 import network.elrond.processor.impl.AbstractBlockTask;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
@@ -19,21 +19,18 @@ public class SynchronizationBlockTask extends AbstractBlockTask {
         Blockchain blockchain = state.getBlockchain();
 
         long timeStamp = 0;
+
         try {
             timeStamp = System.currentTimeMillis();
 
             AppServiceProvider.getBootstrapService().fetchNetworkBlockIndex(blockchain);
 
-            logger.debug("Took {} ms to fetch max height with status {}", System.currentTimeMillis() - timeStamp,
-                    AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.NETWORK, blockchain).getResponse());
+            while (System.currentTimeMillis() - timeStamp < 1000){
+                ThreadUtil.sleep(10);
+            }
         } catch (Exception ex) {
             logger.catching(ex);
         }
-    }
-
-    @Override
-    protected int getWaitingTime(){
-        return 500;
     }
 }
 
