@@ -80,21 +80,22 @@ public class P2PRequestServiceImpl implements P2PRequestService {
                 if (response.getObject() != null) {
                     peersOnChannel.addAll(response.getObject());
                 }
+
+                if (!peersOnChannel.contains(channel.getConnection().getPeer().peerAddress())){
+                    //something happened with self, re-adding
+                    logger.warn("Not found self on request channel {}...re-adding", channel.getChannelIdentifier(shard));
+
+                    try{
+                        subscribeToChannel(connection, shard, channel);
+                    } catch (Exception ex){
+                        logger.catching(ex);
+                    }
+
+                    peersOnChannel.add(channel.getConnection().getPeer().peerAddress());
+                }
             }
         } catch (Exception ex){
             logger.catching(ex);
-        }
-
-        //testing whether self is still on channel
-        if (!peersOnChannel.contains(channel.getConnection().getPeer().peerAddress())){
-            //something happened with self, re-adding
-            logger.warn("Not found self on request channel {}...re-adding", channel.getChannelIdentifier(shard));
-
-            try{
-                subscribeToChannel(connection, shard, channel);
-            } catch (Exception ex){
-                logger.catching(ex);
-            }
         }
 
         channel.addPeerAddresses(channelId, peersOnChannel);

@@ -3,11 +3,14 @@ package network.elrond.processor.impl.executor;
 import network.elrond.Application;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
-import network.elrond.data.LocationType;
+import network.elrond.data.ExecutionReport;
 import network.elrond.processor.impl.AbstractBlockTask;
+import network.elrond.data.SyncState;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.math.BigInteger;
 
 public class SynchronizationBlockTask extends AbstractBlockTask {
     private static final Logger logger = LogManager.getLogger(SynchronizationBlockTask.class);
@@ -18,22 +21,28 @@ public class SynchronizationBlockTask extends AbstractBlockTask {
         AppState state = application.getState();
         Blockchain blockchain = state.getBlockchain();
 
-        long timeStamp = 0;
         try {
-            timeStamp = System.currentTimeMillis();
 
-            AppServiceProvider.getBootstrapService().fetchNetworkBlockIndex(blockchain);
+            SyncState syncState = AppServiceProvider.getBootstrapService().getSyncState(blockchain);
 
-            logger.debug("Took {} ms to fetch max height with status {}", System.currentTimeMillis() - timeStamp,
-                    AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.NETWORK, blockchain).getResponse());
+            if (!syncState.isSyncRequired()) {
+                logger.trace("is not sync required!");
+                return;
+            }
+
+            BigInteger localBlockIndex = syncState.getLocalBlockIndex();
+            BigInteger remoteBlockIndex = syncState.getRemoteBlockIndex();
+
+            logger.info("{}, Starting to synchronize > Current bloc index {} | remote block index {}",
+                    application.getContext().getNodeName(), localBlockIndex,
+                    remoteBlockIndex);
+
+            ExecutionReport report = AppServiceProvider.getBootstrapService().synchronize(localBlockIndex, remoteBlockIndex, state);
+
+            logger.debug("Sync result: {}", report);
         } catch (Exception ex) {
             logger.catching(ex);
         }
-    }
-
-    @Override
-    protected int getWaitingTime(){
-        return 500;
     }
 }
 
