@@ -85,7 +85,10 @@ public class P2PRequestServiceImpl implements P2PRequestService {
                     peersOnChannel.addAll((HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object());
                 }
 
-                if (!peersOnChannel.contains(channel.getConnection().getPeer().peerAddress())) {
+                boolean needToBeOnShard = !peersOnChannel.contains(channel.getConnection().getPeer().peerAddress()) &&
+                        (shard.getIndex() == channel.getConnection().getShard().getIndex());
+
+                if (needToBeOnShard) {
                     //something happened with self, re-adding
                     logger.warn("Not found self on request channel {}...re-adding", channel.getChannelIdentifier(shard));
 
