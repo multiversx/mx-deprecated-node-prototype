@@ -30,7 +30,6 @@ public class AppP2PManager {
             logger.trace("channel NULL, creating...");
             channel = AppServiceProvider.getP2PBroadcastService().createChannel(connection, channelName);
         }
-        AppServiceProvider.getP2PBroadcastService().subscribeToChannel(channel);
         state.addChannel(channel);
 
         channel.getListeners().add(listener);

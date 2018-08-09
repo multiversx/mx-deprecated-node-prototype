@@ -2,9 +2,7 @@ package network.elrond.p2p;
 
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.p2p.Peer;
-import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
-import network.elrond.application.AppState;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,9 +45,6 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         P2PBroadcastChannel channel = new P2PBroadcastChannel(channelName, connection);
         List<String> channelIds = getChannelIdentifiers(connection, channelName);
 
-        for (String channelId : channelIds) {
-            subscribeToChannel(connection, channelId);
-        }
         Peer peer = connection.getPeer();
         peer.objectDataReply(connection.registerChannel(channel));
 
@@ -57,41 +52,10 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
     }
 
     @SuppressWarnings("unchecked")
-    public boolean subscribeToChannel(P2PBroadcastChannel channel) {
-        logger.traceEntry("params: {}", channel);
-        List<String> channelIds = getChannelIdentifiers(channel.getConnection(), channel.getName());
-        boolean result = true;
-        P2PConnection connection = channel.getConnection();
-
-        for (String channelId : channelIds) {
-            boolean resultSubscribed = subscribeToChannel(connection, channelId);
-            result = result & resultSubscribed;
-        }
-        return logger.traceExit(result);
-    }
-
-    @SuppressWarnings("unchecked")
-    private boolean subscribeToChannel(P2PConnection connection, String channelId) {
-        Number160 hash = Number160.createHash(channelId);
-
-        HashSet<PeerAddress> hashSetPeers = new HashSet<>();
-
-        try {
-
-            logger.debug("Added self to broadcast channel {}", channelId);
-            return (true);
-        } catch (Exception ex) {
-            logger.catching(ex);
-            return false;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
     @Override
     public HashSet<PeerAddress> getPeersOnChannel(P2PBroadcastChannel channel) {
         logger.traceEntry("params: {}", channel);
         HashSet<PeerAddress> totalPeers = new HashSet<>();
-        List<String> channelIds = getChannelIdentifiers(channel.getConnection(), channel.getName());
         P2PConnection connection = channel.getConnection();
         PeerDHT dht = connection.getDht();
         logger.trace("got connection...");
@@ -115,7 +79,6 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
     @Override
     public HashSet<PeerAddress> getPeersOnChannel(P2PBroadcastChannel globalChannel, Integer destinationShard) {
         logger.traceEntry("params: {}", globalChannel);
-        String channelId = globalChannel.getChannelIdentifier(destinationShard);
         P2PConnection connection = globalChannel.getConnection();
 
         HashSet<PeerAddress> totalPeers = connection.getPeersOnShard(connection.getShard().getIndex());

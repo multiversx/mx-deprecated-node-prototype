@@ -1,6 +1,5 @@
 package network.elrond.application;
 
-import net.tomp2p.peers.PeerAddress;
 import network.elrond.AsciiTable;
 import network.elrond.account.Accounts;
 import network.elrond.benchmark.ElrondSystemTimerImpl;
@@ -20,9 +19,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class AppState implements Serializable, AsciiPrintable {
 

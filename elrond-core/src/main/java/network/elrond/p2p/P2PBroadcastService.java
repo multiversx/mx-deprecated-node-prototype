@@ -11,8 +11,6 @@ public interface P2PBroadcastService {
 
     P2PBroadcastChannel createChannel(P2PConnection connection, P2PBroadcastChannelName channelName);
 
-    boolean subscribeToChannel(P2PBroadcastChannel channel);
-
     HashSet<PeerAddress> getPeersOnChannel(P2PBroadcastChannel channel);
 
     HashSet<PeerAddress> getPeersOnChannel(P2PBroadcastChannel globalChannel, Integer destinationShard);

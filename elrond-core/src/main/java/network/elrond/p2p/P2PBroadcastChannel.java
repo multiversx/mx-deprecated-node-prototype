@@ -1,38 +1,17 @@
 package network.elrond.p2p;
 
-import net.tomp2p.peers.PeerAddress;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class P2PBroadcastChannel {
 
     private P2PBroadcastChannelName name;
     private P2PConnection connection;
     private List<P2PChannelListener> listeners = new ArrayList<>();
-    private Map<String, HashSet<PeerAddress>> peerAddresses;
-    private Object peerLock = new Object();
 
     public P2PBroadcastChannel(P2PBroadcastChannelName chanelName, P2PConnection connection) {
         this.name = chanelName;
         this.connection = connection;
-        this.peerAddresses = new HashMap<>();
-    }
-
-    public void addPeerAddresses(String channelHash, HashSet<PeerAddress> peerAddresses) {
-        synchronized (peerLock) {
-            HashSet<PeerAddress> hashSet = this.peerAddresses.get(channelHash);
-            if (hashSet == null) {
-                hashSet = new HashSet<>();
-                this.peerAddresses.put(channelHash, hashSet);
-            }
-            hashSet.addAll(peerAddresses);
-        }
-    }
-
-    public HashSet<PeerAddress> getPeerAddresses(String hash) {
-        synchronized (peerLock) {
-            return new HashSet<>(peerAddresses.get(hash));
-        }
     }
 
     public P2PBroadcastChannelName getName() {

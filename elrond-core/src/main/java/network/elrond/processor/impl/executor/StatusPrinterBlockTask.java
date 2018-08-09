@@ -25,11 +25,6 @@ public class StatusPrinterBlockTask implements AppTask {
 
 
             while (state.isStillRunning()) {
-                if (state == null){
-                    ThreadUtil.sleep(waitError);
-                    continue;
-                }
-
                 P2PConnection connection = state.getConnection();
                 if (connection == null){
                     ThreadUtil.sleep(waitError);
@@ -49,7 +44,7 @@ public class StatusPrinterBlockTask implements AppTask {
                 }
 
                 logger.info("\r\n" + printPeers(peerAddresses).render());
-                logger.info("\r\n" + printBucket(state.getAllPeers()).render());
+                logger.info("\r\n" + printBucket(connection.getAllPeers()).render());
 
                 ThreadUtil.sleep(waitNormal);
             }
@@ -88,10 +83,12 @@ public class StatusPrinterBlockTask implements AppTask {
                 AsciiTable.Row row = new AsciiTable.Row();
 
                 if (oldShard != shard) {
-                    AsciiTable.Row rowMinus = new AsciiTable.Row();
-                    rowMinus.getValues().add("---");
-                    rowMinus.getValues().add("--------------------------------------------------------------------------------------------------");
-                    table.getData().add(rowMinus);
+                    if (oldShard != -1) {
+                        AsciiTable.Row rowMinus = new AsciiTable.Row();
+                        rowMinus.getValues().add("---");
+                        rowMinus.getValues().add("--------------------------------------------------------------------------------------------------");
+                        table.getData().add(rowMinus);
+                    }
 
                     row.getValues().add(String.valueOf(shard));
                     oldShard = shard;
