@@ -112,6 +112,9 @@ public class Application implements Serializable {
         
         logger.debug("Start chronology processor...");
         AppTasks.CHRONOLOGY.process(this);
+
+        logger.debug("Start status printer...");
+        AppTasks.STATUS_PRINTER.process(this);
     }
 
     /**

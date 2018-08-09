@@ -45,18 +45,22 @@ public class P2PConnectionServiceImpl implements P2PConnectionService {
         Peer peer = new PeerBuilder(Number160.createHash(nodeName)).broadcastHandler(broadcastStructuredHandler).ports(peerPort).start();
         PeerDHT dht = new PeerBuilderDHT(peer).start();
 
-        FutureBootstrap fb = peer
-                .bootstrap()
-                .inetAddress(InetAddress.getByName(masterPeerIpAddress))
-                .ports(masterPeerPort).start();
-        fb.awaitUninterruptibly();
-        if (fb.isSuccess()) {
-            peer.discover().peerAddress(fb.bootstrapTo().iterator().next()).start().awaitUninterruptibly();
-            logger.info("Connection was SUCCESSFUL! Status: {}", fb.failedReason());
+        if (peerPort != masterPeerPort) {
+            FutureBootstrap fb = peer
+                    .bootstrap()
+                    .inetAddress(InetAddress.getByName(masterPeerIpAddress))
+                    .ports(masterPeerPort).start();
+            fb.awaitUninterruptibly();
+            if (fb.isSuccess()) {
+                peer.discover().peerAddress(fb.bootstrapTo().iterator().next()).start().awaitUninterruptibly();
+                logger.info("Connection was SUCCESSFUL! Status: {}", fb.failedReason());
+            } else {
+                RuntimeException ex = new RuntimeException(fb.failedReason());
+                logger.throwing(ex);
+                throw ex;
+            }
         } else {
-            RuntimeException ex = new RuntimeException(fb.failedReason());
-            logger.throwing(ex);
-            throw ex;
+            logger.info("Connection started as SEEDER!");
         }
 
         P2PConnection connection = new P2PConnection(nodeName, peer, dht);

@@ -49,7 +49,6 @@ public class ContextCreator {
         ShardingService shardingService = AppServiceProvider.getShardingService();
         PublicKey preGeneratedPublicKey = new PublicKey(context.getPrivateKey());
         Shard shard = shardingService.getShard(preGeneratedPublicKey.getValue());
-        logger.info("Allocated to shard: {}", shard.getIndex());
 
         return logger.traceExit(context);
     }
