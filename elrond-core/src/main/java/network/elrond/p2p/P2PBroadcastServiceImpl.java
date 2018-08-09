@@ -96,14 +96,12 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         PeerDHT dht = connection.getDht();
         logger.trace("got connection...");
 
-        AppState appState = connection.getBroadcastStructuredHandler().getAppState();
-
         if (channel.getName().getType().equals(P2PChannelType.GLOBAL_LEVEL)) {
-            for (Integer shardId : appState.getAllPeers().keySet()) {
-                totalPeers.addAll(appState.getPeersOnShard(shardId));
+            for (Integer shardId : connection.getAllPeers().keySet()) {
+                totalPeers.addAll(connection.getPeersOnShard(shardId));
             }
         } else {
-            totalPeers.addAll(appState.getPeersOnShard(connection.getShard().getIndex()));
+            totalPeers.addAll(connection.getPeersOnShard(connection.getShard().getIndex()));
         }
 
         if (!totalPeers.contains(dht.peer().peerAddress())) {
@@ -120,9 +118,8 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         String channelId = globalChannel.getChannelIdentifier(destinationShard);
         P2PConnection connection = globalChannel.getConnection();
 
-        AppState appState = connection.getBroadcastStructuredHandler().getAppState();
-        HashSet<PeerAddress> totalPeers = appState.getPeersOnShard(connection.getShard().getIndex());
-        totalPeers.addAll(appState.getPeersOnShard(destinationShard));
+        HashSet<PeerAddress> totalPeers = connection.getPeersOnShard(connection.getShard().getIndex());
+        totalPeers.addAll(connection.getPeersOnShard(destinationShard));
 
         return totalPeers;
     }
