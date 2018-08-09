@@ -59,7 +59,7 @@ public class P2PConnectionServiceImpl implements P2PConnectionService {
 
         P2PConnection connection = new P2PConnection(nodeName, peer, dht);
         peer.objectDataReply(connection.getDataReplyCallback());
-        connection.setBroadcastStructuredHandler(broadcastStructuredHandler);
+        broadcastStructuredHandler.setConnection(connection);
         return logger.traceExit(connection);
     }
 

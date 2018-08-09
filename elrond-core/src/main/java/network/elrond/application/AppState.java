@@ -41,9 +41,6 @@ public class AppState implements Serializable, AsciiPrintable {
     private NTPClient ntpClient;
     private P2PConnection connection;
 
-    // Buckets for each shard containing connected peers
-    private Map<Integer, HashSet<PeerAddress>> bucketsPeers = new ConcurrentHashMap<>();
-
     private Map<P2PBroadcastChannelName, P2PBroadcastChannel> broadcastChannels = new HashMap<>();
     private Map<P2PRequestChannelName, P2PRequestChannel> requestChannels = new HashMap<>();
 
@@ -171,21 +168,6 @@ public class AppState implements Serializable, AsciiPrintable {
 
     public TransactionsPool getPool() {
         return blockchain.getPool();
-    }
-
-    public HashSet<PeerAddress> getPeersOnShard(Integer shardId) {
-        HashSet<PeerAddress> result = bucketsPeers.get(shardId);
-        return result == null ? new HashSet<>() : new HashSet<>(result);
-    }
-
-    public synchronized void addPeerOnShard(PeerAddress peerAddress, Integer shardId) {
-        HashSet<PeerAddress> peersOnShard = getPeersOnShard(shardId);
-        peersOnShard.add(peerAddress);
-        bucketsPeers.put(shardId, peersOnShard);
-    }
-
-    public Map<Integer, HashSet<PeerAddress>> getAllPeers() {
-        return new HashMap<>(bucketsPeers);
     }
 
     @Override

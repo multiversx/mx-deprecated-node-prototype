@@ -12,35 +12,24 @@ import net.tomp2p.peers.PeerMap;
 import net.tomp2p.storage.Data;
 import net.tomp2p.utils.ConcurrentCacheMap;
 import net.tomp2p.utils.Utils;
-import network.elrond.application.AppState;
+import network.elrond.p2p.P2PConnection;
 import network.elrond.p2p.P2PIntroductionMessage;
 import network.elrond.p2p.P2PReplyIntroductionMessage;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.NavigableMap;
+import java.util.*;
 
 public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
     private final ConcurrentCacheMap<Number160, Boolean> cache = new ConcurrentCacheMap<Number160, Boolean>();
     private volatile Peer peer;
-    private volatile AppState appState;
+    P2PConnection connection;
 
     private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(BroadcastStructuredHandler.class);
 
     public BroadcastStructuredHandler() {
         this.peer = null;
-        this.appState = null;
-    }
-
-    public AppState getAppState() {
-        return appState;
-    }
-
-    public void setAppState(AppState appState) {
-        this.appState = appState;
+        this.connection = null;
     }
 
     @Override
@@ -54,7 +43,7 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
             return this;
         }
 
-        if (appState == null) {
+        if (connection == null) {
             return this;
         }
 
@@ -75,7 +64,7 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
                 P2PIntroductionMessage introductionMessage = (P2PIntroductionMessage) dataMap.get(Number640.ZERO).object();
                 logger.debug("{} received broadcast message from: {}", peer.peerID(), introductionMessage.getPeerAddress());
                 peerAddressReceived = introductionMessage.getPeerAddress();
-                appState.addPeerOnShard(peerAddressReceived, introductionMessage.getShardId());
+                connection.addPeerOnShard(peerAddressReceived, introductionMessage.getShardId());
 
             } catch (ClassNotFoundException | IOException e) {
                 logger.catching(e);
@@ -108,7 +97,7 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
         if (!peer.peerAddress().equals(peerAddressReceived)) {
             //get all currently known peers and send to requester
 
-            Map<Integer, HashSet<PeerAddress>> peersMap = appState.getAllPeers();
+            Map<Integer, HashSet<PeerAddress>> peersMap = connection.getAllPeers();
 
             P2PReplyIntroductionMessage replyIntroductionMessage = new P2PReplyIntroductionMessage(peersMap);
 
@@ -126,6 +115,10 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
         }
 
         return this;
+    }
+
+    public void setConnection(P2PConnection connection) {
+        this.connection = connection;
     }
 
     @Override

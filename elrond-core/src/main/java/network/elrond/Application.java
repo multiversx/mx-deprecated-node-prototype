@@ -85,7 +85,6 @@ public class Application implements Serializable {
         logger.debug("Starting obect request mechanism...");
         AppTasks.INIT_REQUEST_OBJECT.process(this);
 
-
         logger.debug("Intercept P2P transactions...");
         AppTasks.INTERCEPT_TRANSACTIONS.process(this);
 

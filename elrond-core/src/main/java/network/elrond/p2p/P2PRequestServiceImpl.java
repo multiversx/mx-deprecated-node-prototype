@@ -6,7 +6,6 @@ import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
-import network.elrond.application.AppState;
 import network.elrond.core.ThreadUtil;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
@@ -56,9 +55,8 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         String channelId = channel.getChannelIdentifier(shard);
 
         HashSet<PeerAddress> peersOnChannel = new HashSet<>();
-        AppState appState = connection.getBroadcastStructuredHandler().getAppState();
-        HashSet<PeerAddress> totalPeers = appState.getPeersOnShard(connection.getShard().getIndex());
-        totalPeers.addAll(appState.getPeersOnShard(shard.getIndex()));
+        HashSet<PeerAddress> totalPeers = connection.getPeersOnShard(connection.getShard().getIndex());
+        totalPeers.addAll(connection.getPeersOnShard(shard.getIndex()));
 
         channel.addPeerAddresses(channelId, peersOnChannel);
         peersOnChannel = channel.getPeerAddresses(channelId);

@@ -9,12 +9,13 @@ import network.elrond.core.ObjectUtil;
 import network.elrond.core.Util;
 import network.elrond.p2p.handlers.BroadcastStructuredHandler;
 import network.elrond.sharding.Shard;
+import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class P2PConnection {
-
+    private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(P2PConnection.class);
     private String nodeName;
     private Peer peer;
     private PeerDHT dht;
@@ -24,7 +25,8 @@ public class P2PConnection {
     private List<P2PBroadcastChannel> broadcastChannels = new ArrayList<>();
     private List<P2PRequestChannel> requestChannels = new ArrayList<>();
 
-    private BroadcastStructuredHandler broadcastStructuredHandler;
+    // Buckets for each shard containing connected peers
+    private Map<Integer, HashSet<PeerAddress>> bucketsPeers = new ConcurrentHashMap<>();
 
     public P2PConnection(String nodeName, Peer peer, PeerDHT dht) {
         this.nodeName = nodeName;
@@ -49,6 +51,22 @@ public class P2PConnection {
             throw new RuntimeException("Not supported request" + request);
         };
     }
+
+    public HashSet<PeerAddress> getPeersOnShard(Integer shardId) {
+        HashSet<PeerAddress> result = bucketsPeers.get(shardId);
+        return result == null ? new HashSet<>() : new HashSet<>(result);
+    }
+
+    public synchronized void addPeerOnShard(PeerAddress peerAddress, Integer shardId) {
+        HashSet<PeerAddress> peersOnShard = getPeersOnShard(shardId);
+        peersOnShard.add(peerAddress);
+        bucketsPeers.put(shardId, peersOnShard);
+    }
+
+    public Map<Integer, HashSet<PeerAddress>> getAllPeers() {
+        return new HashMap<>(bucketsPeers);
+    }
+
 
     private Object handleRequest(PeerAddress sender, P2PRequestMessage request) throws InterruptedException {
 
@@ -85,24 +103,19 @@ public class P2PConnection {
     }
 
     private Object handleReplyIntroduction(PeerAddress sender, P2PReplyIntroductionMessage request) {
+        logger.fatal("handleReplyIntroduction...");
+
         if (request == null) {
             return null;
         }
 
-        if (broadcastStructuredHandler == null) {
-            return null;
-        }
-
-        if (broadcastStructuredHandler.getAppState() == null) {
-            return null;
-        }
-
-        AppState appState = broadcastStructuredHandler.getAppState();
-
         for (P2PIntroductionMessage msg : request.getBucketList()) {
             PeerAddress peerAddress = msg.getPeerAddress();
-            appState.addPeerOnShard(peerAddress, msg.getShardId());
+            addPeerOnShard(peerAddress, msg.getShardId());
+
         }
+
+        logger.fatal("new bucket list {}", getAllPeers());
 
         return null;
     }
@@ -145,14 +158,6 @@ public class P2PConnection {
         return dataReplyCallback;
     }
 
-    public BroadcastStructuredHandler getBroadcastStructuredHandler() {
-        return broadcastStructuredHandler;
-    }
-
-    public void setBroadcastStructuredHandler(BroadcastStructuredHandler broadcastStructuredHandler) {
-        this.broadcastStructuredHandler = broadcastStructuredHandler;
-    }
-
     public P2PRequestChannel getRequestChannel(String channelName) {
         Util.check(channelName != null, "channelName != null");
 
@@ -160,19 +165,6 @@ public class P2PConnection {
             P2PRequestChannelName requestChannelName = requestChannel.getName();
             if (channelName.equals(requestChannelName.getName())) {
                 return requestChannel;
-            }
-        }
-
-        return null;
-    }
-
-    public P2PBroadcastChannel getBroadcastChannel(String channelName) {
-        Util.check(channelName != null, "channelName != null");
-
-        for (P2PBroadcastChannel broadcastChannel : broadcastChannels) {
-            P2PBroadcastChannelName broadcastChannelName = broadcastChannel.getName();
-            if (channelName.equals(broadcastChannelName.toString())) {
-                return broadcastChannel;
             }
         }
 
