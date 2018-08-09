@@ -143,8 +143,8 @@ public class AppBlockManager {
                 sendReceipts(state, block, receipts);
                 long end = System.currentTimeMillis();
 
-                logger.info("New block proposed with hash {} ");
-                logger.info("Proposed in {} ms and sent in {} ms", hashBlock, end-proposeStart, end-start);
+                logger.info("New block proposed with hash {} ", hashBlock);
+                logger.info("Proposed in {} ms and sent in {} ms", end-proposeStart, end-start);
 
                 logger.info("\r\n" + state.print().render());
                 //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
