@@ -50,16 +50,16 @@ public class StatisticsManager implements Serializable {
         numberNodesInShard = AppShardingManager.instance().getNumberNodesInShard(state);
     }
 
-    Statistic currentStatistic = null;
+    List<Statistic> currentStatistics = new ArrayList<>();
 
     public void addStatistic(Statistic statistic){
-        currentStatistic = statistic;
+        currentStatistics.add(statistic);
     }
 
-    public void processStatistic() {
-        logger.traceEntry("params: {}", currentStatistic);
+    public void processStatistics() {
+        logger.traceEntry("params: {}", currentStatistics);
 
-        if(currentStatistic == null){
+        if(currentStatistics == null || currentStatistics.isEmpty()){
             return;
         }
         long roundTimeDuration = AppServiceProvider.getChronologyService().getRoundTimeDuration();
@@ -71,30 +71,46 @@ public class StatisticsManager implements Serializable {
 
         liveRoundTime = roundTimeDuration;
 
-        statistics.add(currentStatistic);
+        statistics.addAll(currentStatistics);
         if (statistics.size() > maxStatistics) {
             statistics.remove(0);
         }
 
+        long transactionsCount = 0;
+        long maxTransactionsProcessed = 0;
+        long maxBlockNonce = currentBlockNonce;
+        for(Statistic stat : currentStatistics){
+            long currentTxInBlock = stat.getNrTransactionsInBlock();
+            if(currentTxInBlock > maxTransactionsProcessed){
+                maxTransactionsProcessed = currentTxInBlock;
+            }
+            transactionsCount += currentTxInBlock;
 
-        totalProcessedTransactions += currentStatistic.getNrTransactionsInBlock();
-        liveTps = currentStatistic.getNrTransactionsInBlock() * 1000.0 / liveRoundTime;
-
-        logger.info("Live Round Time is: " + liveRoundTime + " and processed " + currentStatistic.getNrTransactionsInBlock() + " transactions at a TPS of: " + liveTps);
-
-        logger.trace("currentTps is " + liveTps);
-        ComputeTps(liveTps);
-
-        liveNrTransactionsInBlock = currentStatistic.getNrTransactionsInBlock();
-        computeNrTransactionsInBlock(liveNrTransactionsInBlock);
-
-        computeAverageRoundTime(ellapsedMillis);
-
-        if(currentBlockNonce < currentStatistic.getCurrentBlockNonce()){
-            currentBlockNonce = currentStatistic.getCurrentBlockNonce();
+            long currentBlockNumber = stat.getCurrentBlockNonce();
+            if(currentBlockNumber > maxBlockNonce){
+                maxBlockNonce = currentBlockNumber + 1;
+            }
+            logger.info("Statistics for block {}: {} transactions", currentBlockNumber, currentTxInBlock);
         }
 
+        totalProcessedTransactions += transactionsCount;
+        liveNrTransactionsInBlock = maxTransactionsProcessed;
+
+        liveTps = maxTransactionsProcessed * 1000.0 / liveRoundTime;//get the max TPS from all statistics
+
+        logger.info("Live Round Time is: " + liveRoundTime + " and processed " + maxTransactionsProcessed
+                + " transactions at a TPS of: " + liveTps);
+
+        logger.trace("currentTps is " + liveTps);
+
+        computeTps(liveTps);
+        computeNrTransactionsInBlock(liveNrTransactionsInBlock);
+        computeAverageRoundTime(ellapsedMillis);
+
+        currentBlockNonce = maxBlockNonce;
+
         currentIndex++;
+        currentStatistics.clear();
         logger.traceExit();
     }
 
@@ -103,7 +119,7 @@ public class StatisticsManager implements Serializable {
         logger.trace("averageNrTransactionsInBlock is " + averageNrTransactionsInBlock);
     }
 
-    private void ComputeTps(Double currentTps) {
+    private void computeTps(Double currentTps) {
         if (maxTps < currentTps) {
             maxTps = currentTps;
         }
@@ -124,9 +140,11 @@ public class StatisticsManager implements Serializable {
         if (minNrTransactionsInBlock > currentNrTransactionsInBlock) {
             minNrTransactionsInBlock = currentNrTransactionsInBlock;
         }
-        if(currentNrTransactionsInBlock>0) { //only in proposed blocks, this cannot have zero trasactions in them
-            averageNrTransactionsInBlock = (averageNrTransactionsInBlock * currentIndex + currentNrTransactionsInBlock) / (currentIndex + 1);
+
+        if(currentBlockNonce > 0) {
+            averageNrTransactionsInBlock = totalProcessedTransactions / currentBlockNonce;
         }
+
         logger.trace("averageNrTransactionsInProposedBlock is " + averageNrTransactionsInBlock);
     }
 
