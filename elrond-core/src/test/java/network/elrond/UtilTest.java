@@ -17,9 +17,8 @@ import org.junit.Test;
 
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class UtilTest {
@@ -90,6 +89,23 @@ public class UtilTest {
     @Test
     public void testPrint01(){
         logger.debug("{}", Arrays.asList("aaa", "bbb", "ccc"));
+    }
+
+    @Test
+    public void testAddConcurrentMap(){
+        Map<Integer, HashSet<String>> map = new ConcurrentHashMap<>();
+
+        HashSet<String> hashSet = new HashSet<>();
+        hashSet.add("aaa");
+
+        map.put(1, hashSet);
+
+        HashSet<String> hashSet2 = new HashSet<>();
+        hashSet2.add("aaa");
+        hashSet2.add("bbb");
+        map.put(1, hashSet2);
+
+        HashSet<String> hashSetResult = map.get(1);
     }
 
     @Test

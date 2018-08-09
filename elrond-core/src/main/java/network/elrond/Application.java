@@ -86,8 +86,6 @@ public class Application implements Serializable {
         AppTasks.INIT_REQUEST_OBJECT.process(this);
 
 
-
-
         logger.debug("Intercept P2P transactions...");
         AppTasks.INTERCEPT_TRANSACTIONS.process(this);
 
@@ -115,6 +113,9 @@ public class Application implements Serializable {
         
         logger.debug("Start chronology processor...");
         AppTasks.CHRONOLOGY.process(this);
+
+        logger.debug("Start status printer...");
+        AppTasks.STATUS_PRINTER.process(this);
     }
 
     /**

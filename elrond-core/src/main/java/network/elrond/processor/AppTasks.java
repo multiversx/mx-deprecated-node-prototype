@@ -2,6 +2,7 @@ package network.elrond.processor;
 
 import network.elrond.processor.impl.executor.BootstrapBlockTask;
 import network.elrond.processor.impl.executor.ChronologyBlockTask;
+import network.elrond.processor.impl.executor.StatusPrinterBlockTask;
 import network.elrond.processor.impl.executor.SynchronizationBlockTask;
 import network.elrond.processor.impl.initialization.*;
 import network.elrond.processor.impl.interceptor.P2PBlocksInterceptorProcessor;
@@ -120,5 +121,7 @@ public class AppTasks {
     };
 
 
-
+    public static AppTask STATUS_PRINTER = (application) -> {
+        new StatusPrinterBlockTask().process(application);
+    };
 }
