@@ -2,13 +2,13 @@ package network.elrond.sharding;
 
 import net.tomp2p.peers.PeerAddress;
 import network.elrond.application.AppState;
-import network.elrond.core.CollectionUtil;
 import network.elrond.p2p.P2PBroadcastChannel;
 import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -31,7 +31,9 @@ public class AppShardingManager {
         if (isSeedNode == null) {
             P2PBroadcastChannel chanel = state.getChannel(P2PBroadcastChannelName.BLOCK);
             HashSet<PeerAddress> peers = AppServiceProvider.getP2PBroadcastService().getPeersOnChannel(chanel);
-            isSeedNode = CollectionUtil.size(peers) <= 1;
+            List<PeerAddress> listPeers = new ArrayList<>(peers);
+
+            isSeedNode = listPeers.get(0).equals(state.getConnection().getPeer().peerAddress());
         }
 
         return isSeedNode;

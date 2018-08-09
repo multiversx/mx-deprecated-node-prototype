@@ -216,4 +216,24 @@ public class UtilTest {
         System.out.println("================================================================");
 
     }
+
+    @Test
+    public void testOrderHashSet(){
+        HashSet<String> hashSet1 = new HashSet<>();
+        hashSet1.add("bbb");
+        hashSet1.add("aaa");
+        hashSet1.add("ccc");
+
+        HashSet<String> hashSet2 = new HashSet<>();
+        hashSet2.add("ccc");
+        hashSet2.add("bbb");
+        hashSet2.add("aaa");
+
+        List<String> lst1 = new ArrayList<>(hashSet1);
+        List<String> lst2 = new ArrayList<>(hashSet2);
+
+        TestCase.assertEquals(lst1.get(0), lst2.get(0));
+        TestCase.assertEquals(lst1.get(1), lst2.get(1));
+        TestCase.assertEquals(lst1.get(2), lst2.get(2));
+    }
 }
