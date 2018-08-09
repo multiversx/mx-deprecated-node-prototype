@@ -62,9 +62,6 @@ public class StatusPrinterBlockTask implements AppTask {
         table.setMaxColumnWidth(200);
 
         table.getColumns().add(new AsciiTable.Column("Verified peers: "));
-        AsciiTable.Row rowMinus = new AsciiTable.Row();
-        rowMinus.getValues().add("----------------------------------------------------------------");
-        table.getData().add(rowMinus);
 
         for (PeerAddress peerAddress : peerAddressesList) {
             AsciiTable.Row row = new AsciiTable.Row();
@@ -92,8 +89,8 @@ public class StatusPrinterBlockTask implements AppTask {
 
                 if (oldShard != shard) {
                     AsciiTable.Row rowMinus = new AsciiTable.Row();
-                    rowMinus.getValues().add("--------");
-                    rowMinus.getValues().add("----------------------------------------------------------------");
+                    rowMinus.getValues().add("---");
+                    rowMinus.getValues().add("--------------------------------------------------------------------------------------------------");
                     table.getData().add(rowMinus);
 
                     row.getValues().add(String.valueOf(shard));

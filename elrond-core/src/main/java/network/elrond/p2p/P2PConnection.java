@@ -141,6 +141,10 @@ public class P2PConnection {
         return dataReplyCallback;
     }
 
+    public ObjectDataReply getDataReplyCallback(){
+        return dataReplyCallback;
+    }
+
     public BroadcastStructuredHandler getBroadcastStructuredHandler() {
         return broadcastStructuredHandler;
     }

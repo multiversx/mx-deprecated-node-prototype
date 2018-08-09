@@ -1,9 +1,6 @@
 package network.elrond.p2p.handlers;
 
-import net.tomp2p.futures.BaseFutureAdapter;
-import net.tomp2p.futures.FutureChannelCreator;
-import net.tomp2p.futures.FutureDirect;
-import net.tomp2p.futures.FutureResponse;
+import net.tomp2p.futures.*;
 import net.tomp2p.message.Message;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.p2p.StructuredBroadcastHandler;
@@ -21,7 +18,10 @@ import network.elrond.p2p.P2PReplyIntroductionMessage;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableMap;
 
 public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
     private final ConcurrentCacheMap<Number160, Boolean> cache = new ConcurrentCacheMap<Number160, Boolean>();
@@ -73,7 +73,7 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
             dataMap = message.dataMap(0).dataMap();
             try {
                 P2PIntroductionMessage introductionMessage = (P2PIntroductionMessage) dataMap.get(Number640.ZERO).object();
-                logger.debug("{} received broadcast message from: {}", peer.peerID(), introductionMessage.getPeerAddress().peerId());
+                logger.debug("{} received broadcast message from: {}", peer.peerID(), introductionMessage.getPeerAddress());
                 peerAddressReceived = introductionMessage.getPeerAddress();
                 appState.addPeerOnShard(peerAddressReceived, introductionMessage.getShardId());
 
@@ -101,19 +101,29 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
             int bucketNr = PeerMap.classMember(peerAddress.peerId(),
                     peer.peerID());
             //magic send
-            doSend(messageKey, dataMap, hopCount, message.isUdp(), peerAddress,
+            doSendBroadcast(messageKey, dataMap, hopCount, message.isUdp(), peerAddress,
                     bucketNr);
         }
 
+        if (!peer.peerAddress().equals(peerAddressReceived)) {
+            //get all currently known peers and send to requester
 
-        //get all currently known peers and send to requester
-        Map<Integer, HashSet<PeerAddress>> peersMap = appState.getAllPeers();
+            Map<Integer, HashSet<PeerAddress>> peersMap = appState.getAllPeers();
 
-        P2PReplyIntroductionMessage replyIntroductionMessage = new P2PReplyIntroductionMessage(peersMap);
-        FutureDirect futureDirect = peer
-                .sendDirect(peerAddressReceived)
-                .object(replyIntroductionMessage).start();
-        futureDirect.awaitUninterruptibly();
+            P2PReplyIntroductionMessage replyIntroductionMessage = new P2PReplyIntroductionMessage(peersMap);
+
+            FutureDirect futureDirect = peer.sendDirect(peerAddressReceived).object(replyIntroductionMessage).start();
+            futureDirect.addListener(new BaseFutureAdapter<BaseFuture>() {
+                @Override
+                public void operationComplete(BaseFuture future) throws Exception {
+                    if (future.isSuccess() && future.isCompleted()){
+                        logger.debug("Done sending to {} the bucket", peerAddressReceived);
+                    } else {
+                        logger.warn("Error sending to {}: {}", peerAddressReceived, future.failedReason());
+                    }
+                }
+            });
+        }
 
         return this;
     }
@@ -134,10 +144,10 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
         return false;
     }
 
-    private void doSend(final Number160 messageKey,
-                        final NavigableMap<Number640, Data> dataMap, final int hopCounter,
-                        final boolean isUDP, final PeerAddress peerAddress,
-                        final int bucketNr) {
+    private void doSendBroadcast(final Number160 messageKey,
+                                 final NavigableMap<Number640, Data> dataMap, final int hopCounter,
+                                 final boolean isUDP, final PeerAddress peerAddress,
+                                 final int bucketNr) {
 
         FutureChannelCreator frr = peer.connectionBean().reservation()
                 .create(isUDP ? 1 : 0, isUDP ? 0 : 1);

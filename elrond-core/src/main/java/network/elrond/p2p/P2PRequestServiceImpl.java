@@ -136,7 +136,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
             return responses;
         }
 
-        logger.warn("peersOnChannel: {} on request channel {} and shard {}", peersOnChannel.size(), channel.getName(), shard.getIndex());
+        //logger.warn("peersOnChannel: {} on request channel {} and shard {}", peersOnChannel.size(), channel.getName(), shard.getIndex());
 
         return null;
     }
