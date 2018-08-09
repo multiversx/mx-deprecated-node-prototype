@@ -22,6 +22,4 @@ public interface P2PBroadcastService {
     boolean unsubscribeFromChannel(P2PBroadcastChannel channel);
 
     boolean leaveNetwork(List<P2PBroadcastChannel> channel);
-
-    void addPeerToShardBucket(PeerAddress peerAddress, Integer shard);
 }

@@ -4,6 +4,7 @@ import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
+import network.elrond.application.AppState;
 import network.elrond.core.ObjectUtil;
 import network.elrond.core.Util;
 import network.elrond.p2p.handlers.BroadcastStructuredHandler;
@@ -38,6 +39,10 @@ public class P2PConnection {
 
             if (request instanceof P2PRequestMessage) {
                 return handleRequest(sender, (P2PRequestMessage) request);
+            }
+
+            if (request instanceof P2PReplyIntroductionMessage) {
+                return handleReplyIntroduction(sender, (P2PReplyIntroductionMessage) request);
             }
 
 
@@ -79,6 +84,28 @@ public class P2PConnection {
         return null;
     }
 
+    private Object handleReplyIntroduction(PeerAddress sender, P2PReplyIntroductionMessage request) {
+        if (request == null) {
+            return null;
+        }
+
+        if (broadcastStructuredHandler == null) {
+            return null;
+        }
+
+        if (broadcastStructuredHandler.getAppState() == null) {
+            return null;
+        }
+
+        AppState appState = broadcastStructuredHandler.getAppState();
+
+        for (P2PIntroductionMessage msg : request.getBucketList()) {
+            PeerAddress peerAddress = msg.getPeerAddress();
+            appState.addPeerOnShard(peerAddress, msg.getShardId());
+        }
+
+        return null;
+    }
 
     public Peer getPeer() {
         return peer;
@@ -114,11 +141,11 @@ public class P2PConnection {
         return dataReplyCallback;
     }
 
-    public BroadcastStructuredHandler getBroadcastStructuredHandler(){
+    public BroadcastStructuredHandler getBroadcastStructuredHandler() {
         return broadcastStructuredHandler;
     }
 
-    public void setBroadcastStructuredHandler(BroadcastStructuredHandler broadcastStructuredHandler){
+    public void setBroadcastStructuredHandler(BroadcastStructuredHandler broadcastStructuredHandler) {
         this.broadcastStructuredHandler = broadcastStructuredHandler;
     }
 

@@ -1,15 +1,13 @@
 package network.elrond.p2p;
 
 import net.tomp2p.dht.FutureGet;
-import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
-import net.tomp2p.storage.Data;
+import network.elrond.application.AppState;
 import network.elrond.core.ThreadUtil;
-import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
@@ -46,33 +44,6 @@ public class P2PRequestServiceImpl implements P2PRequestService {
     @SuppressWarnings("unchecked")
     private void subscribeToChannel(P2PConnection connection, Shard shard, P2PRequestChannel channel) throws Exception {
         Number160 hash = Number160.createHash(channel.getChannelIdentifier(shard));
-        PeerDHT dht = connection.getDht();
-        int nbRetries = Util.MAX_RETRIES_PUT;
-        FuturePut futurePut = null;
-        do {
-            HashSet<PeerAddress> hashSetPeers = new HashSet<>();
-            FutureGet futureGet = dht.get(hash).start();
-            futureGet.awaitUninterruptibly(3000);
-            if (!futureGet.isSuccess()) {
-                logger.warn("Error getting subscribed peers from request channel {}: {}", channel.getChannelIdentifier(shard), futureGet.failedReason());
-                continue;
-            }
-
-            if (futureGet.dataMap().values().iterator().hasNext()) {
-                hashSetPeers.addAll((HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object());
-            }
-
-            hashSetPeers.add(connection.getPeer().peerAddress());
-
-            futurePut = dht.put(hash).data(new Data(hashSetPeers)).start().awaitUninterruptibly();
-            nbRetries--;
-        } while (nbRetries > 0 && futurePut != null && futurePut.isSuccess());
-
-        boolean subscribeFail = nbRetries == 0 && (futurePut == null || !futurePut.isSuccess());
-
-        if (subscribeFail) {
-            return;
-        }
 
         logger.debug("Added self to request channel {}", channel.getChannelIdentifier(shard));
     }
@@ -85,38 +56,9 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         String channelId = channel.getChannelIdentifier(shard);
 
         HashSet<PeerAddress> peersOnChannel = new HashSet<>();
-        Number160 hash = Number160.createHash(channelId);
-
-        try {
-            PeerDHT dht = connection.getDht();
-            FutureGet futureGet = dht.get(hash).start();
-            futureGet.awaitUninterruptibly(3000);
-            if (!futureGet.isSuccess()) {
-                logger.warn("Error getting subscribed peers from request channel {}", channel.getChannelIdentifier(shard));
-            } else {
-                if (futureGet.dataMap().values().iterator().hasNext()) {
-                    peersOnChannel.addAll((HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object());
-                }
-
-                boolean needToBeOnShard = !peersOnChannel.contains(channel.getConnection().getPeer().peerAddress()) &&
-                        (shard.getIndex() == channel.getConnection().getShard().getIndex());
-
-                if (needToBeOnShard) {
-                    //something happened with self, re-adding
-                    logger.warn("Not found self on request channel {}...re-adding", channel.getChannelIdentifier(shard));
-
-                    try {
-                        subscribeToChannel(connection, shard, channel);
-                    } catch (Exception ex) {
-                        logger.catching(ex);
-                    }
-
-                    peersOnChannel.add(channel.getConnection().getPeer().peerAddress());
-                }
-            }
-        } catch (Exception ex) {
-            logger.catching(ex);
-        }
+        AppState appState = connection.getBroadcastStructuredHandler().getAppState();
+        HashSet<PeerAddress> totalPeers = appState.getPeersOnShard(connection.getShard().getIndex());
+        totalPeers.addAll(appState.getPeersOnShard(shard.getIndex()));
 
         channel.addPeerAddresses(channelId, peersOnChannel);
         peersOnChannel = channel.getPeerAddresses(channelId);

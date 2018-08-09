@@ -2,6 +2,7 @@ package network.elrond.p2p.handlers;
 
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.futures.FutureChannelCreator;
+import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.futures.FutureResponse;
 import net.tomp2p.message.Message;
 import net.tomp2p.p2p.Peer;
@@ -15,10 +16,12 @@ import net.tomp2p.storage.Data;
 import net.tomp2p.utils.ConcurrentCacheMap;
 import net.tomp2p.utils.Utils;
 import network.elrond.application.AppState;
+import network.elrond.p2p.P2PIntroductionMessage;
+import network.elrond.p2p.P2PReplyIntroductionMessage;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
-import java.util.NavigableMap;
+import java.io.IOException;
+import java.util.*;
 
 public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
     private final ConcurrentCacheMap<Number160, Boolean> cache = new ConcurrentCacheMap<Number160, Boolean>();
@@ -32,26 +35,26 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
         this.appState = null;
     }
 
-    public AppState getAppState(){
+    public AppState getAppState() {
         return appState;
     }
 
-    public void setAppState(AppState appState){
+    public void setAppState(AppState appState) {
         this.appState = appState;
     }
 
     @Override
     public StructuredBroadcastHandler receive(Message message) {
         //sanity checks
-        if (peer == null){
+        if (peer == null) {
             return this;
         }
 
-        if (message == null){
+        if (message == null) {
             return this;
         }
 
-        if (appState == null){
+        if (appState == null) {
             return this;
         }
 
@@ -59,78 +62,28 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
 
         final Number160 messageKey = message.key(0);
         //filter out same message processed
-        if (twiceSeen(messageKey)){
+        if (twiceSeen(messageKey)) {
             //logger.debug("{} already received the message: {}", peer.peerAddress().tcpPort(), messageKey);
             return this;
         }
+        NavigableMap<Number640, Data> dataMap;
+        PeerAddress peerAddressReceived;
 
-        final NavigableMap<Number640, Data> dataMap;
         if (message.dataMap(0) != null) {
             dataMap = message.dataMap(0).dataMap();
+            try {
+                P2PIntroductionMessage introductionMessage = (P2PIntroductionMessage) dataMap.get(Number640.ZERO).object();
+                logger.debug("{} received broadcast message from: {}", peer.peerID(), introductionMessage.getPeerAddress().peerId());
+                peerAddressReceived = introductionMessage.getPeerAddress();
+                appState.addPeerOnShard(peerAddressReceived, introductionMessage.getShardId());
+
+            } catch (ClassNotFoundException | IOException e) {
+                logger.catching(e);
+                return this;
+            }
         } else {
-            dataMap = null;
+            return this;
         }
-
-        //##############################################################DO THE MAGIC HERE !!!!!!!!!
-
-
-        //OLD JLS BELOW
-        //we got the broadcast message, we shall interpret it
-        //first, add the new PeerAddress in the PeerAddress map corresponding to the shard
-        //then, direct message to the peer to advertise itself
-//        PeerAddressShard peerAddressShard = null;
-//
-//        try {
-//            peerAddressShard = (PeerAddressShard) dataMap.values().iterator().next().object();
-//        } catch (Exception ex){
-//            logger.catching(ex);
-//        }
-//
-//        if (peerAddressShard == null){
-//            return this;
-//        }
-//
-//        appState.addPeerAddressShard(peerAddressShard);
-//
-//        PeerAddress peerAddressReceiver = null;
-//
-//        try {
-//            peerAddressReceiver = new PeerAddress(peerAddressShard.getId(), peerAddressShard.getAddress(),
-//                    peerAddressShard.getPort(), peerAddressShard.getPort());
-//        } catch (Exception ex){
-//            logger.catching(ex);
-//        }
-//
-//        if (peerAddressReceiver == null){
-//            return this;
-//        }
-//
-//        PeerAddressShard peerAddressShardSender = null;
-//        peerAddressShardSender.setAddress(peer.peerAddress().inetAddress());
-//        peerAddressShardSender.setPort(peer.peerAddress().tcpPort());
-//        peerAddressShardSender.setId(peer.peerID());
-//        peerAddressShardSender.setShard(appState.getShard().getIndex());
-//
-//
-//        NavigableMap<Number640, Data> dataMapSend = new TreeMap<>();
-//        try {
-//            dataMapSend.put(Number640.ZERO, new Data(peerAddressShardSender));
-//        } catch (Exception ex){
-//            logger.catching(ex);
-//            return null;
-//        }
-//
-//        //the message key *must* be unique for broadcast you do. In order to avoid duplicates, multiple
-//        //messages with the same message key will be ignored, thus, subsequent broadcast may fail.
-//        Number160 messageKey = Number160.createHash("blub");
-//        //take any peer and send broadcast
-//        peers.get(19).broadcast(messageKey).dataMap(dataMap).start();
-//
-//        peer.sendDirect(
-//
-//        //logger.info("{} received the message: {}", peer.peerAddress().tcpPort(), messageKey);
-
-        //##############################################################END DO THE MAGIC HERE !!!!!!!!!
 
         //broadcast
         final int hopCount = message.intAt(0);
@@ -139,8 +92,8 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
         //to be checked if we send to the verified peers or all known peers (even overflowed peers)
         //listToSend.addAll(peer.peerBean().peerMap().allOverflow());
 
-        for (PeerAddress peerAddress : listToSend){
-            if (peerAddress == sender){
+        for (PeerAddress peerAddress : listToSend) {
+            if (peerAddress == sender) {
                 //not returning to sender
                 continue;
             }
@@ -151,6 +104,16 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
             doSend(messageKey, dataMap, hopCount, message.isUdp(), peerAddress,
                     bucketNr);
         }
+
+
+        //get all currently known peers and send to requester
+        Map<Integer, HashSet<PeerAddress>> peersMap = appState.getAllPeers();
+
+        P2PReplyIntroductionMessage replyIntroductionMessage = new P2PReplyIntroductionMessage(peersMap);
+        FutureDirect futureDirect = peer
+                .sendDirect(peerAddressReceived)
+                .object(replyIntroductionMessage).start();
+        futureDirect.awaitUninterruptibly();
 
         return this;
     }
@@ -180,8 +143,7 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
                 .create(isUDP ? 1 : 0, isUDP ? 0 : 1);
         frr.addListener(new BaseFutureAdapter<FutureChannelCreator>() {
             @Override
-            public void operationComplete(final FutureChannelCreator future)
-                    throws Exception {
+            public void operationComplete(final FutureChannelCreator future) {
                 if (future.isSuccess()) {
                     BroadcastBuilder broadcastBuilder = new BroadcastBuilder(
                             peer, messageKey);

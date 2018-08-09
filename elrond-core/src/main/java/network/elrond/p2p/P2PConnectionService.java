@@ -17,6 +17,6 @@ public interface P2PConnectionService {
             int masterPeerPort
     ) throws IOException;
 
-    void introceSelf(Shard shard, P2PConnection connection);
+    void introduceSelf(Shard shard, P2PConnection connection);
 
 }

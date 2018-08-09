@@ -1,6 +1,5 @@
 package network.elrond.p2p;
 
-
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.futures.FutureBootstrap;
@@ -65,7 +64,7 @@ public class P2PConnectionServiceImpl implements P2PConnectionService {
         return logger.traceExit(connection);
     }
 
-    public void introceSelf(Shard shard, P2PConnection connection) {
+    public void introduceSelf(Shard shard, P2PConnection connection) {
         Peer peer = connection.getPeer();
         NavigableMap<Number640, Data> messageData = new TreeMap<>();
         try {
