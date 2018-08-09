@@ -6,6 +6,7 @@ import network.elrond.application.AppState;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.processor.AppTask;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,6 +26,8 @@ public class P2PConnectionStarterProcessor implements AppTask {
 
         connection.setShard(state.getShard());
         state.setConnection(connection);
+
+        AppServiceProvider.getP2PConnectionService().introceSelf(state.getShard(), connection);
 
         logger.traceExit();
     }

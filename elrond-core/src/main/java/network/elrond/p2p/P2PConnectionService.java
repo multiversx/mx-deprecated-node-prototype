@@ -2,6 +2,7 @@ package network.elrond.p2p;
 
 
 import network.elrond.application.AppContext;
+import network.elrond.sharding.Shard;
 
 import java.io.IOException;
 
@@ -15,5 +16,7 @@ public interface P2PConnectionService {
             String masterPeerIpAddress,
             int masterPeerPort
     ) throws IOException;
+
+    void introceSelf(Shard shard, P2PConnection connection);
 
 }

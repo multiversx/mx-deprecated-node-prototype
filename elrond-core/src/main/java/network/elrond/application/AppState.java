@@ -1,5 +1,6 @@
 package network.elrond.application;
 
+import net.tomp2p.peers.PeerAddress;
 import network.elrond.AsciiTable;
 import network.elrond.account.Accounts;
 import network.elrond.benchmark.ElrondSystemTimerImpl;
@@ -19,6 +20,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 public class AppState implements Serializable, AsciiPrintable {
@@ -38,6 +40,8 @@ public class AppState implements Serializable, AsciiPrintable {
     private NTPClient ntpClient;
     private P2PConnection connection;
 
+    // Buckets for each shard containing connected peers
+    Map<Integer, HashSet<PeerAddress>> bucket;
 
     private Map<P2PBroadcastChannelName, P2PBroadcastChannel> broadcastChannels = new HashMap<>();
     private Map<P2PRequestChannelName, P2PRequestChannel> requestChannels = new HashMap<>();
@@ -158,8 +162,8 @@ public class AppState implements Serializable, AsciiPrintable {
 
     public StatisticsManager getStatisticsManager() {
         logger.warn("Transactions in Pool: {}", getPool().getTransactions().size());
-        if(statisticsManagers == null){
-          statisticsManagers  = new StatisticsManager(new ElrondSystemTimerImpl(), getShard().getIndex());
+        if (statisticsManagers == null) {
+            statisticsManagers = new StatisticsManager(new ElrondSystemTimerImpl(), getShard().getIndex());
         }
         return statisticsManagers;
     }

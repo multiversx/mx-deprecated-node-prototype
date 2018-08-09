@@ -7,12 +7,17 @@ import net.tomp2p.futures.FutureBootstrap;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
+import net.tomp2p.peers.Number640;
+import net.tomp2p.storage.Data;
 import network.elrond.application.AppContext;
+import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 public class P2PConnectionServiceImpl implements P2PConnectionService {
 
@@ -34,7 +39,9 @@ public class P2PConnectionServiceImpl implements P2PConnectionService {
                                           String masterPeerIpAddress,
                                           int masterPeerPort) throws IOException {
         logger.traceEntry("params: {} {} {} {}", nodeName, peerPort, masterPeerIpAddress, masterPeerPort);
-        Peer peer = new PeerBuilder(Number160.createHash(nodeName)).ports(peerPort).start();
+
+        Peer peer = new PeerBuilder(Number160.createHash(nodeName)).broadcastHandler(new P2PBroadcastMessageHandler()).ports(peerPort).start();
+
         PeerDHT dht = new PeerBuilderDHT(peer).start();
 
         FutureBootstrap fb = peer
@@ -55,5 +62,14 @@ public class P2PConnectionServiceImpl implements P2PConnectionService {
         return logger.traceExit(connection);
     }
 
-
+    public void introceSelf(Shard shard, P2PConnection connection) {
+        Peer peer = connection.getPeer();
+        NavigableMap<Number640, Data> messageData = new TreeMap<>();
+        try {
+            messageData.put(Number640.ZERO, new Data(new P2PIntroductionMessage(peer.peerAddress(), shard.getIndex())));
+            peer.broadcast(Number160.createHash(peer.peerID().toString())).dataMap(messageData).start();
+        } catch (IOException e) {
+            logger.catching(e);
+        }
+    }
 }

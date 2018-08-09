@@ -126,12 +126,4 @@ public class Application implements Serializable {
         this.state.getConnection().getPeer().shutdown();
     }
 
-//    public void addStatistic(Statistic statistic){
-//        logger.traceEntry("params: {}", statistic);
-//        statisticsManager.addStatistic(statistic);
-//        logger.traceExit();
-//    }
-
-
-
 }

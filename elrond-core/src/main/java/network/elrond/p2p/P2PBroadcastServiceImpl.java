@@ -185,6 +185,14 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         return globalChannel.getPeerAddresses(hash.toString());
     }
 
+    @Override
+    public void addPeerToShardBucket(PeerAddress peerAddress, Integer shard) {
+        logger.traceEntry("params: {} {}", peerAddress, shard);
+
+        logger.traceExit();
+    }
+
+
     @SuppressWarnings("unchecked")
     @Override
     public boolean publishToChannel(P2PBroadcastChannel channel, Serializable object, Integer destinationShard) {

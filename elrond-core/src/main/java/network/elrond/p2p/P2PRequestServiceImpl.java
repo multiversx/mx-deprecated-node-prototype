@@ -1,6 +1,7 @@
 package network.elrond.p2p;
 
 import net.tomp2p.dht.FutureGet;
+import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.p2p.Peer;
@@ -8,6 +9,7 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.storage.Data;
 import network.elrond.core.ThreadUtil;
+import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
@@ -20,6 +22,8 @@ import java.util.stream.Collectors;
 public class P2PRequestServiceImpl implements P2PRequestService {
 
     private static final Logger logger = LogManager.getLogger(P2PRequestServiceImpl.class);
+    // TODO: remove later, quickfix
+    Map<PeerAddress, Integer>
 
     @Override
     @SuppressWarnings("unchecked")
@@ -44,23 +48,34 @@ public class P2PRequestServiceImpl implements P2PRequestService {
     @SuppressWarnings("unchecked")
     private void subscribeToChannel(P2PConnection connection, Shard shard, P2PRequestChannel channel) throws Exception {
         Number160 hash = Number160.createHash(channel.getChannelIdentifier(shard));
-
-        HashSet<PeerAddress> hashSetPeers = new HashSet<>();
         PeerDHT dht = connection.getDht();
-        FutureGet futureGet = dht.get(hash).start();
-        futureGet.awaitUninterruptibly(3000);
-        if (!futureGet.isSuccess()) {
-            logger.warn("Error getting subscribed peers from request channel {}: {}", channel.getChannelIdentifier(shard), futureGet.failedReason());
+        int nbRetries = Util.MAX_RETRIES_PUT;
+        FuturePut futurePut = null;
+        do {
+            HashSet<PeerAddress> hashSetPeers = new HashSet<>();
+            FutureGet futureGet = dht.get(hash).start();
+            futureGet.awaitUninterruptibly(3000);
+            if (!futureGet.isSuccess()) {
+                logger.warn("Error getting subscribed peers from request channel {}: {}", channel.getChannelIdentifier(shard), futureGet.failedReason());
+                continue;
+            }
+
+            if (futureGet.dataMap().values().iterator().hasNext()) {
+                hashSetPeers.addAll((HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object());
+            }
+
+            hashSetPeers.add(connection.getPeer().peerAddress());
+
+            futurePut = dht.put(hash).data(new Data(hashSetPeers)).start().awaitUninterruptibly();
+            nbRetries--;
+        } while (nbRetries > 0 && futurePut != null && futurePut.isSuccess());
+
+        boolean subscribeFail = nbRetries == 0 && (futurePut == null || !futurePut.isSuccess());
+
+        if (subscribeFail) {
             return;
         }
 
-        if (futureGet.dataMap().values().iterator().hasNext()) {
-            hashSetPeers.addAll((HashSet<PeerAddress>) futureGet.dataMap().values().iterator().next().object());
-        }
-
-        hashSetPeers.add(connection.getPeer().peerAddress());
-
-        dht.put(hash).data(new Data(hashSetPeers)).start().awaitUninterruptibly();
         logger.debug("Added self to request channel {}", channel.getChannelIdentifier(shard));
     }
 
