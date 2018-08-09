@@ -8,6 +8,7 @@ import net.tomp2p.p2p.Peer;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.peers.Number160;
 import network.elrond.application.AppContext;
+import network.elrond.p2p.handlers.BroadcastStructuredHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,7 +35,10 @@ public class P2PConnectionServiceImpl implements P2PConnectionService {
                                           String masterPeerIpAddress,
                                           int masterPeerPort) throws IOException {
         logger.traceEntry("params: {} {} {} {}", nodeName, peerPort, masterPeerIpAddress, masterPeerPort);
-        Peer peer = new PeerBuilder(Number160.createHash(nodeName)).ports(peerPort).start();
+
+        BroadcastStructuredHandler broadcastStructuredHandler = new BroadcastStructuredHandler();
+
+        Peer peer = new PeerBuilder(Number160.createHash(nodeName)).broadcastHandler(broadcastStructuredHandler).ports(peerPort).start();
         PeerDHT dht = new PeerBuilderDHT(peer).start();
 
         FutureBootstrap fb = peer
@@ -52,6 +56,7 @@ public class P2PConnectionServiceImpl implements P2PConnectionService {
         }
 
         P2PConnection connection = new P2PConnection(nodeName, peer, dht);
+        connection.setBroadcastStructuredHandler(broadcastStructuredHandler);
         return logger.traceExit(connection);
     }
 
