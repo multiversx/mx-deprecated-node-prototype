@@ -9,7 +9,6 @@ import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -43,16 +42,14 @@ public class AppShardingManager {
         P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.BLOCK);
         Integer nbPeers = getConnectedPeersOnChannel(channel).size();
 
-        // account for self
-        return nbPeers + 1;
+        return nbPeers;
     }
 
     public Integer getNumberNodesInNetwork(AppState state) {
         P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.XTRANSACTION_BLOCK);
         Integer nbPeers = getConnectedPeersOnChannel(channel).size();
 
-        // account for self
-        return nbPeers + 1;
+        return nbPeers;
     }
 
 
