@@ -52,7 +52,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         logger.traceEntry("params: {} {}", channel, shard);
         P2PConnection connection = channel.getConnection();
 
-        HashSet<PeerAddress> totalPeers = connection.getPeersOnShard(connection.getShard().getIndex());
+        HashSet<PeerAddress> totalPeers = connection.getPeersOnShard(shard.getIndex());
 
         return totalPeers;
     }

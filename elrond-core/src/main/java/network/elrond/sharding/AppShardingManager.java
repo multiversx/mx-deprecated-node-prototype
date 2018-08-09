@@ -58,11 +58,9 @@ public class AppShardingManager {
 
     public List<String> getConnectedPeersOnChannel(P2PBroadcastChannel channel) {
         // get only alive nodes
-        List<PeerAddress> allConnectedPeers = new ArrayList<>(channel.getConnection().getDht().peerBean().peerMap().all());
-
         return AppServiceProvider.getP2PBroadcastService().getPeersOnChannel(channel)
                 .stream()
-                .filter(Objects::nonNull).filter(allConnectedPeers::contains)
+                .filter(Objects::nonNull)
                 .map(peerAddress -> peerAddress.peerId().toString())
                 .sorted()
                 .collect(Collectors.toList());
@@ -76,13 +74,12 @@ public class AppShardingManager {
             nodeList.addAll(state.getBlockchain().getCurrentBlock().getPeers());
         }
 
-        P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.BLOCK);
-        HashSet<PeerAddress> totalPeers = AppServiceProvider.getP2PBroadcastService().getPeersOnChannel(channel);
+        // P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.BLOCK);
+        HashSet<PeerAddress> totalPeers = state.getConnection().getPeersOnShard(state.getShard().getIndex());
 
         for (PeerAddress peer : totalPeers) {
             nodeList.add(peer.peerId().toString());
         }
-
 
         String self = state.getConnection().getPeer().peerID().toString();
 
