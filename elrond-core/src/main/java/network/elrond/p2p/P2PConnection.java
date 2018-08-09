@@ -6,6 +6,7 @@ import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 import network.elrond.core.ObjectUtil;
 import network.elrond.core.Util;
+import network.elrond.p2p.handlers.BroadcastStructuredHandler;
 import network.elrond.sharding.Shard;
 
 import java.util.ArrayList;
@@ -21,6 +22,8 @@ public class P2PConnection {
     private ObjectDataReply dataReplyCallback;
     private List<P2PBroadcastChannel> broadcastChannels = new ArrayList<>();
     private List<P2PRequestChannel> requestChannels = new ArrayList<>();
+
+    private BroadcastStructuredHandler broadcastStructuredHandler;
 
     public P2PConnection(String nodeName, Peer peer, PeerDHT dht) {
         this.nodeName = nodeName;
@@ -109,6 +112,14 @@ public class P2PConnection {
     public ObjectDataReply registerChannel(P2PRequestChannel channel) {
         requestChannels.add(channel);
         return dataReplyCallback;
+    }
+
+    public BroadcastStructuredHandler getBroadcastStructuredHandler(){
+        return broadcastStructuredHandler;
+    }
+
+    public void setBroadcastStructuredHandler(BroadcastStructuredHandler broadcastStructuredHandler){
+        this.broadcastStructuredHandler = broadcastStructuredHandler;
     }
 
     public P2PRequestChannel getRequestChannel(String channelName) {

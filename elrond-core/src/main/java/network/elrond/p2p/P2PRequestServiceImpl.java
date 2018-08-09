@@ -22,8 +22,6 @@ import java.util.stream.Collectors;
 public class P2PRequestServiceImpl implements P2PRequestService {
 
     private static final Logger logger = LogManager.getLogger(P2PRequestServiceImpl.class);
-    // TODO: remove later, quickfix
-    Map<PeerAddress, Integer>
 
     @Override
     @SuppressWarnings("unchecked")

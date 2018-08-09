@@ -102,7 +102,6 @@ public class ExecutionServiceImpl implements ExecutionService {
             ExecutionReport blockExecutionReport = ExecutionReport.create();
             BlockchainService blockchainService = AppServiceProvider.getBlockchainService();
             ArrayList<String> signers;
-            String blockHash = serializationService.getHashString(block);
 
             // check if previous block hash is in blockchain, otherwise can't add it yet
             // do the check only if nonce is not 0
