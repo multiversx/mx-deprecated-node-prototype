@@ -23,7 +23,6 @@ public class P2PConnectionStarterProcessor implements AppTask {
         AppState state = application.getState();
 
         P2PConnection connection = AppServiceProvider.getP2PConnectionService().createConnection(context);
-        connection.getBroadcastHandler().setBlockchain(state.getBlockchain());
 
         connection.setShard(state.getShard());
         state.setConnection(connection);

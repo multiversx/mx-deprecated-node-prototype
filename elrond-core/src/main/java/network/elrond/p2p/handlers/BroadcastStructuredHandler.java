@@ -75,9 +75,14 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
                     connection.addPeerOnShard(peerAddressReceived, introductionMessage.getShardId());
                 } else if (data instanceof BlockHeightMessage) {
                     BlockHeightMessage blockHeightMessage = (BlockHeightMessage) data;
-                    if (blockchain != null && connection.getShard().getIndex().equals(blockHeightMessage.getShardId())) {
-                        AppServiceProvider.getBootstrapService().setBlockHeightFromNetwork(blockHeightMessage.getBlockHeight(), blockchain);
-                        logger.debug("{} received broadcast blockHeight {}", peer.peerID(), blockHeightMessage.getBlockHeight().toString());
+                    if (blockchain != null) {
+                        if (connection.getShard().getIndex().equals(blockHeightMessage.getShardId())) {
+                            AppServiceProvider.getBootstrapService().setBlockHeightFromNetwork(blockHeightMessage.getBlockHeight(), blockchain);
+                            logger.debug("{} received broadcast blockHeight {}", peer.peerID(), blockHeightMessage.getBlockHeight().toString());
+                        }
+                    } else {
+                        logger.debug("{} received broadcast blockHeight {} but can not process because blockchain is null!",
+                                peer.peerID(), blockHeightMessage.getBlockHeight().toString());
                     }
                 }
             } catch (Exception e) {

@@ -42,6 +42,10 @@ public class BlockchainStarterProcessor implements AppTask {
 
         Blockchain blockchain = new Blockchain(blockContext);
         state.setBlockchain(blockchain);
+
+        state.getConnection().getBroadcastHandler().setBlockchain(blockchain);
+
+
         logger.traceExit();
     }
 
