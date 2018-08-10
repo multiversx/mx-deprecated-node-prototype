@@ -56,6 +56,7 @@ public class P2PConnectionServiceImpl implements P2PConnectionService {
             logger.info("Connection was SUCCESSFUL! Status: {}", fb.failedReason());
         } else {
             logger.error(fb.failedReason());
+            throw new RuntimeException(fb.failedReason());
         }
 
         P2PConnection connection = new P2PConnection(nodeName, peer, dht);
