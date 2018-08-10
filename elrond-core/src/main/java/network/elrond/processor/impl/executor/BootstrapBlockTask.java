@@ -32,8 +32,6 @@ public class BootstrapBlockTask extends AbstractBlockTask {
         try {
             BootstrapService bootstrapService = AppServiceProvider.getBootstrapService();
 
-            bootstrapService.fetchNetworkBlockIndex(state.getBlockchain());
-
             SyncState syncState = bootstrapService.getSyncState(state.getBlockchain());
 
             if (!syncState.isValid()){
