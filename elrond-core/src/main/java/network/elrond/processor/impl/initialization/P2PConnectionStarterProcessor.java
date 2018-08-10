@@ -25,7 +25,8 @@ public class P2PConnectionStarterProcessor implements AppTask {
         connection.setShard(state.getShard());
         state.setConnection(connection);
 
-        logger.info("Peer {}, allocated to shard {}", connection.getPeer().peerAddress(), state.getShard().getIndex());
+        logger.info("Peer {}", connection.getPeer().peerAddress());
+        logger.info("Allocated to shard {}", state.getShard().getIndex());
 
         AppServiceProvider.getP2PConnectionService().introduceSelf(state.getShard(), connection);
 

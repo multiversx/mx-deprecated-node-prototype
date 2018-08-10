@@ -54,9 +54,10 @@ public class BootstrapServiceImpl implements BootstrapService {
             value = Util.BIG_INT_MIN_ONE;
         }
 
-        blockchain.setNetworkHeight(value);
-
-        logger.info("Set current network block height to value: {}", value);
+        if (value.compareTo(blockchain.getNetworkHeight()) > 0) {
+            blockchain.setNetworkHeight(value);
+            logger.info("Set current network block height to value: {}", value);
+        }
     }
 
     @Override

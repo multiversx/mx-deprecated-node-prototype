@@ -21,7 +21,7 @@ public class StatusPrinterBlockTask implements AppTask {
 
         Thread thread = new Thread(() -> {
             int waitError = 1000;
-            int waitNormal = 10000;
+            int waitNormal = 60000;
 
 
             while (state.isStillRunning()) {

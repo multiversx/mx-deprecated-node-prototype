@@ -23,7 +23,7 @@ public class NodeRunner {
         String nodeName = "elrond-node-2.1" + nr;
         Integer port = 31201 + nr;
         Integer masterPeerPort = 31201;
-        String masterPeerIpAddress = "192.168.11.121";
+        String masterPeerIpAddress = "127.0.0.1";
         String nodeRunnerPrivateKey = "00e15fc71adc4832c56c4e6a8b50a9503a4ede9485c4efbc585def0c657d93066a";
         if (nodeRunnerPrivateKey.length() % 2 == 1) {
             nodeRunnerPrivateKey += "1";
