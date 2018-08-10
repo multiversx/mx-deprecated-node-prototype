@@ -4,6 +4,7 @@ import network.elrond.Application;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
+import network.elrond.core.Util;
 import network.elrond.data.BootstrapService;
 import network.elrond.data.BootstrapType;
 import network.elrond.data.SyncState;
@@ -31,6 +32,10 @@ public class BootstrapBlockTask extends AbstractBlockTask {
 
         try {
             BootstrapService bootstrapService = AppServiceProvider.getBootstrapService();
+
+            if (blockchain.getNetworkHeight().equals(Util.BIG_INT_MIN_ONE)) {
+                bootstrapService.fetchNetworkBlockIndex(blockchain);
+            }
 
             SyncState syncState = bootstrapService.getSyncState(state.getBlockchain());
 
@@ -68,6 +73,8 @@ public class BootstrapBlockTask extends AbstractBlockTask {
             logger.catching(ex);
         }
     }
+
+
 
 
 }
