@@ -71,6 +71,9 @@ public class BootstrapServiceImpl implements BootstrapService {
         if ((locationType.getIndex() & 1) != 0) {
             logger.debug("Saving network max height of {} in cache...", currentBlockIndex);
             blockchain.setNetworkHeight(currentBlockIndex);
+
+            BlockHeightMessage message = new BlockHeightMessage(currentBlockIndex, blockchain.getShard().getIndex());
+            AppServiceProvider.getP2PConnectionService().broadcastMessage(message, blockchain.getConnection());
         }
 
         logger.traceExit();
@@ -359,8 +362,14 @@ public class BootstrapServiceImpl implements BootstrapService {
         return logger.traceExit(result);
     }
 
+
     @Override
-    public SyncState getSyncState(Blockchain blockchain){
+    public void setBlockHeightFromNetwork(BigInteger blockHeight, Blockchain blockchain) {
+        blockchain.setNetworkHeight(blockHeight);
+    }
+
+    @Override
+    public SyncState getSyncState(Blockchain blockchain) {
         SyncState syncState = new SyncState();
 
         BigInteger localHeight = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.LOCAL, blockchain);

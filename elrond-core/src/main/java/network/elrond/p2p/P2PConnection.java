@@ -20,6 +20,7 @@ public class P2PConnection {
     private Peer peer;
     private PeerDHT dht;
     private Shard shard;
+    BroadcastStructuredHandler broadcastHandler;
 
     private ObjectDataReply dataReplyCallback;
     private List<P2PBroadcastChannel> broadcastChannels = new ArrayList<>();
@@ -50,6 +51,14 @@ public class P2PConnection {
 
             throw new RuntimeException("Not supported request" + request);
         };
+    }
+
+    public BroadcastStructuredHandler getBroadcastHandler() {
+        return broadcastHandler;
+    }
+
+    public void setBroadcastHandler(BroadcastStructuredHandler broadcastHandler) {
+        this.broadcastHandler = broadcastHandler;
     }
 
     public HashSet<PeerAddress> getPeersOnShard(Integer shardId) {
@@ -154,7 +163,7 @@ public class P2PConnection {
         return dataReplyCallback;
     }
 
-    public ObjectDataReply getDataReplyCallback(){
+    public ObjectDataReply getDataReplyCallback() {
         return dataReplyCallback;
     }
 

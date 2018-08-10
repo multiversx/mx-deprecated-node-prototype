@@ -12,18 +12,21 @@ import net.tomp2p.peers.PeerMap;
 import net.tomp2p.storage.Data;
 import net.tomp2p.utils.ConcurrentCacheMap;
 import net.tomp2p.utils.Utils;
+import network.elrond.blockchain.Blockchain;
+import network.elrond.data.BlockHeightMessage;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.p2p.P2PIntroductionMessage;
 import network.elrond.p2p.P2PReplyIntroductionMessage;
+import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
 import java.util.*;
 
 public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
     private final ConcurrentCacheMap<Number160, Boolean> cache = new ConcurrentCacheMap<Number160, Boolean>();
     private volatile Peer peer;
     P2PConnection connection;
+    Blockchain blockchain;
 
     private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(BroadcastStructuredHandler.class);
 
@@ -55,18 +58,29 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
             //logger.debug("{} already received the message: {}", peer.peerAddress().tcpPort(), messageKey);
             return this;
         }
-        NavigableMap<Number640, Data> dataMap;
-        PeerAddress peerAddressReceived;
 
+        NavigableMap<Number640, Data> dataMap;
+        PeerAddress peerAddressReceived = null;
+
+        Object data;
         if (message.dataMap(0) != null) {
             dataMap = message.dataMap(0).dataMap();
             try {
-                P2PIntroductionMessage introductionMessage = (P2PIntroductionMessage) dataMap.get(Number640.ZERO).object();
-                logger.debug("{} received broadcast message from: {}", peer.peerID(), introductionMessage.getPeerAddress());
-                peerAddressReceived = introductionMessage.getPeerAddress();
-                connection.addPeerOnShard(peerAddressReceived, introductionMessage.getShardId());
+                data = dataMap.get(Number640.ZERO).object();
+                if (data instanceof P2PIntroductionMessage) {
 
-            } catch (ClassNotFoundException | IOException e) {
+                    P2PIntroductionMessage introductionMessage = (P2PIntroductionMessage) data;
+                    logger.debug("{} received broadcast message from: {}", peer.peerID(), introductionMessage.getPeerAddress());
+                    peerAddressReceived = introductionMessage.getPeerAddress();
+                    connection.addPeerOnShard(peerAddressReceived, introductionMessage.getShardId());
+                } else if (data instanceof BlockHeightMessage) {
+                    BlockHeightMessage blockHeightMessage = (BlockHeightMessage) data;
+                    if (blockchain != null && connection.getShard().getIndex().equals(blockHeightMessage.getShardId())) {
+                        AppServiceProvider.getBootstrapService().setBlockHeightFromNetwork(blockHeightMessage.getBlockHeight(), blockchain);
+                        logger.debug("{} received broadcast blockHeight {}", peer.peerID(), blockHeightMessage.getBlockHeight().toString());
+                    }
+                }
+            } catch (Exception e) {
                 logger.catching(e);
                 return this;
             }
@@ -94,24 +108,27 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
                     bucketNr);
         }
 
-        if (!peer.peerAddress().equals(peerAddressReceived)) {
-            //get all currently known peers and send to requester
+        if (data instanceof P2PIntroductionMessage) {
+            if (peerAddressReceived != null && !peer.peerAddress().equals(peerAddressReceived)) {
+                //get all currently known peers and send to requester
 
-            Map<Integer, HashSet<PeerAddress>> peersMap = connection.getAllPeers();
+                Map<Integer, HashSet<PeerAddress>> peersMap = connection.getAllPeers();
 
-            P2PReplyIntroductionMessage replyIntroductionMessage = new P2PReplyIntroductionMessage(peersMap);
+                P2PReplyIntroductionMessage replyIntroductionMessage = new P2PReplyIntroductionMessage(peersMap);
+                PeerAddress peerAddress = peerAddressReceived;
 
-            FutureDirect futureDirect = peer.sendDirect(peerAddressReceived).object(replyIntroductionMessage).start();
-            futureDirect.addListener(new BaseFutureAdapter<BaseFuture>() {
-                @Override
-                public void operationComplete(BaseFuture future) throws Exception {
-                    if (future.isSuccess() && future.isCompleted()){
-                        logger.debug("Done sending to {} the bucket", peerAddressReceived);
-                    } else {
-                        logger.warn("Error sending to {}: {}", peerAddressReceived, future.failedReason());
+                FutureDirect futureDirect = peer.sendDirect(peerAddressReceived).object(replyIntroductionMessage).start();
+                futureDirect.addListener(new BaseFutureAdapter<BaseFuture>() {
+                    @Override
+                    public void operationComplete(BaseFuture future) throws Exception {
+                        if (future.isSuccess() && future.isCompleted()) {
+                            logger.debug("Done sending to {} the bucket", peerAddress);
+                        } else {
+                            logger.warn("Error sending to {}: {}", peerAddress, future.failedReason());
+                        }
                     }
-                }
-            });
+                });
+            }
         }
 
         return this;
@@ -119,6 +136,10 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
 
     public void setConnection(P2PConnection connection) {
         this.connection = connection;
+    }
+
+    public void setBlockchain(Blockchain blockchain) {
+        this.blockchain = blockchain;
     }
 
     @Override

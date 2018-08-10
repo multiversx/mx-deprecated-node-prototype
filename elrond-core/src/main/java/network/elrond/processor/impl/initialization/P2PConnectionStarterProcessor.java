@@ -4,6 +4,7 @@ import network.elrond.Application;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.p2p.P2PConnection;
+import network.elrond.p2p.P2PIntroductionMessage;
 import network.elrond.processor.AppTask;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
@@ -22,13 +23,16 @@ public class P2PConnectionStarterProcessor implements AppTask {
         AppState state = application.getState();
 
         P2PConnection connection = AppServiceProvider.getP2PConnectionService().createConnection(context);
+        connection.getBroadcastHandler().setBlockchain(state.getBlockchain());
+
         connection.setShard(state.getShard());
         state.setConnection(connection);
 
         logger.info("Peer {}", connection.getPeer().peerAddress());
         logger.info("Allocated to shard {}", state.getShard().getIndex());
 
-        AppServiceProvider.getP2PConnectionService().introduceSelf(state.getShard(), connection);
+        P2PIntroductionMessage message = new P2PIntroductionMessage(connection.getPeer().peerAddress(), connection.getShard().getIndex());
+        AppServiceProvider.getP2PConnectionService().broadcastMessage(message, connection);
 
         logger.traceExit();
     }

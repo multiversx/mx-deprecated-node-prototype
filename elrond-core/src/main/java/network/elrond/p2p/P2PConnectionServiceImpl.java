@@ -9,12 +9,12 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
 import network.elrond.application.AppContext;
-import network.elrond.sharding.Shard;
 import network.elrond.p2p.handlers.BroadcastStructuredHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.NavigableMap;
 import java.util.TreeMap;
@@ -58,16 +58,19 @@ public class P2PConnectionServiceImpl implements P2PConnectionService {
         }
 
         P2PConnection connection = new P2PConnection(nodeName, peer, dht);
+        connection.setBroadcastHandler(broadcastStructuredHandler);
+
         peer.objectDataReply(connection.getDataReplyCallback());
         broadcastStructuredHandler.setConnection(connection);
+
         return logger.traceExit(connection);
     }
 
-    public void introduceSelf(Shard shard, P2PConnection connection) {
+    public <T extends Serializable> void broadcastMessage(T object, P2PConnection connection) {
         Peer peer = connection.getPeer();
         NavigableMap<Number640, Data> messageData = new TreeMap<>();
         try {
-            messageData.put(Number640.ZERO, new Data(new P2PIntroductionMessage(peer.peerAddress(), shard.getIndex())));
+            messageData.put(Number640.ZERO, new Data(object));
             peer.broadcast(Number160.createHash(peer.peerID().toString())).dataMap(messageData).start();
         } catch (IOException e) {
             logger.catching(e);

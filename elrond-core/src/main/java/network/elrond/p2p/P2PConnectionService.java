@@ -5,6 +5,7 @@ import network.elrond.application.AppContext;
 import network.elrond.sharding.Shard;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 public interface P2PConnectionService {
 
@@ -17,6 +18,6 @@ public interface P2PConnectionService {
             int masterPeerPort
     ) throws IOException;
 
-    void introduceSelf(Shard shard, P2PConnection connection);
+    <T extends Serializable> void broadcastMessage(T object, P2PConnection connection);
 
 }

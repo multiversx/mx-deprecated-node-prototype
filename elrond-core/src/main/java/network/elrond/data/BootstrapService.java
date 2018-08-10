@@ -32,5 +32,7 @@ public interface BootstrapService {
 
     SyncState getSyncState(Blockchain blockchain);
 
+    void setBlockHeightFromNetwork(BigInteger blockHeight, Blockchain blockchain);
+
     void fetchNetworkBlockIndex(Blockchain blockchain) throws java.io.IOException, ClassNotFoundException;
 }
