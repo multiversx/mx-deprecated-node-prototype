@@ -50,7 +50,12 @@ public class BootstrapServiceImpl implements BootstrapService {
         BigInteger value = AppServiceProvider.getP2PRequestService().get(blockchain.getConnection().getRequestChannel("BLOCK_HEIGHT"),
                 blockchain.getShard(), P2PRequestChannelName.BLOCK_HEIGHT, "");
 
+        if (value == null) {
+            value = Util.BIG_INT_MIN_ONE;
+        }
+
         blockchain.setNetworkHeight(value);
+
         logger.info("Set current network block height to value: {}", value);
     }
 
@@ -63,7 +68,7 @@ public class BootstrapServiceImpl implements BootstrapService {
         }
 
         if ((locationType.getIndex() & 1) != 0) {
-            logger.debug("put on network max height of {}, actually in cache...");
+            logger.debug("Saving network max height of {} in cache...", currentBlockIndex);
             blockchain.setNetworkHeight(currentBlockIndex);
         }
 
