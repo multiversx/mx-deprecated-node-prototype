@@ -18,6 +18,7 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+import java.util.UUID;
 
 public class P2PConnectionServiceImpl implements P2PConnectionService {
 
@@ -71,7 +72,7 @@ public class P2PConnectionServiceImpl implements P2PConnectionService {
         NavigableMap<Number640, Data> messageData = new TreeMap<>();
         try {
             messageData.put(Number640.ZERO, new Data(object));
-            peer.broadcast(Number160.createHash(peer.peerID().toString())).dataMap(messageData).start();
+            peer.broadcast(Number160.createHash(UUID.randomUUID().toString())).dataMap(messageData).start();
         } catch (IOException e) {
             logger.catching(e);
         }
