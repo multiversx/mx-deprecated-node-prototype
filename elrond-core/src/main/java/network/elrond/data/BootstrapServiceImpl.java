@@ -1,6 +1,5 @@
 package network.elrond.data;
 
-import net.tomp2p.dht.FuturePut;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
@@ -9,11 +8,8 @@ import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.blockchain.SettingsType;
 import network.elrond.chronology.NTPClient;
 import network.elrond.core.AppStateUtil;
-import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
-import network.elrond.p2p.DHTResponseObject;
-import network.elrond.p2p.P2PConnection;
-import network.elrond.p2p.ResponseDHT;
+import network.elrond.p2p.P2PRequestChannelName;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,72 +22,36 @@ import java.util.List;
 public class BootstrapServiceImpl implements BootstrapService {
     private static final Logger logger = LogManager.getLogger(BootstrapServiceImpl.class);
 
-    private DHTResponseObject<BigInteger> networkBlockHeight = new DHTResponseObject<>(Util.BIG_INT_MIN_ONE, ResponseDHT.FAIL);
-
     @Override
-    public DHTResponseObject<BigInteger> getCurrentBlockIndex(LocationType locationType, Blockchain blockchain) {
+    public BigInteger getCurrentBlockIndex(LocationType locationType, Blockchain blockchain) {
         logger.traceEntry("params: {} {}", locationType, blockchain);
 
         if (locationType == LocationType.BOTH) {
             logger.error("Decide from where to get the data!");
-            return new DHTResponseObject<>(Util.BIG_INT_MIN_ONE, ResponseDHT.FAIL);
+            return Util.BIG_INT_MIN_ONE;
         }
 
         if (locationType == LocationType.LOCAL) {
             BigInteger currentBlockIndex = blockchain.getCurrentBlockIndex();
-            return logger.traceExit(new DHTResponseObject<>(currentBlockIndex, ResponseDHT.SUCCESS));
+            return logger.traceExit(currentBlockIndex);
         }
 
         if (locationType == LocationType.NETWORK) {
-            synchronized(networkBlockHeight) {
-                return networkBlockHeight;
-            }
+            return logger.traceExit(blockchain.getNetworkHeight());
         }
 
         logger.error("Unimplemented location type: {}!", locationType.toString());
-        return new DHTResponseObject<>(Util.BIG_INT_MIN_ONE, ResponseDHT.FAIL);
+        return Util.BIG_INT_MIN_ONE;
     }
 
     public void fetchNetworkBlockIndex(Blockchain blockchain) throws java.io.IOException, ClassNotFoundException {
         logger.traceEntry("params: {}", blockchain);
 
-        DHTResponseObject<BigInteger> result;
-        int nRetries = 0;
+        BigInteger value = AppServiceProvider.getP2PRequestService().get(blockchain.getConnection().getRequestChannel("BLOCK_HEIGHT"),
+                blockchain.getShard(), P2PRequestChannelName.BLOCK_HEIGHT, "");
 
-        do {
-            nRetries++;
-            if (nRetries > 1)
-                ThreadUtil.sleep(1);
-            result = AppServiceProvider.getP2PObjectService().get(
-                    blockchain.getConnection(),
-                    SettingsType.MAX_BLOCK_HEIGHT.toString(),
-                    BigInteger.class);
-
-            synchronized(networkBlockHeight) {
-                networkBlockHeight.setResponse(ResponseDHT.FAIL);
-
-                if ((result.getObject() == null) && (result.getResponse() == ResponseDHT.SUCCESS) &&
-                        (networkBlockHeight.getObject().compareTo(Util.BIG_INT_MIN_ONE) == 0)){
-                    logger.warn("Is seeder on shard? fetch network block index: {} with {} tries", result.getObject(), nRetries);
-                    networkBlockHeight.setResponse(result.getResponse());
-                    break;
-                }
-
-                if (result.getObject() != null) {
-                    networkBlockHeight.setResponse(result.getResponse());
-
-                    if (networkBlockHeight.getObject().compareTo(result.getObject()) < 0) {
-                        logger.warn("fetch network block index: {} with {} tries", result.getObject(), nRetries);
-                        networkBlockHeight.setObject(result.getObject());
-                    }
-
-                    break;
-
-                } else {
-                    logger.warn("Error getting max height with status {}", result.getResponse());
-                }
-            }
-        } while (nRetries < Util.MAX_RETRIES_GET);
+        blockchain.setNetworkHeight(value);
+        logger.info("Set current network block height to value: {}", value);
     }
 
     @Override
@@ -103,18 +63,8 @@ public class BootstrapServiceImpl implements BootstrapService {
         }
 
         if ((locationType.getIndex() & 1) != 0) {
-            logger.trace("put on network");
-
-            BigInteger value = Util.BIG_INT_MIN_ONE;
-            synchronized(networkBlockHeight) {
-                if (networkBlockHeight.getResponse() != ResponseDHT.SUCCESS){
-                    throw new Exception("Inconsistent data found on DHT while getting max height!");
-                }
-
-                value = networkBlockHeight.getObject();
-            }
-            BigInteger max = currentBlockIndex.max(value);
-            AppServiceProvider.getP2PObjectService().put(blockchain.getConnection(), SettingsType.MAX_BLOCK_HEIGHT.toString(), max);
+            logger.debug("put on network max height of {}, actually in cache...");
+            blockchain.setNetworkHeight(currentBlockIndex);
         }
 
         logger.traceExit();
@@ -153,77 +103,33 @@ public class BootstrapServiceImpl implements BootstrapService {
         ExecutionReport result = new ExecutionReport();
 
         try {
-            if (block.getNonce().compareTo(networkBlockHeight.getObject()) <= 0) {
-                result.combine(new ExecutionReport().ko("put block in blockchain failed! block nonce to be propossed is: " + block.getNonce() + " and network block height is: " + networkBlockHeight.getObject()));
+            fetchNetworkBlockIndex(blockchain);
+
+            if (block.getNonce().compareTo(blockchain.getNetworkHeight()) <= 0) {
+                result.combine(new ExecutionReport().ko("put block in blockchain failed! block nonce to be propossed is: " + block.getNonce() +
+                        " and network block height is: " + blockchain.getNetworkHeight()));
                 return logger.traceExit(result);
             }
 
-            // Put index <=> hash mapping only on DHT
-            P2PConnection connection = blockchain.getConnection();
-            String blockNonce = getBlockIndexIdentifier(block.getNonce());
-            DHTResponseObject<String> responseGet = AppServiceProvider.getP2PObjectService().get(connection, blockNonce, String.class);
-            String blockHashRemote = responseGet.getObject();
+            logger.trace("stored block index {}", block.getNonce());
 
-            if (blockHashRemote != null) {
-                result.combine(new ExecutionReport().ko("put block in blockchain failed! " + blockNonce + "already has " + blockHashRemote));
+            AppServiceProvider.getBlockchainService().putLocal(blockHash, block, blockchain, BlockchainUnitType.BLOCK);
+            setBlockHashWithIndex(block.getNonce(), blockHash, blockchain);
+            logger.trace("stored block {}", blockHash);
 
-            } else {
+            // Update max index
+            setCurrentBlockIndex(LocationType.BOTH, block.getNonce(), blockchain);
+            logger.trace("done updating maxblock to {}", block.getNonce());
 
-                if (responseGet.getResponse().equals(ResponseDHT.TIMEOUT)) {
-                    result.combine(new ExecutionReport().ko("put block in blockchain failed! Getting " + blockNonce + "timed out "));
-                    return logger.traceExit(result);
-                }
+            // Update current block
+            blockchain.setCurrentBlock(block);
+            logger.trace("done updating current block");
 
-                FuturePut futurePut = AppServiceProvider.getP2PObjectService().put(connection, blockNonce, blockHash, true, false);
+            //Maintain processed transactions
+            blockchain.getPool().addBlock(block);
 
-                if (!futurePut.isSuccess()) {
-                    String blockHashGot;
+            result.combine(new ExecutionReport().ok("Put block in blockchain : " + blockHash + " # " + block));
 
-                    blockHashGot = AppServiceProvider.getP2PObjectService().get(connection, blockNonce, String.class).getObject();
-
-                    if (blockHashGot != null && !blockHashGot.equals(blockHash)) {
-                        result.combine(new ExecutionReport().ko("Not allowed to override block index " + blockNonce + " with hash " + blockHashGot + " with his own generated hash " + blockHash));
-                        return result;
-                    } else if (blockHashGot == null) {
-                        result.combine(new ExecutionReport().ko("block with hash " + blockHash + " could not be committed"));
-                        return result;
-                    }
-
-                    logger.debug("Commited first, block index " + blockNonce + " with hash " + blockHashGot + ". There was " + futurePut.rawResult().size() + " peers which have tried to commit the same block index.");
-                }
-
-                logger.trace("stored block index {}", block.getNonce());
-
-                AppServiceProvider.getBlockchainService().putLocal(blockHash, block, blockchain, BlockchainUnitType.BLOCK);
-                setBlockHashWithIndex(block.getNonce(), blockHash, blockchain);
-                logger.trace("stored block {}", blockHash);
-
-                // Update max index
-                setCurrentBlockIndex(LocationType.BOTH, block.getNonce(), blockchain);
-                logger.trace("done updating maxblock to {}", block.getNonce());
-
-                // Update current block
-                blockchain.setCurrentBlock(block);
-                logger.trace("done updating current block");
-
-                //Maintain processed transactions
-                blockchain.getPool().addBlock(block);
-
-                //TODO: remove! DEBUG ONLY
-                String blockHashPrev;
-                BigInteger nonce = block.getNonce();
-                for (int i = 1; i <= 3; i++) {
-                    BigInteger nonceIdx = nonce.subtract(BigInteger.valueOf(i));
-                    if (nonceIdx.compareTo(BigInteger.ZERO) >= 0) {
-                        String nonceID = getBlockIndexIdentifier(nonceIdx);
-                        blockHashPrev = AppServiceProvider.getP2PObjectService().get(connection, nonceID, String.class).getObject();
-                        logger.debug("{} with hash: {}", nonceID, blockHashPrev);
-                    } else {
-                        break;
-                    }
-                }
-                result.combine(new ExecutionReport().ok("Put block in blockchain : " + blockHash + " # " + block));
-            }
         } catch (Exception ex) {
             result.combine(new ExecutionReport().ko(ex));
         }
@@ -451,13 +357,13 @@ public class BootstrapServiceImpl implements BootstrapService {
     public SyncState getSyncState(Blockchain blockchain){
         SyncState syncState = new SyncState();
 
-        DHTResponseObject<BigInteger> localHeight = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.LOCAL, blockchain);
-        DHTResponseObject<BigInteger> networkHeight = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.NETWORK, blockchain);
+        BigInteger localHeight = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.LOCAL, blockchain);
+        BigInteger networkHeight = AppServiceProvider.getBootstrapService().getCurrentBlockIndex(LocationType.NETWORK, blockchain);
 
-        syncState.setValid((localHeight.getResponse() == ResponseDHT.SUCCESS) && (networkHeight.getResponse() == ResponseDHT.SUCCESS));
+        syncState.setValid(true);
 
-        syncState.setLocalBlockIndex(localHeight.getObject());
-        syncState.setRemoteBlockIndex(networkHeight.getObject());
+        syncState.setLocalBlockIndex(localHeight);
+        syncState.setRemoteBlockIndex(networkHeight);
 
         boolean isBlocAvailable = syncState.getRemoteBlockIndex().compareTo(BigInteger.ZERO) >= 0;
         boolean isNewBlockRemote = syncState.getRemoteBlockIndex().compareTo(syncState.getLocalBlockIndex()) > 0;

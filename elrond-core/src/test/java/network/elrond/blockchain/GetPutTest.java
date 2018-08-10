@@ -1,6 +1,5 @@
 package network.elrond.blockchain;
 
-import net.tomp2p.dht.FuturePut;
 import network.elrond.Application;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
@@ -10,8 +9,6 @@ import network.elrond.data.BaseBlockchainTest;
 import network.elrond.data.SerializationService;
 import network.elrond.data.Transaction;
 import network.elrond.data.TransactionService;
-import network.elrond.p2p.P2PBroadcastChannel;
-import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.service.AppServiceProvider;
 import org.spongycastle.util.encoders.Base64;
 
@@ -29,67 +26,67 @@ public class GetPutTest extends BaseBlockchainTest {
     private PrivateKey pvKeyRecv = new PrivateKey("b");
     private PublicKey pbKeyRecv = new PublicKey(pvKeyRecv);
 
-    //@Test
-    public void mainProducer() throws Exception {
-
-        AppContext context = new AppContext();
-        context.setStorageBasePath("producer");
-        context.setMasterPeerIpAddress("127.0.0.1");
-        context.setMasterPeerPort(4000);
-        context.setPort(4000);
-        context.setNodeName("1");
-
-
-        Application app = new Application(context);
-        app.start();
-
-        Thread thread = new Thread(() -> {
-
-            AppState state = app.getState();
-            P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.TRANSACTION);
-
-            int value = 0;
-
-            SerializationService serServ = AppServiceProvider.getSerializationService();
-
-            do {
-                if (value < 1000) {
-                    //inject transaction based on value so I will know the hash on the other node
-                    Transaction tx = transactionService.generateTransaction(pbKeySender, pbKeyRecv, value, 0);
-
-                    try {
-                        FuturePut fp = AppServiceProvider.getP2PObjectService().put(channel.getConnection(),
-                                getTxHash(tx), serServ.encodeJSON(tx));
-                        System.out.println("Pet tx hash: " + getTxHash(tx) + " on wire...");
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-
-                    value++;
-                }
-
-                //InjectBlk(state, rdm);
-
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-            } while (state.isStillRunning());
-
-        });
-        thread.start();
-
-
-        @SuppressWarnings("resource")
-        Scanner input = new Scanner(System.in);
-        while (input.hasNext()) {
-            if (input.nextLine().equals("exit")) {
-                app.stop();
-            }
-        }
-    }
+//    //@Test
+//    public void mainProducer() throws Exception {
+//
+//        AppContext context = new AppContext();
+//        context.setStorageBasePath("producer");
+//        context.setMasterPeerIpAddress("127.0.0.1");
+//        context.setMasterPeerPort(4000);
+//        context.setPort(4000);
+//        context.setNodeName("1");
+//
+//
+//        Application app = new Application(context);
+//        app.start();
+//
+//        Thread thread = new Thread(() -> {
+//
+//            AppState state = app.getState();
+//            P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.TRANSACTION);
+//
+//            int value = 0;
+//
+//            SerializationService serServ = AppServiceProvider.getSerializationService();
+//
+//            do {
+//                if (value < 1000) {
+//                    //inject transaction based on value so I will know the hash on the other node
+//                    Transaction tx = transactionService.generateTransaction(pbKeySender, pbKeyRecv, value, 0);
+//
+//                    try {
+//                        FuturePut fp = AppServiceProvider.getP2PObjectService().put(channel.getConnection(),
+//                                getTxHash(tx), serServ.encodeJSON(tx));
+//                        System.out.println("Pet tx hash: " + getTxHash(tx) + " on wire...");
+//                    } catch (Exception ex) {
+//                        ex.printStackTrace();
+//                    }
+//
+//                    value++;
+//                }
+//
+//                //InjectBlk(state, rdm);
+//
+//                try {
+//                    Thread.sleep(10);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//
+//            } while (state.isStillRunning());
+//
+//        });
+//        thread.start();
+//
+//
+//        @SuppressWarnings("resource")
+//        Scanner input = new Scanner(System.in);
+//        while (input.hasNext()) {
+//            if (input.nextLine().equals("exit")) {
+//                app.stop();
+//            }
+//        }
+//    }
 
     //@Test
     public void mainConsumer() throws Exception {

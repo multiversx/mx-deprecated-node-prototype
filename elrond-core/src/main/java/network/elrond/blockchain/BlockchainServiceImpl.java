@@ -107,12 +107,6 @@ public class BlockchainServiceImpl implements BlockchainService {
 
         logger.trace("Locally stored!");
 
-        if (!isOffline(connection)) {
-
-            AppServiceProvider.getP2PObjectService().put(connection, hash.toString(), object, await, true);
-            logger.trace("DHT stored!");
-        }
-
         logger.traceExit();
     }
 
@@ -197,18 +191,6 @@ public class BlockchainServiceImpl implements BlockchainService {
 
         B result = cache.get(hash);
         return logger.traceExit(result);
-    }
-
-    private <H extends Object, B extends Serializable> B getDataFromNetwork(H hash, BlockchainPersistenceUnit<H, B> unit, P2PConnection connection)
-            throws ClassNotFoundException, IOException {
-        logger.traceEntry("params: {} {} {}", hash, unit, connection);
-
-        if (isOffline(connection)) {
-            logger.trace("offline!");
-            logger.traceExit();
-            return null;
-        }
-        return AppServiceProvider.getP2PObjectService().get(connection, hash.toString(), unit.clazz).getObject();
     }
 
     private <B extends Serializable, H extends Object> B getDataFromDatabase(H hash, BlockchainPersistenceUnit<H, B> unit) {

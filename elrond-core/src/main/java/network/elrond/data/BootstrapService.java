@@ -3,14 +3,13 @@ package network.elrond.data;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
-import network.elrond.p2p.DHTResponseObject;
 
 import java.math.BigInteger;
 
 public interface BootstrapService {
 
     //returns max block height from location
-    DHTResponseObject<BigInteger> getCurrentBlockIndex(LocationType locationType, Blockchain blockchain);
+    BigInteger getCurrentBlockIndex(LocationType locationType, Blockchain blockchain);
 
     //sets max block height in location
     void setCurrentBlockIndex(LocationType locationType, BigInteger height, Blockchain blockchain) throws Exception;

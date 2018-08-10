@@ -3,17 +3,14 @@ package network.elrond.p2p.handlers;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
-import network.elrond.data.Block;
 import network.elrond.p2p.P2PRequestMessage;
 import network.elrond.p2p.RequestHandler;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
-
 public class BlockIndexRequestHandler implements RequestHandler<String, P2PRequestMessage> {
-    private static final Logger logger = LogManager.getLogger(BlockRequestHandler.class);
+    private static final Logger logger = LogManager.getLogger(BlockIndexRequestHandler.class);
 
     @Override
     public String onRequest(AppState state, P2PRequestMessage data) {

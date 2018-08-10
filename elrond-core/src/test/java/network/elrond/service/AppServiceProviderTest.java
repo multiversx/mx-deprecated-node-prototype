@@ -2,7 +2,6 @@ package network.elrond.service;
 
 import network.elrond.account.AccountStateServiceImpl;
 import network.elrond.blockchain.BlockchainServiceImpl;
-import network.elrond.chronology.ChronologyService;
 import network.elrond.chronology.ChronologyServiceImpl;
 import network.elrond.consensus.SPoSServiceImpl;
 import network.elrond.consensus.ValidatorServiceImpl;
@@ -10,7 +9,6 @@ import network.elrond.crypto.MultiSignatureServiceBNImpl;
 import network.elrond.crypto.SignatureServiceSchnorrImpl;
 import network.elrond.data.*;
 import network.elrond.p2p.P2PBroadcastServiceImpl;
-import network.elrond.p2p.P2PObjectServiceImpl;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -28,11 +26,11 @@ public class AppServiceProviderTest {
         Assert.assertEquals(SerializationServiceImpl.class, AppServiceProvider.getSerializationService().getClass());
     }
 
-    @Test
-    public void TestDefaultP2PObjectService(){
-        AppServiceProvider.InjectDefaultServices();
-        Assert.assertEquals(P2PObjectServiceImpl.class, AppServiceProvider.getP2PObjectService().getClass());
-    }
+//    @Test
+//    public void TestDefaultP2PObjectService(){
+//        AppServiceProvider.InjectDefaultServices();
+//        Assert.assertEquals(P2PObjectServiceImpl.class, AppServiceProvider.getP2PObjectService().getClass());
+//    }
 
     @Test
     public void TestDefaultTransactionService (){

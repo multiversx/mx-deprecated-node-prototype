@@ -30,7 +30,7 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
 
     protected final Map<BlockchainUnitType, BlockchainPersistenceUnit<?, ?>> blockchain = new HashMap<>();
 
-
+    private BigInteger networkBlockHeight = Util.BIG_INT_MIN_ONE;
 
     public Blockchain(BlockchainContext context) throws IOException {
         Util.check(context != null, "context!=null");
@@ -124,6 +124,14 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
 
     public TransactionsPool getPool() {
         return pool;
+    }
+
+    public BigInteger getNetworkHeight(){
+        return networkBlockHeight;
+    }
+
+    public synchronized void setNetworkHeight(BigInteger networkBlockHeight){
+        this.networkBlockHeight = networkBlockHeight;
     }
 
     @Override

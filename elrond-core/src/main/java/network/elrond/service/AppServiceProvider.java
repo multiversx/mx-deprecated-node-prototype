@@ -40,7 +40,6 @@ public class AppServiceProvider {
     public static void InjectDefaultServices() {
         putService(P2PBroadcastService.class, new P2PBroadcastServiceImpl());
         putService(SerializationService.class, new SerializationServiceImpl());
-        putService(P2PObjectService.class, new P2PObjectServiceImpl());
         putService(TransactionService.class, new TransactionServiceImpl());
         putService(ValidatorService.class, new ValidatorServiceImpl());
         putService(SPoSService.class, new SPoSServiceImpl());
@@ -66,10 +65,6 @@ public class AppServiceProvider {
 
     public static SerializationService getSerializationService() {
         return getService(SerializationService.class);
-    }
-
-    public static P2PObjectService getP2PObjectService() {
-        return getService(P2PObjectService.class);
     }
 
     public static TransactionService getTransactionService() {
