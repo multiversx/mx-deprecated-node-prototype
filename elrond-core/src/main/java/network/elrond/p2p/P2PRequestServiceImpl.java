@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -127,8 +128,6 @@ public class P2PRequestServiceImpl implements P2PRequestService {
             return responses;
         }
 
-        //logger.warn("peersOnChannel: {} on request channel {} and shard {}", peersOnChannel.size(), channel.getName(), shard.getIndex());
-
         return null;
     }
 
@@ -140,36 +139,42 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         List<R> responses = sendRequestMessage(channel, shard, new P2PRequestMessage(key, channelName, shard));
         List<R> results = new ArrayList<>();
 
+
         if (responses != null && !responses.isEmpty()) {
-            Map<R, String> objectToHash = responses.stream()
-                    .filter(entry -> !(entry instanceof Collection) || !((Collection) entry).isEmpty())
-                    .filter(Objects::nonNull)
-                    .collect(
-                            Collectors.toMap(
-                                    response -> response,
-                                    response -> AppServiceProvider.getSerializationService().getHashString(response),
-                                    (response1, response2) -> response1));
+            if (P2PRequestChannelName.BLOCK_HEIGHT.equals(channelName)) {
+                return Collections.max(responses, Comparator.comparing(o -> ((BigInteger) o)));
+            } else {
+                Map<R, String> objectToHash = responses.stream()
+                        .filter(entry -> !(entry instanceof Collection) || !((Collection) entry).isEmpty())
+                        .filter(Objects::nonNull)
+                        .collect(
+                                Collectors.toMap(
+                                        response -> response,
+                                        response -> AppServiceProvider.getSerializationService().getHashString(response),
+                                        (response1, response2) -> response1));
 
-            logger.trace("objectToHash: {}", objectToHash.toString());
+                logger.trace("objectToHash: {}", objectToHash.toString());
 
-            if (!objectToHash.isEmpty()) {
-                Map<String, Long> counts = objectToHash.entrySet()
-                        .stream()
-                        .collect(Collectors.groupingBy(Map.Entry::getValue, Collectors.counting()));
+                if (!objectToHash.isEmpty()) {
+                    Map<String, Long> counts = objectToHash.entrySet()
+                            .stream()
+                            .collect(Collectors.groupingBy(Map.Entry::getValue, Collectors.counting()));
 
-                String element = Collections.max(counts.entrySet(), Map.Entry.comparingByValue()).getKey();
+                    String element = Collections.max(counts.entrySet(), Map.Entry.comparingByValue()).getKey();
 
-                results = objectToHash.entrySet()
-                        .stream()
-                        .filter(entry -> Objects.equals(entry.getValue(), element))
-                        .map(Map.Entry::getKey)
-                        .collect(Collectors.toList());
+                    results = objectToHash.entrySet()
+                            .stream()
+                            .filter(entry -> Objects.equals(entry.getValue(), element))
+                            .map(Map.Entry::getKey)
+                            .collect(Collectors.toList());
+                }
+
+                R result = (results.size() > 0) ? results.get(0) : null;
+
+                return logger.traceExit(result);
             }
-
-            R result = (results.size() > 0) ? results.get(0) : null;
-
-            return logger.traceExit(result);
         }
         return logger.traceExit((R) null);
+
     }
 }
