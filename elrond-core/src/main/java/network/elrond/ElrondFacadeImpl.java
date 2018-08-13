@@ -30,7 +30,6 @@ import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -249,6 +248,8 @@ public class ElrondFacadeImpl implements ElrondFacade {
                 peersToSend.add(peer);
             }
         }
+
+        KeysManager.getInstance().ReloadSendToKez();
 
         peersToSend.parallelStream().forEach(peer -> {
 
