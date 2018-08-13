@@ -22,10 +22,10 @@
             <!--<PatternLayout pattern="${ALT_LOG_PATTERN}"/>-->
         </WebSocketAppender>
 
-        <MySQLAppender name="MySQLAppender" connection="jdbc:mysql://34.236.99.100:3306/LOGS?useSSL=false&amp;useServerPrepStmts=false&amp;rewriteBatchedStatements=true&amp;user=loguser&amp;password=elrondCaps67">
-            <PatternLayout pattern="${MAIN_LOG_PATTERN}"/>
-            <!--<PatternLayout pattern="${ALT_LOG_PATTERN}"/>-->
-        </MySQLAppender>
+        <!--<MySQLAppender name="MySQLAppender" connection="jdbc:mysql://34.236.99.100:3306/LOGS?useSSL=false&amp;useServerPrepStmts=false&amp;rewriteBatchedStatements=true&amp;user=loguser&amp;password=elrondCaps67">-->
+            <!--<PatternLayout pattern="${MAIN_LOG_PATTERN}"/>-->
+            <!--&lt;!&ndash;<PatternLayout pattern="${ALT_LOG_PATTERN}"/>&ndash;&gt;-->
+        <!--</MySQLAppender>-->
 
         <!-- Rolling File Appender -->
         <RollingFile name="FileAppender" fileName="${ctx:LOG_FOLDER}/elrond.log"

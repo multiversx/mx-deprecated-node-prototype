@@ -30,6 +30,7 @@ import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -229,11 +230,24 @@ public class ElrondFacadeImpl implements ElrondFacade {
         port = 8080;
         List<String> currentPeers = KeysManager.getInstance().getConnectedPeers();
         String local = "127.0.0.1;" + application.getState().getShard().getIndex().toString();
-        if(!currentPeers.contains(local)) {
+        if (!currentPeers.contains(local)) {
             currentPeers.add(0, local);
         }
 
-        currentPeers.parallelStream().forEach( peer -> {
+        List<String> peersToSend = new ArrayList<>();
+
+        Integer[] addressPerShard = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+        for (String peer : currentPeers) {
+            String[] splitPeer = peer.split(";");
+            Integer allocatedShard = Integer.parseInt(splitPeer[1]);
+            if (addressPerShard[allocatedShard] < 1){
+                addressPerShard[allocatedShard]++;
+                peersToSend.add(peer);
+            }
+        }
+
+        peersToSend.parallelStream().forEach(peer -> {
 
             Runnable myrunnable = new Runnable() {
                 public void run() {
@@ -242,7 +256,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
                     try {
                         String address = KeysManager.getInstance().getSendToPeers().get(Integer.parseInt(splitPeer[1])).split(";")[2];
 
-                        url = new URL("http://" + splitPeer[0] + ":" + getport() +"/node/sendMultipleTransactions" +
+                        url = new URL("http://" + splitPeer[0] + ":" + getport() + "/node/sendMultipleTransactions" +
                                 "?address=" + address +
                                 "&value=" + value +
                                 "&nrTransactions=" + nrTransactions);
@@ -273,14 +287,16 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
         });
 
-        if (!success){
+        if (!success) {
             return new ResponseObject(false, lastError, "Not Successful");
         }
 
         return new ResponseObject(true, "", "Successful sent transactions to all nodes");
     }
+
     int port = 0;
-    synchronized int getport(){
+
+    synchronized int getport() {
         return 8080;
         //return port;
     }
@@ -506,12 +522,12 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
     @Override
     public ResponseObject getNextPrivateKey(String remoteAddress) {
-        return logger.traceExit(new ResponseObject(true, "", KeysManager.getInstance().getNextPrivateKey(remoteAddress) ));
+        return logger.traceExit(new ResponseObject(true, "", KeysManager.getInstance().getNextPrivateKey(remoteAddress)));
     }
 
     @Override
-    public ResponseObject getPrivatePublicKeyShard(Application application){
-        if (application == null){
+    public ResponseObject getPrivatePublicKeyShard(Application application) {
+        if (application == null) {
             return new ResponseObject(false, "Node not started!", null);
         }
 
@@ -519,15 +535,15 @@ public class ElrondFacadeImpl implements ElrondFacade {
         PrivateKey privateKey = application.getContext().getPrivateKey();
         Shard shard = application.getState().getShard();
 
-        if (privateKey == null){
+        if (privateKey == null) {
             return new ResponseObject(false, "Error reading data from node! [private key]", null);
         }
 
-        if (publicKey == null){
+        if (publicKey == null) {
             return new ResponseObject(false, "Error reading data from node! [public key]", null);
         }
 
-        if (shard == null){
+        if (shard == null) {
             return new ResponseObject(false, "Error reading data from node! [shard]", null);
         }
 

@@ -100,10 +100,10 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
         //to be checked if we send to the verified peers or all known peers (even overflowed peers)
         //listToSend.addAll(peer.peerBean().peerMap().allOverflow());
 
-        for (PeerAddress peerAddress : listToSend) {
+        listToSend.stream().parallel().forEach(peerAddress -> {
             if (peerAddress == sender) {
                 //not returning to sender
-                continue;
+                return;
             }
 
             int bucketNr = PeerMap.classMember(peerAddress.peerId(),
@@ -111,7 +111,7 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
             //magic send
             doSendBroadcast(messageKey, dataMap, hopCount, message.isUdp(), peerAddress,
                     bucketNr);
-        }
+        });
 
         if (data instanceof P2PIntroductionMessage) {
             if (peerAddressReceived != null && !peer.peerAddress().equals(peerAddressReceived)) {
