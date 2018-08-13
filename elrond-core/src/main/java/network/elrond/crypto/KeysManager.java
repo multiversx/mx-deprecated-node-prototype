@@ -51,7 +51,9 @@ public class KeysManager {
     public synchronized String getNextPrivateKey(String remoteAddress) {
         if(privateKeys.size() > 0){
             String pk = privateKeys.get(0);
-            getConnectedPeers().add(remoteAddress +";"+pk);
+            String remoteAndPk = remoteAddress +";"+pk;
+            getConnectedPeers().add(remoteAndPk);
+            logger.info(remoteAndPk);
             Path file = Paths.get("connectedPeers.txt");
             try {
                 Files.write(file, getConnectedPeers(), Charset.forName("UTF-8"));
@@ -61,6 +63,7 @@ public class KeysManager {
             privateKeys.remove(0);
             return  pk;
         }
+        logger.info("Could not find any other private keys for address " + remoteAddress);
         return null;
     }
 
