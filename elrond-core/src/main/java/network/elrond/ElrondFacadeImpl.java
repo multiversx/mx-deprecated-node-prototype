@@ -238,10 +238,13 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
         Integer[] addressPerShard = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
+        logger.info("all peers {}", currentPeers);
+
         for (String peer : currentPeers) {
+            logger.info("peer: {}", peer);
             String[] splitPeer = peer.split(";");
             Integer allocatedShard = Integer.parseInt(splitPeer[1]);
-            if (addressPerShard[allocatedShard] < 1){
+            if (addressPerShard[allocatedShard] < 1) {
                 addressPerShard[allocatedShard]++;
                 peersToSend.add(peer);
             }
@@ -249,36 +252,34 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
         peersToSend.parallelStream().forEach(peer -> {
 
-            Runnable myrunnable = new Runnable() {
-                public void run() {
-                    String[] splitPeer = peer.split(";");
-                    URL url = null;
-                    try {
-                        String address = KeysManager.getInstance().getSendToPeers().get(Integer.parseInt(splitPeer[1])).split(";")[2];
+            Runnable myrunnable = () -> {
+                String[] splitPeer = peer.split(";");
+                URL url = null;
+                try {
+                    String address = KeysManager.getInstance().getSendToPeers().get(Integer.parseInt(splitPeer[1])).split(";")[2];
 
-                        url = new URL("http://" + splitPeer[0] + ":" + getport() + "/node/sendMultipleTransactions" +
-                                "?address=" + address +
-                                "&value=" + value +
-                                "&nrTransactions=" + nrTransactions);
+                    url = new URL("http://" + splitPeer[0] + ":" + getport() + "/node/sendMultipleTransactions" +
+                            "?address=" + address +
+                            "&value=" + value +
+                            "&nrTransactions=" + nrTransactions);
 
-                        logger.info(url);
-                        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                        con.setRequestMethod("GET");
+                    logger.info(url);
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                    con.setRequestMethod("GET");
 
-                        BufferedReader in = new BufferedReader(
-                                new InputStreamReader(con.getInputStream()));
-                        String inputLine;
-                        StringBuffer content = new StringBuffer();
-                        while ((inputLine = in.readLine()) != null) {
-                            content.append(inputLine);
-                        }
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(con.getInputStream()));
+                    String inputLine;
+                    StringBuffer content = new StringBuffer();
+                    while ((inputLine = in.readLine()) != null) {
+                        content.append(inputLine);
+                    }
 
-                        logger.info(content.toString());
-                    } catch (Exception ex) {
-                        logger.throwing(ex);
+                    logger.info(content.toString());
+                } catch (Exception ex) {
+                    logger.throwing(ex);
 //                lastError = "Error sending transactions: " + ex.getMessage();
 //                success = false;
-                    }
                 }
             };
 

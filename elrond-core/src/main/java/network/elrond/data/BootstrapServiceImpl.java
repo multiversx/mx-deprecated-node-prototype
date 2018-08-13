@@ -44,7 +44,7 @@ public class BootstrapServiceImpl implements BootstrapService {
         return Util.BIG_INT_MIN_ONE;
     }
 
-    public void fetchNetworkBlockIndex(Blockchain blockchain) throws java.io.IOException, ClassNotFoundException {
+    public void fetchNetworkBlockIndex(Blockchain blockchain) {
         logger.traceEntry("params: {}", blockchain);
 
         BigInteger value = AppServiceProvider.getP2PRequestService().get(blockchain.getConnection().getRequestChannel("BLOCK_HEIGHT"),
@@ -66,7 +66,7 @@ public class BootstrapServiceImpl implements BootstrapService {
     }
 
     @Override
-    public void setCurrentBlockIndex(LocationType locationType, BigInteger currentBlockIndex, Blockchain blockchain) throws Exception {
+    public void setCurrentBlockIndex(LocationType locationType, BigInteger currentBlockIndex, Blockchain blockchain) {
         logger.traceEntry("params: {} {} {}", locationType, currentBlockIndex, blockchain);
         if ((locationType.getIndex() & 2) != 0) {
             logger.trace("put locally");
