@@ -38,6 +38,11 @@ public class KeysManager {
             logger.info("Cannot read kez.txt. " + e.getMessage());
         }
 
+        ReloadSendToKez();
+
+    }
+
+    public void ReloadSendToKez(){
         Path sendToKez = Paths.get("sendToKez.txt");
 
         try {
