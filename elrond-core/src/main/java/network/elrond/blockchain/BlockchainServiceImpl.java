@@ -1,5 +1,6 @@
 package network.elrond.blockchain;
 
+import javafx.util.Pair;
 import network.elrond.core.LRUMap;
 import network.elrond.core.Util;
 import network.elrond.p2p.P2PConnection;
@@ -43,21 +44,6 @@ public class BlockchainServiceImpl implements BlockchainService {
         B block = getLocal(hash, blockchain, type);
         return logger.traceExit(block != null);
     }
-
-
-    /**
-     * Put object on object chain (memory->database->network) and wait
-     *
-     * @param hash   object hash
-     * @param object
-     * @throws IOException
-     */
-    //@Override
-    public synchronized <H extends Object, B extends Serializable> void putAndWait(H hash, B object, Blockchain blockchain, BlockchainUnitType type) throws IOException {
-        boolean await = true;
-        put(hash, object, blockchain, type, await);
-    }
-
 
     /**
      * Put object on object chain (memory->database->network)
@@ -111,19 +97,20 @@ public class BlockchainServiceImpl implements BlockchainService {
     }
 
     @Override
-    public synchronized <H extends Object, B extends Serializable> List<B> getAll(List<H> hashes, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
+    @SuppressWarnings("unchecked")
+    public synchronized <H extends Object, B extends Serializable> List<Pair<H, B>> getAll(List<H> hashes, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
         logger.traceEntry("params: {} {} {}", hashes, blockchain, type);
 
         Util.check(hashes != null, "hashes!=null");
         Util.check(blockchain != null, "blockchain!=null");
 
-        List<B> list = new ArrayList<>();
+        List<Pair<H, B>> list = new ArrayList<>();
 
         for (H hash : hashes) {
 
             B val = getLocal(hash, blockchain, type);
             if (val != null) {
-                list.add(val);
+                list.add(new Pair(hash, val));
             }
         }
 
@@ -158,11 +145,6 @@ public class BlockchainServiceImpl implements BlockchainService {
             }
 
             return object;
-
-//            if (object != null) {
-//                cache.put(hash, object);
-//                logger.trace("Got from local storace");
-//            }
         }
 
         B result = cache.get(hash);
@@ -170,6 +152,7 @@ public class BlockchainServiceImpl implements BlockchainService {
 
     }
 
+    @Override
     public synchronized <H extends Object, B extends Serializable> B getLocal(H hash, Blockchain blockchain, BlockchainUnitType type) {
         logger.traceEntry("params: {} {} {}", hash, blockchain, type);
 
@@ -216,11 +199,6 @@ public class BlockchainServiceImpl implements BlockchainService {
         return logger.traceExit(AppServiceProvider.getSerializationService().decodeJSON(strJSONData, clazz));
     }
 
-    protected boolean isOffline(P2PConnection connection) {
-        return connection == null;
-    }
-
-
     private <H extends Object, B extends Serializable> B requestData(H hash, BlockchainUnitType unitType, P2PConnection connection) {
         logger.traceEntry("params: {} {} {}", hash, unitType, connection);
 
@@ -237,9 +215,8 @@ public class BlockchainServiceImpl implements BlockchainService {
         response = AppServiceProvider.getP2PRequestService().get(channel, shard, channelName, hashStr);
 
         if (channelName.getName().equals(BlockchainUnitType.BLOCK_TRANSACTIONS.name())) {
-            logger.warn("Requested {} with hash {}. Received: {} transactions", channel.getName(), hash, ((response == null) ? response : ((ArrayList)response).size()));
-        }
-        else {
+            logger.warn("Requested {} with hash {}. Received: {} transactions", channel.getName(), hash, ((response == null) ? response : ((ArrayList) response).size()));
+        } else {
             logger.warn("Requested {} with hash {}. Received: {}", channel.getName(), hash, response);
         }
 

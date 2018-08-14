@@ -1,5 +1,6 @@
 package network.elrond.data;
 
+import javafx.util.Pair;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.Util;
@@ -135,13 +136,13 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<Transaction> getTransactions(Blockchain blockchain, Block block) throws IOException, ClassNotFoundException {
+    public List<Pair<String, Transaction>> getTransactions(Blockchain blockchain, Block block) throws IOException, ClassNotFoundException {
         logger.traceEntry("params: {} {}", blockchain, block);
 
         Util.check(blockchain != null, "blockchain is null");
         Util.check(block != null, "block is null");
 
-        List<Transaction> transactions;
+        List<Pair<String, Transaction>> transactionHashPairs;
 
         //JLS 2018.05.29 - need to store fetched transaction!
         //BlockchainService appPersistenceService = AppServiceProvider.getAppPersistanceService();
@@ -149,21 +150,21 @@ public class TransactionServiceImpl implements TransactionService {
 
         List<String> hashes = BlockUtil.getTransactionsHashesAsString(block);
 
-        transactions = AppServiceProvider.getBlockchainService().getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
+        transactionHashPairs = AppServiceProvider.getBlockchainService().getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
 
-        logger.info("Getting transactions... transactions size: {} hashes size: {}", transactions.size(), hashes.size());
-        if (transactions.size() != hashes.size()) {
-            transactions = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK_TRANSACTIONS);
+        logger.info("Getting transactions... transactions size: {} hashes size: {}", transactionHashPairs.size(), hashes.size());
+        if (transactionHashPairs.size() != hashes.size()) {
+            transactionHashPairs = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK_TRANSACTIONS);
         }
-        if (transactions != null) {
-            for (Transaction transaction : transactions) {
-                String transactionHash = AppServiceProvider.getSerializationService().getHashString(transaction);
-                AppServiceProvider.getBlockchainService().putLocal(transactionHash, transaction, blockchain, BlockchainUnitType.TRANSACTION);
+        if (transactionHashPairs != null) {
+            for (Pair<String, Transaction> transactionHashPair : transactionHashPairs) {
+                String transactionHash = transactionHashPair.getKey();
+                AppServiceProvider.getBlockchainService().putLocal(transactionHash, transactionHashPair.getValue(), blockchain, BlockchainUnitType.TRANSACTION);
             }
         } else {
-            transactions = new ArrayList<>();
+            transactionHashPairs = new ArrayList<>();
         }
-        return logger.traceExit(transactions);
+        return logger.traceExit(transactionHashPairs);
     }
 
     @Override

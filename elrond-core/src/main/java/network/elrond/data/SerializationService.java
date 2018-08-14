@@ -8,5 +8,10 @@ public interface SerializationService {
 
     byte[] getHash(Object object);
 
+    byte[] getHash(String hash);
+
     String getHashString(Object object);
+
+    String getHashString(byte[] hash);
+
 }

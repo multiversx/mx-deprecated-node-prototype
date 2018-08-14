@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
+import javafx.util.Pair;
+
 public class ExecutionServiceTest extends BaseBlockchainTest {
     private Blockchain blockchain;
     private Accounts accounts;
@@ -97,7 +99,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
             transactionHashes.add(hash);
             AppServiceProvider.getBlockchainService().put(hashStr, tx, blockchain, BlockchainUnitType.TRANSACTION);
             // execute transactions to get the accountState
-            AppServiceProvider.getExecutionService().processTransaction(tx, accountsSandbox);
+            AppServiceProvider.getExecutionService().processTransaction(new Pair<String, Transaction>(hashStr, tx), accountsSandbox);
         }
 
         block.setAppStateHash(accountsSandbox.getAccountsPersistenceUnit().getRootHash());

@@ -151,41 +151,4 @@ public class AccountStateServiceImplTest {
         Assert.assertTrue(state.getBalance().compareTo(Util.VALUE_MINTING) == 0);
         Assert.assertTrue(state.getBalance().compareTo(Util.VALUE_MINTING) == 0);
     }
-
-//    public Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue,
-//                                                               AccountsContext accountsContextTemporary, PrivateKey privateKey) {
-//
-//        if (initialValue.compareTo(Util.VALUE_MINTING) > 0) {
-//            initialValue = Util.VALUE_MINTING;
-//        }
-//
-//
-//        Transaction transactionMint = AppServiceProvider.getTransactionService().generateTransaction(Util.PUBLIC_KEY_MINTING,
-//                new PublicKey(Util.hexStringToByteArray(initialAddress)), initialValue, BigInteger.ZERO);
-//        AppServiceProvider.getTransactionService().signTransaction(transactionMint, Util.PRIVATE_KEY_MINTING.getValue(), Util.PUBLIC_KEY_MINTING.getValue());
-//
-//        Block genesisBlock = new Block();
-//        genesisBlock.setNonce(BigInteger.ZERO);
-//        genesisBlock.getListTXHashes().add(AppServiceProvider.getSerializationService().getHash(transactionMint));
-//
-//        //compute state root hash
-//        try {
-//            Accounts accountsTemp = new Accounts(accountsContextTemporary, new AccountsPersistenceUnit<>(accountsContextTemporary.getDatabasePath()));
-//
-//            ExecutionService executionService = AppServiceProvider.getExecutionService();
-//            ExecutionReport executionReport = executionService.processTransaction(transactionMint, accountsTemp);
-//            if (!executionReport.isOk()) {
-//                return (null);
-//            }
-//            genesisBlock.setAppStateHash(accountsTemp.getAccountsPersistenceUnit().getRootHash());
-//            AppBlockManager.instance().signBlock(genesisBlock, privateKey);
-//            accountsTemp.getAccountsPersistenceUnit().close();
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//            return (null);
-//        }
-//
-//        return (new Fun.Tuple2<>(genesisBlock, transactionMint));
-//    }
-
 }

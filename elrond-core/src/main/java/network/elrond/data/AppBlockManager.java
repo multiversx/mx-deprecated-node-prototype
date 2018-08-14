@@ -44,6 +44,7 @@ public class AppBlockManager {
         return instance;
     }
 
+    @SuppressWarnings("unchecked")
     public Block generateAndBroadcastBlock(List<String> queue, PrivateKey privateKey, AppState state) {
         logger.traceEntry("params: {} {} {}", queue, privateKey, state);
         Accounts accounts = state.getAccounts();
@@ -58,8 +59,8 @@ public class AppBlockManager {
         }
 
         try {
-            List<Transaction> transactions = AppServiceProvider.getBlockchainService().getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
-            Pair<Block, List<Receipt>> blockReceiptsPair = composeBlock(transactions, state);
+            List<Pair<String, Transaction>> transactionHashPairs = AppServiceProvider.getBlockchainService().getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
+            Pair<Block, List<Receipt>> blockReceiptsPair = composeBlock(transactionHashPairs, state);
             Block block = blockReceiptsPair.getKey();
             List<Receipt> receipts = blockReceiptsPair.getValue();
             AppBlockManager.instance().signBlock(block, privateKey);
@@ -70,14 +71,14 @@ public class AppBlockManager {
             ExecutionService executionService = AppServiceProvider.getExecutionService();
 
             //test whether I can broadcast the block
-            ChronologyService chronologyService =  AppServiceProvider.getChronologyService();
+            ChronologyService chronologyService = AppServiceProvider.getChronologyService();
             long globalTimeStamp = chronologyService.getSynchronizedTime(state.getNtpClient());
             long genesisTimeStampCached = 0;
-            if (blockchain.getGenesisBlock() != null){
+            if (blockchain.getGenesisBlock() != null) {
                 genesisTimeStampCached = blockchain.getGenesisBlock().getTimestamp();
             }
             Round currentRound = chronologyService.getRoundFromDateTime(genesisTimeStampCached, globalTimeStamp);
-            if (block.getRoundIndex() != currentRound.getIndex()){
+            if (block.getRoundIndex() != currentRound.getIndex()) {
                 logger.warn("Force exit for block with hash {}, nonce: {}, round: {}", hashBlock, block.getNonce(), block.getRoundIndex());
                 return logger.traceExit((Block) null);
             }
@@ -111,23 +112,23 @@ public class AppBlockManager {
                     xTransactionBlockList.add(xDataBloc);
                 }
 
-                List<Transaction> blockTransactions = AppServiceProvider.getBlockchainService()
+                List<Pair<String, Transaction>> blockTransactions = AppServiceProvider.getBlockchainService()
                         .getAll(acceptedTransactions,
                                 blockchain,
                                 BlockchainUnitType.TRANSACTION);
                 blockTransactions.stream()
-                        .filter(transaction -> transaction.isCrossShardTransaction())
-                        .filter(transaction -> !ObjectUtil.isEqual(shard, transaction.getReceiverShard()))
-                        .forEach(transaction -> {
-                            Integer shardNb = transaction.getReceiverShard().getIndex();
+                        .filter(transactionHashPair -> transactionHashPair.getValue().isCrossShardTransaction())
+                        .filter(transactionHashPair -> !ObjectUtil.isEqual(shard, transactionHashPair.getValue().getReceiverShard()))
+                        .forEach(transactionHashPair -> {
+                            Integer shardNb = transactionHashPair.getValue().getReceiverShard().getIndex();
                             TransferDataBlock transferDataBlock = xTransactionBlockList.get(shardNb);
-                            transferDataBlock.getDataList().add(transaction);
+                            transferDataBlock.getDataList().add(transactionHashPair.getValue());
                         });
 
                 // transmit the cross transaction blocks
                 xTransactionBlockList.stream().parallel().forEach(transactionTransferDataBlock -> {
                     Integer receiverShardIndex = xTransactionBlockList.indexOf(transactionTransferDataBlock);
-                    boolean isThisShard = receiverShardIndex == state.getShard().getIndex();
+                    boolean isThisShard = receiverShardIndex.equals(state.getShard().getIndex());
                     boolean isEmpty = transactionTransferDataBlock.getDataList().isEmpty();
 
                     if (isThisShard || isEmpty) {
@@ -144,7 +145,7 @@ public class AppBlockManager {
                 long end = System.currentTimeMillis();
 
                 logger.info("New block proposed with hash {} ", hashBlock);
-                logger.info("Proposed in {} ms and sent in {} ms", end-proposeStart, end-start);
+                logger.info("Proposed in {} ms and sent in {} ms", end - proposeStart, end - start);
 
                 logger.info("\r\n" + state.print().render());
                 //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
@@ -185,9 +186,9 @@ public class AppBlockManager {
         });
     }
 
-    public Pair<Block, List<Receipt>> composeBlock(List<Transaction> transactions, AppState state) throws
+    public Pair<Block, List<Receipt>> composeBlock(List<Pair<String, Transaction>> transactionsHashPairs, AppState state) throws
             IOException {
-        logger.traceEntry("params: {} {}", transactions, state);
+        logger.traceEntry("params: {} {}", transactionsHashPairs, state);
         Util.check(state != null, "state!=null");
         List<Receipt> receipts;
 
@@ -195,7 +196,7 @@ public class AppBlockManager {
         Blockchain blockchain = state.getBlockchain();
         NTPClient ntpClient = state.getNtpClient();
 
-        Util.check(transactions != null, "transactions!=null");
+        Util.check(transactionsHashPairs != null, "transactionsHashPairs!=null");
         Util.check(blockchain != null, "blockchain!=null");
         Util.check(accounts != null, "accounts!=null");
         Util.check(blockchain.getGenesisBlock() != null, "genesisBlock!=null");
@@ -212,8 +213,8 @@ public class AppBlockManager {
         logger.trace("done computing round and round start millis = calculated round start millis, round index = {}, time stamp = {}",
                 block.roundIndex, block.timestamp);
 
-        receipts = addTransactions(transactions, block, state);
-        logger.trace("done added {} transactions to block", transactions.size());
+        receipts = addTransactions(transactionsHashPairs, block, state);
+        logger.trace("done added {} transactions to block", transactionsHashPairs.size());
 
         P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.BLOCK);
         HashSet<PeerAddress> totalPeers = AppServiceProvider.getP2PBroadcastService().getPeersOnChannel(channel);
@@ -249,10 +250,10 @@ public class AppBlockManager {
         return logger.traceExit(new Pair<>(block, receipts));
     }
 
-    private List<Receipt> addTransactions(List<Transaction> transactions, Block block, AppState state) throws
+    private List<Receipt> addTransactions(List<Pair<String, Transaction>> transactionHashPairs, Block block, AppState state) throws
             IOException {
-        logger.traceEntry("params: {} {} {}", transactions, block, state);
-        Util.check(transactions != null, "transactions != null");
+        logger.traceEntry("params: {} {} {}", transactionHashPairs, block, state);
+        Util.check(transactionHashPairs != null, "transactions != null");
         Util.check(block != null, "block != null");
         Util.check(state != null, "state != null");
 
@@ -260,23 +261,23 @@ public class AppBlockManager {
 
         Accounts accounts = state.getAccounts();
         TimeWatch tw = TimeWatch.start();
-        for (Transaction transaction : transactions) {
-            boolean valid = AppServiceProvider.getTransactionService().verifyTransaction(transaction);
+        for (Pair<String, Transaction> transactionHashPair : transactionHashPairs) {
+            boolean valid = AppServiceProvider.getTransactionService().verifyTransaction(transactionHashPair.getValue());
             if (!valid) {
-                receipts.add(rejectTransaction(block, transaction, state));
-                logger.info("Invalid transaction discarded [verify] {}", transaction);
+                receipts.add(rejectTransaction(block, transactionHashPair, state));
+                logger.info("Invalid transaction discarded [verify] {}", transactionHashPair);
                 continue;
             }
 
-            ExecutionReport executionReport = AppServiceProvider.getExecutionService().processTransaction(transaction, accounts);
+            ExecutionReport executionReport = AppServiceProvider.getExecutionService().processTransaction(transactionHashPair, accounts);
             if (!executionReport.isOk()) {
-                receipts.add(rejectTransaction(block, transaction, state));
-                logger.info("Invalid transaction discarded [exec] {}", transaction);
+                receipts.add(rejectTransaction(block, transactionHashPair, state));
+                logger.info("Invalid transaction discarded [exec] {}", transactionHashPair);
                 continue;
             }
 
-            byte[] txHash = AppServiceProvider.getSerializationService().getHash(transaction);
-            receipts.add(acceptTransaction(block, transaction, state));
+            byte[] txHash = AppServiceProvider.getSerializationService().getHash(transactionHashPair.getKey());
+            receipts.add(acceptTransaction(block, transactionHashPair, state));
 
             logger.trace("added transaction {} in block", txHash);
             BlockUtil.addTransactionInBlock(block, txHash);
@@ -293,29 +294,29 @@ public class AppBlockManager {
         return logger.traceExit(receipts);
     }
 
-    private Receipt acceptTransaction(Block block, Transaction transaction, AppState state) throws IOException {
-        logger.traceEntry("params: {} {} {}", block, transaction, state);
+    private Receipt acceptTransaction(Block block, Pair<String, Transaction> transactionHashPair, AppState state) throws IOException {
+        logger.traceEntry("params: {} {} {}", block, transactionHashPair, state);
         Util.check(block != null, "block != null");
-        Util.check(transaction != null, "transaction != null");
+        Util.check(transactionHashPair != null, "transaction != null");
         Util.check(state != null, "state != null");
 
         ReceiptStatus status = ReceiptStatus.ACCEPTED;
         String log = "Transaction processed";
-        String transactionHash = AppServiceProvider.getSerializationService().getHashString(transaction);
+        String transactionHash = transactionHashPair.getKey();
         Receipt receipt = new Receipt(null, transactionHash, status, log);
 
         return logger.traceExit(receipt);
     }
 
-    private Receipt rejectTransaction(Block block, Transaction transaction, AppState state) throws IOException {
-        logger.traceEntry("params: {} {} {}", block, transaction, state);
+    private Receipt rejectTransaction(Block block, Pair<String, Transaction> transactionHashPair, AppState state) {
+        logger.traceEntry("params: {} {} {}", block, transactionHashPair, state);
         Util.check(block != null, "block != null");
-        Util.check(transaction != null, "transaction != null");
+        Util.check(transactionHashPair != null, "transactionHashPair != null");
         Util.check(state != null, "state != null");
 
         ReceiptStatus status = ReceiptStatus.REJECTED;
         String log = "Invalid transaction";
-        String transactionHash = AppServiceProvider.getSerializationService().getHashString(transaction);
+        String transactionHash = transactionHashPair.getKey();
         Receipt receipt = new Receipt(null, transactionHash, status, log);
 
         return logger.traceExit(receipt);

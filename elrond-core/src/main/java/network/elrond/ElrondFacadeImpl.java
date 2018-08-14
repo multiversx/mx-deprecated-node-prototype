@@ -552,5 +552,4 @@ public class ElrondFacadeImpl implements ElrondFacade {
         return new ResponseObject(true, "", new String[]{Util.byteArrayToHexString(privateKey.getValue()),
                 Util.byteArrayToHexString(publicKey.getValue()), shard.getIndex().toString()});
     }
-
 }

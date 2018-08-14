@@ -11,6 +11,7 @@ import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 import org.junit.Test;
 import org.mapdb.Fun;
+import javafx.util.Pair;
 
 import java.math.BigInteger;
 
@@ -53,17 +54,15 @@ public class GenesisBlockTest {
         TestCase.assertEquals("Expecting null ", null, acsRecv);
         TestCase.assertEquals("Expecting " + Util.VALUE_MINTING, Util.VALUE_MINTING, acsMint.getBalance());
 
-        executionService.processTransaction(genesisData.b, accounts);
+        Pair<String, Transaction> transactionHashPair = new Pair(AppServiceProvider.getSerializationService().getHash(genesisData.b), genesisData.b);
+
+        executionService.processTransaction(transactionHashPair, accounts);
 
         acsMint = accountStateService.getAccountState(acMint, accounts);
         acsRecv = accountStateService.getAccountState(acRecv, accounts);
 
         TestCase.assertEquals("Expecting " + value.toString(10), value, acsRecv.getBalance());
         TestCase.assertEquals("Expecting " + Util.VALUE_MINTING.subtract(value), Util.VALUE_MINTING.subtract(value), acsMint.getBalance());
-
-
-        //GenesisBlock gb = new GenesisBlock();
-        //System.out.println(AppServiceProvider.getSerializationService().encodeJSON(gb));
 
     }
 }

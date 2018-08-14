@@ -1,5 +1,6 @@
 package network.elrond.data;
 
+import javafx.util.Pair;
 import network.elrond.account.Accounts;
 import network.elrond.account.AccountsManager;
 import network.elrond.benchmark.Statistic;
@@ -157,9 +158,9 @@ public class ExecutionServiceImpl implements ExecutionService {
             // 2. when not part of the consensus validate block and add it to it's blockchain if valid
 
             logger.trace("Processing transactions...");
-            List<Transaction> transactions = AppServiceProvider.getTransactionService().getTransactions(blockchain, block);
-            for (Transaction transaction : transactions) {
-                ExecutionReport transactionExecutionReport = processTransaction(transaction, accounts);
+            List<Pair<String, Transaction>> transactionHashPairs = AppServiceProvider.getTransactionService().getTransactions(blockchain, block);
+            for (Pair<String, Transaction> transactionHashPair : transactionHashPairs) {
+                ExecutionReport transactionExecutionReport = processTransaction(transactionHashPair, accounts);
                 if (!transactionExecutionReport.isOk()) {
                     blockExecutionReport.combine(transactionExecutionReport);
                     logger.trace("Block process FAILED!");
@@ -197,25 +198,26 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
     @Override
-    public ExecutionReport processTransaction(Transaction transaction, Accounts accounts) {
-        logger.traceEntry("params: {} {}", transaction, accounts);
-        Util.check(transaction != null, "transaction != null");
+    public ExecutionReport processTransaction(Pair<String, Transaction> transactionHashPair, Accounts accounts) {
+        logger.traceEntry("params: {} {}", transactionHashPair, accounts);
+        Util.check(transactionHashPair != null, "transaction != null");
         Util.check(accounts != null, "accounts != null");
 
         try {
-            return logger.traceExit(_processTransaction(accounts, transaction));
+            return logger.traceExit(_processTransaction(accounts, transactionHashPair));
         } catch (Exception e) {
             logger.catching(e);
             return logger.traceExit(ExecutionReport.create().ko(e));
         }
     }
 
-    private ExecutionReport _processTransaction(Accounts accounts, Transaction transaction) throws IOException, ClassNotFoundException {
-        logger.traceEntry("params: {} {}", transaction, accounts);
+    private ExecutionReport _processTransaction(Accounts accounts, Pair<String, Transaction> transactionHashPair) throws IOException, ClassNotFoundException {
+        logger.traceEntry("params: {} {}", transactionHashPair, accounts);
 
-        Util.check(transaction != null, "Null transaction");
+        Util.check(transactionHashPair != null, "Null transaction");
 
-        String strHash = new String(Base64.encode(serializationService.getHash(transaction)));
+        String strHash = transactionHashPair.getKey();
+        Transaction transaction = transactionHashPair.getValue();
 
         if (!AppServiceProvider.getTransactionService().verifyTransaction(transaction)) {
             return logger.traceExit(ExecutionReport.create().ko("Invalid transaction! tx hash: " + strHash));

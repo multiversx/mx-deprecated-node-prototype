@@ -1,6 +1,5 @@
 package network.elrond.account;
 
-import net.tomp2p.peers.PeerAddress;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.chronology.NTPClient;
@@ -10,8 +9,6 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.*;
-import network.elrond.p2p.P2PBroadcastChannel;
-import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,10 +17,9 @@ import org.mapdb.Fun;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+
+import javafx.util.Pair;
 
 public class AccountStateServiceImpl implements AccountStateService {
     private static final Logger logger = LogManager.getLogger(AccountStateServiceImpl.class);
@@ -156,6 +152,7 @@ public class AccountStateServiceImpl implements AccountStateService {
         logger.traceExit();
     }
 
+    @SuppressWarnings("unchecked")
     public Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue, AppState state, AppContext context) {
         logger.traceEntry("params: {} {} {} {}", initialAddress, initialValue, state, context);
 
@@ -207,7 +204,10 @@ public class AccountStateServiceImpl implements AccountStateService {
             Accounts accountsTemp = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
 
             ExecutionService executionService = AppServiceProvider.getExecutionService();
-            ExecutionReport executionReport = executionService.processTransaction(transactionMint, accountsTemp);
+            String transactionMintHash = AppServiceProvider.getSerializationService().getHashString(transactionMint);
+
+            Pair<String, Transaction> transactionHashPair = new Pair(transactionMintHash, transactionMint);
+            ExecutionReport executionReport = executionService.processTransaction(transactionHashPair, accountsTemp);
             if (!executionReport.isOk()) {
                 return logger.traceExit((Fun.Tuple2<Block, Transaction>) null);
             }

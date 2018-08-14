@@ -29,7 +29,7 @@ public class SerializationServiceImpl implements SerializationService {
             return logger.traceExit(mapper.writeValueAsString(object));
         } catch (JsonProcessingException e) {
             logger.catching(e);
-            return logger.traceExit((String)null);
+            return logger.traceExit((String) null);
         }
     }
 
@@ -41,7 +41,7 @@ public class SerializationServiceImpl implements SerializationService {
             return logger.traceExit(mapper.readValue(strJSONData, clazz));
         } catch (IOException e) {
             logger.catching(e);
-            return logger.traceExit((T)null);
+            return logger.traceExit((T) null);
         }
     }
 
@@ -52,20 +52,26 @@ public class SerializationServiceImpl implements SerializationService {
         String json = AppServiceProvider.getSerializationService().encodeJSON(object);
         Util.check(json != null, "json is null");
 
-//        MessageDigest instance = null;
-////        try {
-////            instance = MessageDigest.getInstance("SHA3-256");
-////        } catch (NoSuchAlgorithmException ex) {
-////            throw new RuntimeException(ex);
-////        }
-////        return instance.digest(json.getBytes());
         return logger.traceExit((Util.SHA3.get().digest(json.getBytes())));
     }
 
+
     @Override
-    public String getHashString(Object object) {
-        return new String(Base64.encode(getHash(object)));
+    public byte[] getHash(String hash) {
+        Util.check(hash != null, "hash != null");
+        return Base64.decode(hash);
     }
 
 
+    @Override
+    public String getHashString(Object object) {
+        Util.check(object != null, "object != null");
+        return new String(Base64.encode(getHash(object)));
+    }
+
+    @Override
+    public String getHashString(byte[] hash) {
+        Util.check(hash != null, "hash != null");
+        return new String(Base64.encode(hash));
+    }
 }

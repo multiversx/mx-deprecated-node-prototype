@@ -1,5 +1,6 @@
 package network.elrond.data;
 
+import javafx.util.Pair;
 import network.elrond.account.Accounts;
 import network.elrond.benchmark.StatisticsManager;
 import network.elrond.blockchain.Blockchain;
@@ -15,5 +16,5 @@ public interface ExecutionService {
     /**
      * Process transaction and update accounts state
      */
-    ExecutionReport processTransaction(Transaction transaction, Accounts accounts);
+    ExecutionReport processTransaction(Pair<String, Transaction> transactionHashPair, Accounts accounts);
 }

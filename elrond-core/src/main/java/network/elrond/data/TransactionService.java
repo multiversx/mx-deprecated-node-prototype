@@ -1,5 +1,6 @@
 package network.elrond.data;
 
+import javafx.util.Pair;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.crypto.PublicKey;
 
@@ -13,7 +14,7 @@ public interface TransactionService {
 
     boolean verifyTransaction(Transaction tx);
 
-    List<Transaction> getTransactions(Blockchain blockchain, Block block) throws IOException, ClassNotFoundException;
+    List<Pair<String, Transaction>> getTransactions(Blockchain blockchain, Block block) throws IOException, ClassNotFoundException;
 
     Transaction generateTransaction(PublicKey sender, PublicKey receiver, long value, long nonce);
 

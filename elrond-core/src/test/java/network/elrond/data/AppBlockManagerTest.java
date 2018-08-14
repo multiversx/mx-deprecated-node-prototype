@@ -151,12 +151,14 @@ public class AppBlockManagerTest {
         Transaction tx1 = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, pbkeyRecv, BigInteger.TEN, BigInteger.ZERO);
         AppServiceProvider.getTransactionService().signTransaction(tx1, privateKeyMinting.getValue(), publicKeyMinting.getValue());
 
-        List<Transaction> transactions = new ArrayList<>();
-        transactions.add(tx1);
-        AppServiceProvider.getBootstrapService().commitTransaction(tx1, AppServiceProvider.getSerializationService().getHashString(tx1), state.getBlockchain());
+        List<Pair<String, Transaction>> transactionHashPairs = new ArrayList<>();
+        String txHash = AppServiceProvider.getSerializationService().getHashString(tx1);
+
+        transactionHashPairs.add(new Pair<>(txHash, tx1));
+        AppServiceProvider.getBootstrapService().commitTransaction(tx1, txHash, state.getBlockchain());
 
         waitToStartInAnewRound();
-        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(transactions, state);
+        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(transactionHashPairs, state);
         Block blk = blockReceiptsPair.getKey();
         appBlockManager.signBlock(blk, pvkeyRecv);
 
@@ -178,7 +180,6 @@ public class AppBlockManagerTest {
 
         UtilTest.printAccountsWithBalance(state.getAccounts());
 
-
     }
 
     @Test
@@ -198,14 +199,17 @@ public class AppBlockManagerTest {
         Transaction tx2 = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, pbkeyRecv, BigInteger.TEN, BigInteger.ZERO);
         AppServiceProvider.getTransactionService().signTransaction(tx1, privateKeyMinting.getValue(), publicKeyMinting.getValue());
 
-        List<Transaction> transactions = new ArrayList<>();
-        transactions.add(tx1);
-        transactions.add(tx2);
-        AppServiceProvider.getBootstrapService().commitTransaction(tx1, AppServiceProvider.getSerializationService().getHashString(tx1), state.getBlockchain());
-        AppServiceProvider.getBootstrapService().commitTransaction(tx2, AppServiceProvider.getSerializationService().getHashString(tx2), state.getBlockchain());
+        List<Pair<String, Transaction>> transactionHashPairs = new ArrayList<>();
+        String tx1Hash = AppServiceProvider.getSerializationService().getHashString(tx1);
+        String tx2Hash = AppServiceProvider.getSerializationService().getHashString(tx2);
+
+        transactionHashPairs.add(new Pair<>(tx1Hash, tx1));
+        transactionHashPairs.add(new Pair<>(tx2Hash, tx2));
+        AppServiceProvider.getBootstrapService().commitTransaction(tx1, tx1Hash, state.getBlockchain());
+        AppServiceProvider.getBootstrapService().commitTransaction(tx2, tx2Hash, state.getBlockchain());
 
         waitToStartInAnewRound();
-        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(transactions, state);
+        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(transactionHashPairs, state);
         Block blk = blockReceiptsPair.getKey();
         appBlockManager.signBlock(blk, pvkeyRecv);
 
@@ -258,14 +262,18 @@ public class AppBlockManagerTest {
         //valid transaction to recv1
         transactions.add(AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, pbkeyRecv1, BigInteger.TEN, BigInteger.valueOf(2)));
 
+        List<Pair<String, Transaction>> transactionHashPair = new ArrayList<>();
         for (Transaction transaction : transactions) {
+            String txHash = AppServiceProvider.getSerializationService().getHashString(transaction);
+            transactionHashPair.add(new Pair<>(txHash, transaction));
             AppServiceProvider.getTransactionService().signTransaction(transaction, privateKeyMinting.getValue(), publicKeyMinting.getValue());
 
-            AppServiceProvider.getBootstrapService().commitTransaction(transaction, AppServiceProvider.getSerializationService().getHashString(transaction), state.getBlockchain());
+            AppServiceProvider.getBootstrapService().commitTransaction(transaction, txHash, state.getBlockchain());
+
         }
 
         waitToStartInAnewRound();
-        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(transactions, state);
+        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(transactionHashPair, state);
         Block blk = blockReceiptsPair.getKey();
         appBlockManager.signBlock(blk, pvkeyRecv1);
 
@@ -323,14 +331,18 @@ public class AppBlockManagerTest {
         //valid transaction to recv1
         transactions.add(AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, pbkeyRecv1, BigInteger.TEN, BigInteger.valueOf(2)));
 
+        List<Pair<String, Transaction>> transactionHashPair = new ArrayList<>();
+
         for (Transaction transaction : transactions) {
+            String txHash = AppServiceProvider.getSerializationService().getHashString(transaction);
+            transactionHashPair.add(new Pair<>(txHash, transaction));
             AppServiceProvider.getTransactionService().signTransaction(transaction, privateKeyMinting.getValue(), publicKeyMinting.getValue());
 
-            AppServiceProvider.getBootstrapService().commitTransaction(transaction, AppServiceProvider.getSerializationService().getHashString(transaction), state.getBlockchain());
+            AppServiceProvider.getBootstrapService().commitTransaction(transaction, txHash, state.getBlockchain());
         }
 
         waitToStartInAnewRound();
-        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(transactions, state);
+        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(transactionHashPair, state);
         Block block = blockReceiptsPair.getKey();
         appBlockManager.signBlock(block, pvkeyRecv1);
 
@@ -439,8 +451,9 @@ public class AppBlockManagerTest {
         PrivateKey privateKeyMinting = AppServiceProvider.getShardingService().getPrivateKeyForMinting(new Shard(0));
 
         Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, publicKey, BigInteger.TEN, BigInteger.ZERO);
+        String txHash = AppServiceProvider.getSerializationService().getHashString(tx);
         AppServiceProvider.getTransactionService().signTransaction(tx, privateKeyMinting.getValue(), publicKeyMinting.getValue());
-        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx), state);
+        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(new Pair<>(txHash, tx)), state);
         Block block = blockReceiptsPair.getKey();
         Assert.assertTrue("ListOfTxHashes does not have exactly 1 hash", BlockUtil.getTransactionsCount(block) == 1);
     }
@@ -449,7 +462,9 @@ public class AppBlockManagerTest {
     public void testComposeBlockWithOneNotSignedTransaction() throws IOException {
         Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, publicKey, BigInteger.TEN.pow(100), BigInteger.ZERO);
         //AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue());
-        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx), state);
+        String txHash = AppServiceProvider.getSerializationService().getHashString(tx);
+
+        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(new Pair<>(txHash, tx)), state);
         Block block = blockReceiptsPair.getKey();
         Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.getTransactionsCount(block) == 0);
     }
@@ -457,8 +472,9 @@ public class AppBlockManagerTest {
     @Test
     public void testComposeBlockWithOneNotEnoughFundsTransaction() throws IOException {
         Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, publicKey, BigInteger.TEN.pow(100), BigInteger.ZERO);
+        String txHash = AppServiceProvider.getSerializationService().getHashString(tx);
         AppServiceProvider.getTransactionService().signTransaction(tx, privateKeyMinting.getValue(), publicKeyMinting.getValue());
-        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx), state);
+        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(new Pair<>(txHash, tx)), state);
         Block block = blockReceiptsPair.getKey();
         Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.getTransactionsCount(block) == 0);
     }
@@ -467,8 +483,9 @@ public class AppBlockManagerTest {
     //@Test
     public void testComposeBlockWithOneNonceMismatchTransaction() throws IOException {
         Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, publicKey, BigInteger.TEN, BigInteger.TEN);
+        String txHash = AppServiceProvider.getSerializationService().getHashString(tx);
         AppServiceProvider.getTransactionService().signTransaction(tx, privateKeyMinting.getValue(), publicKeyMinting.getValue());
-        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx), state);
+        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(new Pair<>(txHash, tx)), state);
         Block block = blockReceiptsPair.getKey();
         Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.getTransactionsCount(block) == 0);
     }
@@ -479,12 +496,14 @@ public class AppBlockManagerTest {
         PrivateKey privateKeyMinting = AppServiceProvider.getShardingService().getPrivateKeyForMinting(new Shard(0));
 
         Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, publicKey, BigInteger.TEN.pow(100), BigInteger.ZERO);
+        String txHash = AppServiceProvider.getSerializationService().getHashString(tx);
         Transaction tx2 = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, publicKey, BigInteger.TEN.pow(1), BigInteger.ZERO);
+        String tx2Hash = AppServiceProvider.getSerializationService().getHashString(tx2);
 
         AppServiceProvider.getTransactionService().signTransaction(tx, privateKeyMinting.getValue(), publicKeyMinting.getValue());
         AppServiceProvider.getTransactionService().signTransaction(tx2, privateKeyMinting.getValue(), publicKeyMinting.getValue());
 
-        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx, tx2), state);
+        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(new Pair<>(txHash, tx), new Pair<>(tx2Hash, tx2)), state);
         Block block = blockReceiptsPair.getKey();
         Assert.assertTrue("ListOfTxHashes does not have exactly 1 hash", BlockUtil.getTransactionsCount(block) == 1);
     }
@@ -536,19 +555,16 @@ public class AppBlockManagerTest {
     @Test
     public void testVerifySignatureBlock() throws IOException {
         Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, publicKey, BigInteger.TEN.pow(1), BigInteger.ONE);
+        String txHash = AppServiceProvider.getSerializationService().getHashString(tx);
         Transaction tx2 = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, publicKey, BigInteger.TEN.pow(1), BigInteger.ONE);
+        String tx2Hash = AppServiceProvider.getSerializationService().getHashString(tx);
 
         AppServiceProvider.getTransactionService().signTransaction(tx, privateKeyMinting.getValue(), publicKeyMinting.getValue());
         AppServiceProvider.getTransactionService().signTransaction(tx2, privateKeyMinting.getValue(), publicKeyMinting.getValue());
 
         accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
 
-//        state = new AppState();
-//        state.setAccounts(accounts);
-//        state.setBlockchain(blockchain);
-//        state.setNtpClient(new NTPClient(new ArrayList<String>(), 100));
-
-        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(tx, tx2), state);
+        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(new Pair<>(txHash, tx), new Pair<>(tx2Hash, tx2)), state);
         Block block = blockReceiptsPair.getKey();
         appBlockManager.signBlock(block, privateKey);
 

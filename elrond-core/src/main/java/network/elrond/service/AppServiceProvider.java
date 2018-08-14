@@ -2,8 +2,6 @@ package network.elrond.service;
 
 import network.elrond.account.AccountStateService;
 import network.elrond.account.AccountStateServiceImpl;
-import network.elrond.blockchain.AppPersistenceService;
-import network.elrond.blockchain.AppPersistenceServiceImpl;
 import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainServiceImpl;
 import network.elrond.chronology.ChronologyService;
@@ -49,7 +47,6 @@ public class AppServiceProvider {
         putService(MultiSignatureService.class, new MultiSignatureServiceBNImpl());
         putService(AccountStateService.class, new AccountStateServiceImpl());
         putService(ExecutionService.class, new ExecutionServiceImpl());
-        putService(AppPersistenceService.class, new AppPersistenceServiceImpl());
         putService(BootstrapService.class, new BootstrapServiceImpl());
         putService(P2PCommunicationService.class, new P2PCommunicationServiceImpl());
         putService(ChronologyService.class, new ChronologyServiceImpl());

@@ -1,5 +1,6 @@
 package network.elrond.p2p.handlers;
 
+import javafx.util.Pair;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
@@ -14,13 +15,14 @@ import org.spongycastle.util.encoders.Base64;
 
 import java.util.ArrayList;
 
-public class BlockTransactionsHandler implements RequestHandler<ArrayList<Transaction>, P2PRequestMessage> {
+public class BlockTransactionsHandler implements RequestHandler<ArrayList<Pair<String, Transaction>>, P2PRequestMessage> {
     private static final Logger logger = LogManager.getLogger(BlockRequestHandler.class);
 
     @Override
-    public ArrayList<Transaction> onRequest(AppState state, P2PRequestMessage data) {
+    @SuppressWarnings("unchecked")
+    public ArrayList<Pair<String, Transaction>> onRequest(AppState state, P2PRequestMessage data) {
         logger.traceEntry("params: {} {}", state, data);
-        ArrayList<Transaction> transactionList = new ArrayList<>();
+        ArrayList<Pair<String, Transaction>> transactionHashPairList = new ArrayList<>();
         data.getKey();
         String blockHash = (String) data.getKey();
         Blockchain blockchain = state.getBlockchain();
@@ -30,16 +32,17 @@ public class BlockTransactionsHandler implements RequestHandler<ArrayList<Transa
         } else {
             // get list of transactions
             for (byte[] transactionHash : block.getListTXHashes()) {
-                Transaction transaction = AppServiceProvider.getBlockchainService().getLocal(new String(Base64.encode(transactionHash)), blockchain, BlockchainUnitType.TRANSACTION);
+                String hash = new String(Base64.encode(transactionHash));
+                Transaction transaction = AppServiceProvider.getBlockchainService().getLocal(hash, blockchain, BlockchainUnitType.TRANSACTION);
                 if (transaction != null) {
-                    transactionList.add(transaction);
+                    transactionHashPairList.add(new Pair(hash, transaction));
                 } else {
                     logger.warn("Replying to request: BLOCK_TRANSACTIONS {} for block hash {} not found", transactionHash, blockHash);
                 }
             }
 
-            logger.warn("Replying to request: BLOCK_TRANSACTIONS with hash {} and {} transactions", blockHash, transactionList.size());
+            logger.warn("Replying to request: BLOCK_TRANSACTIONS with hash {} and {} transactions", blockHash, transactionHashPairList.size());
         }
-        return logger.traceExit(transactionList);
+        return logger.traceExit(transactionHashPairList);
     }
 }
