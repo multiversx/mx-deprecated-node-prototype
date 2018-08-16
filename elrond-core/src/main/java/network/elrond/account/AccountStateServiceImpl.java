@@ -201,7 +201,7 @@ public class AccountStateServiceImpl implements AccountStateService {
 
             AccountsContext accountsContext = new AccountsContext();
             accountsContext.setShard(state.getShard());
-            Accounts accountsTemp = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
+            Accounts accountsTemp = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath(), 100000));
 
             ExecutionService executionService = AppServiceProvider.getExecutionService();
             String transactionMintHash = AppServiceProvider.getSerializationService().getHashString(transactionMint);

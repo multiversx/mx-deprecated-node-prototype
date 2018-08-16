@@ -26,7 +26,7 @@ public class AccountStateServiceImplTest {
         AccountsContext context = new AccountsContext();
         PublicKey publicKeyMinting = AppServiceProvider.getShardingService().getPublicKeyForMinting(new Shard(0));
         context.setShard(AppServiceProvider.getShardingService().getShard(publicKeyMinting.getValue()));
-        accounts = new Accounts(context, new AccountsPersistenceUnit<>(""));
+        accounts = new Accounts(context, new AccountsPersistenceUnit<>("", 100));
         address = AccountAddress.fromHexString("testAddresss");
     }
 
@@ -141,7 +141,7 @@ public class AccountStateServiceImplTest {
         accountsContext.setShard(shard);
         appState.setShard(shard);
 
-        accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(""));
+        accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>("", 100));
         String initialAddress = Util.byteArrayToHexString(publicKey.getValue());
 
         accountStateService.generateGenesisBlock(initialAddress, BigInteger.TEN, appState, appContext);

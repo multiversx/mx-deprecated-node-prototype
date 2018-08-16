@@ -12,7 +12,7 @@ public class AccountsTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testAccountsFromNullContextShouldThrowException() throws IOException {
-        Accounts accounts  = new Accounts(null, new AccountsPersistenceUnit<>(""));
+        Accounts accounts  = new Accounts(null, new AccountsPersistenceUnit<>("", 100));
         Assert.fail();
     }
 
@@ -24,7 +24,7 @@ public class AccountsTest {
 
     @Test
     public void testGetAccountsPersistenceUnit() throws IOException {
-        AccountsPersistenceUnit<AccountAddress, AccountState> unit = new AccountsPersistenceUnit<>("");
+        AccountsPersistenceUnit<AccountAddress, AccountState> unit = new AccountsPersistenceUnit<>("", 100);
         AccountsContext accountsContext = new AccountsContext();
         PublicKey publicKeyMinting = AppServiceProvider.getShardingService().getPublicKeyForMinting(new Shard(0));
         accountsContext.setShard(AppServiceProvider.getShardingService().getShard(publicKeyMinting.getValue()));
@@ -34,7 +34,7 @@ public class AccountsTest {
 
     @Test
     public void testGetAddresses() throws IOException {
-        AccountsPersistenceUnit<AccountAddress, AccountState> unit = new AccountsPersistenceUnit<>("");
+        AccountsPersistenceUnit<AccountAddress, AccountState> unit = new AccountsPersistenceUnit<>("", 100);
         AccountsContext accountsContext = new AccountsContext();
         PublicKey publicKeyMinting = AppServiceProvider.getShardingService().getPublicKeyForMinting(new Shard(0));
         accountsContext.setShard(AppServiceProvider.getShardingService().getShard(publicKeyMinting.getValue()));

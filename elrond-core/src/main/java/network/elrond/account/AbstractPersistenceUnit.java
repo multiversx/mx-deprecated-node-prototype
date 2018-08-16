@@ -14,17 +14,15 @@ import java.io.IOException;
  * Abstract implementation of key => value persistence unit
  */
 public abstract class AbstractPersistenceUnit<K, V> {
-
-    protected static final int MAX_ENTRIES = 10000;
-
     protected final String databasePath;
     protected DB database;
 
-    final private LRUMap<K, V> cache = new LRUMap<>(0, MAX_ENTRIES);
+    final long maxEntries;
+    final private LRUMap<K, V> cache;
 
     private static final Logger logger = LogManager.getLogger(AbstractPersistenceUnit.class);
 
-    public AbstractPersistenceUnit(String databasePath) throws IOException {
+    public AbstractPersistenceUnit(String databasePath, long maxEntries) throws IOException {
         logger.traceEntry("params: {}", databasePath);
         this.databasePath = databasePath;
         if (databasePath == null || databasePath.isEmpty()) {
@@ -34,6 +32,9 @@ public abstract class AbstractPersistenceUnit<K, V> {
         } else {
             this.database = initDatabase(databasePath);
         }
+        this.maxEntries = maxEntries;
+        cache = new LRUMap<>(0, maxEntries);
+
         logger.traceExit();
     }
 
@@ -43,6 +44,10 @@ public abstract class AbstractPersistenceUnit<K, V> {
         options.createIfMissing(true);
         Iq80DBFactory factory = new Iq80DBFactory();
         return logger.traceExit(factory.open(new File(databasePath), options));
+    }
+
+    public long getMaxEntries() {
+        return maxEntries;
     }
 
     public LRUMap<K, V> getCache() {

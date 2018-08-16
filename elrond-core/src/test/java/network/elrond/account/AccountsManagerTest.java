@@ -24,7 +24,7 @@ public class AccountsManagerTest extends ExpectedExceptionTest {
         AccountsContext accountsContext = new AccountsContext();
         PublicKey publicKeyMinting = AppServiceProvider.getShardingService().getPublicKeyForMinting(new Shard(0));
         accountsContext.setShard(AppServiceProvider.getShardingService().getShard(publicKeyMinting.getValue()));
-        accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(""));
+        accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>("", 100));
         operation = ShardOperation.INTRA_SHARD;
     }
 

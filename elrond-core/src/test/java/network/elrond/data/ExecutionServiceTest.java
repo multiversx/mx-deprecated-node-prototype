@@ -43,7 +43,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
 
         accountsContext.setShard(AppServiceProvider.getShardingService().getShard(publicKeyMinting.getValue()));
 
-        accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
+        accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath(), 100));
     }
 
     @After
@@ -73,7 +73,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         byte[] appStateHash = new byte[0];
         AccountsContext accountsContext = new AccountsContext();
         accountsContext.setShard(AppServiceProvider.getShardingService().getShard(publicKeyMinting.getValue()));
-        Accounts accountsSandbox = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
+        Accounts accountsSandbox = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath(), 100));
 
         for (PublicKey pkWallet : publicKeysWallets) {
             if (!pkWallet.equals(publicKeyMint)) {

@@ -35,7 +35,7 @@ public class GenesisBlockTest {
         accTemp.setShard(AppServiceProvider.getShardingService().getShard(publicKeyMinting.getValue()));
         accTemp.setDatabasePath(null);
 
-        Accounts accounts = new Accounts(accTemp, new AccountsPersistenceUnit<>(accTemp.getDatabasePath()));
+        Accounts accounts = new Accounts(accTemp, new AccountsPersistenceUnit<>(accTemp.getDatabasePath(), 100));
         AccountState acsMintTest = accountStateService.getAccountState(acMint, accounts);
         TestCase.assertEquals("Expected " + Util.VALUE_MINTING, Util.VALUE_MINTING, acsMintTest.getBalance());
 
@@ -48,7 +48,7 @@ public class GenesisBlockTest {
 
         TestCase.assertNotNull("Not expecting null for GenesisData ", genesisData);
 
-        accounts = new Accounts(accTemp, new AccountsPersistenceUnit<>(accTemp.getDatabasePath()));
+        accounts = new Accounts(accTemp, new AccountsPersistenceUnit<>(accTemp.getDatabasePath(), 100));
         AccountState acsMint = accountStateService.getAccountState(acMint, accounts);
         AccountState acsRecv = accountStateService.getAccountState(acRecv, accounts);
 

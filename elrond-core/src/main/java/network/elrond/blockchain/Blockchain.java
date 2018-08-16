@@ -44,7 +44,7 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
             String path = context.getDatabasePath(type);
             Class<?> ketType = type.getKeyType();
             Class<?> valueType = type.getValueType();
-            BlockchainPersistenceUnit<?, ?> unit = new BlockchainPersistenceUnit<>(path, valueType);
+            BlockchainPersistenceUnit<?, ?> unit = new BlockchainPersistenceUnit<>(path, valueType, type.getMaxEntries());
             blockchain.put(type, unit);
         }
     }
@@ -93,7 +93,7 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
     }
 
     public void setCurrentBlockIndex(BigInteger currentBlockIndex) {
-        Util.check(currentBlockIndex!=null, "currentBlockIndex!=null");
+        Util.check(currentBlockIndex != null, "currentBlockIndex!=null");
         Util.check(currentBlockIndex.compareTo(BigInteger.ZERO) >= 0, "currentBlockIndex!=null");
         this.currentBlockIndex = currentBlockIndex;
     }
@@ -127,11 +127,11 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
         return pool;
     }
 
-    public BigInteger getNetworkHeight(){
+    public BigInteger getNetworkHeight() {
         return networkBlockHeight;
     }
 
-    public synchronized void setNetworkHeight(BigInteger networkBlockHeight){
+    public synchronized void setNetworkHeight(BigInteger networkBlockHeight) {
         this.networkBlockHeight = networkBlockHeight;
     }
 

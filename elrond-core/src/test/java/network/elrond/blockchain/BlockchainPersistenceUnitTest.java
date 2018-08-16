@@ -17,7 +17,7 @@ public class BlockchainPersistenceUnitTest {
     public void setUp() throws IOException {
 
         r = new Random();
-        blockchainPersistenceUnit = new BlockchainPersistenceUnit<>("test", String.class);
+        blockchainPersistenceUnit = new BlockchainPersistenceUnit<>("test", String.class, 100);
     }
 
     @After
@@ -39,7 +39,7 @@ public class BlockchainPersistenceUnitTest {
     @Test
     public void testPutNullObjectShouldThrowException() throws IOException {
         BlockchainPersistenceUnit<String, String> blockchainPersistenceUnit =
-                new BlockchainPersistenceUnit<>(BaseBlockchainTest.BLOCKCHAIN_BLOCK_DATA_TEST_PATH, String.class);
+                new BlockchainPersistenceUnit<>(BaseBlockchainTest.BLOCKCHAIN_BLOCK_DATA_TEST_PATH, String.class, 100);
         byte[] key = new byte[] { (byte)r.nextInt()};
         byte[] value = new byte[] { (byte)r.nextInt()};
         blockchainPersistenceUnit.put(key,value);
@@ -51,7 +51,7 @@ public class BlockchainPersistenceUnitTest {
     @Test
     public void testDestroyAndRecreate() throws IOException {
         BlockchainPersistenceUnit<String, String> blockchainPersistenceUnit =
-                new BlockchainPersistenceUnit<>(BaseBlockchainTest.BLOCKCHAIN_BLOCK_DATA_TEST_PATH, String.class);
+                new BlockchainPersistenceUnit<>(BaseBlockchainTest.BLOCKCHAIN_BLOCK_DATA_TEST_PATH, String.class, 100);
 
         byte[] key = new byte[]{(byte) r.nextInt()};
         byte[] value = new byte[]{(byte) r.nextInt()};
@@ -75,7 +75,7 @@ public class BlockchainPersistenceUnitTest {
 
 
         BlockchainPersistenceUnit<String, String> blockchainPersistenceUnit =
-                new BlockchainPersistenceUnit<>(BaseBlockchainTest.BLOCKCHAIN_BLOCK_DATA_TEST_PATH, String.class);
+                new BlockchainPersistenceUnit<>(BaseBlockchainTest.BLOCKCHAIN_BLOCK_DATA_TEST_PATH, String.class, 100);
 
         byte[] key = new byte[]{(byte) r.nextInt()};
         byte[] value = new byte[]{(byte) r.nextInt()};

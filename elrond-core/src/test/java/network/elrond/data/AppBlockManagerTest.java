@@ -98,7 +98,7 @@ public class AppBlockManagerTest {
         //memory-only accounts
         accountsContext = new AccountsContext();
         accountsContext.setShard(new Shard(0));
-        state.setAccounts(new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath())));
+        state.setAccounts(new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath(), 100)));
 
         privateKey = new PrivateKey("Receiver");
         publicKey = new PublicKey(privateKey);
@@ -109,7 +109,7 @@ public class AppBlockManagerTest {
         String hashString = AppServiceProvider.getSerializationService().getHashString(blockchain.getGenesisBlock());
         AppServiceProvider.getBootstrapService().commitBlock(blockchain.getGenesisBlock(), hashString, blockchain);
 
-        accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
+        accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath(), 100));
 
         appBlockManager = new AppBlockManager();
     }
@@ -123,7 +123,7 @@ public class AppBlockManagerTest {
     public void testInitialAccounts() throws Exception {
         AccountsContext accountsContextLocal = new AccountsContext();
         accountsContextLocal.setShard(new Shard(0));
-        state.setAccounts(new Accounts(accountsContextLocal, new AccountsPersistenceUnit<>(accountsContextLocal.getDatabasePath())));
+        state.setAccounts(new Accounts(accountsContextLocal, new AccountsPersistenceUnit<>(accountsContextLocal.getDatabasePath(), 100)));
         state.setShard(AppServiceProvider.getShardingService().getShard(publicKeyMinting.getValue()));
         //size should be 1
         TestCase.assertEquals("Accounts size should have been 1: ", 1, state.getAccounts().getAddresses().size());
@@ -144,7 +144,7 @@ public class AppBlockManagerTest {
 
         AccountsContext accountsContextLocal = new AccountsContext();
         accountsContextLocal.setShard(new Shard(0));
-        state.setAccounts(new Accounts(accountsContextLocal, new AccountsPersistenceUnit<>(accountsContextLocal.getDatabasePath())));
+        state.setAccounts(new Accounts(accountsContextLocal, new AccountsPersistenceUnit<>(accountsContextLocal.getDatabasePath(), 100)));
 
         PrivateKey pvkeyRecv = new PrivateKey("RECV");
         PublicKey pbkeyRecv = new PublicKey(pvkeyRecv);
@@ -189,7 +189,7 @@ public class AppBlockManagerTest {
 
         AccountsContext accountsContextLocal = new AccountsContext();
         accountsContextLocal.setShard(new Shard(0));
-        state.setAccounts(new Accounts(accountsContextLocal, new AccountsPersistenceUnit<>(accountsContextLocal.getDatabasePath())));
+        state.setAccounts(new Accounts(accountsContextLocal, new AccountsPersistenceUnit<>(accountsContextLocal.getDatabasePath(), 100)));
 
         PrivateKey pvkeyRecv = new PrivateKey("RECV");
         PublicKey pbkeyRecv = new PublicKey(pvkeyRecv);
@@ -239,7 +239,7 @@ public class AppBlockManagerTest {
 
         AccountsContext accountsContextLocal = new AccountsContext();
         accountsContextLocal.setShard(new Shard(0));
-        state.setAccounts(new Accounts(accountsContextLocal, new AccountsPersistenceUnit<>(accountsContextLocal.getDatabasePath())));
+        state.setAccounts(new Accounts(accountsContextLocal, new AccountsPersistenceUnit<>(accountsContextLocal.getDatabasePath(), 100)));
 
         PrivateKey pvkeyRecv1 = new PrivateKey("RECV1");
         PublicKey pbkeyRecv1 = new PublicKey(pvkeyRecv1);
@@ -308,7 +308,7 @@ public class AppBlockManagerTest {
 
         AccountsContext accountsContextLocal = new AccountsContext();
         accountsContextLocal.setShard(new Shard(0));
-        state.setAccounts(new Accounts(accountsContextLocal, new AccountsPersistenceUnit<>(accountsContextLocal.getDatabasePath())));
+        state.setAccounts(new Accounts(accountsContextLocal, new AccountsPersistenceUnit<>(accountsContextLocal.getDatabasePath(), 100)));
 
         PrivateKey pvkeyRecv1 = new PrivateKey("RECV1");
         PublicKey pbkeyRecv1 = new PublicKey(pvkeyRecv1);
@@ -543,7 +543,7 @@ public class AppBlockManagerTest {
 
     @Test
     public void testVerifySignatureEmptyBlock() throws IOException {
-        accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
+        accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath(), 100));
         state.setAccounts(accounts);
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Collections.emptyList(), state);
         Block block = blockReceiptsPair.getKey();
@@ -563,7 +563,7 @@ public class AppBlockManagerTest {
         AppServiceProvider.getTransactionService().signTransaction(tx, privateKeyMinting.getValue(), publicKeyMinting.getValue());
         AppServiceProvider.getTransactionService().signTransaction(tx2, privateKeyMinting.getValue(), publicKeyMinting.getValue());
 
-        accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
+        accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath(), 100));
 
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(new Pair<>(txHash, tx), new Pair<>(tx2Hash, tx2)), state);
         Block block = blockReceiptsPair.getKey();

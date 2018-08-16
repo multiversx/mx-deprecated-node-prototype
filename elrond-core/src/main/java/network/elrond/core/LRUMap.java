@@ -8,9 +8,9 @@ import com.google.common.cache.CacheBuilder;
  */
 public class LRUMap<K, V> {
     private Cache<K, V> cache;
-    protected final int maxEntries;
+    protected final long maxEntries;
 
-    public LRUMap(int initialEntries, int maxEntries) {
+    public LRUMap(int initialEntries, long maxEntries) {
         this.maxEntries = maxEntries;
         cache = CacheBuilder.newBuilder().maximumSize(maxEntries).build();
     }
