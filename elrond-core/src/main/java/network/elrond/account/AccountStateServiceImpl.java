@@ -25,7 +25,7 @@ public class AccountStateServiceImpl implements AccountStateService {
     private static final Logger logger = LogManager.getLogger(AccountStateServiceImpl.class);
 
     @Override
-    public synchronized AccountState getOrCreateAccountState(AccountAddress address, Accounts accounts) throws IOException, ClassNotFoundException {
+    public synchronized AccountState getOrCreateAccountState(AccountAddress address, Accounts accounts) {
         logger.traceEntry("params: {} {}", address, accounts);
 
         Util.check(address != null, "address!=null");

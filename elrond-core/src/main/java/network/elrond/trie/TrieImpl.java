@@ -125,7 +125,7 @@ public class TrieImpl implements Trie {
     public byte[] getRootHash() {
         if (root == null
                 || (root instanceof byte[] && ((byte[]) root).length == 0)
-                || (root instanceof String && "".equals((String) root))) {
+                || (root instanceof String && "".equals(root))) {
             return ByteUtil.EMPTY_BYTE_ARRAY;
         } else if (root instanceof byte[]) {
             return (byte[]) this.getRoot();
@@ -473,6 +473,6 @@ public class TrieImpl implements Trie {
     }
 
     public interface ScanAction {
-        public void doOnNode(byte[] hash, Value node);
+        void doOnNode(byte[] hash, Value node);
     }
 }

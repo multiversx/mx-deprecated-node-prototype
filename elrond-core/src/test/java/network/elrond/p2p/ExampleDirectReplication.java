@@ -62,12 +62,7 @@ public final class ExampleDirectReplication {
     private static void exampleDirectReplication(final PeerDHT[] peers) throws IOException, InterruptedException {
         PutBuilder putBuilder = peers[1].put(Number160.ONE).data(new Data("test"));
         JobScheduler replication = new JobScheduler(peers[1].peer());
-        Shutdown shutdown = replication.start(putBuilder, 1000, -1, new AutomaticFuture() {
-            @Override
-            public void futureCreated(BaseFuture future) {
-                System.out.println("put again...");
-            }
-        });
+        Shutdown shutdown = replication.start(putBuilder, 1000, -1, future -> System.out.println("put again..."));
         Thread.sleep(NINE_SECONDS);
         System.out.println("stop replication");
         shutdown.shutdown();

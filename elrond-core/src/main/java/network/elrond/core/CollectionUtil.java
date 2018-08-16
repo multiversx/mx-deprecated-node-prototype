@@ -20,16 +20,16 @@ public class CollectionUtil {
 
         List<F> elems = list.stream().map(function).collect(Collectors.toList());
 
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (int i = 0; i < elems.size(); i++) {
-            result += elems.get(i);
+            result.append(elems.get(i));
             if (i < list.size() - 1) {
-                result += glue;
+                result.append(glue);
             }
 
         }
 
-        return result;
+        return result.toString();
 
     }
 

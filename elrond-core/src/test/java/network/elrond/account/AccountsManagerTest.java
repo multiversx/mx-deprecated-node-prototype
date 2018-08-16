@@ -1,7 +1,6 @@
 package network.elrond.account;
 
 import network.elrond.ExpectedExceptionTest;
-import network.elrond.core.Util;
 import network.elrond.crypto.PublicKey;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
@@ -113,9 +112,9 @@ public class AccountsManagerTest extends ExpectedExceptionTest {
         AppServiceProvider.getAccountStateService().setAccountState(senderAddress, senderAccountState, accounts);
         accountsManager.transferFunds(accounts, "Sender", "Receiver", BigInteger.ONE, BigInteger.ZERO, operation);
         senderAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(senderAddress, accounts);
-        Assert.assertTrue(senderAccountState.getBalance().longValue() == 9);
+        Assert.assertEquals(9, senderAccountState.getBalance().longValue());
         AccountState receiverAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(receiverAddress, accounts);
-        Assert.assertTrue(receiverAccountState.getBalance().longValue() == 1);
-        Assert.assertTrue(senderAccountState.getNonce().longValue() == 1);
+        Assert.assertEquals(1, receiverAccountState.getBalance().longValue());
+        Assert.assertEquals(1, senderAccountState.getNonce().longValue());
     }
 }

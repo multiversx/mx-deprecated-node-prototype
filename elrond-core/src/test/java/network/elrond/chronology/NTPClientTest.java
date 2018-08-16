@@ -4,10 +4,10 @@ import junit.framework.TestCase;
 import network.elrond.Application;
 import network.elrond.application.AppContext;
 import network.elrond.core.ThreadUtil;
-import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 
 public class NTPClientTest {
@@ -21,7 +21,7 @@ public class NTPClientTest {
     public void getTimeNoServerShouldResultInOfflineNtpClient() throws Exception{
         //ChronologyService chronologyService = AppServiceProvider.getChronologyService();
 
-        NTPClient ntp = new NTPClient(Arrays.asList(""), 100);
+        NTPClient ntp = new NTPClient(Collections.singletonList(""), 100);
 
         Thread.sleep(1000);
 

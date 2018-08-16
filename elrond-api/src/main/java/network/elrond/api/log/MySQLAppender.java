@@ -31,7 +31,7 @@ public class MySQLAppender extends AbstractAppender {
 
     private Thread threadWork;
 
-    private Object locker = new Object();
+    private final Object locker = new Object();
     private List<LogEvent> logEventList = new ArrayList<>();
 
     private static final int BUCKET_SIZE = 500;
@@ -44,9 +44,7 @@ public class MySQLAppender extends AbstractAppender {
     protected MySQLAppender(String name, Filter filter, Layout<? extends Serializable> layout) {
         super(name, filter, layout);
 
-        threadWork = new Thread(() -> {
-            doContinousAppend();
-        });
+        threadWork = new Thread(this::doContinousAppend);
         threadWork.start();
 
     }
@@ -56,9 +54,7 @@ public class MySQLAppender extends AbstractAppender {
 
         this.connection = connection;
 
-        threadWork = new Thread(() -> {
-            doContinousAppend();
-        });
+        threadWork = new Thread(() -> doContinousAppend());
         threadWork.start();
     }
 
@@ -242,9 +238,8 @@ public class MySQLAppender extends AbstractAppender {
     private Connection getConnection(){
         //"jdbc:mysql://46.101.242.65:3306/LOGS?useSSL=false&useServerPrepStmts=false&rewriteBatchedStatements=true&user=loguser&password=elrondCaps67"
         try {
-            Connection conn = DriverManager.getConnection(connection);
             //connection.setAutoCommit(false);
-            return conn;
+            return DriverManager.getConnection(connection);
         } catch (Exception ex){
             ex.printStackTrace();
         }

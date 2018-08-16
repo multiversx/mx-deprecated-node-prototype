@@ -78,7 +78,7 @@ public class MockDB implements org.iq80.leveldb.DB {
     }
 
     @Override
-    public void suspendCompactions() throws InterruptedException {
+    public void suspendCompactions() {
 
     }
 
@@ -93,7 +93,7 @@ public class MockDB implements org.iq80.leveldb.DB {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
 
     }
 }

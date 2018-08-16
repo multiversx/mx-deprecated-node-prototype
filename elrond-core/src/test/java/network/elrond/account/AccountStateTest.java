@@ -27,7 +27,7 @@ public class AccountStateTest {
     @Test
     public void testAccountStateConstructorWithCorrectBalance() {
         AccountState accountState = new AccountState(BigInteger.ZERO, BigInteger.valueOf(2), AccountAddress.EMPTY_ADDRESS);
-        Assert.assertTrue(accountState.getBalance().longValue() == 2);
+        Assert.assertEquals(2, accountState.getBalance().longValue());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -39,7 +39,7 @@ public class AccountStateTest {
     @Test
     public void testAccountStateConstructorWithCorrectNonce() {
         AccountState accountState = new AccountState(BigInteger.valueOf(1), BigInteger.valueOf(2), AccountAddress.EMPTY_ADDRESS);
-        Assert.assertTrue(accountState.getNonce().longValue() == 1);
+        Assert.assertEquals(1, accountState.getNonce().longValue());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -53,8 +53,8 @@ public class AccountStateTest {
         AccountState accountState = new AccountState(BigInteger.valueOf(1), BigInteger.valueOf(2), AccountAddress.EMPTY_ADDRESS);
         AccountState copiedState = new AccountState(accountState);
 
-        Assert.assertTrue(copiedState.getBalance().longValue() == 2);
-        Assert.assertTrue(copiedState.getNonce().longValue() == 1);
+        Assert.assertEquals(2, copiedState.getBalance().longValue());
+        Assert.assertEquals(1, copiedState.getNonce().longValue());
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -34,7 +34,7 @@ public class NTPClient implements AutoCloseable{
     Thread pollThread = null;
     long pollMs;
     List<InetAddress> listHostsAddr = new ArrayList<>();
-    List<String> listHosts = new ArrayList();
+    List<String> listHosts = new ArrayList<>();
     int currentHost = 0;
     boolean offline = true;
 
@@ -103,7 +103,7 @@ public class NTPClient implements AutoCloseable{
 
     private TimeInfo timeInfo;
     private long timeInfoSetLocalTime;
-    private Object locker = new Object();
+    private final Object locker = new Object();
 
     private void setTimeInfo(TimeInfo timeInfo) {
         synchronized (locker) {

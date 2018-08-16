@@ -43,6 +43,7 @@ public class ElrondApiApplication {
                 .build();
     }
 
+    @SuppressWarnings("unchecked")
     public static void main(String[] args) {
         SimpleDateFormat sdfSource = new SimpleDateFormat(
                 "yyyy-MM-dd HH.mm.ss");

@@ -1,6 +1,5 @@
 package network.elrond.account;
 
-import network.elrond.core.Util;
 import network.elrond.crypto.PublicKey;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
@@ -18,7 +17,7 @@ public class AccountsTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testAccountsFromNullAccountsPersistenceUnitShouldThrowException() throws IOException {
+    public void testAccountsFromNullAccountsPersistenceUnitShouldThrowException() {
         Accounts accounts  = new Accounts(new AccountsContext(), null);
         Assert.fail();
     }
@@ -40,7 +39,7 @@ public class AccountsTest {
         PublicKey publicKeyMinting = AppServiceProvider.getShardingService().getPublicKeyForMinting(new Shard(0));
         accountsContext.setShard(AppServiceProvider.getShardingService().getShard(publicKeyMinting.getValue()));
         Accounts accounts  = new Accounts(accountsContext, unit);
-        Assert.assertTrue(accounts.getAddresses()!=null );
+        Assert.assertNotNull(accounts.getAddresses());
         Assert.assertEquals(1, accounts.getAddresses().size());
     }
 }

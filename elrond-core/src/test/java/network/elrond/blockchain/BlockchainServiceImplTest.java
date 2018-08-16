@@ -32,17 +32,17 @@ public class BlockchainServiceImplTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testPutWithNullHashShouldThrowExtension() throws IOException, ClassNotFoundException {
+    public void testPutWithNullHashShouldThrowExtension() throws IOException {
         blockchainService.put(null, "test", blockchain, BlockchainUnitType.BLOCK);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testPutWithNullObjectShouldThrowExtension() throws IOException, ClassNotFoundException {
+    public void testPutWithNullObjectShouldThrowExtension() throws IOException {
         blockchainService.put("testHash",  null, blockchain, BlockchainUnitType.BLOCK);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testPutWithNullBlockchainShouldThrowExtension() throws IOException, ClassNotFoundException {
+    public void testPutWithNullBlockchainShouldThrowExtension() throws IOException {
         blockchainService.put("testHash",  "test", null, BlockchainUnitType.BLOCK);
     }
 

@@ -30,7 +30,7 @@ public class BlockchainServiceImpl implements BlockchainService {
      * @return
      */
     @Override
-    public synchronized <H extends Object, B extends Serializable> boolean contains(H hash, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
+    public synchronized <H, B extends Serializable> boolean contains(H hash, Blockchain blockchain, BlockchainUnitType type) {
         logger.traceEntry("params: {} {} {}", hash, blockchain, type);
         Util.check(hash != null, "hash!=null");
         Util.check(blockchain != null, "blockchain!=null");
@@ -77,7 +77,7 @@ public class BlockchainServiceImpl implements BlockchainService {
     }
 
 
-    private <H extends Object, B extends Serializable> void put(H hash, B object, Blockchain blockchain, BlockchainUnitType type, boolean await) throws IOException {
+    private <H extends Object, B extends Serializable> void put(H hash, B object, Blockchain blockchain, BlockchainUnitType type, boolean await) {
         logger.traceEntry("params: {} {} {} {}", hash, object, blockchain, type);
 
         Util.check(hash != null, "hash!=null");
@@ -98,7 +98,7 @@ public class BlockchainServiceImpl implements BlockchainService {
 
     @Override
     @SuppressWarnings("unchecked")
-    public synchronized <H extends Object, B extends Serializable> List<Pair<H, B>> getAll(List<H> hashes, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
+    public synchronized <H extends Object, B extends Serializable> List<Pair<H, B>> getAll(List<H> hashes, Blockchain blockchain, BlockchainUnitType type) {
         logger.traceEntry("params: {} {} {}", hashes, blockchain, type);
 
         Util.check(hashes != null, "hashes!=null");
@@ -122,11 +122,9 @@ public class BlockchainServiceImpl implements BlockchainService {
      *
      * @param hash block hash
      * @return
-     * @throws IOException
-     * @throws ClassNotFoundException
      */
     @Override
-    public synchronized <H extends Object, B extends Serializable> B get(H hash, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
+    public synchronized <H extends Object, B extends Serializable> B get(H hash, Blockchain blockchain, BlockchainUnitType type) {
         logger.traceEntry("params: {} {} {}", hash, blockchain, type);
 
         Util.check(hash != null, "hash!=null");

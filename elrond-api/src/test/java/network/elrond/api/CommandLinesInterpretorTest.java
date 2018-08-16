@@ -50,6 +50,7 @@ public class CommandLinesInterpretorTest {
         TestCase.assertNull(result.getPayload());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testInterpretWithConfigOK() throws IOException {
         FileWriter fileWriter = new FileWriter("test.config", false);
@@ -79,6 +80,7 @@ public class CommandLinesInterpretorTest {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testInterpretWithConfigOK2() throws IOException {
         FileWriter fileWriter = new FileWriter("test.config", false);

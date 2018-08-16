@@ -14,7 +14,7 @@ public abstract class BaseBlockchainTest {
     public static final String BLOCKCHAIN_SETTINGS_DATA_TEST_PATH = "tests/blockchain.settings.data-test";
     public static final String BLOCKCHAIN_BLOCKIDX_DATA_TEST_PATH = "tests/blockchain.blockidx.data-test";
 
-    public BlockchainContext getDefaultTestBlockchainContext() throws IOException {
+    public BlockchainContext getDefaultTestBlockchainContext() {
         Random r = new Random(System.currentTimeMillis());
         String currentDir = r.nextInt() + "";
 

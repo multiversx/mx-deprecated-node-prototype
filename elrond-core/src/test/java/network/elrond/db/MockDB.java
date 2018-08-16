@@ -19,7 +19,7 @@ public class MockDB implements DB {
     Map<ByteArrayWrapper, byte[]> storage = new HashMap<>();
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         storage.clear();
     }
 
@@ -107,7 +107,7 @@ public class MockDB implements DB {
     }
 
     @Override
-    public void suspendCompactions() throws InterruptedException {
+    public void suspendCompactions() {
         // TODO Auto-generated method stub
     }
 

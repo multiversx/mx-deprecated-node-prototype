@@ -17,7 +17,6 @@ import network.elrond.sharding.Shard;
 import network.elrond.sharding.ShardOperation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongycastle.util.encoders.Base64;
 
 import java.io.IOException;
 import java.math.BigInteger;

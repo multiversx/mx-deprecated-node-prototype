@@ -93,7 +93,7 @@ public class ExampleUtils {
         return peers;
     }
 
-    public static PeerTracker[] createAndAttachPeersTracker( PeerDHT[] peers ) throws IOException {
+    public static PeerTracker[] createAndAttachPeersTracker( PeerDHT[] peers ) {
         PeerTracker[] peers2 = new PeerTracker[peers.length];
         for ( int i = 0; i < peers.length; i++ ) {
             peers2[i] = new PeerBuilderTracker(peers[i].peer()).verifyPeersOnTracker(false).start();
@@ -122,7 +122,7 @@ public class ExampleUtils {
             public StructuredBroadcastHandler init(Peer peer) {
                 return super.init(peer);
             }
-        };
+        }
 
         for (int i = 0; i < nr; i++) {
 

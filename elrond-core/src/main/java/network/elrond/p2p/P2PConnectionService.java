@@ -2,7 +2,6 @@ package network.elrond.p2p;
 
 
 import network.elrond.application.AppContext;
-import network.elrond.sharding.Shard;
 
 import java.io.IOException;
 import java.io.Serializable;

@@ -20,29 +20,25 @@ import javafx.util.Pair;
 public class TransactionServiceTest extends ExpectedExceptionTest {
 
     TransactionService transactionService = AppServiceProvider.getTransactionService();
-    private String sendAddress;
-    private String recvAddress;
-    private String pubKey;
     private BigInteger nonce;
     private BigInteger value;
     private PublicKey publicKeySender;
     private PrivateKey privateKeySender;
 
     private PublicKey publicKeyReceiver;
-    private PrivateKey privateKeyReceiver;
 
     @Before
     public void SetupTest() {
-        sendAddress = "0xa87b8fa28a8476553363a9356aa02635e4a1b033";
-        recvAddress = "0x0000000000000000000000000000000000000000";
-        pubKey = "025f37d20e5b18909361e0ead7ed17c69b417bee70746c9e9c2bcb1394d921d4ae";
+        String sendAddress = "0xa87b8fa28a8476553363a9356aa02635e4a1b033";
+        String recvAddress = "0x0000000000000000000000000000000000000000";
+        String pubKey = "025f37d20e5b18909361e0ead7ed17c69b417bee70746c9e9c2bcb1394d921d4ae";
         nonce = BigInteger.ZERO;
         value = BigInteger.TEN.pow(8);
 
         privateKeySender = new PrivateKey();
         publicKeySender = new PublicKey(privateKeySender);
 
-        privateKeyReceiver = new PrivateKey();
+        PrivateKey privateKeyReceiver = new PrivateKey();
         publicKeyReceiver = new PublicKey(privateKeyReceiver);
     }
 
@@ -80,7 +76,7 @@ public class TransactionServiceTest extends ExpectedExceptionTest {
     public void testgetTransactionsWithNullBlockchainShouldThrowException() throws IOException, ClassNotFoundException {
         expected(IllegalArgumentException.class, "blockchain is null");
 
-        List<Pair<String, Transaction>> transactionHashPairs = AppServiceProvider.getTransactionService().getTransactions((Blockchain) null, (Block) null);
+        List<Pair<String, Transaction>> transactionHashPairs = AppServiceProvider.getTransactionService().getTransactions(null, null);
         transactionService.verifyTransaction(null);
         Assert.fail();
     }
@@ -89,7 +85,7 @@ public class TransactionServiceTest extends ExpectedExceptionTest {
     public void testgetTransactionsWithNullBlockShouldThrowException() throws IOException, ClassNotFoundException {
         expected(IllegalArgumentException.class, "block is null");
 
-        List<Pair<String, Transaction>> transactionHashPairs = AppServiceProvider.getTransactionService().getTransactions(new Blockchain(new BlockchainContext()), (Block) null);
+        List<Pair<String, Transaction>> transactionHashPairs = AppServiceProvider.getTransactionService().getTransactions(new Blockchain(new BlockchainContext()), null);
         Assert.fail();
     }
 

@@ -5,7 +5,6 @@ import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
-import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -263,7 +262,7 @@ public class MultiSignatureBNTest {
     public void testComputeSignatureShareNullCommitmentSecret() {
         MultiSignatureService signatureService = AppServiceProvider.getMultiSignatureService();
         byte[] challenge = Util.SHA3.get().digest("dummy challenge".getBytes());
-        byte[] privateKey = new PrivateKey().getValue();;
+        byte[] privateKey = new PrivateKey().getValue();
         byte[] commitmentSecret = null;
 
         signatureService.computeSignatureShare(challenge, privateKey, commitmentSecret);

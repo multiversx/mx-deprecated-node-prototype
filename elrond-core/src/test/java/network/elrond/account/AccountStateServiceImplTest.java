@@ -6,7 +6,6 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.service.AppServiceProvider;
-import network.elrond.sharding.AppShardingManager;
 import network.elrond.sharding.Shard;
 import org.junit.Assert;
 import org.junit.Before;
@@ -97,8 +96,8 @@ public class AccountStateServiceImplTest {
         accountStateService.rollbackAccountStates(accounts);
         state = accountStateService.getAccountState(address, accounts);
         Assert.assertNotNull(state);
-        Assert.assertTrue(state.getBalance().compareTo(BigInteger.TEN) == 0);
-        Assert.assertTrue(state.getNonce().compareTo(BigInteger.ONE) == 0);
+        Assert.assertEquals(0, state.getBalance().compareTo(BigInteger.TEN));
+        Assert.assertEquals(0, state.getNonce().compareTo(BigInteger.ONE));
     }
 
     @Test
@@ -126,7 +125,7 @@ public class AccountStateServiceImplTest {
         accountStateService.initialMintingToKnownAddress(accounts);
         AccountState state = accountStateService.getAccountState(AppServiceProvider.getShardingService().getAddressForMinting(accounts.getShard()), accounts);
         Assert.assertNotNull(state);
-        Assert.assertTrue(state.getBalance().compareTo(Util.VALUE_MINTING) == 0);
+        Assert.assertEquals(0, state.getBalance().compareTo(Util.VALUE_MINTING));
     }
 
 
@@ -148,7 +147,7 @@ public class AccountStateServiceImplTest {
         accountStateService.generateGenesisBlock(initialAddress, BigInteger.TEN, appState, appContext);
         AccountState state = accountStateService.getAccountState(AppServiceProvider.getShardingService().getAddressForMinting(accounts.getShard()), accounts);
         Assert.assertNotNull(state);
-        Assert.assertTrue(state.getBalance().compareTo(Util.VALUE_MINTING) == 0);
-        Assert.assertTrue(state.getBalance().compareTo(Util.VALUE_MINTING) == 0);
+        Assert.assertEquals(0, state.getBalance().compareTo(Util.VALUE_MINTING));
+        Assert.assertEquals(0, state.getBalance().compareTo(Util.VALUE_MINTING));
     }
 }

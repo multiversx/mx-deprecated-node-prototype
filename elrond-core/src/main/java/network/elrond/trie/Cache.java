@@ -89,12 +89,7 @@ public class Cache {
     }
 
     public void undo() {
-        Iterator<Map.Entry<ByteArrayWrapper, Node>> iter = this.nodes.entrySet().iterator();
-        while (iter.hasNext()) {
-            if(iter.next().getValue().isDirty()) {
-                iter.remove();
-            }
-        }
+        this.nodes.entrySet().removeIf(byteArrayWrapperNodeEntry -> byteArrayWrapperNodeEntry.getValue().isDirty());
         this.isDirty = false;
     }
 

@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 public class P2PRequestObjectStarterProcessor implements AppTask {
     private static final Logger logger = LogManager.getLogger(AbstractChannelTask.class);
 
+    @SuppressWarnings("unchecked")
     @Override
     public void process(Application application) {
         logger.traceEntry("params: {}", application);

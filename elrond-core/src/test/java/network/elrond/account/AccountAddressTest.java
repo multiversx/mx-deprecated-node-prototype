@@ -33,7 +33,7 @@ public class AccountAddressTest {
     public void testAccountAddressFromBytes() {
         PublicKey publicKeyMinting = AppServiceProvider.getShardingService().getPublicKeyForMinting(new Shard(0));
         AccountAddress accountAddress = AccountAddress.fromBytes(publicKeyMinting.getValue());
-        Assert.assertTrue(accountAddress != null);
+        Assert.assertNotNull(accountAddress);
     }
 
     @Test(expected = IllegalArgumentException.class)

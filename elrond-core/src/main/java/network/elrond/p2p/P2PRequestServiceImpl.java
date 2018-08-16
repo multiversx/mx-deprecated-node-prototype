@@ -42,7 +42,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
     }
 
     @SuppressWarnings("unchecked")
-    private void subscribeToChannel(P2PConnection connection, Shard shard, P2PRequestChannel channel) throws Exception {
+    private void subscribeToChannel(P2PConnection connection, Shard shard, P2PRequestChannel channel) {
         Number160 hash = Number160.createHash(channel.getChannelIdentifier(shard));
 
         logger.debug("Added self to request channel {}", channel.getChannelIdentifier(shard));
@@ -53,12 +53,11 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         logger.traceEntry("params: {} {}", channel, shard);
         P2PConnection connection = channel.getConnection();
 
-        HashSet<PeerAddress> totalPeers = connection.getPeersOnShard(shard.getIndex());
-
-        return totalPeers;
+        return connection.getPeersOnShard(shard.getIndex());
     }
 
 
+    @SuppressWarnings("unchecked")
     private <K extends Serializable, R extends Serializable> List<R> sendRequestMessage(P2PRequestChannel channel, Shard shard, P2PRequestMessage message) {
         P2PConnection connection = channel.getConnection();
         PeerDHT dht = connection.getDht();

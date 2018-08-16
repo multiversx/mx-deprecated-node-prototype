@@ -14,7 +14,7 @@ public class DirectBaseFutureListener<F> implements BaseFutureListener<net.tomp2
     }
 
     @Override
-    public void exceptionCaught(Throwable t) throws Exception {
+    public void exceptionCaught(Throwable t) {
 
     }
 

@@ -47,16 +47,15 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
             Map<Integer, HashSet<PeerAddress>> peersMap = connection.getAllPeers();
 
             P2PReplyIntroductionMessage replyIntroductionMessage = new P2PReplyIntroductionMessage(peersMap);
-            PeerAddress peerAddress = peerAddressReceived;
 
             FutureDirect futureDirect = peer.sendDirect(peerAddressReceived).object(replyIntroductionMessage).start();
             futureDirect.addListener(new BaseFutureAdapter<BaseFuture>() {
                 @Override
-                public void operationComplete(BaseFuture future) throws Exception {
+                public void operationComplete(BaseFuture future) {
                     if (future.isSuccess() && future.isCompleted()) {
-                        logger.debug("Done sending to {} the bucket", peerAddress);
+                        logger.debug("Done sending to {} the bucket", peerAddressReceived);
                     } else {
-                        logger.warn("Error sending to {}: {}", peerAddress, future.failedReason());
+                        logger.warn("Error sending to {}: {}", peerAddressReceived, future.failedReason());
                     }
                 }
             });

@@ -116,7 +116,7 @@ public class CommandLinesInterpretor {
             List<String> commands = new ArrayList<>();
             for (String configFile : configs) {
                 count++;
-                List<String> lines = Arrays.asList(
+                List<String> lines = Collections.singletonList(
                         String.format("java -jar elrond-api-1.0-SNAPSHOT.jar -config=%s --server.port=%d", configFile, 8080 + count));
                 String fileName = String.format("startPeerNode%d.bat",count);
                 Path file = Paths.get(fileName);
@@ -270,7 +270,7 @@ public class CommandLinesInterpretor {
         System.out.println("node_name=AUTO    => will generate an unique name in format elrond-node-" + UUID.randomUUID().toString());
         System.out.println("node_private_key=AUTO    => will generate an unique private key");
         System.out.println("startup_type=" + Arrays.stream(BootstrapType.values()).
-                map(val -> val.toString()).
+                map(Enum::toString).
                 collect(Collectors.toList()));
         System.out.println("blockchain_path=AUTO    => will get the node's name");
         System.out.println("blockchain_restore_path=AUTO    => will get the node's name");

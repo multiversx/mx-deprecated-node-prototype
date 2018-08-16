@@ -63,9 +63,9 @@ public class P2PCommunicationServiceTest {
 
         System.out.println(pingResponse.toString());
 
-        TestCase.assertEquals(true, pingResponse.isReachablePing());
+        TestCase.assertTrue(pingResponse.isReachablePing());
         TestCase.assertTrue((pingResponse.getReponseTimeMs() >= 0) && (pingResponse.getReponseTimeMs() < 1000));
-        TestCase.assertEquals(true, pingResponse.isReachablePort());
+        TestCase.assertTrue(pingResponse.isReachablePort());
 
         serverSocket.close();
         thrAccept.join();

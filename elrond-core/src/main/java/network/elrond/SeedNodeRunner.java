@@ -52,11 +52,6 @@ public class SeedNodeRunner {
                 if (responseObjectTransaction.isSuccess()){
                     ResponseObject sendersBalance = facade.getBalance(AccountAddress.fromBytes(application.getState().getPublicKey().getValue()), application);
                     ResponseObject receiverBalance = facade.getBalance(address, application);
-                    //logger.info("Sender balance: {}, receiver balance: {}", sendersBalance.getPayload(), receiverBalance.getPayload());
-
-//                    String hash = AppServiceProvider.getSerializationService().getHashString(responseObjectTransaction.getPayload().toString());
-//                    ResponseObject responseObjectReceipt = facade.getReceipt(hash, application);
-//                    logger.info(responseObjectReceipt);
                 }
 
 

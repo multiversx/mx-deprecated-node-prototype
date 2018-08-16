@@ -38,10 +38,10 @@ public class ValidatorTest {
         Validator v = new Validator("test","ip", ConsensusAnswerType.NOT_AVAILABLE, BigInteger.valueOf(7), 10);
         Validator copyV = new Validator(v);
 
-        Assert.assertTrue(v.getPubKey() == copyV.getPubKey());
-        Assert.assertTrue(v.getIP() == copyV.getIP());
-        Assert.assertTrue(v.getAnswer() == copyV.getAnswer());
-        Assert.assertTrue(v.getRating()== copyV.getRating());
-        Assert.assertTrue(v.getStake() == copyV.getStake());
+        Assert.assertSame(v.getPubKey(), copyV.getPubKey());
+        Assert.assertSame(v.getIP(), copyV.getIP());
+        Assert.assertSame(v.getAnswer(), copyV.getAnswer());
+        Assert.assertEquals(v.getRating(), copyV.getRating());
+        Assert.assertSame(v.getStake(), copyV.getStake());
     }
 }

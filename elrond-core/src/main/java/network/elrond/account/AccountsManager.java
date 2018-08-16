@@ -30,7 +30,7 @@ public class AccountsManager {
         return logger.traceExit(senderAccountState.getBalance().compareTo(value) >= 0);
     }
 
-    public Boolean hasCorrectNonce(Accounts accounts, String addressString, BigInteger nonce) throws IOException, ClassNotFoundException {
+    public Boolean hasCorrectNonce(Accounts accounts, String addressString, BigInteger nonce) {
         logger.traceEntry("params: {} {} {}", accounts, addressString, nonce);
         Util.check(accounts != null, "accounts!=null");
         Util.check(!(addressString == null || addressString.isEmpty()), "addressString!=null");

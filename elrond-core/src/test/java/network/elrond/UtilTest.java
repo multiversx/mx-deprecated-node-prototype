@@ -162,7 +162,7 @@ public class UtilTest {
 
     @Test
     public void testStringFormat() {
-        logger.info(String.format("test %s %d", (Object) null, (BigInteger) null));
+        logger.info(String.format("test %s %d", null, null));
     }
 
     public static void createDummyGenesisBlock(Blockchain blockchain) {

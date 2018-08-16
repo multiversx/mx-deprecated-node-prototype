@@ -18,7 +18,7 @@ import java.util.concurrent.CountDownLatch;
 public class ExampleVDHT {
 
     private static final Random RND = new Random(42L);
-    private static Object locker = new Object();
+    private static final Object locker = new Object();
     private static long vers = 1;
 
 
@@ -51,40 +51,31 @@ public class ExampleVDHT {
         final CountDownLatch cl = new CountDownLatch(3);
 
         // store them simultaneously
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    storeDHT(peers[1], " one: " + String.valueOf(System.currentTimeMillis()));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                cl.countDown();
+        new Thread(() -> {
+            try {
+                storeDHT(peers[1], " one: " + String.valueOf(System.currentTimeMillis()));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+            cl.countDown();
         }).start();
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    storeDHT(peers[2], " two: " + String.valueOf(System.currentTimeMillis()));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                cl.countDown();
+        new Thread(() -> {
+            try {
+                storeDHT(peers[2], " two: " + String.valueOf(System.currentTimeMillis()));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+            cl.countDown();
         }).start();
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    storeDHT(peers[3], " three: " + String.valueOf(System.currentTimeMillis()));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                cl.countDown();
+        new Thread(() -> {
+            try {
+                storeDHT(peers[3], " three: " + String.valueOf(System.currentTimeMillis()));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+            cl.countDown();
         }).start();
 
         // wait until all 3 threads are finished
@@ -112,7 +103,7 @@ public class ExampleVDHT {
     }
 
     private static void storeDHT(PeerDHT peerDHT, String string)
-            throws ClassNotFoundException, InterruptedException, IOException {
+            throws ClassNotFoundException, IOException {
         FutureGet fg = peerDHT.get(Number160.ONE).getLatest().start()
                 .awaitUninterruptibly();
 
@@ -135,40 +126,31 @@ public class ExampleVDHT {
         final CountDownLatch cl = new CountDownLatch(3);
 
         // store them simultaneously
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    store(peers[1], " one ");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                cl.countDown();
+        new Thread(() -> {
+            try {
+                store(peers[1], " one ");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+            cl.countDown();
         }).start();
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    store(peers[2], " two ");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                cl.countDown();
+        new Thread(() -> {
+            try {
+                store(peers[2], " two ");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+            cl.countDown();
         }).start();
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    store(peers[3], " three ");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                cl.countDown();
+        new Thread(() -> {
+            try {
+                store(peers[3], " three ");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+            cl.countDown();
         }).start();
 
         // wait until all 3 threads are finished

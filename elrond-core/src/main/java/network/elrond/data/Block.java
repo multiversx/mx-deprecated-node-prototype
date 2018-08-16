@@ -1,6 +1,5 @@
 package network.elrond.data;
 
-import net.tomp2p.peers.PeerAddress;
 import network.elrond.AsciiTable;
 import network.elrond.core.Util;
 import network.elrond.sharding.Shard;
@@ -8,10 +7,7 @@ import network.elrond.sharding.Shard;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * The Block abstract class implements a block of data that contains hashes of transaction

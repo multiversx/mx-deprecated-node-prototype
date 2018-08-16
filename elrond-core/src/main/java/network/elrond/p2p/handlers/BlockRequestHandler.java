@@ -10,8 +10,6 @@ import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
-
 public class BlockRequestHandler implements RequestHandler<Block, P2PRequestMessage> {
     private static final Logger logger = LogManager.getLogger(BlockRequestHandler.class);
 

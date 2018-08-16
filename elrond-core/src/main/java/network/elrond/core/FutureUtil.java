@@ -14,7 +14,7 @@ public class FutureUtil {
     }
 
     public static <E> E get(Task<E> task, long timeout) throws Exception {
-        FutureTask<E> timeoutTask = new FutureTask<E>(() -> task.get());
+        FutureTask<E> timeoutTask = new FutureTask<>(task::get);
         new Thread(timeoutTask).start();
         return timeoutTask.get(timeout, TimeUnit.SECONDS);
 

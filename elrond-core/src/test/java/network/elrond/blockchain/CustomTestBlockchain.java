@@ -10,7 +10,7 @@ public class CustomTestBlockchain extends Blockchain {
     }
 
     @Override
-    public void generatePersistenceUnitMap(BlockchainContext context) throws IOException {
+    public void generatePersistenceUnitMap(BlockchainContext context) {
         for (BlockchainUnitType type : BlockchainUnitType.values()) {
             String path = context.getDatabasePath(type);
             Class<?> ketType = type.getKeyType();

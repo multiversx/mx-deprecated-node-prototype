@@ -17,9 +17,7 @@ public class AppTasks {
     /**
      * Init application P2P connections
      */
-    public static AppTask INIT_P2P_CONNECTION = (application) -> {
-        new P2PConnectionStarterProcessor().process(application);
-    };
+    public static AppTask INIT_P2P_CONNECTION = (application) -> new P2PConnectionStarterProcessor().process(application);
 
     /**
      * P2P transactions broadcast
@@ -42,10 +40,7 @@ public class AppTasks {
         new P2PReceiptInterceptorProcessor().process(application);
     };
 
-    /**
-     * P2P transactions broadcast
-     */
-//    public static AppTask BLOCK_ASSEMBLY_PROCESSOR = (application) -> {
+    //    public static AppTask BLOCK_ASSEMBLY_PROCESSOR = (application) -> {
 //        new BlockAssemblyProcessor().process(application);
 //    };
 

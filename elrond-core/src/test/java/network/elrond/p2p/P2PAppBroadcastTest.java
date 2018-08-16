@@ -30,12 +30,9 @@ public class P2PAppBroadcastTest {
         AppTasks.INIT_SHARDING.process(app);
         app.getState().getConnection().setShard(app.getState().getShard());
 
-        P2PBroadcastChannel channel = AppP2PManager.instance().subscribeToChannel(app, P2PBroadcastChannelName.TRANSACTION, new P2PChannelListener() {
-            @Override
-            public void onReceiveMessage(PeerAddress sender, P2PBroadcastMessage request) throws InterruptedException {
-                if ((request.getPayload().equals("###"))) {
-                    messagesCount.incrementAndGet();
-                }
+        P2PBroadcastChannel channel = AppP2PManager.instance().subscribeToChannel(app, P2PBroadcastChannelName.TRANSACTION, (sender, request) -> {
+            if ((request.getPayload().equals("###"))) {
+                messagesCount.incrementAndGet();
             }
         });
         AppServiceProvider.getP2PBroadcastService().publishToChannel(channel, "###", 0);
@@ -81,7 +78,7 @@ public class P2PAppBroadcastTest {
     }
 
 
-    private AppContext createClient(Integer masterPeerPort, Integer port) throws IOException {
+    private AppContext createClient(Integer masterPeerPort, Integer port) {
         AppContext context = new AppContext();
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(masterPeerPort);
@@ -91,7 +88,7 @@ public class P2PAppBroadcastTest {
         return context;
     }
 
-    private AppContext createServer(int port) throws IOException {
+    private AppContext createServer(int port) {
         AppContext context = new AppContext();
         context.setMasterPeerIpAddress("127.0.0.1");
         context.setMasterPeerPort(port);

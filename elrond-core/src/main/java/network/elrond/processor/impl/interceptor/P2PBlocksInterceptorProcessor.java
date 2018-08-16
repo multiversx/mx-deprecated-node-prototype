@@ -14,8 +14,6 @@ import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
-
 public class P2PBlocksInterceptorProcessor extends AbstractChannelTask<Block> {
 
     private static final Logger logger = LogManager.getLogger(P2PBlocksInterceptorProcessor.class);

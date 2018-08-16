@@ -37,6 +37,7 @@ public class AppP2PManager {
         return logger.traceExit(channel);
     }
 
+    @SuppressWarnings("unchecked")
     public <T> ArrayBlockingQueue<T> subscribeToChannel(Application application, P2PBroadcastChannelName channelName) {
         logger.traceEntry("params: {} {}", application, channelName);
 

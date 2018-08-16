@@ -160,7 +160,7 @@ public class AppBlockManager {
         return logger.traceExit((Block) null);
     }
 
-    private void sendReceipts(AppState state, Block block, List<Receipt> receipts) throws IOException {
+    private void sendReceipts(AppState state, Block block, List<Receipt> receipts) {
         ThreadUtil.submit(() -> {
             String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
 
@@ -170,12 +170,7 @@ public class AppBlockManager {
 
             receipts.stream().parallel().forEach(receipt -> {
                 receipt.setBlockHash(hashBlock);
-
-                try {
-                    storeReceipt(block, receipt, state);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                storeReceipt(block, receipt, state);
             });
 
             receiptsDataList.addAll(receipts);
@@ -230,9 +225,7 @@ public class AppBlockManager {
 
         String self = state.getConnection().getPeer().peerID().toString();
 
-        if (!nodeList.contains(self)) {
-            nodeList.add(self);
-        }
+        nodeList.add(self);
 
         block.setPeers(nodeList.stream()
                 .filter(Objects::nonNull)
@@ -294,7 +287,7 @@ public class AppBlockManager {
         return logger.traceExit(receipts);
     }
 
-    private Receipt acceptTransaction(Block block, Pair<String, Transaction> transactionHashPair, AppState state) throws IOException {
+    private Receipt acceptTransaction(Block block, Pair<String, Transaction> transactionHashPair, AppState state) {
         logger.traceEntry("params: {} {} {}", block, transactionHashPair, state);
         Util.check(block != null, "block != null");
         Util.check(transactionHashPair != null, "transaction != null");
@@ -323,7 +316,7 @@ public class AppBlockManager {
     }
 
 
-    private void storeReceipt(Block block, Receipt receipt, AppState state) throws IOException {
+    private void storeReceipt(Block block, Receipt receipt, AppState state) {
         logger.traceEntry("params: {} {} {}", block, receipt, state);
         Util.check(block != null, "block != null");
         Util.check(receipt != null, "receipt != null");

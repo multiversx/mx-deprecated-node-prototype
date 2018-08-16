@@ -58,6 +58,6 @@
             <!--<AppenderRef ref="WebSocketAppender"/>-->
         </Root>
 
-        <Logger name="network.elrond" level="DEBUG"></Logger>
+        <Logger name="network.elrond" level="DEBUG"/>
     </Loggers>
 </Configuration>

@@ -203,11 +203,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
             }
 
             transactions.stream().parallel().filter(Objects::nonNull).forEach((tr) -> {
-                try {
-                    sendTransaction(application.getState(), tr);
-                } catch (IOException e) {
-                    logger.catching(e);
-                }
+                sendTransaction(application.getState(), tr);
             });
 
             int successful = (int) transactions.stream().filter(Objects::nonNull).count();
@@ -378,7 +374,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
         }
     }
 
-    private void sendTransaction(AppState state, Transaction transaction) throws java.io.IOException {
+    private void sendTransaction(AppState state, Transaction transaction) {
         //String hash = AppServiceProvider.getSerializationService().getHashString(transaction);
         //P2PConnection connection = state.getConnection();
         //AppServiceProvider.getP2PObjectService().put(connection, hash, transaction);

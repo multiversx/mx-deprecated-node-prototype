@@ -14,7 +14,7 @@ public class AccountInitializerProcessor implements AppTask {
     private static final Logger logger = LogManager.getLogger(AccountInitializerProcessor.class);
 
     @Override
-    public void process(Application application) throws IOException {
+    public void process(Application application) {
         logger.traceEntry("params: {}", application);
 
         AppContext context = application.getContext();

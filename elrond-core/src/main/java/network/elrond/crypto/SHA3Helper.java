@@ -4,9 +4,8 @@ import org.spongycastle.crypto.digests.SHA3Digest;
 
 public class SHA3Helper {
 
-    private static int DEFAULT_SIZE = 256;
-
     public static byte[] sha3(byte[] message) {
+        int DEFAULT_SIZE = 256;
         return sha3(message, new SHA3Digest(DEFAULT_SIZE), true);
     }
 

@@ -21,18 +21,18 @@ public class BlockchainPersistenceUnitTest {
     }
 
     @After
-    public void TearDown() throws IOException, InterruptedException {
+    public void TearDown() throws IOException {
         blockchainPersistenceUnit.close();
         blockchainPersistenceUnit.destroy();
     }
     @Test(expected = IllegalArgumentException.class)
-    public void testBlockchainPersistenceUnitConstructorWithNullDatabasePathShouldThrowException() throws IOException {
+    public void testBlockchainPersistenceUnitConstructorWithNullDatabasePathShouldThrowException() {
         blockchainPersistenceUnit.put(null, new byte[3]);
     }
 
 
     @Test(expected = IllegalArgumentException.class)
-    public void testBlockchainPersistenceUnitWithNullPathShouldThrowException() throws IOException {
+    public void testBlockchainPersistenceUnitWithNullPathShouldThrowException() {
         blockchainPersistenceUnit.put(null, new byte[3]);
     }
 
@@ -66,7 +66,7 @@ public class BlockchainPersistenceUnitTest {
 
         readValue = blockchainPersistenceUnit.get(key);
 
-        Assert.assertEquals(null, readValue);
+        Assert.assertNull(readValue);
         blockchainPersistenceUnit.close();
     }
 

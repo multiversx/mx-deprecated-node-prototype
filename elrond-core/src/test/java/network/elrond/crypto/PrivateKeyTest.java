@@ -13,13 +13,13 @@ public class PrivateKeyTest {
     @Test
     public void testDefaultConstructor(){
         PrivateKey privateKey = new PrivateKey();
-        Assert.assertTrue(privateKey.getValue() != null);
+        Assert.assertNotNull(privateKey.getValue());
     }
 
     @Test
     public void testConstructorFromByteArray(){
         PrivateKey privateKey = new PrivateKey("test".getBytes());
-        Assert.assertTrue(privateKey.getValue() != null);
+        Assert.assertNotNull(privateKey.getValue());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -30,7 +30,7 @@ public class PrivateKeyTest {
     @Test
     public void testConstructorFromSeed(){
         PrivateKey privateKey = new PrivateKey("Seed");
-        Assert.assertTrue(privateKey.getValue() != null);
+        Assert.assertNotNull(privateKey.getValue());
     }
 
     @Test(expected = IllegalArgumentException.class)

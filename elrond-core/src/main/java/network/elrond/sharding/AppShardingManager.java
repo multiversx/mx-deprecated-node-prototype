@@ -42,9 +42,8 @@ public class AppShardingManager {
     public Integer getNumberNodesInShard(AppState state) {
 
         P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.BLOCK);
-        Integer nbPeers = getConnectedPeersOnChannel(channel).size();
 
-        return nbPeers;
+        return getConnectedPeersOnChannel(channel).size();
     }
 
     public Integer getNumberNodesInNetwork(AppState state) {
@@ -82,9 +81,7 @@ public class AppShardingManager {
 
         String self = state.getConnection().getPeer().peerID().toString();
 
-        if (!nodeList.contains(self)) {
-            nodeList.add(self);
-        }
+        nodeList.add(self);
 
         return nodeList.stream()
                 .filter(Objects::nonNull)

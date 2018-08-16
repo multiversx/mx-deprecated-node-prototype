@@ -14,7 +14,7 @@ public class ShardStarterProcessor implements AppTask {
     private static final Logger logger = LogManager.getLogger(ShardStarterProcessor.class);
 
     @Override
-    public void process(Application application) throws IOException {
+    public void process(Application application) {
         logger.traceEntry("params: {}", application);
 
         AppState state = application.getState();

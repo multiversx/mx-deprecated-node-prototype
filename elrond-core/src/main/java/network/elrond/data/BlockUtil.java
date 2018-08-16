@@ -14,7 +14,7 @@ public class BlockUtil {
     public static List<String> getTransactionsHashesAsString(Block block) {
         List<byte[]> list = getTransactionsHashesAsByte(block);
         return list.stream().
-                map(byteHash -> Util.getDataEncoded64(byteHash)).
+                map(Util::getDataEncoded64).
                 collect(Collectors.toList());
     }
 

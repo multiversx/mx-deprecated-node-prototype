@@ -49,7 +49,8 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
         }
     }
 
-    public <H extends Object, B> BlockchainPersistenceUnit<H, B> getUnit(BlockchainUnitType type) {
+    @SuppressWarnings("unchecked")
+    public <H, B> BlockchainPersistenceUnit<H, B> getUnit(BlockchainUnitType type) {
         return (BlockchainPersistenceUnit<H, B>) blockchain.get(type);
     }
 

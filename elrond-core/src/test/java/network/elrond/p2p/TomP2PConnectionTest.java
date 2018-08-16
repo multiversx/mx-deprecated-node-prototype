@@ -303,8 +303,7 @@ public class TomP2PConnectionTest {
                         .create(isUDP ? 1 : 0, isUDP ? 0 : 1);
                 frr.addListener(new BaseFutureAdapter<FutureChannelCreator>() {
                     @Override
-                    public void operationComplete(final FutureChannelCreator future)
-                            throws Exception {
+                    public void operationComplete(final FutureChannelCreator future) {
                         if (future.isSuccess()) {
                             BroadcastBuilder broadcastBuilder = new BroadcastBuilder(
                                     peer, messageKey);
@@ -323,7 +322,7 @@ public class TomP2PConnectionTest {
                     }
                 });
             }
-        };
+        }
 
 
         List<Peer> peers = new ArrayList<>();
@@ -377,7 +376,7 @@ public class TomP2PConnectionTest {
         class MyObjectDataReply implements ObjectDataReply {
 
             @Override
-            public Object reply(PeerAddress sender, Object request) throws Exception {
+            public Object reply(PeerAddress sender, Object request) {
                 logger.info("Peer {} got message: {}", sender.tcpPort(), request.toString());
 
                 return(null);

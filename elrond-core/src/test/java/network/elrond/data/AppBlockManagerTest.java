@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class AppBlockManagerTest {
@@ -114,7 +115,7 @@ public class AppBlockManagerTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
 
     }
 
@@ -433,15 +434,15 @@ public class AppBlockManagerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testComposeBlockWithNullApplicationShouldThrowException() throws IOException {
-        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(), null);
+        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Collections.emptyList(), null);
     }
 
     @Test
     public void testComposeBlockWithZeroTransaction() throws IOException {
-        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(), state);
+        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Collections.emptyList(), state);
         Block block = blockReceiptsPair.getKey();
-        Assert.assertTrue("Block cannot be null", block != null);
-        Assert.assertTrue("PrevBlockHash cannot be null", block.prevBlockHash != null);
+        Assert.assertNotNull("Block cannot be null", block);
+        Assert.assertNotNull("PrevBlockHash cannot be null", block.prevBlockHash);
         Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.isEmptyBlock(block));
     }
 
@@ -453,9 +454,9 @@ public class AppBlockManagerTest {
         Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, publicKey, BigInteger.TEN, BigInteger.ZERO);
         String txHash = AppServiceProvider.getSerializationService().getHashString(tx);
         AppServiceProvider.getTransactionService().signTransaction(tx, privateKeyMinting.getValue(), publicKeyMinting.getValue());
-        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(new Pair<>(txHash, tx)), state);
+        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Collections.singletonList(new Pair<>(txHash, tx)), state);
         Block block = blockReceiptsPair.getKey();
-        Assert.assertTrue("ListOfTxHashes does not have exactly 1 hash", BlockUtil.getTransactionsCount(block) == 1);
+        Assert.assertEquals("ListOfTxHashes does not have exactly 1 hash", 1, BlockUtil.getTransactionsCount(block));
     }
 
     @Test
@@ -464,9 +465,9 @@ public class AppBlockManagerTest {
         //AppServiceProvider.getTransactionService().signTransaction(tx, Util.PRIVATE_KEY_MINTING.getValue());
         String txHash = AppServiceProvider.getSerializationService().getHashString(tx);
 
-        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(new Pair<>(txHash, tx)), state);
+        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Collections.singletonList(new Pair<>(txHash, tx)), state);
         Block block = blockReceiptsPair.getKey();
-        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.getTransactionsCount(block) == 0);
+        Assert.assertEquals("ListOfTxHashes does not have exactly 0 hash", 0, BlockUtil.getTransactionsCount(block));
     }
 
     @Test
@@ -474,9 +475,9 @@ public class AppBlockManagerTest {
         Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, publicKey, BigInteger.TEN.pow(100), BigInteger.ZERO);
         String txHash = AppServiceProvider.getSerializationService().getHashString(tx);
         AppServiceProvider.getTransactionService().signTransaction(tx, privateKeyMinting.getValue(), publicKeyMinting.getValue());
-        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(new Pair<>(txHash, tx)), state);
+        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Collections.singletonList(new Pair<>(txHash, tx)), state);
         Block block = blockReceiptsPair.getKey();
-        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.getTransactionsCount(block) == 0);
+        Assert.assertEquals("ListOfTxHashes does not have exactly 0 hash", 0, BlockUtil.getTransactionsCount(block));
     }
 
     //TODO: Readd when NonceIsVerified
@@ -485,9 +486,9 @@ public class AppBlockManagerTest {
         Transaction tx = AppServiceProvider.getTransactionService().generateTransaction(publicKeyMinting, publicKey, BigInteger.TEN, BigInteger.TEN);
         String txHash = AppServiceProvider.getSerializationService().getHashString(tx);
         AppServiceProvider.getTransactionService().signTransaction(tx, privateKeyMinting.getValue(), publicKeyMinting.getValue());
-        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(new Pair<>(txHash, tx)), state);
+        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Collections.singletonList(new Pair<>(txHash, tx)), state);
         Block block = blockReceiptsPair.getKey();
-        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.getTransactionsCount(block) == 0);
+        Assert.assertEquals("ListOfTxHashes does not have exactly 0 hash", 0, BlockUtil.getTransactionsCount(block));
     }
 
     @Test
@@ -505,46 +506,46 @@ public class AppBlockManagerTest {
 
         Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(new Pair<>(txHash, tx), new Pair<>(tx2Hash, tx2)), state);
         Block block = blockReceiptsPair.getKey();
-        Assert.assertTrue("ListOfTxHashes does not have exactly 1 hash", BlockUtil.getTransactionsCount(block) == 1);
+        Assert.assertEquals("ListOfTxHashes does not have exactly 1 hash", 1, BlockUtil.getTransactionsCount(block));
     }
 
     @Test
     public void testComposeBlockWithNoCurrentBlockFoundTransaction() throws IOException {
-        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(), state);
+        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Collections.emptyList(), state);
         Block block = blockReceiptsPair.getKey();
-        Assert.assertTrue("Block cannot be null", block != null);
-        Assert.assertTrue("PrevBlockHash cannot be null", block.prevBlockHash != null);
-        Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.getTransactionsCount(block) == 0);
+        Assert.assertNotNull("Block cannot be null", block);
+        Assert.assertNotNull("PrevBlockHash cannot be null", block.prevBlockHash);
+        Assert.assertEquals("ListOfTxHashes does not have exactly 0 hash", 0, BlockUtil.getTransactionsCount(block));
     }
 
     @Test
     public void testSignEmptyBlock() throws IOException {
-        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(), state);
+        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Collections.emptyList(), state);
         Block block = blockReceiptsPair.getKey();
         appBlockManager.signBlock(block, privateKey);
 
-        Assert.assertTrue("Commitment cannot be null", block.getCommitment() != null);
-        Assert.assertTrue("Signature cannot be null", block.getSignature() != null);
-        Assert.assertTrue("Signature cannot be null", block.getListPublicKeys() != null);
+        Assert.assertNotNull("Commitment cannot be null", block.getCommitment());
+        Assert.assertNotNull("Signature cannot be null", block.getSignature());
+        Assert.assertNotNull("Signature cannot be null", block.getListPublicKeys());
     }
 
     @Test
     public void testVerifySignEmptyBlock() throws IOException {
-        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(), state);
+        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Collections.emptyList(), state);
         Block block = blockReceiptsPair.getKey();
         appBlockManager.signBlock(block, privateKey);
         MultiSignatureService multiSignatureService = AppServiceProvider.getMultiSignatureService();
 
-        Assert.assertTrue("Commitment cannot be null", block.getCommitment() != null);
-        Assert.assertTrue("Signature cannot be null", block.getSignature() != null);
-        Assert.assertTrue("Signature cannot be null", block.getListPublicKeys() != null);
+        Assert.assertNotNull("Commitment cannot be null", block.getCommitment());
+        Assert.assertNotNull("Signature cannot be null", block.getSignature());
+        Assert.assertNotNull("Signature cannot be null", block.getListPublicKeys());
     }
 
     @Test
     public void testVerifySignatureEmptyBlock() throws IOException {
         accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
         state.setAccounts(accounts);
-        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(), state);
+        Pair<Block, List<Receipt>> blockReceiptsPair = appBlockManager.composeBlock(Collections.emptyList(), state);
         Block block = blockReceiptsPair.getKey();
 
         appBlockManager.signBlock(block, privateKey);

@@ -16,7 +16,7 @@ public class TransactionsPool {
 
     private static final Logger logger = LogManager.getLogger(TransactionsPool.class);
 
-    private Object locker = new Object();
+    private final Object locker = new Object();
 
     protected final Map<String, Object> lastTransactions = new LRUMap<>(100000);
     protected final List<String> transactions = new ArrayList<>();
@@ -63,11 +63,8 @@ public class TransactionsPool {
             return true;
         }
 
-        if (lastTransactions.containsKey(transactionHash)) {
-            return true;
-        }
+        return lastTransactions.containsKey(transactionHash);
 
-        return (false);
     }
 
     public void addBlock(Block block) {

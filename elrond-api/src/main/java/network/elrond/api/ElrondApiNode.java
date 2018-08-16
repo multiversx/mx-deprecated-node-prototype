@@ -213,16 +213,14 @@ class ElrondApiNode {
     }
 
     private void SendBalanceToNewNode(String nextPrivateKey) {
-        Runnable myrunnable = new Runnable() {
-            public void run() {
-                try {
-                    Thread.sleep(60000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                String publicKey = nextPrivateKey.split(";")[2];
-                send(AccountAddress.fromHexString(publicKey), BigInteger.valueOf(1000000000));
+        Runnable myrunnable = () -> {
+            try {
+                Thread.sleep(60000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+            String publicKey = nextPrivateKey.split(";")[2];
+            send(AccountAddress.fromHexString(publicKey), BigInteger.valueOf(1000000000));
         };
 
         new Thread(myrunnable).start();

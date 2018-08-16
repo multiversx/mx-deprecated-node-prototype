@@ -28,20 +28,6 @@ public class TransactionServiceImpl implements TransactionService {
     private static final Logger logger = LogManager.getLogger(TransactionServiceImpl.class);
     private SerializationService serializationService = AppServiceProvider.getSerializationService();
 
-
-    /**
-     * Computes the hash of the complete tx info
-     * Used as a mean of tx identification
-     *
-     * @param tx      transaction
-     * @param withSig whether or not to include the signature parts in hash
-     * @return hash as byte array
-     */
-//    public byte[] getHash(Transaction tx, boolean withSig) {
-//        String json = AppServiceProvider.getSerializationService().encodeJSON(tx);
-//        return (Util.SHA3.get().digest(json.getBytes()));
-//    }
-
     /**
      * Signs the transaction using private keys
      *

@@ -17,6 +17,7 @@ import java.math.BigInteger;
 
 public class GenesisBlockTest {
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testBlock() throws Exception {
         PublicKey publicKeyMinting = AppServiceProvider.getShardingService().getPublicKeyForMinting(new Shard(0));
@@ -51,7 +52,7 @@ public class GenesisBlockTest {
         AccountState acsMint = accountStateService.getAccountState(acMint, accounts);
         AccountState acsRecv = accountStateService.getAccountState(acRecv, accounts);
 
-        TestCase.assertEquals("Expecting null ", null, acsRecv);
+        TestCase.assertNull("Expecting null ", acsRecv);
         TestCase.assertEquals("Expecting " + Util.VALUE_MINTING, Util.VALUE_MINTING, acsMint.getBalance());
 
         Pair<String, Transaction> transactionHashPair = new Pair(AppServiceProvider.getSerializationService().getHash(genesisData.b), genesisData.b);

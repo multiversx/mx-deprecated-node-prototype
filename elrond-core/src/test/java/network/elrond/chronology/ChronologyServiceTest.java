@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class ChronologyServiceTest {
@@ -142,7 +143,7 @@ public class ChronologyServiceTest {
     public void testIsStillInRoundState() throws Exception{
         ChronologyService chronologyService = AppServiceProvider.getChronologyService();
 
-        NTPClient ntpClient = new NTPClient(Arrays.asList("time.google.com"), 100);
+        NTPClient ntpClient = new NTPClient(Collections.singletonList("time.google.com"), 100);
 
         ThreadUtil.sleep(1000);
 

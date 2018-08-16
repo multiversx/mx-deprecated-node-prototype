@@ -26,7 +26,7 @@ public class AppState implements Serializable, AsciiPrintable {
     private static final Logger logger = LogManager.getLogger(AppState.class);
 
     private boolean stillRunning = true;
-    public Object lockerSyncPropose = new Object();
+    public final Object lockerSyncPropose = new Object();
 
     private Shard shard;
     private Accounts accounts;

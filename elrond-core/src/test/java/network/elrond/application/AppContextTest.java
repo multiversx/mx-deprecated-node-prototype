@@ -97,7 +97,7 @@ public class AppContextTest {
 
     @Test
     public void testGetValueMint(){
-        Assert.assertTrue(Util.VALUE_MINTING.compareTo(context.getValueMint()) == 0);
+        Assert.assertEquals(0, Util.VALUE_MINTING.compareTo(context.getValueMint()));
     }
 
     @Test(expected = IllegalArgumentException.class)

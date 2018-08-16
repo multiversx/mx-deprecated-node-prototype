@@ -156,6 +156,7 @@ public class ChronologyBlockTask implements AppTask {
     }
 
 
+    @SuppressWarnings("unchecked")
     private void notifyEventObjects(Application application, Round round, RoundState roundState, long globalTimeStamp){
         SubRound subRound = new SubRound();
         subRound.setRound(round);

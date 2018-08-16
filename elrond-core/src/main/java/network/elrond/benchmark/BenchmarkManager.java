@@ -6,7 +6,7 @@ import java.util.List;
 public class BenchmarkManager {
     static BenchmarkManager instance;
 
-    private BenchmarkManager(){};
+    private BenchmarkManager(){}
 
     public static synchronized BenchmarkManager getInstance(){
         if(instance == null){

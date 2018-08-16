@@ -16,7 +16,7 @@ public enum LocationType {
             stream(LocationType.values()).collect(toMap(leg -> leg.locationIdx, leg -> leg));
 
 
-    private LocationType(final int locationIdx) {
+    LocationType(final int locationIdx) {
         this.locationIdx = locationIdx;
     }
 

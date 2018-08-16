@@ -9,10 +9,10 @@ import static org.mockito.Mockito.when;
 
 public class StatisticsMangerTest {
     private StatisticsManager statisticService;
-    private ElrondSystemTimer timer;
+
     @Before
     public void SetUp(){
-        timer = mock(ElrondSystemTimer.class);
+        ElrondSystemTimer timer = mock(ElrondSystemTimer.class);
         when(timer.getCurrentTime())
                 .thenReturn((long) 1000)
                 .thenReturn((long) 2000)

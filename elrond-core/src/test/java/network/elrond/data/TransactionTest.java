@@ -20,7 +20,6 @@ public class TransactionTest {
 
     private String sendAddress ;
     private String recvAddress ;
-    private String pubKey ;
     private BigInteger nonce;
     private BigInteger value;
     private Shard senderShard;
@@ -30,7 +29,7 @@ public class TransactionTest {
     public void SetupTest(){
         sendAddress = "0xa87b8fa28a8476553363a9356aa02635e4a1b033";
         recvAddress = "0x0000000000000000000000000000000000000000";
-        pubKey = "025f37d20e5b18909361e0ead7ed17c69b417bee70746c9e9c2bcb1394d921d4ae";
+        String pubKey = "025f37d20e5b18909361e0ead7ed17c69b417bee70746c9e9c2bcb1394d921d4ae";
         nonce = BigInteger.ZERO;
         value = BigInteger.TEN.pow(8);
         senderShard = AppServiceProvider.getShardingService().getShard(sendAddress.getBytes());
@@ -165,7 +164,7 @@ public class TransactionTest {
         System.out.println(hashWithoutSignature);
         System.out.println(hashWithSignature);
 
-        TestCase.assertFalse(hashWithoutSignature == hashWithSignature);
+        TestCase.assertNotSame(hashWithoutSignature, hashWithSignature);
 
     }
 }

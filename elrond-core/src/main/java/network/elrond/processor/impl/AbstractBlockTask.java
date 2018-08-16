@@ -14,7 +14,7 @@ public abstract class AbstractBlockTask implements AppTask {
     private static final Logger logger = LogManager.getLogger(AbstractBlockTask.class);
 
     @Override
-    public void process(Application application) throws IOException {
+    public void process(Application application) {
 
         Thread threadProcess = new Thread(() -> {
             logger.traceEntry();
