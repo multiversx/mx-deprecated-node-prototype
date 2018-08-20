@@ -24,7 +24,7 @@ public class NodeRunner {
         Integer port = 31201 + nr;
         Integer masterPeerPort = 31201;
         String masterPeerIpAddress = "127.0.0.1";
-        String nodeRunnerPrivateKey = "008fa99e6320d066dc74fc812948d050ae5ddad2060b4ce56ce75e9f8fd785ec25";
+        String nodeRunnerPrivateKey = "00e15fc71adc4832c56c4e6a8b50a9503a4ede9485c4efbc585def0c657d93066a";
         if (nodeRunnerPrivateKey.length() % 2 == 1) {
             nodeRunnerPrivateKey += "1";
         }

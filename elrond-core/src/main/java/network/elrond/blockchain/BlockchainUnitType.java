@@ -9,11 +9,11 @@ import java.math.BigInteger;
 public enum BlockchainUnitType {
     BLOCK(String.class, Block.class, 50),
     BLOCK_INDEX(BigInteger.class, String.class, 100),
-    TRANSACTION(String.class, Transaction.class, 100000),
+    TRANSACTION(String.class, Transaction.class, 10000),
     SETTINGS(String.class, String.class, 1000),
-    RECEIPT(String.class, Receipt.class, 10000),
-    TRANSACTION_RECEIPT(String.class, String.class, 10000),
-    BLOCK_TRANSACTIONS(String.class, String.class, 10000),;
+    RECEIPT(String.class, Receipt.class, 1000),
+    TRANSACTION_RECEIPT(String.class, String.class, 1000),
+    BLOCK_TRANSACTIONS(String.class, String.class, 1000),;
 
     private Class<?> keyType;
     private Class<?> valueType;
