@@ -109,6 +109,34 @@ public class Transaction implements Serializable, AsciiPrintable {
         pubKey = "";
     }
 
+    public Transaction(Transaction transaction) {
+
+        //tx counter
+        this.nonce = transaction.getNonce();
+        //value used in transaction in sERDs see core.Util
+        this.value = transaction.getValue();
+        //receiving address as 0x0024f2849a...
+        this.receiverAddress = transaction.getReceiverAddress();
+        //sender address as 0x0024f22323...
+        this.senderAddress = transaction.getSenderAddress();
+        //amount of sERDs per each unit of gas
+        this.gasPrice = transaction.getGasPrice();
+        //gas used for running the tx
+        this.gasLimit = transaction.getGasLimit();
+        //blob of data to executed in Elrond Virtual Machine
+        this.data = transaction.getData();
+        //blob of data containing first part of sig
+        this.signature = transaction.getSignature();
+        //blob of data containing second part of sig
+        this.challenge = transaction.getChallenge();
+        //plain public key in hexa form
+        this.pubKey = transaction.getPubKey();
+
+        this.senderShard = transaction.getSenderShard();
+
+        this.receiverShard = transaction.getReceiverShard();
+    }
+
     /**
      * Gets the nonce
      *
