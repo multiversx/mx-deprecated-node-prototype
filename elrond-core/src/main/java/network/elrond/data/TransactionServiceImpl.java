@@ -111,16 +111,12 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         //test 3. verify the signature
-        byte[] signature = transaction.getSignature();
-        byte[] challenge = transaction.getChallenge();
+        Transaction transactionLocal = new Transaction(transaction);
 
-        transaction.setSignature(null);
-        transaction.setChallenge(null);
+        transactionLocal.setSignature(null);
+        transactionLocal.setChallenge(null);
 
-        byte[] message = serializationService.getHash(transaction);
-
-        transaction.setSignature(signature);
-        transaction.setChallenge(challenge);
+        byte[] message = serializationService.getHash(transactionLocal);
 
         SignatureService schnorr = AppServiceProvider.getSignatureService();
 

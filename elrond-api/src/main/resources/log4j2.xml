@@ -2,7 +2,7 @@
 <Configuration status="WARN" monitorInterval="30">
     <Properties>
         <Property name="MAIN_LOG_PATTERN">
-            %d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex
+            %highlight{%d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex}{FATAL=Blinking bright red, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=blue, TRACE=white}
         </Property>
         <Property name="ALT_LOG_PATTERN">
             %d{yyyy-MM-dd HH:mm:ss.SSS} %5p: %msg  >>> [%t] %c{1.}%n
