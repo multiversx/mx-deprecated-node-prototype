@@ -200,7 +200,7 @@ public class AppBlockManager {
         Util.check(accounts != null, "accounts!=null");
         Util.check(blockchain.getGenesisBlock() != null, "genesisBlock!=null");
 
-        Block block = getNewBlockAndBindToPrevious(blockchain.getCurrentBlock());
+        Block block = getNewBlockAndBindToPrevious(blockchain);
         logger.trace("done generating blank new block as {}", block);
 
         ChronologyService chronologyService = AppServiceProvider.getChronologyService();
@@ -339,18 +339,18 @@ public class AppBlockManager {
         logger.traceExit();
     }
 
-    private Block getNewBlockAndBindToPrevious(Block currentBlock) {
-        logger.traceEntry("params: {}", currentBlock);
-        Util.check(currentBlock != null, "currentBlock != null");
+    private Block getNewBlockAndBindToPrevious(Blockchain blockchain) {
+        logger.traceEntry("params: {}", blockchain);
+        Util.check(blockchain.getCurrentBlock() != null, "currentBlock != null");
 
         Block block = new Block();
-        byte[] hash = AppServiceProvider.getSerializationService().getHash(currentBlock);
+        byte[] hash = AppServiceProvider.getSerializationService().getHash(blockchain.getCurrentBlock());
 
         // Bind on prev block
         block.setPrevBlockHash(hash);
-        BigInteger nonce = currentBlock.getNonce().add(BigInteger.ONE);
+        BigInteger nonce = blockchain.getCurrentBlock().getNonce().add(BigInteger.ONE);
         block.setNonce(nonce);
-        block.setShard(currentBlock.getShard());
+        block.setShard(blockchain.getShard());
         return logger.traceExit(block);
     }
 

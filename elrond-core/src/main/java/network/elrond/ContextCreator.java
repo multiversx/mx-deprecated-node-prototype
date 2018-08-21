@@ -53,6 +53,8 @@ public class ContextCreator {
             throw new Exception("Seeder must start in shard 0, not shard " + String.valueOf(shard.getIndex()) + "!");
         }
 
+        logger.info("Node's public key is {}", Util.byteArrayToHexString(preGeneratedPublicKey.getValue()));
+
         return logger.traceExit(context);
     }
 
