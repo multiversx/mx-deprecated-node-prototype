@@ -139,7 +139,7 @@ public class BlockchainServiceImpl implements BlockchainService {
      * @throws ClassNotFoundException
      */
     @Override
-    public synchronized <H extends Object, B extends Serializable> B get(H hash, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
+    public synchronized <H extends Object, B extends Serializable> B get(H hash, Blockchain blockchain, BlockchainUnitType type, boolean fromAllShards) throws IOException, ClassNotFoundException {
         logger.traceEntry("params: {} {} {}", hash, blockchain, type);
 
         Util.check(hash != null, "hash!=null");
@@ -154,7 +154,7 @@ public class BlockchainServiceImpl implements BlockchainService {
         if (!exists) {
             B object = getDataFromDatabase(hash, unit);
             if (object == null) {
-                object = requestData(hash, type, connection);
+                object = requestData(hash, type, connection, fromAllShards);
             }
 
             return object;
@@ -221,7 +221,7 @@ public class BlockchainServiceImpl implements BlockchainService {
     }
 
 
-    private <H extends Object, B extends Serializable> B requestData(H hash, BlockchainUnitType unitType, P2PConnection connection) {
+    private <H extends Object, B extends Serializable> B requestData(H hash, BlockchainUnitType unitType, P2PConnection connection, boolean fromAllShards) {
         logger.traceEntry("params: {} {} {}", hash, unitType, connection);
 
         B response;
@@ -234,7 +234,11 @@ public class BlockchainServiceImpl implements BlockchainService {
         Shard shard = connection.getShard();
         String hashStr = hash.toString();
 
-        response = AppServiceProvider.getP2PRequestService().get(channel, shard, channelName, hashStr);
+        if (fromAllShards) {
+            response = AppServiceProvider.getP2PRequestService().getFromAllShards(channel, channelName, hashStr);
+        } else {
+            response = AppServiceProvider.getP2PRequestService().get(channel, shard, channelName, hashStr);
+        }
 
         if (channelName.getName().equals(BlockchainUnitType.BLOCK_TRANSACTIONS.name())) {
             logger.warn("Requested {} with hash {}. Received: {} transactions", channel.getName(), hash, ((response == null) ? response : ((ArrayList)response).size()));

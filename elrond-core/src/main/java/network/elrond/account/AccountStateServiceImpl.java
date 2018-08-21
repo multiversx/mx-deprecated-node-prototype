@@ -13,6 +13,7 @@ import network.elrond.data.*;
 import network.elrond.p2p.P2PBroadcastChannel;
 import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.ShardingServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mapdb.Fun;
@@ -137,8 +138,14 @@ public class AccountStateServiceImpl implements AccountStateService {
         return logger.traceExit(accountState);
     }
 
-    public void initialMintingToKnownAddress(Accounts accounts) {
+    public void initialMintingToKnownAddress(Accounts accounts, int shardId) {
         logger.traceEntry("params: {}", accounts);
+
+        //hardwired, only shard 0 gets to have a premint address
+        if (shardId != 0){
+            return;
+        }
+
         AccountState accountState = null;
 
         try {

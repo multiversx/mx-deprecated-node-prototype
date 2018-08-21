@@ -59,7 +59,7 @@ public class AppBlockManagerTest {
 
         initialized = true;
 
-        ShardingServiceImpl.MAX_ACTIVE_SHARDS_CONT = 1;
+        AppServiceProvider.getShardingService().setNumberOfShards(1);
 
 
         context = new AppContext();

@@ -53,29 +53,23 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         logger.traceEntry("params: {} {}", channel, shard);
         P2PConnection connection = channel.getConnection();
 
-        HashSet<PeerAddress> totalPeers = connection.getPeersOnShard(shard.getIndex());
-
-        return totalPeers;
+        return connection.getPeersOnShard(shard.getIndex());
     }
 
-
-    private <K extends Serializable, R extends Serializable> List<R> sendRequestMessage(P2PRequestChannel channel, Shard shard, P2PRequestMessage message) {
+    private <K extends Serializable, R extends Serializable> List<R> sendRequestMessage(P2PRequestChannel channel, HashSet<PeerAddress> peersToSend, P2PRequestMessage message) {
         P2PConnection connection = channel.getConnection();
         PeerDHT dht = connection.getDht();
 
-        //get all peers on channel
-        HashSet<PeerAddress> peersOnChannel = getPeersOnChannel(channel, shard);
-
-        if (peersOnChannel.size() > 0) {
+        if (peersToSend.size() > 0) {
             List<R> responses = new ArrayList<>();
             // remove self from channel peer list
             PeerAddress self = connection.getPeer().peerAddress();
-            peersOnChannel.remove(self);
+            peersToSend.remove(self);
             Peer peer = dht.peer();
 
             List<DirectBaseFutureListener> listOfFutureGets = new ArrayList<>();
 
-            peersOnChannel.stream().parallel().forEach(peerAddress -> {
+            peersToSend.stream().parallel().forEach(peerAddress -> {
                 FutureDirect futureDirect = peer
                         .sendDirect(peerAddress)
                         .object(message).start();
@@ -97,7 +91,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
 
                 synchronized (listOfFutureGets) {
                     //not sent to all
-                    if (listOfFutureGets.size() != peersOnChannel.size()) {
+                    if (listOfFutureGets.size() != peersToSend.size()) {
                         continue;
                     }
                     //got all responses, not waiting
@@ -131,14 +125,29 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         return null;
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <K extends Serializable, R extends Serializable> R get(P2PRequestChannel channel, Shard shard, P2PRequestChannelName channelName, K key) {
-        logger.traceEntry("params: {} {} {} {}", channel, shard, channelName, key);
 
-        List<R> responses = sendRequestMessage(channel, shard, new P2PRequestMessage(key, channelName, shard));
+    private <K extends Serializable, R extends Serializable> List<R> sendRequestMessage(P2PRequestChannel channel, Shard shard, P2PRequestMessage message) {
+        P2PConnection connection = channel.getConnection();
+        PeerDHT dht = connection.getDht();
+
+        //get all peers on channel
+        HashSet<PeerAddress> peersOnChannel = getPeersOnChannel(channel, shard);
+
+        return sendRequestMessage(channel, peersOnChannel, message);
+    }
+
+    private <K extends Serializable, R extends Serializable> List<R> sendRequestMessage(P2PRequestChannel channel, P2PRequestMessage message) {
+        P2PConnection connection = channel.getConnection();
+        PeerDHT dht = connection.getDht();
+
+        //get all peers
+        HashSet<PeerAddress> peers = connection.getPeersOnAllShards();
+
+        return sendRequestMessage(channel, peers, message);
+    }
+
+    private <K extends Serializable, R extends Serializable> R get(P2PRequestChannel channel, List<R> responses, P2PRequestChannelName channelName, K key) {
         List<R> results = new ArrayList<>();
-
 
         if (responses != null && !responses.isEmpty()) {
             if (P2PRequestChannelName.BLOCK_HEIGHT.equals(channelName)) {
@@ -175,6 +184,25 @@ public class P2PRequestServiceImpl implements P2PRequestService {
             }
         }
         return logger.traceExit((R) null);
+    }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public <K extends Serializable, R extends Serializable> R get(P2PRequestChannel channel, Shard shard, P2PRequestChannelName channelName, K key) {
+        logger.traceEntry("params: {} {} {} {}", channel, shard, channelName, key);
+
+        List<R> responses = sendRequestMessage(channel, shard, new P2PRequestMessage(key, channelName, shard));
+
+        return get(channel, responses, channelName, key);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <K extends Serializable, R extends Serializable> R getFromAllShards(P2PRequestChannel channel, P2PRequestChannelName channelName, K key) {
+        logger.traceEntry("params: {} {} {}", channel, channelName, key);
+
+        List<R> responses = sendRequestMessage(channel, new P2PRequestMessage(key, channelName, new Shard(-1)));
+
+        return get(channel, responses, channelName, key);
     }
 }

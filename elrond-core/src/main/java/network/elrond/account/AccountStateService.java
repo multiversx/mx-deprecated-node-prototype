@@ -25,7 +25,7 @@ public interface AccountStateService {
 
     AccountState convertToAccountStateFromRLP(byte[] data);
 
-    void initialMintingToKnownAddress(Accounts accounts);
+    void initialMintingToKnownAddress(Accounts accounts, int shardId);
 
     Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue, AppState state, AppContext context);
 }

@@ -14,12 +14,12 @@ public class ShardingServiceImpl implements ShardingService {
 
     Logger logger = LoggerFactory.getLogger(ShardingServiceImpl.class);
 
-    public static Integer MAX_ACTIVE_SHARDS_CONT = 10;
+    private int maxActiveShardsCnt = 10;
 
     @Override
     public Shard getShard(byte[] address) {
         BigInteger index = new BigInteger(address);
-        int _index = index.mod(BigInteger.valueOf(MAX_ACTIVE_SHARDS_CONT)).intValue();
+        int _index = index.mod(BigInteger.valueOf(maxActiveShardsCnt)).intValue();
         return new Shard(_index);
     }
 
@@ -72,8 +72,10 @@ public class ShardingServiceImpl implements ShardingService {
     }
 
     public Integer getNumberOfShards() {
-        return MAX_ACTIVE_SHARDS_CONT;
+        return maxActiveShardsCnt;
     }
 
-
+    public void setNumberOfShards(int maxActiveShardsCnt){
+        this.maxActiveShardsCnt = maxActiveShardsCnt;
+    }
 }

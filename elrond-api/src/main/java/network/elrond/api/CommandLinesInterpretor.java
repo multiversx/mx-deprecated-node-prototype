@@ -152,7 +152,8 @@ public class CommandLinesInterpretor {
                 "node_private_key=" + pKey,
                 "startup_type=START_FROM_SCRATCH",
                 "blockchain_path=elrond-node-" + count,
-                "blockchain_restore_path=elrond-node-" + count);
+                "blockchain_restore_path=elrond-node-" + count,
+                "is_seeder=false");
                 String configFile = "configGen_" + count +".config";
                 Path file = Paths.get(configFile);
                     Files.write(file, lines, Charset.forName("UTF-8"));
@@ -264,6 +265,7 @@ public class CommandLinesInterpretor {
         System.out.println("startup_type=START_FROM_SCRATCH");
         System.out.println("blockchain_path=elrond-node-1");
         System.out.println("blockchain_restore_path=elrond-node-1");
+        System.out.println("is_seeder=false");
         System.out.println();
         System.out.println("Variants for above config lines:");
         System.out.println("--------------------------------");

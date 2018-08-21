@@ -10,6 +10,7 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.data.BootstrapType;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.ShardingServiceImpl;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,8 @@ public class P2PObjectServiceSeederTest {
 
     @Test
     public void TestPutIfAbsent () throws Exception {
+        AppServiceProvider.getShardingService().setNumberOfShards(1);
+
         StartSeeder();
         StartKeyGenerator();
     }
@@ -67,7 +70,7 @@ public class P2PObjectServiceSeederTest {
                 String seedNodeRunnerPrivateKey = Util.byteArrayToHexString(new PrivateKey("elrond-node-1").getValue());
 
                 AppContext appContext = ContextCreator.createAppContext(nodeName, seedNodeRunnerPrivateKey, masterPeerIpAddress, masterPeerPort, port,
-                        BootstrapType.START_FROM_SCRATCH, nodeName);
+                        BootstrapType.START_FROM_SCRATCH, nodeName, true);
 
                 P2PConnection connection = AppServiceProvider.getP2PConnectionService().createConnection(appContext);
 

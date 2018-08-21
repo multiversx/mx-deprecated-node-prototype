@@ -22,7 +22,7 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
     protected final BlockchainContext context;
 
     protected Block currentBlock;
-    protected BigInteger currentBlockIndex = BigInteger.valueOf(-1);
+    protected BigInteger currentBlockIndex = Util.BIG_INT_MIN_ONE;
     protected Block genesisBlock;
 
     protected TransactionsPool pool = new TransactionsPool();
@@ -35,6 +35,11 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
     public Blockchain(BlockchainContext context) throws IOException {
         Util.check(context != null, "context!=null");
         this.context = context;
+
+        //if the node is not in shard 0, automatically put 0 as current network height (seeder should have generated genesis)
+        if (context.getShard().getIndex() != 0){
+            networkBlockHeight = BigInteger.ZERO;
+        }
 
         generatePersistenceUnitMap(context);
     }

@@ -35,7 +35,7 @@ public class BlockchainTest extends BaseBlockchainTest{
     public void testNullBlock() throws IOException, ClassNotFoundException {
 
         String hash = "kKmANYmd+WewCmBwLmK2id7ry/Zz8mExKwFZFxyTMDQ=";
-        Block block = AppServiceProvider.getBlockchainService().get(hash, blockchain, BlockchainUnitType.BLOCK);
+        Block block = AppServiceProvider.getBlockchainService().get(hash, blockchain, BlockchainUnitType.BLOCK, false);
 
         Assert.assertNull(block);
     }
@@ -73,7 +73,7 @@ public class BlockchainTest extends BaseBlockchainTest{
         for (String hash : blocks.keySet()) {
 
             Block _block = blocks.get(hash);
-            Block block = AppServiceProvider.getBlockchainService().get(hash, blockchain, BlockchainUnitType.BLOCK);
+            Block block = AppServiceProvider.getBlockchainService().get(hash, blockchain, BlockchainUnitType.BLOCK, false);
             Assert.assertEquals(block.nonce, _block.nonce);
             String b1Js = AppServiceProvider.getSerializationService().encodeJSON(_block);
             String b2Js = AppServiceProvider.getSerializationService().encodeJSON(block);

@@ -19,7 +19,7 @@ import java.util.List;
 
 public class P2PObjectServiceTest {
 
-    @Test
+    //@Test
     public void testPutIfAbsentOnDHT() throws Exception {
         String nodeName = "elrond-seeder";
 
@@ -29,7 +29,7 @@ public class P2PObjectServiceTest {
         String seedNodeRunnerPrivateKey = Util.byteArrayToHexString(new PrivateKey("elrond-node-1").getValue());
 
         AppContext appContext = ContextCreator.createAppContext(nodeName, seedNodeRunnerPrivateKey, masterPeerIpAddress, masterPeerPort, port,
-                BootstrapType.START_FROM_SCRATCH, nodeName);
+                BootstrapType.START_FROM_SCRATCH, nodeName, true);
 
         P2PConnection connection = AppServiceProvider.getP2PConnectionService().createConnection(appContext);
 

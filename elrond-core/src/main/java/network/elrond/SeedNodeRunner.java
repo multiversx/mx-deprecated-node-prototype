@@ -7,6 +7,9 @@ import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.BootstrapType;
+import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
+import network.elrond.sharding.ShardingService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,10 +29,13 @@ public class SeedNodeRunner {
         Integer port = 31201;
         Integer masterPeerPort = 31201;
         String masterPeerIpAddress = "127.0.0.1";
-        String seedNodeRunnerPrivateKey = "1111111111111111fa612ecafcfd145cc06c1fb64d7499ef34696ff16b82cbc1";
+
+        ShardingService shardingService = AppServiceProvider.getShardingService();
+
+        String seedNodeRunnerPrivateKey = Util.byteArrayToHexString(shardingService.getPrivateKeyForMinting(new Shard(0)).getValue());
 
         AppContext context = ContextCreator.createAppContext(nodeName, seedNodeRunnerPrivateKey, masterPeerIpAddress, masterPeerPort, port,
-                BootstrapType.START_FROM_SCRATCH, nodeName);
+                BootstrapType.START_FROM_SCRATCH, nodeName, true);
 
         ElrondFacade facade = new ElrondFacadeImpl();
 

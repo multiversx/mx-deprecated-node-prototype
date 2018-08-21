@@ -19,4 +19,6 @@ public interface ShardingService {
 
     Integer getNumberOfShards();
 
+    void setNumberOfShards(int maxActiveShardsCnt);
+
 }
