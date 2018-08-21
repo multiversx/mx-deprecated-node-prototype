@@ -34,7 +34,7 @@ public class AccountsStarterProcessor implements AppTask {
         accountContext.setDatabasePath(databasePath.toString());
         accountContext.setShard(state.getShard());
 
-        Accounts accounts = new Accounts(accountContext, new AccountsPersistenceUnit<>(accountContext.getDatabasePath(), 100000));
+        Accounts accounts = new Accounts(accountContext, new AccountsPersistenceUnit<>(accountContext.getDatabasePath(), 1000));
         state.setAccounts(accounts);
         logger.traceExit();
     }
