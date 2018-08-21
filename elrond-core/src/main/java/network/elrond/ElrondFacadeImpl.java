@@ -1,5 +1,6 @@
 package network.elrond;
 
+import net.tomp2p.peers.PeerAddress;
 import network.elrond.account.AccountAddress;
 import network.elrond.account.AccountState;
 import network.elrond.account.Accounts;
@@ -30,6 +31,7 @@ import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -547,5 +549,10 @@ public class ElrondFacadeImpl implements ElrondFacade {
 
         return new ResponseObject(true, "", new String[]{Util.byteArrayToHexString(privateKey.getValue()),
                 Util.byteArrayToHexString(publicKey.getValue()), shard.getIndex().toString()});
+    }
+
+    @Override
+    public HashSet<PeerAddress> getPeersFromSelectedShard(Application application, Integer shard) {
+        return application.getState().getConnection().getPeersOnShard(shard);
     }
 }

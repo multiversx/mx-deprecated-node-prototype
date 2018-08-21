@@ -1,5 +1,6 @@
 package network.elrond.api;
 
+import net.tomp2p.peers.PeerAddress;
 import network.elrond.Application;
 import network.elrond.ElrondFacade;
 import network.elrond.ElrondFacadeImpl;
@@ -16,11 +17,27 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Component
 class ElrondApiNode {
@@ -206,6 +223,11 @@ class ElrondApiNode {
         return logger.traceExit(ro);
     }
 
+    ResponseObject getNodeLog() {
+        logger.traceEntry();
+        return logger.traceExit(new ResponseObject(true, "Success", null));
+    }
+
     void getLog(){
         logger.traceEntry();
 
@@ -245,5 +267,102 @@ class ElrondApiNode {
             logger.throwing(ex);
         }
         logger.traceExit();
+    }
+
+    public void zipDirectory(File folder, String destName) throws IOException {
+        if ( !folder.isDirectory() ) {
+            return;
+        }
+        FileOutputStream fos = new FileOutputStream(destName);
+        ZipOutputStream zipOut = new ZipOutputStream(fos);
+
+        File[] children = folder.listFiles();
+        for (File childFile : children) {
+            zipFile(childFile, childFile.getName(), zipOut);
+        }
+
+        zipOut.close();
+        fos.close();
+    }
+
+    public HashSet<PeerAddress> getPeersOnSelectedShard(Integer shard) {
+        ElrondFacade facade = getFacade();
+        return facade.getPeersFromSelectedShard(application, shard);
+    }
+
+    public ResponseEntity prepareResponseForFileDownload(File zipArchive) throws IOException {
+        Path path = Paths.get(zipArchive.getAbsolutePath());
+        ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(path));
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + zipArchive.getName());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentLength(zipArchive.length())
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .body(resource);
+    }
+
+
+    /**
+     * Copies a remote file to a given destination
+     * Returns true if it succeeds, false otherwise
+     *
+     * @param url
+     * @param dest
+     * @return
+     */
+    public boolean copyRemoteFile(String url, String dest) {
+        logger.traceEntry("params: {} {}", url, dest);
+        FileOutputStream fileOutputStream = null;
+        try {
+            ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(url).openStream());
+            // Create path for the destination if it doesn't exist
+            File destFile = new File(dest);
+            destFile.getParentFile().mkdirs();
+            destFile.getParentFile().setWritable(true, false);
+            fileOutputStream = new FileOutputStream(dest);
+            fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+            return true;
+        } catch (MalformedURLException e) {
+            logger.catching(e);
+            return false;
+        } catch (IOException e) {
+            logger.catching(e);
+            return false;
+        } finally {
+            logger.traceExit();
+            if ( fileOutputStream != null ) {
+                try {
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    logger.catching(e);
+                    return false;
+                }
+            }
+        }
+
+    }
+
+    private static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) throws IOException {
+        if (fileToZip.isHidden()) {
+            return;
+        }
+        if (fileToZip.isDirectory()) {
+            File[] children = fileToZip.listFiles();
+            for (File childFile : children) {
+                zipFile(childFile, fileName + "/" + childFile.getName(), zipOut);
+            }
+            return;
+        }
+        FileInputStream fis = new FileInputStream(fileToZip);
+        ZipEntry zipEntry = new ZipEntry(fileName);
+        zipOut.putNextEntry(zipEntry);
+        byte[] bytes = new byte[1024];
+        int length;
+        while ((length = fis.read(bytes)) >= 0) {
+            zipOut.write(bytes, 0, length);
+        }
+        fis.close();
     }
 }

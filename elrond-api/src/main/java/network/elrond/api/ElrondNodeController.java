@@ -1,5 +1,6 @@
 package network.elrond.api;
 
+import net.tomp2p.peers.PeerAddress;
 import network.elrond.Application;
 import network.elrond.ContextCreator;
 import network.elrond.account.AccountAddress;
@@ -10,19 +11,22 @@ import network.elrond.core.Util;
 import network.elrond.data.BootstrapType;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.ShardingService;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.HashSet;
+import java.util.Optional;
 
 @Controller
 public class ElrondNodeController {
@@ -278,4 +282,51 @@ public class ElrondNodeController {
         logger.traceExit();
     }
 
+    @RequestMapping(path = {"/node/getNodeLogs", "/node/getNodeLogs/{shard}"}, method = RequestMethod.GET)
+    public @ResponseBody
+    ResponseEntity<Resource> getNodeLogs(@PathVariable Optional<Integer> shard) throws IOException {
+        logger.traceEntry();
+
+        // Get log file path
+        org.apache.logging.log4j.core.Logger loggerImpl = (org.apache.logging.log4j.core.Logger) logger;
+        String logPath = loggerImpl.getContext().getConfiguration().getStrSubstitutor()
+                .getVariableResolver().lookup("LOG_FOLDER");
+        File logFolder = new File(logPath);
+
+        if (!shard.isPresent()) {
+            // Zip current node logs
+            elrondApiNode.zipDirectory(logFolder, "logs.zip");
+        } else {
+            // Download logs for all shards
+            HashSet<PeerAddress> peers = elrondApiNode.getPeersOnSelectedShard(shard.get());
+            if ( peers.isEmpty() ) {
+                return null;
+            }
+            peers.parallelStream().forEach(peer -> {
+                String peerHostAddress = peer.inetAddress().getHostAddress();
+                if ( !elrondApiNode.copyRemoteFile("http://" + peerHostAddress + ":8080/node/getNodeLogs",
+                        "downloads/" + peerHostAddress + ".zip") ) {
+                    logger.warn("Could not copy remote peer log files from " + peerHostAddress);
+                }
+            });
+            elrondApiNode.zipDirectory(new File("downloads"), "logs.zip");
+            // Remove downloads directory
+            Runnable deleteDownloadsRunnable = () -> {
+                try {
+                    FileUtils.deleteDirectory(new File("downloads"));
+                } catch (IOException e) {
+                    logger.catching(e);
+                }
+            };
+            new Thread(deleteDownloadsRunnable).start();
+        }
+
+        // Prepare response object containing the logs archive
+        File zipArchive = new File("logs.zip");
+        ResponseEntity res = elrondApiNode.prepareResponseForFileDownload(zipArchive);
+        Runnable deleteArchiveRunnable = () ->  zipArchive.delete();
+        new Thread(deleteArchiveRunnable).start();
+        logger.traceExit();
+        return res;
+    }
 }

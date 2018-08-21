@@ -1,11 +1,13 @@
 package network.elrond;
 
+import net.tomp2p.peers.PeerAddress;
 import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.core.ResponseObject;
 
 import java.math.BigInteger;
+import java.util.HashSet;
 
 public interface ElrondFacade {
 
@@ -117,4 +119,13 @@ public interface ElrondFacade {
     ResponseObject getNextPrivateKey(String requestAddress);
 
     ResponseObject getPrivatePublicKeyShard(Application application);
+
+    /**
+     * Return a list of peers from a given shard
+     *
+     * @param application
+     * @param shard
+     * @return
+     */
+    HashSet<PeerAddress> getPeersFromSelectedShard(Application application, Integer shard);
 }
