@@ -15,10 +15,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -28,9 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Optional;
 
@@ -303,6 +297,9 @@ public class ElrondNodeController {
         } else {
             // Download logs for all shards
             HashSet<PeerAddress> peers = elrondApiNode.getPeersOnSelectedShard(shard.get());
+            if ( peers.isEmpty() ) {
+                return null;
+            }
             peers.parallelStream().forEach(peer -> {
                 String peerHostAddress = peer.inetAddress().getHostAddress();
                 if ( !elrondApiNode.copyRemoteFile("http://" + peerHostAddress + ":8080/node/getNodeLogs",
@@ -324,15 +321,7 @@ public class ElrondNodeController {
 
         // Prepare response object containing the logs archive
         File zipArchive = new File("logs.zip");
-        Path path = Paths.get(zipArchive.getAbsolutePath());
-        ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(path));
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=logs.zip");
-        ResponseEntity res = ResponseEntity.ok()
-                .headers(headers)
-                .contentLength(zipArchive.length())
-                .contentType(MediaType.parseMediaType("application/octet-stream"))
-                .body(resource);
+        ResponseEntity res = elrondApiNode.prepareResponseForFileDownload(zipArchive);
         Runnable deleteArchiveRunnable = () ->  zipArchive.delete();
         new Thread(deleteArchiveRunnable).start();
         logger.traceExit();

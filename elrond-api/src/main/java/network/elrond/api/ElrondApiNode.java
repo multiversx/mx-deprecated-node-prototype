@@ -17,6 +17,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -28,6 +32,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -283,6 +290,19 @@ class ElrondApiNode {
     public HashSet<PeerAddress> getPeersOnSelectedShard(Integer shard) {
         ElrondFacade facade = getFacade();
         return facade.getPeersFromSelectedShard(application, shard);
+    }
+
+    public ResponseEntity prepareResponseForFileDownload(File zipArchive) throws IOException {
+        Path path = Paths.get(zipArchive.getAbsolutePath());
+        ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(path));
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + zipArchive.getName());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentLength(zipArchive.length())
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .body(resource);
     }
 
 
