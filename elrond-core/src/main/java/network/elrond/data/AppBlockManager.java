@@ -219,7 +219,10 @@ public class AppBlockManager {
             nodeList.add(peer.peerId().toString());
         }
 
-        if (blockchain.getCurrentBlock() != null) {
+        boolean getPeersOnLastBlock = state.getBlockchain() != null && state.getBlockchain().getCurrentBlock() != null &&
+                state.getBlockchain().getCurrentBlock().getShard().getIndex().equals(state.getShard().getIndex());
+
+        if (getPeersOnLastBlock) {
             nodeList.addAll(blockchain.getCurrentBlock().getPeers());
         }
 

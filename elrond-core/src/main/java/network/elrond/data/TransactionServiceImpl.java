@@ -136,7 +136,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         logger.info("Getting transactions... transactions size: {} hashes size: {}", transactionHashPairs.size(), hashes.size());
         if (transactionHashPairs.size() != hashes.size()) {
-            transactionHashPairs = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK_TRANSACTIONS);
+            transactionHashPairs = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK_TRANSACTIONS, false);
         }
         if (transactionHashPairs != null) {
             for (Pair<String, Transaction> transactionHashPair : transactionHashPairs) {

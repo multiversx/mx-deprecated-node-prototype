@@ -77,7 +77,12 @@ public class NTPClient implements AutoCloseable{
 
         logger.trace("Building internal lists...");
         for (int i = 0; i < listHosts.size(); i++){
-            InetAddress host = InetAddress.getByName(listHosts.get(i));
+            InetAddress host = InetAddress.getByName("localhost");
+            try {
+                host = InetAddress.getByName(listHosts.get(i));
+            } catch (Exception ex) {
+                logger.catching(ex);
+            }
             listHostsAddr.add(host);
             this.listHosts.add(listHosts.get(i));
             if (i > 0){

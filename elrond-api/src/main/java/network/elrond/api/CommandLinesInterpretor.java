@@ -30,7 +30,6 @@ public class CommandLinesInterpretor {
     private static final Logger logger = LogManager.getLogger(CommandLinesInterpretor.class);
 
     public static ResponseObject interpretCommandLines(String[] args){
-        logger.traceEntry("params: {}", args);
 
         if (args == null){
             return logger.traceExit(new ResponseObject(true, "null arguments!", null));
