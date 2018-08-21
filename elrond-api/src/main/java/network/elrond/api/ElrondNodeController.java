@@ -11,6 +11,7 @@ import network.elrond.core.Util;
 import network.elrond.data.BootstrapType;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.ShardingService;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -302,27 +303,39 @@ public class ElrondNodeController {
         } else {
             // Download logs for all shards
             HashSet<PeerAddress> peers = elrondApiNode.getPeersOnSelectedShard(shard.get());
-            for (PeerAddress peer : peers) {
+            peers.parallelStream().forEach(peer -> {
                 String peerHostAddress = peer.inetAddress().getHostAddress();
                 if ( !elrondApiNode.copyRemoteFile("http://" + peerHostAddress + ":8080/node/getNodeLogs",
                         "downloads/" + peerHostAddress + ".zip") ) {
                     logger.warn("Could not copy remote peer log files from " + peerHostAddress);
-                    continue;
                 }
-            }
+            });
             elrondApiNode.zipDirectory(new File("downloads"), "logs.zip");
+            // Remove downloads directory
+            Runnable deleteDownloadsRunnable = () -> {
+                try {
+                    FileUtils.deleteDirectory(new File("downloads"));
+                } catch (IOException e) {
+                    logger.catching(e);
+                }
+            };
+            new Thread(deleteDownloadsRunnable).start();
         }
 
+        // Prepare response object containing the logs archive
         File zipArchive = new File("logs.zip");
         Path path = Paths.get(zipArchive.getAbsolutePath());
         ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(path));
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=logs.zip");
-        logger.traceExit();
-        return ResponseEntity.ok()
+        ResponseEntity res = ResponseEntity.ok()
                 .headers(headers)
                 .contentLength(zipArchive.length())
                 .contentType(MediaType.parseMediaType("application/octet-stream"))
                 .body(resource);
+        Runnable deleteArchiveRunnable = () ->  zipArchive.delete();
+        new Thread(deleteArchiveRunnable).start();
+        logger.traceExit();
+        return res;
     }
 }
