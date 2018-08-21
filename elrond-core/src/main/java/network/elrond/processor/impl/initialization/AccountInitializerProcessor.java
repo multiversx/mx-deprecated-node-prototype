@@ -19,6 +19,7 @@ public class AccountInitializerProcessor implements AppTask {
 
         AppContext context = application.getContext();
         AppState state = application.getState();
+        state.setSeeder(context.isSeeder());
         PrivateKey privateKey = context.getPrivateKey();
 
         state.setPrivateKey(privateKey);

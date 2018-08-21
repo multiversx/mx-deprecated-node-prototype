@@ -68,7 +68,10 @@ public class AppShardingManager {
     public List<String> getPeersOnShardInBlock(AppState state) {
         HashSet<String> nodeList = new HashSet<String>();
 
-        if (state.getBlockchain() != null && state.getBlockchain().getCurrentBlock() != null) {
+        boolean getPeersOnLastBlock = state.getBlockchain() != null && state.getBlockchain().getCurrentBlock() != null &&
+                state.getBlockchain().getCurrentBlock().getShard().getIndex().equals(state.getShard().getIndex());
+
+        if (getPeersOnLastBlock) {
             nodeList.addAll(state.getBlockchain().getCurrentBlock().getPeers());
         }
 

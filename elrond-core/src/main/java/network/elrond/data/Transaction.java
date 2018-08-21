@@ -138,6 +138,37 @@ public class Transaction implements Serializable, AsciiPrintable {
     }
 
     /**
+     * Shallow copy constructor
+     * @param src Source transation object
+     */
+    public Transaction(Transaction src){
+        //tx counter
+        nonce = src.getNonce();
+        //value used in transaction in sERDs see core.Util
+        value = src.getValue();
+        //receiving address as 0x0024f2849a...
+        receiverAddress = src.getReceiverAddress();
+        //sender address as 0x0024f22323...
+        senderAddress = src.getSenderAddress();
+        //amount of sERDs per each unit of gas
+        gasPrice = src.getGasPrice();
+        //gas used for running the tx
+        gasLimit = src.getGasLimit();
+        //blob of data to executed in Elrond Virtual Machine
+        data = src.getData();
+        //blob of data containing first part of sig
+        signature = src.getSignature();
+        //blob of data containing second part of sig
+        challenge = src.getChallenge();
+        //plain public key in hexa form
+        pubKey = src.getPubKey();
+
+        senderShard = src.getSenderShard();
+
+        receiverShard = src.getReceiverShard();
+    }
+
+    /**
      * Gets the nonce
      *
      * @return nonce as BigInteger

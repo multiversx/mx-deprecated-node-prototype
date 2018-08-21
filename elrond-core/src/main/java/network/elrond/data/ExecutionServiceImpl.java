@@ -134,6 +134,15 @@ public class ExecutionServiceImpl implements ExecutionService {
                 return logger.traceExit(blockExecutionReport);
             }
 
+            boolean isGenesisBlockFromOtherShard = block.getNonce().equals(BigInteger.ZERO) &&
+                    (!block.getShard().getIndex().equals(blockchain.getShard().getIndex()));
+
+            //genesis block is from other shard, can not process
+            if (isGenesisBlockFromOtherShard){
+                blockExecutionReport.ok(String.format("Genesis from other shard, state root hash: %s", Util.getDataEncoded64(accounts.getAccountsPersistenceUnit().getRootHash())));
+                return logger.traceExit(blockExecutionReport);
+            }
+
             // check block signers are valid for the round
             if (!validateBlockSigners(accounts, blockchain, block)) {
                 blockExecutionReport.ko("Signers not ok for epoch/round");

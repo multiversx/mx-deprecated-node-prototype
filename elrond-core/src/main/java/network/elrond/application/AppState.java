@@ -35,6 +35,8 @@ public class AppState implements Serializable, AsciiPrintable {
     private PublicKey publicKey;
     private PrivateKey privateKey;
 
+    private boolean isSeeder;
+
     private NTPClient ntpClient;
     private P2PConnection connection;
 
@@ -165,6 +167,14 @@ public class AppState implements Serializable, AsciiPrintable {
 
     public TransactionsPool getPool() {
         return blockchain.getPool();
+    }
+
+    public boolean isSeeder(){
+        return isSeeder;
+    }
+
+    public void setSeeder(boolean isSeeder){
+        this.isSeeder = isSeeder;
     }
 
     @Override

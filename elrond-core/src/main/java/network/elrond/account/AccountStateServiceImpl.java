@@ -10,6 +10,7 @@ import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.*;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.ShardingServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mapdb.Fun;
@@ -133,8 +134,14 @@ public class AccountStateServiceImpl implements AccountStateService {
         return logger.traceExit(accountState);
     }
 
-    public void initialMintingToKnownAddress(Accounts accounts) {
+    public void initialMintingToKnownAddress(Accounts accounts, int shardId) {
         logger.traceEntry("params: {}", accounts);
+
+        //hardwired, only shard 0 gets to have a premint address
+        if (shardId != 0){
+            return;
+        }
+
         AccountState accountState = null;
 
         try {

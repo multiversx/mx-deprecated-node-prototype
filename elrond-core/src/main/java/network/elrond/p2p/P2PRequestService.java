@@ -9,4 +9,6 @@ public interface P2PRequestService {
     P2PRequestChannel createChannel(P2PConnection connection, Shard shard, P2PRequestChannelName channelName);
 
     <K extends Serializable, R extends Serializable> R get(P2PRequestChannel channel, Shard shard, P2PRequestChannelName channelName, K key);
+
+    <K extends Serializable, R extends Serializable> R getFromAllShards(P2PRequestChannel channel, P2PRequestChannelName channelName, K key);
 }

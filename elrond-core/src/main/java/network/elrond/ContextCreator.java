@@ -17,11 +17,9 @@ import java.io.IOException;
 public class ContextCreator {
     private static final Logger logger = LogManager.getLogger(ContextCreator.class);
 
-    protected static final String mintAddress = "026c00d83e0dc47e6b626ed6c42f636b";
-
     public static AppContext createAppContext(String nodeName, String nodePrivateKeyString, String masterPeerIpAddress,
                                               Integer masterPeerPort, Integer port, BootstrapType bootstrapType,
-                                              String blockchainPath) throws IOException {
+                                              String blockchainPath, boolean isSeeder) throws Exception {
         logger.traceEntry("params: {} {} {} {} {} {} {}", nodeName, nodePrivateKeyString, masterPeerIpAddress,
                 masterPeerPort, port, bootstrapType, blockchainPath);
 
@@ -36,6 +34,7 @@ public class ContextCreator {
         context.setPort(port);
         context.setNodeName(nodeName);
         context.setStorageBasePath(blockchainPath);
+        context.setSeeder(isSeeder);
 
         context.setBootstrapType(bootstrapType);
         PrivateKey nodePrivateKey = new PrivateKey(Util.hexStringToByteArray(nodePrivateKeyString));
@@ -49,6 +48,12 @@ public class ContextCreator {
         ShardingService shardingService = AppServiceProvider.getShardingService();
         PublicKey preGeneratedPublicKey = new PublicKey(context.getPrivateKey());
         Shard shard = shardingService.getShard(preGeneratedPublicKey.getValue());
+
+        if ((isSeeder) && (shard.getIndex() != 0)){
+            throw new Exception("Seeder must start in shard 0, not shard " + String.valueOf(shard.getIndex()) + "!");
+        }
+
+        logger.info("Node's public key is {}", Util.byteArrayToHexString(preGeneratedPublicKey.getValue()));
 
         return logger.traceExit(context);
     }

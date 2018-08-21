@@ -5,6 +5,9 @@ import network.elrond.application.AppContext;
 import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.data.BootstrapType;
+import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
+import network.elrond.sharding.ShardingService;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,13 +27,13 @@ public class NodeRunner {
         Integer port = 31201 + nr;
         Integer masterPeerPort = 31201;
         String masterPeerIpAddress = "127.0.0.1";
-        String nodeRunnerPrivateKey = "00e15fc71adc4832c56c4e6a8b50a9503a4ede9485c4efbc585def0c657d93066a";
-        if (nodeRunnerPrivateKey.length() % 2 == 1) {
-            nodeRunnerPrivateKey += "1";
-        }
+        ShardingService shardingService = AppServiceProvider.getShardingService();
+
+        String nodeRunnerPrivateKey = Util.byteArrayToHexString(shardingService.getPrivateKeyForMinting(new Shard(1)).getValue());
+
         //Reuploaded
         AppContext context = ContextCreator.createAppContext(nodeName, nodeRunnerPrivateKey, masterPeerIpAddress, masterPeerPort, port,
-                BootstrapType.START_FROM_SCRATCH, nodeName);
+                BootstrapType.START_FROM_SCRATCH, nodeName, false);
 
         ElrondFacade facade = new ElrondFacadeImpl();
 

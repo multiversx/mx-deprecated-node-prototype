@@ -17,6 +17,7 @@ public class AppContext implements Serializable {
     private Integer masterPeerPort;
     private String storageBasePath = "main";
     private PrivateKey privateKey;
+    private boolean isSeeder = false;
 
     private String strAddressMint = "000000000000000000000000000000000000000000000000000000000000000000";
     private BootstrapType bootstrapType = BootstrapType.REBUILD_FROM_DISK;//BootstrapType.START_FROM_SCRATCH;
@@ -102,6 +103,14 @@ public class AppContext implements Serializable {
 
     public List<String> getListNTPServers(){
         return (listNTPServers);
+    }
+
+    public boolean isSeeder(){
+        return isSeeder;
+    }
+
+    public void setSeeder(boolean isSeeder){
+        this.isSeeder = isSeeder;
     }
 
 }

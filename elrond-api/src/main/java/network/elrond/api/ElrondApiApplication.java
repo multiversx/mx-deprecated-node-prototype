@@ -107,7 +107,8 @@ public class ElrondApiApplication {
                                     data.get("peer_ip").toString(),
                                     data.get("node_private_key").toString(),
                                     null,
-                                    (BootstrapType)data.get("startup_type"));
+                                    (BootstrapType)data.get("startup_type"),
+                                    (boolean)data.get("is_seeder"));
                         } catch (Exception ex) {
                             logger.catching(ex);
                             logger.error("Can not auto-start node!");

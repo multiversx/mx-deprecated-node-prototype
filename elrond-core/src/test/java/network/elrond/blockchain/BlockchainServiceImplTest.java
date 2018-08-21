@@ -48,12 +48,12 @@ public class BlockchainServiceImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testGetWithNullHashShouldThrowExtension() throws IOException, ClassNotFoundException {
-        blockchainService.get(null, blockchain, BlockchainUnitType.BLOCK);
+        blockchainService.get(null, blockchain, BlockchainUnitType.BLOCK, false);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testGetWithNullBlockchainShouldThrowExtension() throws IOException, ClassNotFoundException {
-        blockchainService.get("testHash", null, BlockchainUnitType.BLOCK);
+        blockchainService.get("testHash", null, BlockchainUnitType.BLOCK, false);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -74,7 +74,7 @@ public class BlockchainServiceImplTest {
         Assert.assertNull(blockchain.getUnit(BlockchainUnitType.BLOCK).getCache().get(testHash));
         blockchainService.put(testHash,  testObject, blockchain, BlockchainUnitType.BLOCK);
         Assert.assertNotNull(blockchain.getUnit(BlockchainUnitType.BLOCK).getCache().get(testHash));
-        String str = blockchainService.get(testHash, blockchain, BlockchainUnitType.BLOCK);
+        String str = blockchainService.get(testHash, blockchain, BlockchainUnitType.BLOCK, false);
         Assert.assertNotNull(str);
         Assert.assertEquals(testObject, str);
     }
@@ -85,7 +85,7 @@ public class BlockchainServiceImplTest {
         String testObject = "testObject";
         Blockchain blockchain = new Blockchain(new BlockchainContext());
         blockchainService.put(testHash,  testObject, blockchain, BlockchainUnitType.BLOCK);
-        String str = blockchainService.get(testHash, blockchain, BlockchainUnitType.BLOCK);
+        String str = blockchainService.get(testHash, blockchain, BlockchainUnitType.BLOCK, false);
         Assert.assertNotNull(str);
         Assert.assertEquals(testObject, str);
     }

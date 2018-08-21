@@ -122,7 +122,7 @@ public class AccountStateServiceImplTest {
 
     @Test
     public void testInitialMintingToKnownAddress() throws IOException, ClassNotFoundException {
-        accountStateService.initialMintingToKnownAddress(accounts);
+        accountStateService.initialMintingToKnownAddress(accounts, 0);
         AccountState state = accountStateService.getAccountState(AppServiceProvider.getShardingService().getAddressForMinting(accounts.getShard()), accounts);
         Assert.assertNotNull(state);
         Assert.assertEquals(0, state.getBalance().compareTo(Util.VALUE_MINTING));

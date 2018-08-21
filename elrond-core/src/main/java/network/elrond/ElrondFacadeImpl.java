@@ -138,10 +138,10 @@ public class ElrondFacadeImpl implements ElrondFacade {
                 String receiptHash;
                 Receipt receiptLocal = null;
                 do {
-                    receiptHash = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
+                    receiptHash = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT, false);
                     if (receiptHash != null) {
                         AppServiceProvider.getBlockchainService().putLocal(transactionHash, receiptHash, blockchain, BlockchainUnitType.TRANSACTION_RECEIPT);
-                        receiptLocal = AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT);
+                        receiptLocal = AppServiceProvider.getBlockchainService().get(receiptHash, blockchain, BlockchainUnitType.RECEIPT, false);
                         if (receiptLocal != null) {
                             AppServiceProvider.getBlockchainService().putLocal(receiptHash, receiptLocal, blockchain, BlockchainUnitType.RECEIPT);
                         }
@@ -484,7 +484,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
     public ResponseObject getTransactionFromHash(String transactionHash, Blockchain blockchain) {
         logger.traceEntry("params: {} {}", transactionHash, blockchain);
         try {
-            Transaction transaction = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION);
+            Transaction transaction = AppServiceProvider.getBlockchainService().get(transactionHash, blockchain, BlockchainUnitType.TRANSACTION, false);
 
             if (transaction == null) {
                 return logger.traceExit(new ResponseObject(true, String.format("Transaction with hash %s was not found", transactionHash), null));
@@ -503,7 +503,7 @@ public class ElrondFacadeImpl implements ElrondFacade {
     public ResponseObject getBlockFromHash(String blockHash, Blockchain blockchain) {
         logger.traceEntry("params: {} {}", blockchain, blockchain);
         try {
-            Block block = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK);
+            Block block = AppServiceProvider.getBlockchainService().get(blockHash, blockchain, BlockchainUnitType.BLOCK, false);
 
             if (block == null) {
                 return logger.traceExit(new ResponseObject(true, String.format("Block with hash %s was not found", blockHash), null));

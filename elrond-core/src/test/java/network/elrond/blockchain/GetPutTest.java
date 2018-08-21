@@ -143,7 +143,7 @@ public class GetPutTest extends BaseBlockchainTest {
                     Transaction tx = null;
 
                     try {
-                        tx = blockchainService.get(hash, blockchain, BlockchainUnitType.TRANSACTION);
+                        tx = blockchainService.get(hash, blockchain, BlockchainUnitType.TRANSACTION, false);
 
 
                         if (tx != null) {

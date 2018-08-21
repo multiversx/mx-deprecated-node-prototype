@@ -44,7 +44,7 @@ public class BootstrapBlockTask extends AbstractBlockTask {
                 return;
             }
 
-            boolean isLeaderInShard = AppShardingManager.instance().isLeaderInShard(state);
+            boolean isLeaderInShard = state.isSeeder();
             boolean isMissingGenesisBlock = (syncState.getRemoteBlockIndex().compareTo(BigInteger.ZERO) < 0 && syncState.getLocalBlockIndex().compareTo(BigInteger.ZERO) < 0);
             boolean shouldGenerateGenesis = isLeaderInShard && isMissingGenesisBlock;
             if (!shouldGenerateGenesis) {

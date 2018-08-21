@@ -15,7 +15,7 @@ public interface BootstrapService {
     void setCurrentBlockIndex(LocationType locationType, BigInteger height, Blockchain blockchain) throws Exception;
 
     //gets the hash for the block height from location
-    String getBlockHashFromIndex(BigInteger blockIndex, Blockchain blockchain) throws Exception;
+    String getBlockHashFromIndex(BigInteger blockIndex, Blockchain blockchain, boolean fromAllShards) throws Exception;
 
     //sets the hash for a block height in location
     void setBlockHashWithIndex(BigInteger blockIndex, String blockHash, Blockchain blockchain) throws Exception;

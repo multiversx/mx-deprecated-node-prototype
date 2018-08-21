@@ -29,7 +29,7 @@ public class Accounts implements Serializable, PersistenceUnitContainer {
         this.context = context;
         this.unit = unit;
         addresses = new HashSet<>();
-        AppServiceProvider.getAccountStateService().initialMintingToKnownAddress(this);
+        AppServiceProvider.getAccountStateService().initialMintingToKnownAddress(this, context.getShard().getIndex());
         logger.traceExit();
     }
 

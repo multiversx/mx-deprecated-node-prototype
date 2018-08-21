@@ -65,6 +65,22 @@ public class P2PConnection {
         return result == null ? new HashSet<>() : new HashSet<>(result);
     }
 
+    public HashSet<PeerAddress> getPeersOnAllShards() {
+        HashSet<PeerAddress> result = new HashSet<>();
+
+        for (int shardId : bucketsPeers.keySet()){
+            HashSet<PeerAddress> peers = bucketsPeers.get(shardId);
+
+            if (peers == null){
+                continue;
+            }
+
+            result.addAll(peers);
+        }
+
+        return result;
+    }
+
     public synchronized void addPeerOnShard(PeerAddress peerAddress, Integer shardId) {
         HashSet<PeerAddress> peersOnShard = getPeersOnShard(shardId);
         peersOnShard.add(peerAddress);

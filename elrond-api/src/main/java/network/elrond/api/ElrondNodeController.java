@@ -76,16 +76,18 @@ public class ElrondNodeController {
             @RequestParam(defaultValue = "127.0.0.1", required = false) String masterPeerIpAddress,
             @RequestParam(defaultValue = "00e15fc71adc4832c56c4e6a8b50a9503a4ede9485c4efbc585def0c657d93066a", required = true) String privateKey,
             @RequestParam(defaultValue = "21000000", required = false) String mintValue,
-            @RequestParam(defaultValue = "START_FROM_SCRATCH", required = true) BootstrapType bootstrapType//,
+            @RequestParam(defaultValue = "START_FROM_SCRATCH", required = true) BootstrapType bootstrapType,
+            @RequestParam(defaultValue = "false", required = true) boolean isSeedNode
+            //,
             //@RequestParam(defaultValue = "elrond-node-1", required = false) String blockchainPath,
             //@RequestParam(defaultValue = "elrond-node-1", required = false) String blockchainRestorePath
 
-    ) throws IOException {
+    ) throws Exception {
         logger.traceEntry("params: {} {} {} {} {} {} {}", nodeName, port, masterPeerPort, masterPeerIpAddress,
                 privateKey, mintValue, bootstrapType);
         //Reuploaded
         AppContext context = ContextCreator.createAppContext(nodeName, privateKey, masterPeerIpAddress,
-                masterPeerPort, port, bootstrapType, nodeName);
+                masterPeerPort, port, bootstrapType, nodeName, isSeedNode);
 
         logger.info("Node name: {}", nodeName);
 

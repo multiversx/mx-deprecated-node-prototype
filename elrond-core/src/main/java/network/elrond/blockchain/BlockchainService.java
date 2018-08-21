@@ -14,7 +14,7 @@ public interface BlockchainService {
 
     <H, B extends Serializable> void putLocal(H hash, B object, Blockchain blockchain, BlockchainUnitType type);
 
-    <H, B extends Serializable> B get(H hash, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException;
+    <H, B extends Serializable> B get(H hash, Blockchain blockchain, BlockchainUnitType type, boolean fromAllShards) throws IOException, ClassNotFoundException;
 
     <H, B extends Serializable> B getLocal(H hash, Blockchain blockchain, BlockchainUnitType type);
 
