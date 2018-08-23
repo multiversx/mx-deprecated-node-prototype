@@ -26,7 +26,7 @@ public class NodeRunner {
         String nodeName = "elrond-node-2.1" + nr;
         Integer port = 31201 + nr;
         Integer masterPeerPort = 31201;
-        String masterPeerIpAddress = "127.0.0.1";
+        String masterPeerIpAddress = "192.168.11.30";
         ShardingService shardingService = AppServiceProvider.getShardingService();
 
         String nodeRunnerPrivateKey = Util.byteArrayToHexString(shardingService.getPrivateKeyForMinting(new Shard(1)).getValue());

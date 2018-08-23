@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ForkJoinPool;
 
 public class ElrondFacadeImpl implements ElrondFacade {
     private static final Logger logger = LogManager.getLogger(ElrondFacadeImpl.class);
@@ -204,9 +205,12 @@ public class ElrondFacadeImpl implements ElrondFacade {
                 }
             }
 
-            transactions.stream().parallel().filter(Objects::nonNull).forEach((tr) -> {
-                sendTransaction(application.getState(), tr);
-            });
+            ForkJoinPool forkJoinPool = null;
+
+            forkJoinPool = new ForkJoinPool(1000);
+            forkJoinPool.submit(() -> transactions.parallelStream().filter(Objects::nonNull).forEach((tr) -> {
+                        sendTransaction(application.getState(), tr);
+                    }));
 
             int successful = (int) transactions.stream().filter(Objects::nonNull).count();
             result.setSuccessfulTransactionsNumber(successful);

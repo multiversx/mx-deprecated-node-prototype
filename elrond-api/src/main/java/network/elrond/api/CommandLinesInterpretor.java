@@ -377,6 +377,8 @@ public class CommandLinesInterpretor {
             }
             data.put("blockchain_restore_path", blockchainRestorePath);
 
+            data.put("is_seeder", Boolean.valueOf(properties.get("is_seeder").toString()));
+
             return(data);
         } catch (Exception ex){
             ex.printStackTrace();
