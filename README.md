@@ -48,38 +48,44 @@ client to interact with a node (computer running the Elrond Prototype code)
 - **/elrond-core** - implements the core part of the Elrond Prototype protocol
 
 ## Components
-- **P2P communication**: the prototype uses [tomp2p](https://github.com/tomp2p) for
+### P2P communication: 
+the prototype uses [tomp2p](https://github.com/tomp2p) for
 its p2p networking model and communication primitives. Communication is done
 on channels for the registered topics: Transactions, Blocks, Receipts,
 Cross Shard transactions, etc. Message relay across channels is currently done by direct
 send to the registered peers, which is really bad in terms of performance
 and memory consumption but easy to implement in first phase. This needs to
 be abstracted on a gossip model at shard level.
-- **Cryptography**: the prototype uses cryptographic primitives from
+### Cryptography: 
+the prototype uses cryptographic primitives from
 [spongycastle](https://github.com/rtyley/spongycastle) and implements Schnorr
 signature scheme for validating transactions and [Belare-Neven multisignature
 scheme](https://cseweb.ucsd.edu/~mihir/papers/multisignatures-ccs.pdf) for
 signing and validating block signatures. The multisignature scheme allows
 for signature aggregation, so no matter how many signers participate in
 signing a single block the resulting signature is always 64 bytes long.
-- **Chronology**: time is split into epochs, and each epoch is split into
+### Chronology: 
+time is split into epochs, and each epoch is split into
 rounds. In each round there is a new consensus group created, formed by a
 block proposer/leader and validators. Each round is again split into subrounds
 mapped to the consensus phases. Elrond Prototype focuses more on what happens
 during rounds and subrounds, so the epoch actions are not yet implemented.
-- **Consensus**: the consensus mechanism used in the prototype is a round robin
+### Consensus: 
+the consensus mechanism used in the prototype is a round robin
 mechanism where each node takes turns in proposing blocks. Although the random
 sampling of proposer and validators is already implemented in a separate branch,
 changes to the PBFT consensus still have to be operated. The switch to PBFT consensus and selection
 of validators will be done as soon as the branch is ready - **put on hold as
 decided to switch to *Go* for the testnet. PBFT Consensus will be first implemented
 in testnet repository**
-- **Data layer**: main data models implemented: Block, Receipt, Transaction, Account,
+### Data layer: 
+main data models implemented: Block, Receipt, Transaction, Account,
 Trie etc. For serialization we are currently using either json or Ethereum's RLP.
 Probably we will switch to either protobufs or capn'proto in testnet for the performance
 boost, but this is not relevant in the prototype. For persistent storage we are currently using LevelDB
 while for non-persistent storage LRU maps or Guava Cache.
-- **Sharding**: Phase 1 - we are using a static sharding model where we
+### Sharding: 
+Phase 1 - we are using a static sharding model where we
 need to define an initial number of shards. State is currently sharded, each
 shard maintains only accounts associated to its shard and the corresponding blockchain.
 For the time being nodes will be placed in shards according to their PK using the
@@ -89,7 +95,7 @@ is done through messaging in cross shard communication channels. This will no lo
 after the introduction of the notarization chain, as our dispatching of transactions takes care
 of the availability in destination shard, and the inclusion proofs take care of
 validation (Merkle proofs will be replaced with accumulators)
-- **Execution layer**: Includes several executors: bootstrapping, synchronization and chronology tasks
+### Execution layer: Includes several executors: bootstrapping, synchronization and chronology tasks
 (proposals and validations) + transaction and block execution, account state rollback.
 Interceptors: blocks, receipts, transactions, cross shard transactions.
 
