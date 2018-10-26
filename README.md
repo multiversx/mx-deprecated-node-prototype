@@ -142,4 +142,5 @@ connect to the network through any other already connected node.
 
 ## Documentation
 Official website: https://elrond.network
+
 Elrond whitepaer: https://elrond.network/files/Elrond_Whitepaper_EN.pdf
