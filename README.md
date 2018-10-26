@@ -45,7 +45,7 @@ client to interact with a node (computer running the Elrond Prototype code)
 - **/elrond-core** - implements the core part of the Elrond Prototype protocol
 
 ## Components
-- **P2P communication**: the prototype uses [tomp2p](https://tomp2p.net/) for
+- **P2P communication**: the prototype uses [tomp2p](https://github.com/tomp2p) for
 its p2p networking model and communication primitives. Communication is done
 on channels for the registered topics: Transactions, Blocks, Receipts,
 Cross Shard transactions, etc. Message relay across channels is currently done by direct
