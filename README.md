@@ -139,3 +139,7 @@ There are some other functionalities working only on the first instance, such as
 all shards. This is also the reason why each new connecting node should connect to the network
 through this master node. If benchmarking shards is not required, then subsequent nodes can
 connect to the network through any other already connected node.
+
+## Documentation
+Official website: https://elrond.network
+Elrond whitepaer: https://elrond.network/files/Elrond_Whitepaper_EN.pdf
