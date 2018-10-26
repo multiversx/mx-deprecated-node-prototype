@@ -5,26 +5,29 @@ State Sharding PoC for Elrond network
 This readme will give some insight into the code, architecture and several
 concepts used in this prototype.
 
+Elrond Prototype overview - [Progress update #2 - Medium](https://medium.com/elrondnetwork/elrond-prototype-progress-update-2-44202c3c2ef2)
+
 # Table of Contents
 
--   [Design goal](#design-goal)
-    - [What to expect](#what-to-expect)
-    - [What not to expect](#what-not-to-expect)
--   [Directory structure](#directory-structure)
--   [Components](#components)
-    - [P2P communication](**P2P-communication**)
-    - [Cryptography](**cryptography**)
-    - [Chronology](**chronology**)
-    - [Consensus](**consensus**)
-    - [Data layer](**data-layer**)
-    - [Sharding](**Sharding**)
-    - [Execution layer](**execution-layer**)
--   [How to run a node](#how-to-run-a-node)
-
-
+- [Design goal](#design-goal)
+- [What to expect](#what-to-expect)
+- [What not to expect](#what-not-to-expect)
+- [Directory structure](#directory-structure)
+- [Components](#components)
+- [P2P communication](#P2P-communication)
+- [Cryptography](#cryptography)
+- [Chronology](#chronology)
+- [Consensus](#consensus)
+- [Data layer](#data-layer)
+- [Sharding](#sharding)
+- [Execution layer](#execution-layer)
+- [How to run a node](#how-to-run-a-node)
 
 ## Design goal
-Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s
+The purpose of this project is to further research and development twords a state sharded architecture and validate some of our underlying hypothesis and experiments twords a decentralized, scalable and secure blockchain architecture.
+
+The project has been dismissed and focus has been moved onto another repository [elrond-go](https://github.com/ElrondNetwork/elrond-go)
+building the next step of elrond arhitecture &gt; Elrond Testnet v0.1 .
 
 ### What to expect
 This repository was originally created and used to validate several
@@ -98,37 +101,37 @@ For this you need first to run the elrond-api jar.
 ![elrond-core-PoC1](https://i.imgur.com/SrFoOqu.png)
 
 To build the jar you should go to root folder and run
-```
+'''
 $ mvn package
-```
+'''
 
-This will generate a jar  ```/elrond-api/target/elrond-api-1.0-SNAPSHOT.jar``` that you can run
+This will generate a jar '''/elrond-api/target/elrond-api-1.0-SNAPSHOT.jar''' that you can run
 then with:
-```
+'''
 java -jar ./elrond-api/target/elrond-api-1.0-SNAPSHOT.jar
-```
+'''
 
 Wait until you you get a message like
 
-```
+'''
 Started ElrondApiApplication in 15.48 seconds (JVM running for 17.733)
-```
+'''
 
 Now you should be ready to either launch the elrond-ui or start using the swagger.
 To use swagger open a browser page and go to : http://localhost:8080/swagger-ui.html
 
 In elrond-node-controller you can find all currently available REST APIs.
 
-To start the node you should use the ```/node/start``` REST API
+To start the node you should use the '''/node/start''' REST API
 
 **Take care about the port and Ip** you are using. The first instance you start should be the master node, so
 port and master peer port should be the same, and ip address should be the ip of the machine you are running
 on, or localhost. The subsequent nodes should use for the masterPeerPort and masterPeerIpAddress
 the ones from the first node. If you are trying to run multiple node instances on the same machine,
 you can start the elrond-api for other instances but you need to change the port (default is 8080)
-```
+'''
 java -jar ./elrond-api/target/elrond-api-1.0-SNAPSHOT.jar --server.port=8081
-```
+'''
 
 Now you can start swagger on the new port to configure and start the new elrond prototype node instance
 http://localhost:8081/swagger-ui.html
