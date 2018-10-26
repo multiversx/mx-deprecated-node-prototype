@@ -95,7 +95,8 @@ is done through messaging in cross shard communication channels. This will no lo
 after the introduction of the notarization chain, as our dispatching of transactions takes care
 of the availability in destination shard, and the inclusion proofs take care of
 validation (Merkle proofs will be replaced with accumulators)
-### Execution layer: Includes several executors: bootstrapping, synchronization and chronology tasks
+### Execution layer: 
+Includes several executors: bootstrapping, synchronization and chronology tasks
 (proposals and validations) + transaction and block execution, account state rollback.
 Interceptors: blocks, receipts, transactions, cross shard transactions.
 
