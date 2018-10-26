@@ -69,10 +69,12 @@ validation (Merkle proofs will be replaced with accumulators)
 (proposals and validations) + transaction and block execution, account state rollback.
 Interceptors: blocks, receipts, transactions, cross shard transactions.
 
-### How to run a node
+## How to run a node
 You can run an Elrond Prototype node either through Swagger, or by using the
 [elrond-ui](https://github.com/ElrondNetwork/elrond-ui)
 For this you need first to run the elrond-api jar.
+
+![elrond-core-PoC1](https://i.imgur.com/SrFoOqu.png)
 
 To build the jar you should go to root folder and run
 ```
