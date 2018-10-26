@@ -1,17 +1,38 @@
 # Elrond Prototype
 State Sharding PoC for Elrond network
 
-## Introduction
+# Introduction
 This readme will give some insight into the code, architecture and several
 concepts used in this prototype.
 
-###### What to expect
+# Table of Contents
+
+-   [Design goal](#design-goal)
+    - [What to expect](#what-to-expect)
+    - [What not to expect](#what-not-to-expect)
+-   [Directory structure](#directory-structure)
+-   [Components](#components)
+    - [P2P communication](**P2P-communication**)
+    - [Cryptography](**cryptography**)
+    - [Chronology](**chronology**)
+    - [Consensus](**consensus**)
+    - [Data layer](**data-layer**)
+    - [Sharding](**Sharding**)
+    - [Execution layer](**execution-layer**)
+-   [How to run a node](#how-to-run-a-node)
+
+
+
+## Design goal
+Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s
+
+### What to expect
 This repository was originally created and used to validate several
 assumptions related to state sharding and cross shard transactions.
 This can be considered as a sandbox to test various mechanisms as
 preparation for developing the testnet.
 
-###### What not to expect
+### What not to expect
 This is not a testnet so expect not all features or functionalities to
 be available. As our main focus was on validating assumptions regarding
 sharding and not improvements on performance, there are things that could
