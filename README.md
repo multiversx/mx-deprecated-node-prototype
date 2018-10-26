@@ -9,19 +9,19 @@ Elrond Prototype overview - [Progress update #2 - Medium](https://medium.com/elr
 
 # Table of Contents
 
-- [Design goal](#design-goal)
-- [What to expect](#what-to-expect)
-- [What not to expect](#what-not-to-expect)
-- [Directory structure](#directory-structure)
-- [Components](#components)
-- [P2P communication](#P2P-communication)
-- [Cryptography](#cryptography)
-- [Chronology](#chronology)
-- [Consensus](#consensus)
-- [Data layer](#data-layer)
-- [Sharding](#sharding)
-- [Execution layer](#execution-layer)
-- [How to run a node](#how-to-run-a-node)
+-   [Design goal](#design-goal)
+    - [What to expect](#what-to-expect)
+    - [What not to expect](#what-not-to-expect)
+    - [Directory structure](#directory-structure)
+-   [Components](#components)
+    - [P2P communication](#P2P-communication)
+    - [Cryptography](#cryptography)
+    - [Chronology](#chronology)
+    - [Consensus](#consensus)
+    - [Data layer](#data-layer)
+    - [Sharding](#sharding)
+    - [Execution layer](#execution-layer)
+-   [How to run a node](#how-to-run-a-node)
 
 ## Design goal
 The purpose of this project is to further research and development twords a state sharded architecture and validate some of our underlying hypothesis and experiments twords a decentralized, scalable and secure blockchain architecture.
