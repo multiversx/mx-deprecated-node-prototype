@@ -1,6 +1,5 @@
 package network.elrond.data;
 
-import javafx.util.Pair;
 import net.tomp2p.peers.PeerAddress;
 import network.elrond.TimeWatch;
 import network.elrond.account.Accounts;
@@ -59,9 +58,9 @@ public class AppBlockManager {
 
         try {
             List<Transaction> transactions = AppServiceProvider.getBlockchainService().getAll(hashes, blockchain, BlockchainUnitType.TRANSACTION);
-            Pair<Block, List<Receipt>> blockReceiptsPair = composeBlock(transactions, state);
-            Block block = blockReceiptsPair.getKey();
-            List<Receipt> receipts = blockReceiptsPair.getValue();
+            BlockReceipts blockReceipts = composeBlock(transactions, state);
+            Block block = blockReceipts.getBlock();
+            List<Receipt> receipts = blockReceipts.getReceipts();
             AppBlockManager.instance().signBlock(block, privateKey);
 
             String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
@@ -185,7 +184,7 @@ public class AppBlockManager {
         });
     }
 
-    public Pair<Block, List<Receipt>> composeBlock(List<Transaction> transactions, AppState state) throws
+    public BlockReceipts composeBlock(List<Transaction> transactions, AppState state) throws
             IOException {
         logger.traceEntry("params: {} {}", transactions, state);
         Util.check(state != null, "state!=null");
@@ -246,7 +245,7 @@ public class AppBlockManager {
         AppServiceProvider.getAccountStateService().rollbackAccountStates(accounts);
         logger.trace("reverted app state to original form");
 
-        return logger.traceExit(new Pair<>(block, receipts));
+        return logger.traceExit(new BlockReceipts(block, receipts));
     }
 
     private List<Receipt> addTransactions(List<Transaction> transactions, Block block, AppState state) throws
