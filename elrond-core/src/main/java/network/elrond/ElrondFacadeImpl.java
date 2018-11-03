@@ -324,17 +324,17 @@ public class ElrondFacadeImpl implements ElrondFacade {
     }
 
     private ResponseObject generateTransaction(AccountAddress receiver, BigInteger value, AppState state) throws IOException, ClassNotFoundException {
-        Accounts accounts = state.getAccounts();
+        if (state == null) {
+            logger.warn("Invalid application state, state is null");
+            return logger.traceExit(new ResponseObject(false, "Invalid application state, state is null", null));
+        }
+
+    	Accounts accounts = state.getAccounts();
 
         PublicKey senderPublicKey = state.getPublicKey();
         PrivateKey senderPrivateKey = state.getPrivateKey();
         AccountAddress senderAddress = AccountAddress.fromBytes(senderPublicKey.getValue());
         AccountState senderAccount = AppServiceProvider.getAccountStateService().getAccountState(senderAddress, accounts);
-
-        if (state == null) {
-            logger.warn("Invalid application state, state is null");
-            return logger.traceExit(new ResponseObject(false, "Invalid application state, state is null", null));
-        }
 
         if (senderAccount == null) {
             // sender account is new, can't send
