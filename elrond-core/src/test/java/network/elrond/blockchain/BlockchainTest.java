@@ -2,9 +2,7 @@ package network.elrond.blockchain;
 
 import network.elrond.data.BaseBlockchainTest;
 import network.elrond.data.Block;
-import network.elrond.data.SerializationService;
 import network.elrond.p2p.P2PConnection;
-import network.elrond.service.AppServiceProvider;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,7 +16,6 @@ import static org.mockito.Mockito.*;
 
 public class BlockchainTest extends BaseBlockchainTest {
 
-    private SerializationService serializationService = AppServiceProvider.getSerializationService();
     private Blockchain blockchain;
     List<BlockchainUnitType> blockchainUnitTypes = Arrays.asList(
             BlockchainUnitType.BLOCK,
@@ -40,7 +37,7 @@ public class BlockchainTest extends BaseBlockchainTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testBlockchainFromNullContextShouldThrowException() throws IOException {
-        Blockchain b = new Blockchain(null);
+        new Blockchain(null);
     }
 
     @Test
@@ -51,23 +48,23 @@ public class BlockchainTest extends BaseBlockchainTest {
 
     @Test
     public void testGetUnitForBLOCK() throws IOException {
-        BlockchainPersistenceUnit unit = blockchain.getUnit(BlockchainUnitType.BLOCK);
+        BlockchainPersistenceUnit<?, ?> unit = blockchain.getUnit(BlockchainUnitType.BLOCK);
         Assert.assertNotNull(unit);
     }
 
     @Test
     public void testGetUnitForBLOCK_INDEX() throws IOException {
-        BlockchainPersistenceUnit unit = blockchain.getUnit(BlockchainUnitType.BLOCK_INDEX);
+        BlockchainPersistenceUnit<?, ?> unit = blockchain.getUnit(BlockchainUnitType.BLOCK_INDEX);
         Assert.assertNotNull(unit);
     }
     @Test
     public void testGetUnitForTRANSACTION() throws IOException {
-        BlockchainPersistenceUnit unit = blockchain.getUnit(BlockchainUnitType.TRANSACTION);
+        BlockchainPersistenceUnit<?, ?> unit = blockchain.getUnit(BlockchainUnitType.TRANSACTION);
         Assert.assertNotNull(unit);
     }
     @Test
     public void testGetUnitForSETTINGS() throws IOException {
-        BlockchainPersistenceUnit unit = blockchain.getUnit(BlockchainUnitType.SETTINGS);
+        BlockchainPersistenceUnit<?, ?> unit = blockchain.getUnit(BlockchainUnitType.SETTINGS);
         Assert.assertNotNull(unit);
     }
 
@@ -134,7 +131,7 @@ public class BlockchainTest extends BaseBlockchainTest {
         chain.stopPersistenceUnit();
         for(BlockchainUnitType type : blockchainUnitTypes)
         {
-            BlockchainPersistenceUnit persistenceUnit = chain.getUnit(type);
+            BlockchainPersistenceUnit<?, ?> persistenceUnit = chain.getUnit(type);
             verify(persistenceUnit,  times(1)).close();
         }
     }

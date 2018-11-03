@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -99,7 +100,7 @@ public class BlockchainServiceImplTest {
         Blockchain blockchain = new Blockchain(new BlockchainContext());
         blockchainService.put(testHash,  testObject1, blockchain, BlockchainUnitType.BLOCK);
         blockchainService.put(testHash2,  testObject2, blockchain, BlockchainUnitType.BLOCK);
-        List objList = blockchainService.getAll(Arrays.asList(testHash, testHash2), blockchain, BlockchainUnitType.BLOCK);
+        List<Serializable> objList = blockchainService.getAll(Arrays.asList(testHash, testHash2), blockchain, BlockchainUnitType.BLOCK);
         Assert.assertEquals(2, objList.size());
         Assert.assertEquals(testObject1, objList.get(0));
         Assert.assertEquals(testObject2, objList.get(1));

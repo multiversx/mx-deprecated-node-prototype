@@ -23,7 +23,8 @@ import java.util.concurrent.TimeUnit;
 public class AssemblyBlockHandler implements EventHandler<SubRound> {
     private static final Logger logger = LogManager.getLogger(AssemblyBlockHandler.class);
 
-    public void onEvent(AppState state, SubRound data) {
+    @Override
+	public void onEvent(AppState state, SubRound data) {
         logger.traceEntry("params: {} {}",state, data);
 
         Util.check(state != null, "state is null while trying to get full nodes list!");

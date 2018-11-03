@@ -15,7 +15,8 @@ import java.util.List;
 public class ComputeLeaderHandler implements EventHandler<SubRound> {
     private static final Logger logger = LogManager.getLogger(ComputeLeaderHandler.class);
 
-    public void onEvent(AppState state, SubRound data) {
+    @Override
+	public void onEvent(AppState state, SubRound data) {
         logger.traceEntry("params: {} {}", state, data);
 
         Util.check(state != null, "application state is null");

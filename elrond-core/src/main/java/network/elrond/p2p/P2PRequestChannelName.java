@@ -13,9 +13,9 @@ public enum P2PRequestChannelName {
     STATISTICS("STATISTICS", new StatisticsRequestHandler()),;
 
     private final String name;
-    private final RequestHandler handler;
+    private final RequestHandler<?, P2PRequestMessage> handler;
 
-    P2PRequestChannelName(final String name, final RequestHandler handler) {
+    private P2PRequestChannelName(final String name, final RequestHandler<?, P2PRequestMessage> handler) {
         this.name = name;
         this.handler = handler;
     }
@@ -24,7 +24,7 @@ public enum P2PRequestChannelName {
         return name;
     }
 
-    public RequestHandler getHandler() {
+    public RequestHandler<?, P2PRequestMessage> getHandler() {
         return handler;
     }
 

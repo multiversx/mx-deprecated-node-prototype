@@ -42,14 +42,14 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
     public void generatePersistenceUnitMap(BlockchainContext context) throws IOException {
         for (BlockchainUnitType type : BlockchainUnitType.values()) {
             String path = context.getDatabasePath(type);
-            Class<?> ketType = type.getKeyType();
             Class<?> valueType = type.getValueType();
-            BlockchainPersistenceUnit<?, ?> unit = new BlockchainPersistenceUnit<>(path, valueType);
+            BlockchainPersistenceUnit<String, ?> unit = new BlockchainPersistenceUnit<>(path, valueType);
             blockchain.put(type, unit);
         }
     }
 
-    public <H extends Object, B> BlockchainPersistenceUnit<H, B> getUnit(BlockchainUnitType type) {
+    @SuppressWarnings("unchecked")
+	public <H extends Object, B> BlockchainPersistenceUnit<H, B> getUnit(BlockchainUnitType type) {
         return (BlockchainPersistenceUnit<H, B>) blockchain.get(type);
     }
 

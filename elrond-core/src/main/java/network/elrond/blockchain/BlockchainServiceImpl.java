@@ -99,7 +99,6 @@ public class BlockchainServiceImpl implements BlockchainService {
         Util.check(blockchain != null, "blockchain!=null");
 
         BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
-        P2PConnection connection = blockchain.getConnection();
 
         unit.getCache().put(hash, object);
         String strJSONData = AppServiceProvider.getSerializationService().encodeJSON(object);
@@ -170,7 +169,8 @@ public class BlockchainServiceImpl implements BlockchainService {
 
     }
 
-    public synchronized <H extends Object, B extends Serializable> B getLocal(H hash, Blockchain blockchain, BlockchainUnitType type) {
+    @Override
+	public synchronized <H extends Object, B extends Serializable> B getLocal(H hash, Blockchain blockchain, BlockchainUnitType type) {
         logger.traceEntry("params: {} {} {}", hash, blockchain, type);
 
         Util.check(hash != null, "hash!=null");
@@ -237,7 +237,12 @@ public class BlockchainServiceImpl implements BlockchainService {
         response = AppServiceProvider.getP2PRequestService().get(channel, shard, channelName, hashStr);
 
         if (channelName.getName().equals(BlockchainUnitType.BLOCK_TRANSACTIONS.name())) {
-            logger.warn("Requested {} with hash {}. Received: {} transactions", channel.getName(), hash, ((response == null) ? response : ((ArrayList)response).size()));
+        	int responseNrTransactions = 0;
+        	if (response != null && (response instanceof ArrayList<?>)) {
+        		responseNrTransactions = ((ArrayList<?>)response).size();
+        	}
+            logger.warn("Requested {} with hash {}. Received: {} transactions", 
+            		channel.getName(), hash, responseNrTransactions);
         }
         else {
             logger.warn("Requested {} with hash {}. Received: {}", channel.getName(), hash, response);

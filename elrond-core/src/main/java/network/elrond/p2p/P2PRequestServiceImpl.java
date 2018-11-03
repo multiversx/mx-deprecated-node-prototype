@@ -80,7 +80,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
                         .sendDirect(peerAddress)
                         .object(message).start();
 
-                DirectBaseFutureListener<FutureGet> directBaseFutureListener = new DirectBaseFutureListener<>();
+                DirectBaseFutureListener directBaseFutureListener = new DirectBaseFutureListener();
 
                 futureDirect.addListener(directBaseFutureListener);
 
@@ -132,7 +132,6 @@ public class P2PRequestServiceImpl implements P2PRequestService {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <K extends Serializable, R extends Serializable> R get(P2PRequestChannel channel, Shard shard, P2PRequestChannelName channelName, K key) {
         logger.traceEntry("params: {} {} {} {}", channel, shard, channelName, key);
 
@@ -145,7 +144,7 @@ public class P2PRequestServiceImpl implements P2PRequestService {
                 return Collections.max(responses, Comparator.comparing(o -> ((BigInteger) o)));
             } else {
                 Map<R, String> objectToHash = responses.stream()
-                        .filter(entry -> !(entry instanceof Collection) || !((Collection) entry).isEmpty())
+                        .filter(entry -> !(entry instanceof Collection<?>) || !((Collection<?>) entry).isEmpty())
                         .filter(Objects::nonNull)
                         .collect(
                                 Collectors.toMap(

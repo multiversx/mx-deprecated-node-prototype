@@ -166,7 +166,7 @@ public class ChronologyBlockTask implements AppTask {
 
         logger.debug("notifyEventObjects event about to call {}, {}, {}", round.toString(), roundState.toString(), globalTimeStamp);
 
-        EventHandler eventHandler = roundState.getEventHandler();
+        EventHandler<SubRound> eventHandler = roundState.getEventHandler();
         if (eventHandler != null){
             logger.trace("calling default event handler object (from enum)...");
             try {

@@ -24,7 +24,7 @@ public class P2PRequestObjectStarterProcessor implements AppTask {
 
         for (P2PRequestChannelName requestChannel : P2PRequestChannelName.values()) {
             P2PRequestChannel channel = AppServiceProvider.getP2PRequestService().createChannel(connection, shard, requestChannel);
-            RequestHandler requestHandler = requestChannel.getHandler();
+            RequestHandler<?, P2PRequestMessage> requestHandler = requestChannel.getHandler();
 
             channel.setHandler(request -> requestHandler.onRequest(state, request));
             state.addChannel(channel);

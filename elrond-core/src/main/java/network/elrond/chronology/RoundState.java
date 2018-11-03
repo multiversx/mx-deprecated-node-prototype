@@ -14,11 +14,11 @@ public enum RoundState {
 
 
     private final int roundStateDuration;
-    private final EventHandler eventHandler;
+    private final EventHandler<SubRound> eventHandler;
 
     private final static EnumSet<RoundState> MAIN_SET = EnumSet.allOf(RoundState.class);
 
-    RoundState(final int roundStateDuration, final EventHandler eventHandler) {
+    RoundState(final int roundStateDuration, final EventHandler<SubRound> eventHandler) {
         this.roundStateDuration = roundStateDuration;
         this.eventHandler = eventHandler;
     }
@@ -27,7 +27,7 @@ public enum RoundState {
         return (roundStateDuration);
     }
 
-    public EventHandler getEventHandler() {
+    public EventHandler<SubRound> getEventHandler() {
         return (eventHandler);
     }
 
