@@ -26,7 +26,8 @@ public enum P2PBroadcastChannelName {
         return _type;
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return _name;
     }
 

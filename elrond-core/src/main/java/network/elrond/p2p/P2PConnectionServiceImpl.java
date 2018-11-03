@@ -24,7 +24,8 @@ public class P2PConnectionServiceImpl implements P2PConnectionService {
 
     private static final Logger logger = LogManager.getLogger(P2PConnectionServiceImpl.class);
 
-    public P2PConnection createConnection(AppContext context) throws IOException {
+    @Override
+	public P2PConnection createConnection(AppContext context) throws IOException {
 
         String nodeName = context.getNodeName();
         int peerPort = context.getPort();
@@ -35,7 +36,8 @@ public class P2PConnectionServiceImpl implements P2PConnectionService {
 
     }
 
-    public P2PConnection createConnection(String nodeName,
+    @Override
+	public P2PConnection createConnection(String nodeName,
                                           int peerPort,
                                           String masterPeerIpAddress,
                                           int masterPeerPort) throws IOException {
@@ -68,7 +70,8 @@ public class P2PConnectionServiceImpl implements P2PConnectionService {
         return logger.traceExit(connection);
     }
 
-    public <T extends Serializable> void broadcastMessage(T object, P2PConnection connection) {
+    @Override
+	public <T extends Serializable> void broadcastMessage(T object, P2PConnection connection) {
         Peer peer = connection.getPeer();
         NavigableMap<Number640, Data> messageData = new TreeMap<>();
         try {

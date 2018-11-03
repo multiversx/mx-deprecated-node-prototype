@@ -4,7 +4,6 @@ import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
-import network.elrond.application.AppState;
 import network.elrond.core.ObjectUtil;
 import network.elrond.core.Util;
 import network.elrond.p2p.handlers.BroadcastStructuredHandler;
@@ -182,6 +181,6 @@ public class P2PConnection {
 
     @Override
     public String toString() {
-        return (String.format("P2PConnection{MEM=%s, nodeName=%s, shard=%s}", (Object) dht, nodeName, shard));
+        return (String.format("P2PConnection{MEM=%s, nodeName=%s, shard=%s}", dht, nodeName, shard));
     }
 }

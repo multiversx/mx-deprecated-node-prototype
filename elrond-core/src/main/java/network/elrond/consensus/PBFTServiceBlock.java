@@ -26,7 +26,8 @@ public class PBFTServiceBlock implements PBFTService {
      * Sets the validators listToTable by copying each validator
      * @param listValidators to be set
      */
-    public void setValidators(List<Validator> listValidators) {
+    @Override
+	public void setValidators(List<Validator> listValidators) {
         this.listValidators.clear();
 
         for (int i = 0; i < listValidators.size(); i++) {
@@ -39,7 +40,8 @@ public class PBFTServiceBlock implements PBFTService {
      * @param val is a validator who originates the answer
      * @param answer is the answer to be set
      */
-    public void setAnswerFromValidator(Validator val, ConsensusAnswerType answer) {
+    @Override
+	public void setAnswerFromValidator(Validator val, ConsensusAnswerType answer) {
         if (listValidators.contains(val)) {
             listValidators.get(listValidators.indexOf(val)).setAnswer(answer);
         }
@@ -56,7 +58,8 @@ public class PBFTServiceBlock implements PBFTService {
     /**
      * Method for running the process of validating the input data on pBFT (at the end this will either agree or disagree)
      */
-    public void validate() {
+    @Override
+	public void validate() {
         //...bla bla bla, re-run tx's, suppose to agree
         setAnswerFromValidator(new Validator(Util.CRT_PUB_KEY), ConsensusAnswerType.AGREE);
 
@@ -67,7 +70,8 @@ public class PBFTServiceBlock implements PBFTService {
      * @param strPubKey as String
      * @return the validator answer as ConsensusAnswerType
      */
-    public ConsensusAnswerType getAnswer(String strPubKey) {
+    @Override
+	public ConsensusAnswerType getAnswer(String strPubKey) {
         Validator v = null;
 
         int idx = listValidators.indexOf(new Validator(strPubKey));
@@ -83,7 +87,8 @@ public class PBFTServiceBlock implements PBFTService {
      * Gets the overall status of the pBFT consensus
      * @return either Agree or Disagree
      */
-    public ConsensusAnswerType getStatusPBFT() {
+    @Override
+	public ConsensusAnswerType getStatusPBFT() {
         ConsensusAnswerType result = ConsensusAnswerType.DISAGREE;
 
         int prop = (listValidators.size() * 2 / 3) + 1;

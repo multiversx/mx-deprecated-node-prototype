@@ -1,6 +1,5 @@
 package network.elrond.p2p;
 
-import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.futures.FutureDirect;
 import net.tomp2p.p2p.Peer;

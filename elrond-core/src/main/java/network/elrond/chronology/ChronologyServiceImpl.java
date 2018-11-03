@@ -21,17 +21,20 @@ public class ChronologyServiceImpl implements ChronologyService {
         this.roundTimeDuration = roundTimeDuration;
     }
 
-    public long getRoundTimeDuration() {
+    @Override
+	public long getRoundTimeDuration() {
         return (roundTimeDuration);
     }
 
-    public boolean isDateTimeInRound(Round round, long timeStamp) throws IllegalArgumentException {
+    @Override
+	public boolean isDateTimeInRound(Round round, long timeStamp) throws IllegalArgumentException {
         Util.check(round != null, "round should not be null!");
 
         return ((round.getStartTimeStamp() <= timeStamp) && (timeStamp < round.getStartTimeStamp() + roundTimeDuration));
     }
 
-    public Round getRoundFromDateTime(long genesisRoundTimeStamp, long timeStamp) throws IllegalArgumentException {
+    @Override
+	public Round getRoundFromDateTime(long genesisRoundTimeStamp, long timeStamp) throws IllegalArgumentException {
         logger.traceEntry("params: {} {}", genesisRoundTimeStamp, timeStamp);
         long delta = timeStamp - genesisRoundTimeStamp;
 
@@ -44,7 +47,8 @@ public class ChronologyServiceImpl implements ChronologyService {
         return logger.traceExit(r);
     }
 
-    public long getSynchronizedTime(NTPClient ntpClient) {
+    @Override
+	public long getSynchronizedTime(NTPClient ntpClient) {
         logger.traceEntry();
         if (ntpClient != null) {
             return logger.traceExit(ntpClient.currentTimeMillis());
@@ -54,7 +58,8 @@ public class ChronologyServiceImpl implements ChronologyService {
         return logger.traceExit(System.currentTimeMillis());
     }
 
-    public RoundState computeRoundState(long roundStartTimeStamp, long currentTimeStamp) {
+    @Override
+	public RoundState computeRoundState(long roundStartTimeStamp, long currentTimeStamp) {
         logger.traceEntry("params: {} {}", roundStartTimeStamp, currentTimeStamp);
         Set<RoundState> setRoundState = RoundState.getEnumSet();
 
@@ -81,7 +86,8 @@ public class ChronologyServiceImpl implements ChronologyService {
         return logger.traceExit((RoundState) null);
     }
 
-    public synchronized boolean isStillInRoundState(NTPClient ntpClient, long genesisTimeStamp, long targetRoundIndex, RoundState targetRoundState) {
+    @Override
+	public synchronized boolean isStillInRoundState(NTPClient ntpClient, long genesisTimeStamp, long targetRoundIndex, RoundState targetRoundState) {
         logger.traceEntry("params: {} {} {} {}", ntpClient, genesisTimeStamp, targetRoundIndex, targetRoundState);
         Util.check(ntpClient != null, "NTP client should not be null!");
 

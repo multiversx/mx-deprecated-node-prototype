@@ -2,8 +2,6 @@ package network.elrond.data;
 
 import junit.framework.TestCase;
 import network.elrond.core.Util;
-import network.elrond.crypto.PrivateKey;
-import network.elrond.crypto.PublicKey;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 import org.junit.After;

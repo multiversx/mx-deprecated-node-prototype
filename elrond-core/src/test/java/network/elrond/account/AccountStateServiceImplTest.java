@@ -6,7 +6,6 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.service.AppServiceProvider;
-import network.elrond.sharding.AppShardingManager;
 import network.elrond.sharding.Shard;
 import org.junit.Assert;
 import org.junit.Before;

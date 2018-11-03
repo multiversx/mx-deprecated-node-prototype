@@ -12,11 +12,6 @@ import network.elrond.data.BootstrapType;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class P2PObjectServiceTest {
 
     @Test

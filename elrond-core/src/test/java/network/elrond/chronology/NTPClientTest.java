@@ -4,7 +4,6 @@ import junit.framework.TestCase;
 import network.elrond.Application;
 import network.elrond.application.AppContext;
 import network.elrond.core.ThreadUtil;
-import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
 import java.util.Arrays;

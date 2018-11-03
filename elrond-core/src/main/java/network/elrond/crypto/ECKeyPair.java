@@ -43,7 +43,8 @@ public class ECKeyPair implements KeyPair {
      *
      * @return the private key
      */
-    public PrivateKey getPrivateKey() {
+    @Override
+	public PrivateKey getPrivateKey() {
         return privateKey;
     }
 
@@ -52,11 +53,13 @@ public class ECKeyPair implements KeyPair {
      *
      * @return the public key
      */
-    public PublicKey getPublicKey() {
+    @Override
+	public PublicKey getPublicKey() {
         return publicKey;
     }
 
-    public KeyPair clone() throws CloneNotSupportedException {
+    @Override
+	public KeyPair clone() throws CloneNotSupportedException {
         return (KeyPair) super.clone();
     }
 }

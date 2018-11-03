@@ -236,7 +236,8 @@ public class ElrondFacadeImpl implements ElrondFacade {
         currentPeers.parallelStream().forEach( peer -> {
 
             Runnable myrunnable = new Runnable() {
-                public void run() {
+                @Override
+				public void run() {
                     String[] splitPeer = peer.split(";");
                     URL url = null;
                     try {

@@ -214,7 +214,8 @@ class ElrondApiNode {
 
     private void SendBalanceToNewNode(String nextPrivateKey) {
         Runnable myrunnable = new Runnable() {
-            public void run() {
+            @Override
+			public void run() {
                 try {
                     Thread.sleep(60000);
                 } catch (InterruptedException e) {

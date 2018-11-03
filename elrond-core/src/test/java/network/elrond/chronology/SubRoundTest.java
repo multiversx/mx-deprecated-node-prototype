@@ -1,7 +1,5 @@
 package network.elrond.chronology;
 
-import network.elrond.Application;
-import network.elrond.application.AppContext;
 import org.junit.Test;
 
 public class SubRoundTest {

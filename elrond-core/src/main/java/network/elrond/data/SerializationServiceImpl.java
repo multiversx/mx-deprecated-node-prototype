@@ -45,7 +45,8 @@ public class SerializationServiceImpl implements SerializationService {
         }
     }
 
-    public byte[] getHash(Object object) {
+    @Override
+	public byte[] getHash(Object object) {
         logger.traceEntry("params {}", object);
         Util.check(object != null, "object is null");
 

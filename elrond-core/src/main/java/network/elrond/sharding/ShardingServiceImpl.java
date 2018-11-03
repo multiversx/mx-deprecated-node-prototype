@@ -71,7 +71,8 @@ public class ShardingServiceImpl implements ShardingService {
         return AccountAddress.fromBytes(key.getValue());
     }
 
-    public Integer getNumberOfShards() {
+    @Override
+	public Integer getNumberOfShards() {
         return MAX_ACTIVE_SHARDS_CONT;
     }
 

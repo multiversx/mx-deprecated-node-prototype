@@ -5,7 +5,6 @@ import network.elrond.data.Receipt;
 import network.elrond.data.Transaction;
 
 import java.math.BigInteger;
-import java.util.List;
 
 public enum BlockchainUnitType {
     BLOCK(String.class, Block.class),

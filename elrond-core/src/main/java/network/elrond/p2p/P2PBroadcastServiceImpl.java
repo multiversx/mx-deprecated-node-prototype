@@ -36,7 +36,8 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         return channelIds;
     }
 
-    public P2PBroadcastChannel createChannel(P2PConnection connection, P2PBroadcastChannelName channelName) {
+    @Override
+	public P2PBroadcastChannel createChannel(P2PConnection connection, P2PBroadcastChannelName channelName) {
         logger.traceEntry("params: {} {}", connection, channelName);
 
         PeerDHT dht = connection.getDht();
@@ -116,7 +117,8 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
     }
 
 
-    @SuppressWarnings("unchecked")
+    @Override
+	@SuppressWarnings("unchecked")
     public boolean unsubscribeFromChannel(P2PBroadcastChannel channel) {
         logger.traceEntry("params: {}", channel);
 
@@ -140,7 +142,8 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         return logger.traceExit(result);
     }
 
-    public boolean leaveNetwork(List<P2PBroadcastChannel> channels) {
+    @Override
+	public boolean leaveNetwork(List<P2PBroadcastChannel> channels) {
         logger.traceEntry("params: {}", channels);
         P2PConnection connection = channels.get(0).getConnection();
 

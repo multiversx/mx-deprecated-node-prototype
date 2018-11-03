@@ -16,7 +16,8 @@ public class P2PCommunicationServiceImpl implements P2PCommunicationService {
     private final int pingConnectionTimeOut = 2000;
     private final int portConnectionTimeOut = 1000;
 
-    public PingResponse getPingResponse(String address, int port, boolean throwOnPortClosed) throws Exception {
+    @Override
+	public PingResponse getPingResponse(String address, int port, boolean throwOnPortClosed) throws Exception {
         logger.traceEntry("params: {} {}", address, port);
 
         Util.check(address != null, "Address is null!");
@@ -68,7 +69,8 @@ public class P2PCommunicationServiceImpl implements P2PCommunicationService {
         return logger.traceExit(pingResponse);
     }
 
-    public boolean isPortReachable(String address, int port, int timeoutPeriod){
+    @Override
+	public boolean isPortReachable(String address, int port, int timeoutPeriod){
         Util.check(address != null, "Address is null!");
         Util.check(port > 0, "Port is not valid!");
         Util.check(port < 65535, "Port is not valid!");

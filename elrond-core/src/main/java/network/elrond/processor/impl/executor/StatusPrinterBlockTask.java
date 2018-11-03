@@ -16,7 +16,8 @@ import java.util.*;
 public class StatusPrinterBlockTask implements AppTask {
     private static final Logger logger = LogManager.getLogger(StatusPrinterBlockTask.class);
 
-    public void process(Application application) {
+    @Override
+	public void process(Application application) {
         AppState state = application.getState();
 
         Thread thread = new Thread(() -> {

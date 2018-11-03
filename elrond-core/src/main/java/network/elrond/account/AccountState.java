@@ -88,7 +88,8 @@ public class AccountState implements Serializable, AsciiPrintable {
         this.address = address;
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return String.format("AccountState{nonce=%d, balance=%d}", this.getNonce(), this.getBalance());
     }
 

@@ -47,7 +47,8 @@ public class TransactionServiceImpl implements TransactionService {
      * @param transaction      transaction
      * @param privateKeysBytes private key as byte array
      */
-    public void signTransaction(Transaction transaction, byte[] privateKeysBytes, byte[] publicKeyBytes) {
+    @Override
+	public void signTransaction(Transaction transaction, byte[] privateKeysBytes, byte[] publicKeyBytes) {
         logger.traceEntry("params: {} {} {}", transaction, privateKeysBytes, publicKeyBytes);
 
         Util.check(transaction != null, "transaction is null");
@@ -82,7 +83,8 @@ public class TransactionServiceImpl implements TransactionService {
      * @param transaction to be verified
      * @return true if tx passes all consistency tests
      */
-    public boolean verifyTransaction(Transaction transaction) {
+    @Override
+	public boolean verifyTransaction(Transaction transaction) {
         logger.traceEntry("params: {}", transaction);
 
         Util.check(transaction != null, "transaction is null");

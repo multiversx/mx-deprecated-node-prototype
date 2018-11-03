@@ -7,9 +7,6 @@ import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.BootstrapType;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;

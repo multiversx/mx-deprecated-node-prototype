@@ -23,7 +23,8 @@ public class SPoSServiceImpl implements SPoSService {
      * @param eligibleList that contain validators to be included in cleaned up listToTable
      * @return the node that holds the data
      */
-    public EligibleListValidators generateCleanupList(List<Validator> eligibleList) {
+    @Override
+	public EligibleListValidators generateCleanupList(List<Validator> eligibleList) {
         //fetching parameters from validators (ie. min/max stake, min/max reputation, etc)
 
         EligibleListValidators result = new EligibleListValidators();
@@ -76,7 +77,8 @@ public class SPoSServiceImpl implements SPoSService {
      *                            (call method generateCleanupList first)
      * @return the weighted validators listToTable
      */
-    public List<Validator> generateWeightedEligibleList(EligibleListValidators cleanedUpListObject) {
+    @Override
+	public List<Validator> generateWeightedEligibleList(EligibleListValidators cleanedUpListObject) {
 
         if (cleanedUpListObject == null) {
             return (new ArrayList<Validator>());
@@ -127,7 +129,8 @@ public class SPoSServiceImpl implements SPoSService {
      * @param roundHeight the round height (ID)
      * @return the listToTable of selected validator, first item being the leader
      */
-    public List<Validator> generateValidatorsList(String strRandomSource, List<Validator> eligibleList, BigInteger roundHeight) {
+    @Override
+	public List<Validator> generateValidatorsList(String strRandomSource, List<Validator> eligibleList, BigInteger roundHeight) {
         //pick max Util.VERIFIER_GROUP_SIZE from eligible listToTable
         //based on their stake, rating. Round r will rotate the lead
 
@@ -198,7 +201,8 @@ public class SPoSServiceImpl implements SPoSService {
      * @param src listToTable to be copied
      * @return new listToTable of Validators
      */
-    public List<Validator> copyList(List<Validator> src) {
+    @Override
+	public List<Validator> copyList(List<Validator> src) {
         List<Validator> tempList = new ArrayList<Validator>();
 
         for (int i = 0; i < src.size(); i++) {
