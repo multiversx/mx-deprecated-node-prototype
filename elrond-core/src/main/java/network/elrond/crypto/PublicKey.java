@@ -15,13 +15,6 @@ public class PublicKey {
     private boolean initialized;
 
     /**
-     * Default constructor
-     */
-    private PublicKey() {
-        initialized = false;
-    }
-
-    /**
      * Constructor
      * Generates the corresponding public key for the given public point encoding
      *

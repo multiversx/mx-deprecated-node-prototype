@@ -11,10 +11,6 @@ public class Receipt implements Serializable {
     private ReceiptStatus status;
     private List<String> logs;
 
-    private Receipt() {
-
-    }
-
     public Receipt(
             String transactionHash,
             ReceiptStatus status,

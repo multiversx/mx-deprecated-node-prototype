@@ -15,7 +15,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class SeedNodeRunner {
-    private static final Logger logger = LogManager.getLogger(SeedNodeRunner.class);
 
     public static void main(String[] args) throws Exception {
         SimpleDateFormat sdfSource = new SimpleDateFormat(

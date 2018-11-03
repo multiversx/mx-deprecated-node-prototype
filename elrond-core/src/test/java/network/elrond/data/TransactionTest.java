@@ -20,7 +20,6 @@ public class TransactionTest {
 
     private String sendAddress ;
     private String recvAddress ;
-    private String pubKey ;
     private BigInteger nonce;
     private BigInteger value;
     private Shard senderShard;
@@ -30,7 +29,6 @@ public class TransactionTest {
     public void SetupTest(){
         sendAddress = "0xa87b8fa28a8476553363a9356aa02635e4a1b033";
         recvAddress = "0x0000000000000000000000000000000000000000";
-        pubKey = "025f37d20e5b18909361e0ead7ed17c69b417bee70746c9e9c2bcb1394d921d4ae";
         nonce = BigInteger.ZERO;
         value = BigInteger.TEN.pow(8);
         senderShard = AppServiceProvider.getShardingService().getShard(sendAddress.getBytes());
@@ -51,50 +49,49 @@ public class TransactionTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testSendAddressNullShouldThrowException(){
-        Transaction tx = new Transaction(null, recvAddress, value, nonce, null, receiverShard);
+        new Transaction(null, recvAddress, value, nonce, null, receiverShard);
         Assert.fail();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testSendAddressEmptyShouldThrowException(){
-        Transaction tx = new Transaction("", recvAddress, value, nonce, senderShard, null);
+        new Transaction("", recvAddress, value, nonce, senderShard, null);
         Assert.fail();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testReceiveAddressNullShouldThrowException(){
-        Transaction tx = new Transaction(sendAddress, null, value, nonce, senderShard, null);
+        new Transaction(sendAddress, null, value, nonce, senderShard, null);
         Assert.fail();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testReceiveAddressEmptyShouldThrowException(){
-
-        Transaction tx = new Transaction(sendAddress, "", value, nonce, senderShard, null);
+        new Transaction(sendAddress, "", value, nonce, senderShard, null);
         Assert.fail();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testValueLessThanZeroShouldThrowException(){
-        Transaction tx = new Transaction(sendAddress, recvAddress, BigInteger.valueOf(-1), nonce, senderShard, receiverShard);
+        new Transaction(sendAddress, recvAddress, BigInteger.valueOf(-1), nonce, senderShard, receiverShard);
         Assert.fail();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testNonceLessThanZeroShouldThrowException(){
-        Transaction tx = new Transaction(sendAddress, recvAddress, value, BigInteger.valueOf(-1), senderShard, receiverShard);
+        new Transaction(sendAddress, recvAddress, value, BigInteger.valueOf(-1), senderShard, receiverShard);
         Assert.fail();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testValueNullShouldThrowException(){
-        Transaction tx = new Transaction(sendAddress, recvAddress, null, nonce, senderShard, receiverShard);
+        new Transaction(sendAddress, recvAddress, null, nonce, senderShard, receiverShard);
         Assert.fail();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testNonceNullZeroShouldThrowException(){
-        Transaction tx = new Transaction(sendAddress, recvAddress, value, null, senderShard, receiverShard);
+        new Transaction(sendAddress, recvAddress, value, null, senderShard, receiverShard);
         Assert.fail();
     }
 
@@ -124,28 +121,10 @@ public class TransactionTest {
 
         //test encode-decode
         TestCase.assertEquals(serializationService.encodeJSON(tx), serializationService.encodeJSON(tx2));
-
-        //TestCase.assertEquals(tx3.encodeJSON(), tx.encodeJSON());
-
-
-//        System.out.println(tx.decodeJSON(null));
-//        System.out.println(tx.decodeJSON("{}"));
-//        System.out.println(tx.decodeJSON("{TX:{}}"));
-//        System.out.println(tx.decodeJSON("{TX:{nonce:\"aa\"}}"));
-//        System.out.println(tx.decodeJSON("{TX:{nonce:\"0\",}}"));
-
-
-        //byte[] buff = "Elrond".getBytes();
-        //System.out.println(Base64.encode(buff).toString());
-        //System.out.println(new String(Base64.decode(Base64.encode(buff))));
     }
 
     @Test
-    public void testHashWithAndWithoutSignature(){
-        PrivateKey pvKey = new PrivateKey();
-        PublicKey pbKey = new PublicKey(pvKey);
-
-
+    public void testHashWithAndWithoutSignature() {
         Transaction tx = new Transaction(sendAddress, recvAddress, value, nonce,senderShard, receiverShard);
         byte[] buff = new byte[5];
         for (int i = 0; i < buff.length; i++) {
@@ -166,6 +145,5 @@ public class TransactionTest {
         System.out.println(hashWithSignature);
 
         TestCase.assertFalse(hashWithoutSignature == hashWithSignature);
-
     }
 }

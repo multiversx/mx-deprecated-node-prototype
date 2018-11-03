@@ -9,10 +9,6 @@ import java.util.Objects;
 public class Shard implements Serializable, AsciiPrintable {
     private Integer index = -1;
 
-    private Shard() {
-
-    }
-
     public Shard(Integer index) {
         this.index = index;
     }

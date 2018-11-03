@@ -42,22 +42,6 @@ public class Transaction implements Serializable, AsciiPrintable {
     private Shard receiverShard;
 
     /**
-     * Default constructor
-     */
-    private Transaction() {
-        nonce = BigInteger.ZERO;
-        value = BigInteger.ZERO;
-        receiverAddress = "";
-        senderAddress = "";
-        gasPrice = BigInteger.ZERO;
-        gasLimit = BigInteger.ZERO;
-        data = null;
-        signature = null;
-        challenge = null;
-        pubKey = "";
-    }
-
-    /**
      * Explicit constructor
      *
      * @param nonce       tx counter

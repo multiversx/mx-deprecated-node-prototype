@@ -9,8 +9,6 @@ import java.math.BigInteger;
 
 public class AccountStateTest {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-
     @Test
     public void testAccountStateDefaultConstructor() {
         AccountState accountState = new AccountState(AccountAddress.EMPTY_ADDRESS);
@@ -20,7 +18,7 @@ public class AccountStateTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testAccountStateConstructorWithNegativeBalanceShouldThrowException() {
-        AccountState accountState = new AccountState(BigInteger.ZERO, BigInteger.valueOf(-1), AccountAddress.EMPTY_ADDRESS);
+        new AccountState(BigInteger.ZERO, BigInteger.valueOf(-1), AccountAddress.EMPTY_ADDRESS);
         Assert.fail();
     }
 
@@ -32,7 +30,7 @@ public class AccountStateTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testAccountStateConstructorWithNegativeNonceShouldThrowException() {
-        AccountState accountState = new AccountState(BigInteger.valueOf(-1), BigInteger.valueOf(2), AccountAddress.EMPTY_ADDRESS);
+        new AccountState(BigInteger.valueOf(-1), BigInteger.valueOf(2), AccountAddress.EMPTY_ADDRESS);
         Assert.fail();
     }
 
@@ -44,7 +42,7 @@ public class AccountStateTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testAccountStateCopyConstructorWithNullShouldThrowException() {
-        AccountState copiedState = new AccountState((AccountState) null);
+        new AccountState((AccountState) null);
         Assert.fail();
     }
 
