@@ -1,4 +1,4 @@
-package network.elrond;
+package network.elrond.util.console;
 
 
 import java.util.ArrayList;

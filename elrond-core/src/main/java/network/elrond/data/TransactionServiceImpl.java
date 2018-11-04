@@ -8,6 +8,8 @@ import network.elrond.crypto.Signature;
 import network.elrond.crypto.SignatureService;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
+import network.elrond.util.console.AsciiPrinter;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,6 +29,7 @@ public class TransactionServiceImpl implements TransactionService {
     private static final Logger logger = LogManager.getLogger(TransactionServiceImpl.class);
     private SerializationService serializationService = AppServiceProvider.getSerializationService();
 
+    private AsciiPrinter asciiPrinter = AsciiPrinter.instance();
 
     /**
      * Computes the hash of the complete tx info
@@ -101,14 +104,14 @@ public class TransactionServiceImpl implements TransactionService {
                 (transaction.getPubKey().length() != Util.MAX_LEN_PUB_KEY * 2)
                 ) {
             logger.debug("Failed at conistency check (negative nonce, negative value, sig null or empty, wrong lengths for addresses and pub key)");
-            logger.debug(transaction.print().render());
+            logger.debug(asciiPrinter.transactionAsciiTable(transaction).render());
             return logger.traceExit(false);
         }
 
         //test 2. verify if sender address is generated from public key used to sign tx
         if (!transaction.getSenderAddress().equals(Util.getAddressFromPublicKey(Util.hexStringToByteArray(transaction.getPubKey())))) {
             logger.debug("Failed at sender address not being generated (or equal) to public key");
-            logger.debug(transaction.print().render());
+            logger.debug(asciiPrinter.transactionAsciiTable(transaction).render());
             return (false);
         }
 
@@ -130,7 +133,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         if (!isSignatureVerified) {
             logger.debug("Failed at signature verify");
-            logger.debug(transaction.print().render());
+            logger.debug(asciiPrinter.transactionAsciiTable(transaction).render());
         }
 
         return logger.traceExit(isSignatureVerified);

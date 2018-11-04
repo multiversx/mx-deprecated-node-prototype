@@ -11,7 +11,6 @@ import network.elrond.chronology.ChronologyService;
 import network.elrond.chronology.NTPClient;
 import network.elrond.chronology.Round;
 import network.elrond.chronology.RoundState;
-import network.elrond.core.AppStateUtil;
 import network.elrond.core.ObjectUtil;
 import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
@@ -22,6 +21,8 @@ import network.elrond.p2p.P2PBroadcastChannel;
 import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
+import network.elrond.util.console.AsciiPrinter;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,6 +43,8 @@ public class AppBlockManager {
     public static AppBlockManager instance() {
         return instance;
     }
+    
+    private AsciiPrinter asciiPrinter = AsciiPrinter.instance();
 
     public Block generateAndBroadcastBlock(List<String> queue, PrivateKey privateKey, AppState state) {
         logger.traceEntry("params: {} {} {}", queue, privateKey, state);
@@ -145,9 +148,9 @@ public class AppBlockManager {
                 logger.info("New block proposed with hash {} ", hashBlock);
                 logger.info("Proposed in {} ms and sent in {} ms", end-proposeStart, end-start);
 
-                logger.info("\r\n" + state.print().render());
-                //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
-                AppStateUtil.printBlockAndAccounts(block, accounts);
+                logger.info("\r\n" + asciiPrinter.appStateAsciiTable(state).render());
+                logger.info("\r\n" + asciiPrinter.blockAsciiTable(block).render());
+            	logger.info("\r\n" + asciiPrinter.printAccounts(accounts));
             }
 
             return logger.traceExit(block);

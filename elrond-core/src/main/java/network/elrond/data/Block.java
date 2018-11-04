@@ -1,9 +1,7 @@
 package network.elrond.data;
 
-import network.elrond.AsciiTable;
 import network.elrond.core.Util;
 import network.elrond.sharding.Shard;
-
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -16,7 +14,7 @@ import java.util.List;
  * @version 1.0
  * @since 2018-05-14
  */
-public class Block implements Serializable, AsciiPrintable {
+public class Block implements Serializable {
     //block counter
     protected BigInteger nonce;
     //blob of data containing first part of sig
@@ -210,93 +208,5 @@ public class Block implements Serializable, AsciiPrintable {
     public String toString() {
         return (String.format("Block{shard=%s, nonce=%d, signature='%s', commitment='%s', appStateHash='%s', listTXHashes.size=%d, roundIndex=%d, timestamp=%d}",
                 shard, nonce, Util.byteArrayToHexString(signature), Util.byteArrayToHexString(commitment), Util.byteArrayToHexString(appStateHash), listTXHashes.size(), roundIndex, timestamp));
-    }
-
-    @Override
-    public AsciiTable print() {
-
-        AsciiTable table = new AsciiTable();
-        table.setMaxColumnWidth(200);
-
-        table.getColumns().add(new AsciiTable.Column("Block "));
-        table.getColumns().add(new AsciiTable.Column(nonce + ""));
-
-        AsciiTable.Row rowS = new AsciiTable.Row();
-        rowS.getValues().add("Shard");
-        rowS.getValues().add(shard.getIndex() + "");
-        table.getData().add(rowS);
-
-
-        AsciiTable.Row row0 = new AsciiTable.Row();
-        row0.getValues().add("Nonce");
-        row0.getValues().add(nonce.toString());
-        table.getData().add(row0);
-
-        AsciiTable.Row row1 = new AsciiTable.Row();
-        row1.getValues().add("State Hash");
-        row1.getValues().add(Util.getDataEncoded64(appStateHash));
-        table.getData().add(row1);
-
-        AsciiTable.Row row2 = new AsciiTable.Row();
-        row2.getValues().add("Signature");
-        row2.getValues().add(Util.getDataEncoded64(signature));
-        table.getData().add(row2);
-
-        AsciiTable.Row row3 = new AsciiTable.Row();
-        row3.getValues().add("Commitment");
-        row3.getValues().add(Util.getDataEncoded64(commitment));
-        table.getData().add(row3);
-
-        AsciiTable.Row row4 = new AsciiTable.Row();
-        row4.getValues().add("Prev block");
-        row4.getValues().add(Util.getDataEncoded64(prevBlockHash));
-        table.getData().add(row4);
-
-        AsciiTable.Row row5 = new AsciiTable.Row();
-        row5.getValues().add("Transactions in block");
-        row5.getValues().add(listTXHashes.size() + "");
-        table.getData().add(row5);
-
-        AsciiTable.Row row6 = new AsciiTable.Row();
-        row6.getValues().add("----------------------");
-        row6.getValues().add("----------------------------------------------------------------");
-        table.getData().add(row6);
-
-
-        for (int index = 0; index < listTXHashes.size(); index++) {
-            byte[] tx = listTXHashes.get(index);
-            AsciiTable.Row row7 = new AsciiTable.Row();
-            row7.getValues().add("#" + index);
-            row7.getValues().add(Util.getDataEncoded64(tx));
-            table.getData().add(row7);
-        }
-
-        AsciiTable.Row row8 = new AsciiTable.Row();
-        row8.getValues().add("----------------------");
-        row8.getValues().add("----------------------------------------------------------------");
-        table.getData().add(row8);
-
-        AsciiTable.Row row9 = new AsciiTable.Row();
-        row9.getValues().add("Peers in block");
-        row9.getValues().add(peers.size() + "");
-        table.getData().add(row9);
-
-        AsciiTable.Row row10 = new AsciiTable.Row();
-        row10.getValues().add("----------------------");
-        row10.getValues().add("----------------------------------------------------------------");
-        table.getData().add(row10);
-
-        int index = 0;
-
-        for (String node : peers) {
-            index++;
-            AsciiTable.Row row11 = new AsciiTable.Row();
-            row11.getValues().add("#" + index);
-            row11.getValues().add(node);
-            table.getData().add(row11);
-        }
-
-        table.calculateColumnWidth();
-        return table;
     }
 }

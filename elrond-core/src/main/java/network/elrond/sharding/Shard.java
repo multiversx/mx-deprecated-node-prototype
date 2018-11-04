@@ -1,12 +1,9 @@
 package network.elrond.sharding;
 
-import network.elrond.AsciiTable;
-import network.elrond.data.AsciiPrintable;
-
 import java.io.Serializable;
 import java.util.Objects;
 
-public class Shard implements Serializable, AsciiPrintable {
+public class Shard implements Serializable {
     private Integer index = -1;
 
     public Shard(Integer index) {
@@ -36,24 +33,7 @@ public class Shard implements Serializable, AsciiPrintable {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(index);
     }
 
-    @Override
-    public AsciiTable print() {
-
-        AsciiTable table = new AsciiTable();
-        table.setMaxColumnWidth(30);
-
-        table.getColumns().add(new AsciiTable.Column("Shard"));
-
-        AsciiTable.Row row1 = new AsciiTable.Row();
-        row1.getValues().add("Index");
-        row1.getValues().add(index + "");
-        table.getData().add(row1);
-
-        table.calculateColumnWidth();
-        return table;
-    }
 }

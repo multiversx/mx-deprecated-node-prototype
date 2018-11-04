@@ -7,10 +7,11 @@ import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.blockchain.SettingsType;
 import network.elrond.chronology.NTPClient;
-import network.elrond.core.AppStateUtil;
 import network.elrond.core.Util;
 import network.elrond.p2p.P2PRequestChannelName;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.util.console.AsciiPrinter;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mapdb.Fun;
@@ -21,6 +22,8 @@ import java.util.List;
 
 public class BootstrapServiceImpl implements BootstrapService {
     private static final Logger logger = LogManager.getLogger(BootstrapServiceImpl.class);
+    
+    private AsciiPrinter asciiPrinter = AsciiPrinter.instance();
 
     @Override
     public BigInteger getCurrentBlockIndex(LocationType locationType, Blockchain blockchain) {
@@ -204,9 +207,9 @@ public class BootstrapServiceImpl implements BootstrapService {
                 logger.trace("Execution of genesis block was successful!");
                 setCurrentBlockIndex(LocationType.BOTH, genesisBlock.getNonce(), blockchain);
 
-                logger.info("\n" + state.print().render());
-                //logger.info("\n" + AsciiTableUtil.listToTables(Arrays.asList(genesisTransaction)));
-                AppStateUtil.printBlockAndAccounts(genesisBlock, accounts);
+                logger.info("\n" +  asciiPrinter.appStateAsciiTable(state).render());
+                logger.info("\r\n" + asciiPrinter.blockAsciiTable(genesisBlock).render());
+            	logger.info("\r\n" + asciiPrinter.printAccounts(accounts));
             }
 
 
@@ -226,8 +229,6 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         Accounts accounts = state.getAccounts();
         Blockchain blockchain = state.getBlockchain();
-        NTPClient ntpClient = state.getNtpClient();
-
 
         ExecutionReport result = new ExecutionReport().ok("Start bootstrapping by loading from disk...");
         BigInteger idx = BigInteger.valueOf(-1);
@@ -343,18 +344,13 @@ public class BootstrapServiceImpl implements BootstrapService {
                 result.ok("Added block in blockchain : " + blockHash + " # " + block);
 
                 logger.info("New block synchronized with hash {}", blockHash);
-                logger.info("\r\n" + state.print().render());
-                //logger.info("\n" + AsciiTableUtil.listToTables(transactions));
-                AppStateUtil.printBlockAndAccounts(block, accounts);
+                logger.info("\r\n" +  asciiPrinter.appStateAsciiTable(state).render());
+                logger.info("\r\n" + asciiPrinter.blockAsciiTable(block).render());
+            	logger.info("\r\n" + asciiPrinter.printAccounts(accounts));
 
                 // Update current block
                 blockchain.setCurrentBlockIndex(blockIndex);
                 blockchain.setCurrentBlock(block);
-
-//                if (state.getStatisticsManager() != null){
-//                    state.getStatisticsManager().addStatistic(
-//                            new Statistic(block.getListTXHashes().size(), block.getTimestamp()));
-//                }
 
                 logger.trace("done updating current block");
 

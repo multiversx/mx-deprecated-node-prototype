@@ -1,15 +1,13 @@
 package network.elrond.account;
 
-import network.elrond.AsciiTable;
 import network.elrond.core.Util;
-import network.elrond.data.AsciiPrintable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.math.BigInteger;
 
-public class AccountState implements Serializable, AsciiPrintable {
+public class AccountState implements Serializable {
 
     private static final Logger logger = LogManager.getLogger(AccountState.class);
 
@@ -93,27 +91,4 @@ public class AccountState implements Serializable, AsciiPrintable {
         return String.format("AccountState{nonce=%d, balance=%d}", this.getNonce(), this.getBalance());
     }
 
-    @Override
-    public AsciiTable print() {
-
-        AsciiTable table = new AsciiTable();
-        table.setMaxColumnWidth(90);
-
-        table.getColumns().add(new AsciiTable.Column("Account "));
-        table.getColumns().add(new AsciiTable.Column(Util.byteArrayToHexString(address.getBytes())));
-
-        AsciiTable.Row row0 = new AsciiTable.Row();
-        row0.getValues().add("Nonce");
-        row0.getValues().add(nonce.toString());
-        table.getData().add(row0);
-
-        AsciiTable.Row row1 = new AsciiTable.Row();
-        row1.getValues().add("Balance");
-        row1.getValues().add(balance + "");
-        table.getData().add(row1);
-
-
-        table.calculateColumnWidth();
-        return table;
-    }
 }
