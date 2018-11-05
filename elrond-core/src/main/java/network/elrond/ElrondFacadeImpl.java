@@ -20,6 +20,8 @@ import network.elrond.p2p.*;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.AppShardingManager;
 import network.elrond.sharding.Shard;
+import network.elrond.util.time.ElrondSystemTimerImpl;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

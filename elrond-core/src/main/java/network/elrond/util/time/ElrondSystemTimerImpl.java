@@ -1,4 +1,4 @@
-package network.elrond.benchmark;
+package network.elrond.util.time;
 
 import java.io.Serializable;
 

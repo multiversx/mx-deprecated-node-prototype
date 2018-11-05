@@ -1,7 +1,6 @@
 package network.elrond.data;
 
 import net.tomp2p.peers.PeerAddress;
-import network.elrond.TimeWatch;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppState;
 import network.elrond.benchmark.Statistic;
@@ -261,7 +260,6 @@ public class AppBlockManager {
         List<Receipt> receipts = new ArrayList<>();
 
         Accounts accounts = state.getAccounts();
-        TimeWatch tw = TimeWatch.start();
         for (Transaction transaction : transactions) {
             boolean valid = AppServiceProvider.getTransactionService().verifyTransaction(transaction);
             if (!valid) {

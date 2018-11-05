@@ -4,6 +4,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import network.elrond.util.time.ElrondSystemTimer;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

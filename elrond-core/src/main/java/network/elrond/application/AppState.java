@@ -1,7 +1,6 @@
 package network.elrond.application;
 
 import network.elrond.account.Accounts;
-import network.elrond.benchmark.ElrondSystemTimerImpl;
 import network.elrond.benchmark.StatisticsManager;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.TransactionsPool;
@@ -12,6 +11,8 @@ import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.p2p.*;
 import network.elrond.sharding.Shard;
+import network.elrond.util.time.ElrondSystemTimerImpl;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

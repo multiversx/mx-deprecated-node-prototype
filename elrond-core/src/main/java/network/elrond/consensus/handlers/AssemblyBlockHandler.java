@@ -1,6 +1,5 @@
 package network.elrond.consensus.handlers;
 
-import network.elrond.TimeWatch;
 import network.elrond.application.AppState;
 import network.elrond.benchmark.Statistic;
 import network.elrond.blockchain.TransactionsPool;
@@ -16,6 +15,8 @@ import network.elrond.data.BlockUtil;
 import network.elrond.sharding.AppShardingManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.google.common.base.Stopwatch;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -69,7 +70,7 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
             return;
         }
 
-        TimeWatch watch = TimeWatch.start();
+        Stopwatch stopwatch = Stopwatch.createStarted();
         int size = 0;
 
         PrivateKey privateKey = state.getPrivateKey();
@@ -78,7 +79,7 @@ public class AssemblyBlockHandler implements EventHandler<SubRound> {
         if (block != null) {
             size = BlockUtil.getTransactionsCount(block);
 
-            long time = watch.time(TimeUnit.MILLISECONDS);
+            long time = stopwatch.elapsed(TimeUnit.MILLISECONDS);
             long tps = (time > 0) ? ((size * 1000) / time) : 0;
             logger.info(" ###### Executed {} transactions in {}ms  TPS:{}   ###### ",
                     size, time, tps);
