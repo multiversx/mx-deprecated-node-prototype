@@ -13,7 +13,7 @@ public class AccountState implements Serializable {
 
     private BigInteger nonce;
     private BigInteger balance;
-    private AccountAddress address;
+    private final AccountAddress address;
 
 
     public AccountState(AccountAddress address) {
@@ -38,7 +38,7 @@ public class AccountState implements Serializable {
 
         setNonce(source.getNonce());
         setBalance(source.getBalance());
-        setAddress(source.getAddress());
+        this.address = source.getAddress();
 
         logger.traceExit();
     }
@@ -80,10 +80,6 @@ public class AccountState implements Serializable {
 
     public AccountAddress getAddress() {
         return address;
-    }
-
-    public void setAddress(AccountAddress address) {
-        this.address = address;
     }
 
     @Override

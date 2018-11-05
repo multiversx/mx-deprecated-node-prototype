@@ -21,8 +21,7 @@ public class SignatureServiceECDSAImpl implements SignatureService {
         logger.traceEntry();
         ECCryptoService ecCryptoService = AppServiceProvider.getECCryptoService();
         BigInteger[] sig;
-        Signature  signature = new Signature();
-
+        
         Util.check(message != null, "message!=null");
         Util.check(privateKey != null, "privateKey!=null");
         Util.check(publicKey != null, "publicKey!=null");
@@ -41,8 +40,10 @@ public class SignatureServiceECDSAImpl implements SignatureService {
 
         signer.init(true, privKey);
         sig = signer.generateSignature(message);
-        signature.setChallenge(sig[0].toByteArray());
-        signature.setSignature(sig[1].toByteArray());
+        Signature signature = Signature.builder()
+        		.setChallenge(sig[0].toByteArray())
+                .setSignature(sig[1].toByteArray())
+                .build();
 
         return logger.traceExit(signature);
     }

@@ -2,8 +2,8 @@ package network.elrond.crypto;
 
 public class ECKeyPair implements KeyPair {
 
-    private PrivateKey privateKey;
-    private PublicKey publicKey;
+    private final PrivateKey privateKey;
+    private final PublicKey publicKey;
 
     /**
      * Default constructor
@@ -23,19 +23,6 @@ public class ECKeyPair implements KeyPair {
     public ECKeyPair(PrivateKey privateKey) {
         this.privateKey = privateKey;
         publicKey = new PublicKey(privateKey);
-    }
-
-    /**
-     * Creates a pair of (private, public) keys
-     *
-     * @param privateKey the private key
-     * @param publicKey  the public key
-     */
-    public ECKeyPair(PrivateKey privateKey, PublicKey publicKey) {
-        if (privateKey.isValid() && publicKey.equals(new PublicKey(privateKey))) {
-            this.publicKey = publicKey;
-            this.privateKey = privateKey;
-        }
     }
 
     /**

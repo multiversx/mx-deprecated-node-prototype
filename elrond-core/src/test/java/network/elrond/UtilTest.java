@@ -39,10 +39,8 @@ public class UtilTest {
 //    }
 
 
-    public static void displayListValidators(List<Validator> list) {
-        for (int i = 0; i < list.size(); i++) {
-            Validator v = list.get(i);
-
+    public static void displayListValidators(Iterable<Validator> list) {
+    	for (Validator v : list) {
             System.out.println(v.getPubKey() + ", S: " + v.getStake().toString(10) + ", R: " + v.getRating());
         }
         System.out.println();

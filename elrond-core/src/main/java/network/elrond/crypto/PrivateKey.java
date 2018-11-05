@@ -16,7 +16,7 @@ import java.security.SecureRandom;
 public class PrivateKey {
     private static final Logger logger = LogManager.getLogger(PrivateKey.class);
 
-    private byte[] privateKey;
+    private final byte[] privateKey;
 
     /**
      * Default constructor

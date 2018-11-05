@@ -52,19 +52,19 @@ public class SPoSServiceImpl implements SPoSService {
                 continue;
             }
 
-            if (v.getRating() < result.minRating) {
-                result.minRating = v.getRating();
+            if (v.getRating() < result.getMinRating()) {
+                result.setMinRating(v.getRating());
             }
 
-            if (v.getRating() > result.maxRating) {
-                result.maxRating = v.getRating();
+            if (v.getRating() > result.getMaxRating()) {
+                result.setMaxRating(v.getRating());
             }
 
-            if (v.getStake().compareTo(result.maxStake) > 0) {
-                result.maxStake = v.getStake();
+            if (v.getStake().compareTo(result.getMaxStake()) > 0) {
+                result.setMaxStake(v.getStake());
             }
 
-            result.list.add(new Validator(v));
+            result.addValidator(new Validator(v));
         }
 
         return(result);
@@ -86,7 +86,7 @@ public class SPoSServiceImpl implements SPoSService {
 
         ValidatorService vs = AppServiceProvider.getValidatorService();
 
-        List<Validator> tempList = copyList(cleanedUpListObject.list);
+        List<Validator> tempList = cleanedUpListObject.getValidatorListCopy();
 
         //compute stake and rating score for each validator from temp listToTable
         //and multiply temp table instances
@@ -94,21 +94,21 @@ public class SPoSServiceImpl implements SPoSService {
         for (int i = 0; i < tempSize; i++) {
             Validator v = tempList.get(i);
 
-            if (cleanedUpListObject.maxStake.compareTo(Util.MIN_STAKE) == 0) {
+            if (cleanedUpListObject.getMaxStake().compareTo(Util.MIN_STAKE) == 0) {
                 v.setScoreStake(0);
             } else {
                 //(current_stake - minStake) * Util.MAX_SCORE / (maxStake - minStake)
                 int sStake = (v.getStake().subtract(Util.MIN_STAKE)).multiply(BigInteger.valueOf(Util.MAX_SCORE)).
-                        divide(cleanedUpListObject.maxStake.subtract(Util.MIN_STAKE)).intValue();
+                        divide(cleanedUpListObject.getMaxStake().subtract(Util.MIN_STAKE)).intValue();
                 v.setScoreStake(sStake);
             }
 
-            if (cleanedUpListObject.maxRating == cleanedUpListObject.minRating) {
+            if (cleanedUpListObject.getMaxRating() == cleanedUpListObject.getMinRating()) {
                 v.setScoreRating(0);
             } else {
                 //(current_rating - minRating) * Util.MAX_SCORE / (maxRating - minRating)
-                int sRating = (v.getRating() - cleanedUpListObject.minRating) * Util.MAX_SCORE /
-                        (cleanedUpListObject.maxRating - cleanedUpListObject.minRating);
+                int sRating = (v.getRating() - cleanedUpListObject.getMinRating()) * Util.MAX_SCORE /
+                        (cleanedUpListObject.getMaxRating() - cleanedUpListObject.getMinRating());
                 v.setScoreRating(sRating);
             }
 
@@ -141,9 +141,9 @@ public class SPoSServiceImpl implements SPoSService {
 
         EligibleListValidators cleanedUpList = generateCleanupList(eligibleList);
 
-        if (cleanedUpList.list.size() <= Util.VERIFIER_GROUP_SIZE) {
+        if (cleanedUpList.getNrValidators() <= Util.VERIFIER_GROUP_SIZE) {
             //not enouch validators, copy them all
-            tempList = copyList(cleanedUpList.list);
+            tempList = cleanedUpList.getValidatorListCopy();
 
             //rotate leader
             if ((roundHeight.compareTo(BigInteger.ZERO) > 0) && (tempList.size() > 1)) {
@@ -194,22 +194,6 @@ public class SPoSServiceImpl implements SPoSService {
         }
 
         return(tempList);
-    }
-
-    /**
-     * Method used vor copying Lists of Validators. Method creates a new Validator for each item in the source listToTable
-     * @param src listToTable to be copied
-     * @return new listToTable of Validators
-     */
-    @Override
-	public List<Validator> copyList(List<Validator> src) {
-        List<Validator> tempList = new ArrayList<Validator>();
-
-        for (int i = 0; i < src.size(); i++) {
-            tempList.add(new Validator(src.get(i)));
-        }
-
-        return (tempList);
     }
 
 }

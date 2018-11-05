@@ -97,9 +97,11 @@ public class SignatureServiceSchnorrImpl implements SignatureService {
                     logger.trace("trying again...");
                     calculated = false;
                 } else {
-                    signature.setSignature(sInteger.toByteArray());
-                    signature.setChallenge(challengeC);
-                    signature.setCommitment(commitPointR.getEncoded(true));
+                	signature = Signature.builder()
+	                    .setSignature(sInteger.toByteArray())
+	                    .setChallenge(challengeC)
+	                    .setCommitment(commitPointR.getEncoded(true))
+	                    .build();
                     logger.trace("done, everything is OK");
                     calculated = true;
                 }
