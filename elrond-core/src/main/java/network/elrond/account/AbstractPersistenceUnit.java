@@ -13,7 +13,7 @@ import java.io.IOException;
 /**
  * Abstract implementation of key => value persistence unit
  */
-public abstract class AbstractPersistenceUnit<K, V> {
+public abstract class AbstractPersistenceUnit<K, V> implements PersistenceUnit<K, V> {
 
     protected static final int MAX_ENTRIES = 10000;
 
@@ -55,7 +55,8 @@ public abstract class AbstractPersistenceUnit<K, V> {
      * @param key
      * @param val
      */
-    protected abstract void put(byte[] key, byte[] val);
+    @Override
+	public abstract void put(byte[] key, byte[] val);
 
     /**
      * Get value from unit
@@ -63,7 +64,8 @@ public abstract class AbstractPersistenceUnit<K, V> {
      * @param key
      * @return
      */
-    protected abstract byte[] get(byte[] key);
+    @Override
+	public abstract byte[] get(byte[] key);
 
     /**
      * Delete everything and recreate unit
@@ -97,7 +99,8 @@ public abstract class AbstractPersistenceUnit<K, V> {
      *
      * @throws IOException
      */
-    public void close() throws IOException {
+    @Override
+	public void close() throws IOException {
         logger.traceEntry();
         this.database.close();
         logger.traceExit();

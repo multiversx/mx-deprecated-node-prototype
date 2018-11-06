@@ -1,6 +1,7 @@
 package network.elrond.blockchain;
 
 import network.elrond.account.AbstractPersistenceUnit;
+import network.elrond.account.PersistenceUnit;
 import network.elrond.core.Util;
 import network.elrond.data.Block;
 import network.elrond.p2p.P2PConnection;
@@ -112,7 +113,7 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
     @Override
     public void stopPersistenceUnit() {
         logger.traceEntry();
-        for (AbstractPersistenceUnit<?, ?> unit : blockchain.values()) {
+        for (PersistenceUnit<?, ?> unit : blockchain.values()) {
             try {
                 unit.close();
             } catch (IOException e) {

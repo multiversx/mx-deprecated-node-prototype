@@ -49,7 +49,7 @@ public class AccountStateServiceImpl implements AccountStateService {
             return logger.traceExit((AccountState) null);
         }
 
-        AccountsPersistenceUnit<AccountAddress, AccountState> unit = accounts.getAccountsPersistenceUnit();
+        PersistenceUnit<AccountAddress, AccountState> unit = accounts.getAccountsPersistenceUnit();
         byte[] bytes = address.getBytes();
         byte[] data = unit.get(bytes);
 
