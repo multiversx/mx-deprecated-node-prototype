@@ -1,8 +1,8 @@
 package network.elrond.chronology;
 
 public class Round {
-    private long index;
-    private long startTimeStamp;
+    private final long index;
+    private final long startTimeStamp;
 
     public Round() {
         index = 0;
@@ -18,16 +18,8 @@ public class Round {
         return (index);
     }
 
-    public void setIndex(long index) {
-        this.index = index;
-    }
-
     public long getStartTimeStamp() {
         return(startTimeStamp);
-    }
-
-    public void setStartTimeStamp(long startTimeStamp){
-        this.startTimeStamp = startTimeStamp;
     }
 
     @Override

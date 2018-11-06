@@ -28,7 +28,6 @@ public class ChronologyBlockTask implements AppTask {
         Util.check(state.getBlockchain() != null, "blockchain != null");
 
         Blockchain blockchain = state.getBlockchain();
-        String nodeName = application.getContext().getNodeName();
 
         Thread thread = new Thread(() -> {
             logger.traceEntry();
@@ -157,10 +156,7 @@ public class ChronologyBlockTask implements AppTask {
 
 
     private void notifyEventObjects(Application application, Round round, RoundState roundState, long globalTimeStamp){
-        SubRound subRound = new SubRound();
-        subRound.setRound(round);
-        subRound.setRoundState(roundState);
-        subRound.setTimeStamp(globalTimeStamp);
+        SubRound subRound = new SubRound(round, roundState, globalTimeStamp);
 
         AppState state = application.getState();
 

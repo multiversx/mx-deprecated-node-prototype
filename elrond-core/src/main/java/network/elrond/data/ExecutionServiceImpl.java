@@ -81,14 +81,13 @@ public class ExecutionServiceImpl implements ExecutionService {
 
         ChronologyService chronologyService = AppServiceProvider.getChronologyService();
 
-        Round roundBlock = new Round();
-
+        
         long timestamp = blockchain.getGenesisBlock().getTimestamp();
         long roundTimeDuration = chronologyService.getRoundTimeDuration();
         long roundIndex = block.getRoundIndex();
 
         long startTimeStamp = timestamp + roundIndex * roundTimeDuration;
-        roundBlock.setStartTimeStamp(startTimeStamp);
+        Round roundBlock = new Round(0, startTimeStamp);
         logger.trace("Computed round = {}, block's timestamp = {}, block's round = {}, genesis timestamp = {}",
                 roundBlock, block.getTimestamp(), block.getRoundIndex(), timestamp);
 

@@ -40,9 +40,10 @@ public class ChronologyServiceImpl implements ChronologyService {
 
         Util.check(timeStamp >= genesisRoundTimeStamp, "genesisRoundTimeStamp should be lower or equal to dateMillis!");
 
-        Round r = new Round();
-        r.setIndex(delta / roundTimeDuration);
-        r.setStartTimeStamp(genesisRoundTimeStamp + r.getIndex() * roundTimeDuration);
+		long roundIndex = delta / roundTimeDuration;
+		Round r = new Round(
+				roundIndex,
+				genesisRoundTimeStamp + roundIndex * roundTimeDuration);
 
         return logger.traceExit(r);
     }
