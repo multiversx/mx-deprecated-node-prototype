@@ -21,18 +21,6 @@ public class Statistic implements Serializable {
         return nrTransactionsInBlock;
     }
 
-//    public void setNrTransactionsInBlock(long nrTransactionsInBlock) {
-//        this.nrTransactionsInBlock = nrTransactionsInBlock;
-//    }
-//
-//    public long getTps() {
-//        return tps;
-//    }
-//
-//    public void setTps(long tps) {
-//        this.tps = tps;
-//    }
-
     public long getCurrentTimeMillis() {
         return currentTimeMillis;
     }
@@ -40,8 +28,5 @@ public class Statistic implements Serializable {
     public long getCurrentBlockNonce() {
         return currentBlockNonce;
     }
-//
-//    public void setCurrentTimeMillis(long currentTimeMillis) {
-//        this.currentTimeMillis = currentTimeMillis;
-//    }
+
 }

@@ -16,8 +16,6 @@ import java.util.stream.Collectors;
 
 public class AppShardingManager {
 
-    private static final Logger logger = LogManager.getLogger(AppShardingManager.class);
-
     private Boolean isSeedNode;
 
     private static AppShardingManager instance = new AppShardingManager();
@@ -73,7 +71,6 @@ public class AppShardingManager {
             nodeList.addAll(state.getBlockchain().getCurrentBlock().getPeers());
         }
 
-        // P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.BLOCK);
         HashSet<PeerAddress> totalPeers = state.getConnection().getPeersOnShard(state.getShard().getIndex());
 
         for (PeerAddress peer : totalPeers) {

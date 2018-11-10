@@ -55,7 +55,6 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
         final Number160 messageKey = message.key(0);
         //filter out same message processed
         if (twiceSeen(messageKey)) {
-            //logger.debug("{} already received the message: {}", peer.peerAddress().tcpPort(), messageKey);
             return this;
         }
 
@@ -97,9 +96,7 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
         final int hopCount = message.intAt(0);
         //get all verified peers
         List<PeerAddress> listToSend = peer.peerBean().peerMap().all();
-        //to be checked if we send to the verified peers or all known peers (even overflowed peers)
-        //listToSend.addAll(peer.peerBean().peerMap().allOverflow());
-
+        
         for (PeerAddress peerAddress : listToSend) {
             if (peerAddress == sender) {
                 //not returning to sender
