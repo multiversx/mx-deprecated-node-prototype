@@ -9,13 +9,24 @@ package network.elrond.consensus;
  */
 public enum ConsensusAnswerType
 {
-    //the validator agrees on consensus
+    /**
+	 * The validator agrees on consensus.
+	 */
     AGREE,
-    //the validator disagree on consensus
+    
+    /**
+	 * The validator disagree on consensus.
+	 */
     DISAGREE,
-    //the validator did not answer (yet)
+    
+    /**
+	 * The validator did not answer (yet).
+	 */
     NOT_ANSWERED,
-    //the validator is not available
+    
+    /**
+	 * The validator is not available.
+	 */
     NOT_AVAILABLE
 }
 

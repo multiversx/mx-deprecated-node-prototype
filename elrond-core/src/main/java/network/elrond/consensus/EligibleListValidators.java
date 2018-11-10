@@ -24,9 +24,6 @@ public class EligibleListValidators {
 	// maximum stake found in the listToTable
 	private BigInteger maxStake;
 
-	/**
-	 * Implict constructor
-	 */
 	public EligibleListValidators() {
 		maxStake = BigInteger.ZERO;
 
