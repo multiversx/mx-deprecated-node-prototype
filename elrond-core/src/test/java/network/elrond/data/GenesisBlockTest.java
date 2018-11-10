@@ -60,10 +60,5 @@ public class GenesisBlockTest {
 
         TestCase.assertEquals("Expecting " + value.toString(10), value, acsRecv.getBalance());
         TestCase.assertEquals("Expecting " + Util.VALUE_MINTING.subtract(value), Util.VALUE_MINTING.subtract(value), acsMint.getBalance());
-
-
-        //GenesisBlock gb = new GenesisBlock();
-        //System.out.println(AppServiceProvider.getSerializationService().encodeJSON(gb));
-
     }
 }

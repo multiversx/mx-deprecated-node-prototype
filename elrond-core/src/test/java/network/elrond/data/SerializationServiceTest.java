@@ -87,9 +87,6 @@ public class SerializationServiceTest {
 
         String encodedBlock = serializationService.encodeJSON(blk);
 
-        //System.out.println(strEncoded);
-        //System.out.println(strEncoded2);
-
         Block decodedBlock = serializationService.decodeJSON(encodedBlock, Block.class);
 
         TestCase.assertEquals(encodedBlock, serializationService.encodeJSON(decodedBlock));
@@ -111,9 +108,6 @@ public class SerializationServiceTest {
         blk.setSignature(null);
         blk.setCommitment(null);
         String encodedBlock = serializationService.encodeJSON(blk);
-
-        //System.out.println(strEncoded);
-        //System.out.println(strEncoded2);
 
         Block decodedBlock = serializationService.decodeJSON(encodedBlock, Block.class);
 

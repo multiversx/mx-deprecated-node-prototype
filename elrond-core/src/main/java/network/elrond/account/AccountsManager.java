@@ -36,10 +36,6 @@ public class AccountsManager {
         Util.check(!(addressString == null || addressString.isEmpty()), "addressString!=null");
 
         return logger.traceExit(true);
-        //TODO: uncomment in the future
-//        AccountAddress sendAddress = AccountAddress.fromHexaString(addressString);
-//        AccountState senderAccountState = AppServiceProvider.getAccountStateService().getOrCreateAccountState(sendAddress, accounts);
-//        return senderAccountState.getNonce().equals(nonce);
     }
 
     public void transferFunds(Accounts accounts, String senderAddress, String receiverAddress, BigInteger value, BigInteger nonce, ShardOperation operation) throws IOException, ClassNotFoundException {

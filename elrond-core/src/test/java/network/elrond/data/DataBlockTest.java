@@ -32,15 +32,5 @@ public class DataBlockTest {
 
         TestCase.assertEquals(serializationService.encodeJSON(db), serializationService.encodeJSON(db2));
 
-
-//        Block b1 = new Block("Hello world from Elrond", "0");
-////
-////        String data = b1.getData();
-////        TestCase.assertEquals("Hello world from Elrond", b1.getData());
-////
-////        String hash = b1.getHash();
-////        TestCase.assertEquals("?", b1.getHash());
-
-
     }
 }
