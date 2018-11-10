@@ -4,17 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 
 public class BenchmarkManager {
-    static BenchmarkManager instance;
-
-    private BenchmarkManager(){};
+    private static final BenchmarkManager INSTANCE = new BenchmarkManager();
 
     public static synchronized BenchmarkManager getInstance(){
-        if(instance == null){
-            instance = new BenchmarkManager();
-        }
-        return instance;
+        return INSTANCE;
     }
-
 
     public BenchmarkResult getBenchmarkResult(List<StatisticsManager> statisticsManagers){
         BenchmarkResult res = new BenchmarkResult();
@@ -67,6 +61,5 @@ public class BenchmarkManager {
         return res;
     }
 
-    private double maxPeakTps = 0;
     private HashMap<Integer, Double> maxPeakTpsPerShard = new HashMap<Integer, Double>();
 }
