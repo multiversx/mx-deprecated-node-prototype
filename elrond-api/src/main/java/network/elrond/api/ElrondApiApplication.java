@@ -70,7 +70,8 @@ public class ElrondApiApplication {
         if (isEnoughArguments) {
             StringBuilder stringBuilderParameters = new StringBuilder();
 
-            Map<String, Object> data = (Map<String, Object>)responseObject.getPayload();
+            @SuppressWarnings("unchecked")
+			Map<String, Object> data = (Map<String, Object>) responseObject.getPayload();
 
             boolean isFirst = true;
             for (String key : data.keySet()){
