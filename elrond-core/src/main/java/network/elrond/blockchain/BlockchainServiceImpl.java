@@ -1,6 +1,5 @@
 package network.elrond.blockchain;
 
-import network.elrond.core.LRUMap;
 import network.elrond.core.Util;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.p2p.P2PRequestChannel;
@@ -14,6 +13,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.iq80.leveldb.impl.Iq80DBFactory.asString;
 import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
@@ -34,9 +34,9 @@ public class BlockchainServiceImpl implements BlockchainService {
         Util.check(hash != null, "hash!=null");
         Util.check(blockchain != null, "blockchain!=null");
         BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
-        LRUMap<H, B> cache = unit.getCache();
+        Map<H, B> cache = unit.getCache();
 
-        if (cache.contains(hash)) {
+        if (cache.containsKey(hash)) {
             logger.trace("cache contains hash");
             return logger.traceExit(true);
         }
@@ -147,7 +147,7 @@ public class BlockchainServiceImpl implements BlockchainService {
         BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
         P2PConnection connection = blockchain.getConnection();
 
-        LRUMap<H, B> cache = unit.getCache();
+        Map<H, B> cache = unit.getCache();
 
         boolean exists = cache.get(hash) != null;
         if (!exists) {
@@ -157,11 +157,6 @@ public class BlockchainServiceImpl implements BlockchainService {
             }
 
             return object;
-
-//            if (object != null) {
-//                cache.put(hash, object);
-//                logger.trace("Got from local storace");
-//            }
         }
 
         B result = cache.get(hash);
@@ -177,7 +172,7 @@ public class BlockchainServiceImpl implements BlockchainService {
         Util.check(blockchain != null, "blockchain!=null");
 
         BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
-        LRUMap<H, B> cache = unit.getCache();
+        Map<H, B> cache = unit.getCache();
 
         boolean exists = cache.get(hash) != null;
         if (!exists) {

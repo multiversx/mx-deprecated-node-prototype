@@ -1,6 +1,8 @@
 package network.elrond.account;
 
-import network.elrond.core.LRUMap;
+import network.elrond.db.ByteArrayWrapper;
+
+import org.apache.commons.collections4.map.LRUMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.iq80.leveldb.DB;
@@ -9,6 +11,8 @@ import org.iq80.leveldb.impl.Iq80DBFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Abstract implementation of key => value persistence unit
@@ -20,7 +24,7 @@ public abstract class AbstractPersistenceUnit<K, V> implements PersistenceUnit<K
     protected final String databasePath;
     protected DB database;
 
-    final private LRUMap<K, V> cache = new LRUMap<>(0, MAX_ENTRIES);
+    private final Map<K, V> cache = Collections.synchronizedMap(new LRUMap<>(0, MAX_ENTRIES));
 
     private static final Logger logger = LogManager.getLogger(AbstractPersistenceUnit.class);
 
@@ -45,7 +49,7 @@ public abstract class AbstractPersistenceUnit<K, V> implements PersistenceUnit<K
         return logger.traceExit(factory.open(new File(databasePath), options));
     }
 
-    public LRUMap<K, V> getCache() {
+    public Map<K, V> getCache() {
         return cache;
     }
 

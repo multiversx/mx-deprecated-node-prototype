@@ -1,21 +1,25 @@
 package network.elrond.crypto;
 
+import java.util.Collections;
+import java.util.Map;
+
+import org.apache.commons.collections4.map.LRUMap;
+
 import network.elrond.db.ByteArrayWrapper;
 
-import network.elrond.core.LRUMap;
 
 public class HashUtil {
 
     private static final int MAX_ENTRIES = 100; // Should contain most commonly hashed values
-    private static LRUMap<ByteArrayWrapper, byte[]> sha3Cache = new LRUMap<>(0, MAX_ENTRIES);
+    private static final Map<ByteArrayWrapper, byte[]> SHA3_CACHE = Collections.synchronizedMap(new LRUMap<>(0, MAX_ENTRIES));
 
     public static byte[] sha3(byte[] input) {
         ByteArrayWrapper inputByteArray = new ByteArrayWrapper(input);
-        byte[] result = sha3Cache.get(inputByteArray);
+        byte[] result = SHA3_CACHE.get(inputByteArray);
         if(result != null)
             return result;
         result = SHA3Helper.sha3(input);
-        sha3Cache.put(inputByteArray, result);
+        SHA3_CACHE.put(inputByteArray, result);
         return result;
     }
 }
