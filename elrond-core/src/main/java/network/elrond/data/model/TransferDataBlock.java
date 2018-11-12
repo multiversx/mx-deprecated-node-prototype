@@ -5,11 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TransferDataBlock<D> implements Serializable {
-    private List<D> dataList;
-    private String referenceBlockHash;
+    private final List<D> dataList;
+    private final String referenceBlockHash;
 
-    public TransferDataBlock() {
+    public TransferDataBlock(String referenceBlockHash) {
         dataList = new ArrayList<>();
+        this.referenceBlockHash = referenceBlockHash;
     }
 
     public List<D> getDataList() {
@@ -18,9 +19,5 @@ public class TransferDataBlock<D> implements Serializable {
 
     public String getHash() {
         return referenceBlockHash;
-    }
-
-    public void setHash(String hash) {
-        referenceBlockHash = hash;
     }
 }

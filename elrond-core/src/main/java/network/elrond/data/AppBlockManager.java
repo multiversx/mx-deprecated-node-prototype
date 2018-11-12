@@ -115,8 +115,7 @@ public class AppBlockManager {
                 List<TransferDataBlock<Transaction>> xTransactionBlockList = new ArrayList<>();
 
                 for (Integer shardNb = 0; shardNb < AppServiceProvider.getShardingService().getNumberOfShards(); shardNb++) {
-                    TransferDataBlock<Transaction> xDataBloc = new TransferDataBlock<>();
-                    xDataBloc.setHash(hashBlock);
+                    TransferDataBlock<Transaction> xDataBloc = new TransferDataBlock<>(hashBlock);
                     xTransactionBlockList.add(xDataBloc);
                 }
 
@@ -129,7 +128,7 @@ public class AppBlockManager {
                         .filter(transaction -> !ObjectUtil.isEqual(shard, transaction.getReceiverShard()))
                         .forEach(transaction -> {
                             Integer shardNb = transaction.getReceiverShard().getIndex();
-                            TransferDataBlock transferDataBlock = xTransactionBlockList.get(shardNb);
+                            TransferDataBlock<Transaction> transferDataBlock = xTransactionBlockList.get(shardNb);
                             transferDataBlock.getDataList().add(transaction);
                         });
 
@@ -172,8 +171,7 @@ public class AppBlockManager {
         ThreadUtil.submit(() -> {
             String hashBlock = AppServiceProvider.getSerializationService().getHashString(block);
 
-            TransferDataBlock<Receipt> receiptTransferDataBlock = new TransferDataBlock<>();
-            receiptTransferDataBlock.setHash(hashBlock);
+            TransferDataBlock<Receipt> receiptTransferDataBlock = new TransferDataBlock<>(hashBlock);
             List<Receipt> receiptsDataList = receiptTransferDataBlock.getDataList();
 
             receipts.stream().parallel().forEach(receipt -> {

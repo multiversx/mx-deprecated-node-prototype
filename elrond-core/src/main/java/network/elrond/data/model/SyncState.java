@@ -3,10 +3,10 @@ package network.elrond.data.model;
 import java.math.BigInteger;
 
 public class SyncState {
-    boolean syncRequired;
-    BigInteger localBlockIndex;
-    BigInteger remoteBlockIndex;
-    boolean valid;
+    private boolean syncRequired;
+    private BigInteger localBlockIndex;
+    private BigInteger remoteBlockIndex;
+    private boolean valid;
 
     public SyncState(){
         syncRequired = false;

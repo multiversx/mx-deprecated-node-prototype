@@ -7,9 +7,9 @@ import java.util.List;
 public class Receipt implements Serializable {
 
     private String blockHash;
-    private String transactionHash;
-    private ReceiptStatus status;
-    private List<String> logs;
+    private final String transactionHash;
+    private final ReceiptStatus status;
+    private final List<String> logs;
 
     public Receipt(
             String transactionHash,
@@ -49,18 +49,6 @@ public class Receipt implements Serializable {
 
     public void setBlockHash(String blockHash) {
         this.blockHash = blockHash;
-    }
-
-    public void setTransactionHash(String transactionHash) {
-        this.transactionHash = transactionHash;
-    }
-
-    public void setStatus(ReceiptStatus status) {
-        this.status = status;
-    }
-
-    public void setLogs(List<String> logs) {
-        this.logs = logs;
     }
 
     @Override

@@ -12,7 +12,7 @@ public enum LocationType {
     BOTH(3);
 
     private final int locationIdx;
-    private final static Map<Integer, LocationType> map =
+    private final static Map<Integer, LocationType> MAP =
             stream(LocationType.values()).collect(toMap(leg -> leg.locationIdx, leg -> leg));
 
 
@@ -21,7 +21,7 @@ public enum LocationType {
     }
 
     public static LocationType valueOf(int locationIdx) {
-        return map.get(locationIdx);
+        return MAP.get(locationIdx);
     }
 
     public int getIndex() {

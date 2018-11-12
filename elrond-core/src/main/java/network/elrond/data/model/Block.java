@@ -16,22 +16,22 @@ import java.util.List;
  */
 public class Block implements Serializable {
     //block counter
-    protected BigInteger nonce;
+    private BigInteger nonce;
     //blob of data containing first part of sig
     private byte[] signature;
     //blob of data containing second part of sig
     private byte[] commitment;
     //listToTable of public keys used in signing. First is the leader that proposed the block
-    protected List<String> listPubKeys;
+    private List<String> listPubKeys;
     //previus block hash
-    protected byte[] prevBlockHash;
+    private byte[] prevBlockHash;
     //listToTable of transaction hashes included in block
-    protected List<byte[]> listTXHashes;
+    private List<byte[]> listTXHashes;
     //hashset of peers addresses included in block
-    protected List<String> peers;
+    private List<String> peers;
 
     //int shard ID
-    protected Shard shard;
+    private Shard shard;
     //app state hash
     protected byte[] appStateHash;
 

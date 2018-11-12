@@ -10,9 +10,9 @@ import java.io.Serializable;
 public class SecureObject<T> implements Serializable {
     private static final Logger logger = LogManager.getLogger(SecureObject.class);
 
-    private T object;
-    private Signature signature;
-    private byte[] publicKey;
+    private final T object;
+    private final Signature signature;
+    private final byte[] publicKey;
 
     public SecureObject(T object, Signature signature, byte[] publicKey) {
         logger.traceEntry("params: {} {} {}", object, signature, publicKey);
