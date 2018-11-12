@@ -8,16 +8,16 @@ import java.math.BigInteger;
 
 public interface BootstrapService {
 
-    //returns max block height from location
+    /** Returns max block height from location */
     BigInteger getCurrentBlockIndex(LocationType locationType, Blockchain blockchain);
 
-    //sets max block height in location
+    /** Sets max block height in location */
     void setCurrentBlockIndex(LocationType locationType, BigInteger height, Blockchain blockchain) throws Exception;
 
-    //gets the hash for the block height from location
+    /** Gets the hash for the block height from location */
     String getBlockHashFromIndex(BigInteger blockIndex, Blockchain blockchain) throws Exception;
 
-    //sets the hash for a block height in location
+    /** Sets the hash for a block height in location */
     void setBlockHashWithIndex(BigInteger blockIndex, String blockHash, Blockchain blockchain) throws Exception;
 
     ExecutionReport startFromGenesis(AppState state, AppContext context);
