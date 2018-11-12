@@ -12,12 +12,11 @@ public class AppP2PManager {
 
     private static final Logger logger = LogManager.getLogger(AppP2PManager.class);
 
-    private static AppP2PManager instance = new AppP2PManager();
+    private static final AppP2PManager INSTANCE = new AppP2PManager();
 
     public static AppP2PManager instance() {
-        return instance;
+        return INSTANCE;
     }
-
 
     public P2PBroadcastChannel subscribeToChannel(Application application, P2PBroadcastChannelName channelName, P2PChannelListener listener) {
         logger.traceEntry("params: {} {} {}", application, channelName, listener);

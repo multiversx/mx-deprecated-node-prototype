@@ -52,7 +52,6 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         return logger.traceExit(channel);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public HashSet<PeerAddress> getPeersOnChannel(P2PBroadcastChannel channel) {
         logger.traceEntry("params: {}", channel);
@@ -76,7 +75,6 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
         return logger.traceExit(totalPeers);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public HashSet<PeerAddress> getPeersOnChannel(P2PBroadcastChannel globalChannel, Integer destinationShard) {
         logger.traceEntry("params: {}", globalChannel);
@@ -89,7 +87,6 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
     }
 
 
-    @SuppressWarnings("unchecked")
     @Override
     public boolean publishToChannel(P2PBroadcastChannel channel, Serializable object, Integer destinationShard) {
         logger.traceEntry("params: {} {}", channel, object);
@@ -118,13 +115,11 @@ public class P2PBroadcastServiceImpl implements P2PBroadcastService {
 
 
     @Override
-	@SuppressWarnings("unchecked")
-    public boolean unsubscribeFromChannel(P2PBroadcastChannel channel) {
+	public boolean unsubscribeFromChannel(P2PBroadcastChannel channel) {
         logger.traceEntry("params: {}", channel);
 
         List<String> channelIds = getChannelIdentifiers(channel.getConnection(), channel.getName());
         P2PConnection connection = channel.getConnection();
-        PeerDHT dht = connection.getDht();
         boolean result = true;
 
         logger.trace("got connection...");

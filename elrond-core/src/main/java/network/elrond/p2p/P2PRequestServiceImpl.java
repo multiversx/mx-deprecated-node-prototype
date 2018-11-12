@@ -21,7 +21,6 @@ public class P2PRequestServiceImpl implements P2PRequestService {
     private static final Logger logger = LogManager.getLogger(P2PRequestServiceImpl.class);
 
     @Override
-    @SuppressWarnings("unchecked")
     public P2PRequestChannel createChannel(P2PConnection connection, Shard shard, P2PRequestChannelName channelName) {
         logger.traceEntry("params: {} {}", connection, channelName);
 
@@ -40,14 +39,12 @@ public class P2PRequestServiceImpl implements P2PRequestService {
         return logger.traceExit((P2PRequestChannel) null);
     }
 
-    @SuppressWarnings("unchecked")
     private void subscribeToChannel(P2PConnection connection, Shard shard, P2PRequestChannel channel) throws Exception {
         Number160 hash = Number160.createHash(channel.getChannelIdentifier(shard));
 
         logger.debug("Added self to request channel {}", channel.getChannelIdentifier(shard));
     }
 
-    @SuppressWarnings("unchecked")
     private HashSet<PeerAddress> getPeersOnChannel(P2PRequestChannel channel, Shard shard) {
         logger.traceEntry("params: {} {}", channel, shard);
         P2PConnection connection = channel.getConnection();
