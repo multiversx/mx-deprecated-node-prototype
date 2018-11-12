@@ -6,7 +6,7 @@ import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.TransactionsPool;
-import network.elrond.data.Transaction;
+import network.elrond.data.model.Transaction;
 import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.processor.impl.AbstractChannelTask;
 import network.elrond.service.AppServiceProvider;

@@ -1,4 +1,4 @@
-package network.elrond.data;
+package network.elrond.data.service;
 
 import network.elrond.account.Accounts;
 import network.elrond.application.AppContext;
@@ -8,6 +8,13 @@ import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.blockchain.SettingsType;
 import network.elrond.chronology.NTPClient;
 import network.elrond.core.Util;
+import network.elrond.data.BlockHeightMessage;
+import network.elrond.data.BlockUtil;
+import network.elrond.data.model.Block;
+import network.elrond.data.model.ExecutionReport;
+import network.elrond.data.model.LocationType;
+import network.elrond.data.model.SyncState;
+import network.elrond.data.model.Transaction;
 import network.elrond.p2p.P2PRequestChannelName;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.util.console.AsciiPrinter;

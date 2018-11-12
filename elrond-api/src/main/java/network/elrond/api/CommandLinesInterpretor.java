@@ -4,7 +4,7 @@ import network.elrond.core.ResponseObject;
 import network.elrond.core.Util;
 import network.elrond.crypto.PKSKPair;
 import network.elrond.crypto.PrivateKey;
-import network.elrond.data.BootstrapType;
+import network.elrond.data.model.BootstrapType;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.ShardingService;
 import org.apache.logging.log4j.LogManager;

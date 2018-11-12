@@ -2,6 +2,8 @@ package network.elrond.data;
 
 import junit.framework.TestCase;
 import network.elrond.core.Util;
+import network.elrond.data.model.Transaction;
+import network.elrond.data.service.SerializationService;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 import org.junit.After;

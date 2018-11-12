@@ -4,7 +4,8 @@ import network.elrond.account.AccountAddress;
 import network.elrond.core.ObjectUtil;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
-import network.elrond.data.Transaction;
+import network.elrond.data.model.Transaction;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,8 +1,8 @@
 package network.elrond.blockchain;
 
 import network.elrond.data.BaseBlockchainTest;
-import network.elrond.data.Block;
-import network.elrond.data.SerializationService;
+import network.elrond.data.model.Block;
+import network.elrond.data.service.SerializationService;
 import network.elrond.service.AppServiceProvider;
 import org.spongycastle.util.encoders.Base64;
 import org.junit.Test;

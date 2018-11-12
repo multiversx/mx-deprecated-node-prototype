@@ -1,4 +1,4 @@
-package network.elrond.data;
+package network.elrond.data.model;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

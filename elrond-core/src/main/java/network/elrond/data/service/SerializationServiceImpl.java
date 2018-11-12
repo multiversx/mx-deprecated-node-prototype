@@ -1,4 +1,4 @@
-package network.elrond.data;
+package network.elrond.data.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

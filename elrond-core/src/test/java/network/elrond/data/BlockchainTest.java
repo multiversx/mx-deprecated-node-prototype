@@ -2,6 +2,8 @@ package network.elrond.data;
 
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
+import network.elrond.data.model.Block;
+import network.elrond.data.service.SerializationService;
 import network.elrond.service.AppServiceProvider;
 import org.spongycastle.util.encoders.Base64;
 import org.junit.Assert;
@@ -74,7 +76,7 @@ public class BlockchainTest extends BaseBlockchainTest{
 
             Block _block = blocks.get(hash);
             Block block = AppServiceProvider.getBlockchainService().get(hash, blockchain, BlockchainUnitType.BLOCK);
-            Assert.assertEquals(block.nonce, _block.nonce);
+            Assert.assertEquals(block.getNonce(), _block.getNonce());
             String b1Js = AppServiceProvider.getSerializationService().encodeJSON(_block);
             String b2Js = AppServiceProvider.getSerializationService().encodeJSON(block);
             Assert.assertEquals(b1Js, b2Js);

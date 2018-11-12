@@ -1,7 +1,9 @@
-package network.elrond.data;
+package network.elrond.data.service;
 
 import network.elrond.blockchain.Blockchain;
 import network.elrond.crypto.PublicKey;
+import network.elrond.data.model.Block;
+import network.elrond.data.model.Transaction;
 
 import java.io.IOException;
 import java.math.BigInteger;

@@ -3,7 +3,7 @@ package network.elrond.sharding;
 import network.elrond.account.AccountAddress;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
-import network.elrond.data.Transaction;
+import network.elrond.data.model.Transaction;
 
 public interface ShardingService {
 

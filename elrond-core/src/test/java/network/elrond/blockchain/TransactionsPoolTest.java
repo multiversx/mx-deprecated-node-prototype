@@ -2,9 +2,9 @@ package network.elrond.blockchain;
 
 import junit.framework.TestCase;
 import network.elrond.core.Util;
-import network.elrond.data.Block;
 import network.elrond.data.BlockUtil;
-import network.elrond.data.Transaction;
+import network.elrond.data.model.Block;
+import network.elrond.data.model.Transaction;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;

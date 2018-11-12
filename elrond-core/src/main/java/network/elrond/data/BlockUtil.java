@@ -2,6 +2,8 @@ package network.elrond.data;
 
 import network.elrond.core.CollectionUtil;
 import network.elrond.core.Util;
+import network.elrond.data.model.Block;
+import network.elrond.data.model.Transaction;
 import network.elrond.service.AppServiceProvider;
 
 import java.util.ArrayList;

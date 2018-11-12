@@ -16,6 +16,14 @@ import network.elrond.core.Util;
 import network.elrond.crypto.MultiSignatureService;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
+import network.elrond.data.model.Block;
+import network.elrond.data.model.BlockReceipts;
+import network.elrond.data.model.ExecutionReport;
+import network.elrond.data.model.Receipt;
+import network.elrond.data.model.ReceiptStatus;
+import network.elrond.data.model.Transaction;
+import network.elrond.data.model.TransferDataBlock;
+import network.elrond.data.service.ExecutionService;
 import network.elrond.p2p.P2PBroadcastChannel;
 import network.elrond.p2p.P2PBroadcastChannelName;
 import network.elrond.service.AppServiceProvider;
@@ -211,7 +219,7 @@ public class AppBlockManager {
         block.setRoundIndex(round.getIndex());
         block.setTimestamp(round.getStartTimeStamp());
         logger.trace("done computing round and round start millis = calculated round start millis, round index = {}, time stamp = {}",
-                block.roundIndex, block.timestamp);
+                block.getRoundIndex(), block.getTimestamp());
 
         receipts = addTransactions(transactions, block, state);
         logger.trace("done added {} transactions to block", transactions.size());
@@ -361,8 +369,8 @@ public class AppBlockManager {
 
         //AppContext context = application.getContext();
 
-        block.listPubKeys.clear();
-        block.listPubKeys.add(Util.byteArrayToHexString(new PublicKey(privateKey).getValue()));
+        block.getListPublicKeys().clear();
+        block.getListPublicKeys().add(Util.byteArrayToHexString(new PublicKey(privateKey).getValue()));
         block.setCommitment(null);
         block.setSignature(null);
         logger.trace("set block's signature data to null!");

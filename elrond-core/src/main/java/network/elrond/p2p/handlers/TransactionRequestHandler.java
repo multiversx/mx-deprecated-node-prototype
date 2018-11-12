@@ -3,7 +3,7 @@ package network.elrond.p2p.handlers;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
-import network.elrond.data.Transaction;
+import network.elrond.data.model.Transaction;
 import network.elrond.p2p.P2PRequestMessage;
 import network.elrond.p2p.RequestHandler;
 import network.elrond.service.AppServiceProvider;

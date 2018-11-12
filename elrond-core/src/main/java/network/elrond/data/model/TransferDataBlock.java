@@ -1,4 +1,4 @@
-package network.elrond.data;
+package network.elrond.data.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package network.elrond.data;
+package network.elrond.data.model;
 
 import network.elrond.core.Util;
 import network.elrond.sharding.Shard;

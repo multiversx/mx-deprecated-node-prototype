@@ -5,7 +5,7 @@ import network.elrond.chronology.SubRound;
 import network.elrond.consensus.ConsensusData;
 import network.elrond.core.EventHandler;
 import network.elrond.core.Util;
-import network.elrond.data.SyncState;
+import network.elrond.data.model.SyncState;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.AppShardingManager;
 import org.apache.logging.log4j.LogManager;

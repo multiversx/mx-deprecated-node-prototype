@@ -1,4 +1,4 @@
-package network.elrond.data;
+package network.elrond.data.service;
 
 import network.elrond.account.Accounts;
 import network.elrond.account.AccountsManager;
@@ -11,6 +11,10 @@ import network.elrond.chronology.ChronologyService;
 import network.elrond.chronology.Round;
 import network.elrond.core.Util;
 import network.elrond.crypto.MultiSignatureService;
+import network.elrond.data.BlockUtil;
+import network.elrond.data.model.Block;
+import network.elrond.data.model.ExecutionReport;
+import network.elrond.data.model.Transaction;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 import network.elrond.sharding.ShardOperation;
@@ -128,7 +132,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             //check timestamp and round
             if (!validateBlockTimestampRound(blockchain, block)) {
                 blockExecutionReport.ko(String.format("Timestamp and round mismatch! Block nonce: %d, round index: %d, timestamp %d, genesis timestamp: %d",
-                        block.getNonce().longValue(), block.roundIndex, block.getTimestamp(), blockchain.getGenesisBlock().getTimestamp()));
+                        block.getNonce().longValue(), block.getRoundIndex(), block.getTimestamp(), blockchain.getGenesisBlock().getTimestamp()));
                 logger.trace("Block process FAILED!");
                 return logger.traceExit(blockExecutionReport);
             }

@@ -9,8 +9,8 @@ import network.elrond.account.AccountState;
 import network.elrond.account.Accounts;
 import network.elrond.application.AppState;
 import network.elrond.core.Util;
-import network.elrond.data.Block;
-import network.elrond.data.Transaction;
+import network.elrond.data.model.Block;
+import network.elrond.data.model.Transaction;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 

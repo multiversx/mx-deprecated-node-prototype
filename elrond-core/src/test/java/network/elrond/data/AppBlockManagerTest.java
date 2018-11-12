@@ -15,6 +15,11 @@ import network.elrond.core.Util;
 import network.elrond.crypto.MultiSignatureService;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
+import network.elrond.data.model.Block;
+import network.elrond.data.model.BlockReceipts;
+import network.elrond.data.model.BootstrapType;
+import network.elrond.data.model.ExecutionReport;
+import network.elrond.data.model.Transaction;
 import network.elrond.p2p.P2PConnection;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
@@ -426,7 +431,7 @@ public class AppBlockManagerTest {
         BlockReceipts blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(), state);
         Block block = blockReceiptsPair.getBlock();
         Assert.assertTrue("Block cannot be null", block != null);
-        Assert.assertTrue("PrevBlockHash cannot be null", block.prevBlockHash != null);
+        Assert.assertTrue("PrevBlockHash cannot be null", block.getPrevBlockHash() != null);
         Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.isEmptyBlock(block));
     }
 
@@ -491,7 +496,7 @@ public class AppBlockManagerTest {
         BlockReceipts blockReceiptsPair = appBlockManager.composeBlock(Arrays.asList(), state);
         Block block = blockReceiptsPair.getBlock();
         Assert.assertTrue("Block cannot be null", block != null);
-        Assert.assertTrue("PrevBlockHash cannot be null", block.prevBlockHash != null);
+        Assert.assertTrue("PrevBlockHash cannot be null", block.getPrevBlockHash() != null);
         Assert.assertTrue("ListOfTxHashes does not have exactly 0 hash", BlockUtil.getTransactionsCount(block) == 0);
     }
 

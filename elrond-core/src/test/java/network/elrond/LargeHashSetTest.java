@@ -1,7 +1,7 @@
 package network.elrond;
 
 import junit.framework.TestCase;
-import network.elrond.data.Transaction;
+import network.elrond.data.model.Transaction;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 import org.apache.commons.collections4.map.LRUMap;

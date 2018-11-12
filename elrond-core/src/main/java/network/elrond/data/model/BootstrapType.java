@@ -1,4 +1,4 @@
-package network.elrond.data;
+package network.elrond.data.model;
 
 public enum BootstrapType {
     START_FROM_SCRATCH,

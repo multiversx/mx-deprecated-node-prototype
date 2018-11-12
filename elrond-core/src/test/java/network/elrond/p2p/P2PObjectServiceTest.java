@@ -8,7 +8,7 @@ import network.elrond.ContextCreator;
 import network.elrond.application.AppContext;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
-import network.elrond.data.BootstrapType;
+import network.elrond.data.model.BootstrapType;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 

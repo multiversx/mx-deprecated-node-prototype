@@ -1,8 +1,13 @@
-package network.elrond.data;
+package network.elrond.data.service;
 
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
+import network.elrond.data.model.Block;
+import network.elrond.data.model.ExecutionReport;
+import network.elrond.data.model.LocationType;
+import network.elrond.data.model.SyncState;
+import network.elrond.data.model.Transaction;
 
 import java.math.BigInteger;
 

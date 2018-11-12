@@ -1,4 +1,4 @@
-package network.elrond.data;
+package network.elrond.data.service;
 
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
@@ -6,6 +6,9 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PublicKey;
 import network.elrond.crypto.Signature;
 import network.elrond.crypto.SignatureService;
+import network.elrond.data.BlockUtil;
+import network.elrond.data.model.Block;
+import network.elrond.data.model.Transaction;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 import network.elrond.util.console.AsciiPrinter;

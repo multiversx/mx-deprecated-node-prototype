@@ -1,8 +1,8 @@
 package network.elrond.blockchain;
 
-import network.elrond.data.Block;
-import network.elrond.data.Receipt;
-import network.elrond.data.Transaction;
+import network.elrond.data.model.Block;
+import network.elrond.data.model.Receipt;
+import network.elrond.data.model.Transaction;
 
 import java.math.BigInteger;
 

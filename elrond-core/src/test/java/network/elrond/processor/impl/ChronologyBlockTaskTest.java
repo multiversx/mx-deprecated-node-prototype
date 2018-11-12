@@ -6,7 +6,7 @@ import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainContext;
 import network.elrond.chronology.ChronologyService;
 import network.elrond.core.ThreadUtil;
-import network.elrond.data.Block;
+import network.elrond.data.model.Block;
 import network.elrond.processor.AppTask;
 import network.elrond.processor.impl.executor.ChronologyBlockTask;
 import network.elrond.processor.impl.initialization.NtpClientInitializerProcessor;

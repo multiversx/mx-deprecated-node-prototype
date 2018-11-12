@@ -1,7 +1,7 @@
 package network.elrond.blockchain;
 
 import network.elrond.data.BaseBlockchainTest;
-import network.elrond.data.Block;
+import network.elrond.data.model.Block;
 import network.elrond.p2p.P2PConnection;
 import org.junit.Assert;
 import org.junit.Before;

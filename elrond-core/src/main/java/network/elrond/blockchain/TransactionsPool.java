@@ -1,8 +1,9 @@
 package network.elrond.blockchain;
 
 import network.elrond.core.Util;
-import network.elrond.data.Block;
 import network.elrond.data.BlockUtil;
+import network.elrond.data.model.Block;
+
 import org.apache.commons.collections4.map.LRUMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
