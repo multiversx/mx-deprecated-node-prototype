@@ -23,13 +23,15 @@ public class SignatureServiceSchnorrImpl implements SignatureService {
 
     /**
      * Generates the signature according to Schnorr signing algorithm:
-     * 1. Generate random r in range [1, curveOrder - 1]
-     * 2. Compute commitment (point) R = r*G, where G is the base point on the selected curve
-     * 3. Compute the challenge c = H(R, publicKey, message)
-     * 4. if c = 0 mod(order), start again from 1
-     * 5. else compute s = r - c * privateKey mod(order)
-     * 6. if s = 0 start from 1
-     * 7. else return signature (c, s)
+     * <ol>
+     * <li> Generate random r in range [1, curveOrder - 1] </li>
+     * <li> Compute commitment (point) R = r*G, where G is the base point on the selected curve </li>
+     * <li> Compute the challenge c = H(R, publicKey, message) </li>
+     * <li> if c = 0 mod(order), start again from 1 </li>
+     * <li> else compute s = r - c * privateKey mod(order) </li>
+     * <li> if s = 0 start from 1 </li>
+     * <li> else return signature (c, s) </li>
+     * </ol>
      *
      * @param message    the message to sign as a byte array
      * @param privateKey the private key used to sign
@@ -125,17 +127,22 @@ public class SignatureServiceSchnorrImpl implements SignatureService {
     }
 
     /**
-     * Verifies the signature (c, s) on a message m, according to Schnorr verification algorithm:
-     * 1. check if c, s is in [1, order-1]
-     * 2. Compute R = s*G + c*publicKey
-     * 3. if R = O, return false
-     * 4. else calculate c2 = H(R, publicKey, message)
-     * 5. return c2 == c
-     *
-     * @param message   the message as byte array, on which the signature was computed
-     * @param publicKey the public key to verify signature against
-     * @return true if the public key verifies the signature and message, false otherwise
-     */
+	 * Verifies the signature (c, s) on a message m, according to Schnorr verification algorithm:
+	 * <ol>
+	 * <li>check if c, s is in [1, order-1]</li>
+	 * <li>Compute R = s*G + c*publicKey</li>
+	 * <li>if R = O, return false</li>
+	 * <li>else calculate c2 = H(R, publicKey, message)</li>
+	 * <li>return c2 == c</li>
+	 * </ol>
+	 *
+	 * @param message
+	 *            the message as byte array, on which the signature was computed
+	 * @param publicKey
+	 *            the public key to verify signature against
+	 * @return true if the public key verifies the signature and message, false
+	 *         otherwise
+	 */
     @Override
     public boolean verifySignature(byte[] signature, byte[] challenge, byte[] message, byte[] publicKey) {
         logger.traceEntry("params: {} {} {} {}", signature, challenge, message, publicKey);
