@@ -6,7 +6,7 @@ import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.data.model.Receipt;
 import network.elrond.data.model.TransferDataBlock;
-import network.elrond.p2p.P2PBroadcastChannelName;
+import network.elrond.p2p.model.P2PBroadcastChannelName;
 import network.elrond.processor.impl.AbstractChannelTask;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;

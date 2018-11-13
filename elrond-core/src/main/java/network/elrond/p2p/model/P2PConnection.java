@@ -1,4 +1,4 @@
-package network.elrond.p2p;
+package network.elrond.p2p.model;
 
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.p2p.Peer;
@@ -6,6 +6,8 @@ import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 import network.elrond.core.ObjectUtil;
 import network.elrond.core.Util;
+import network.elrond.p2p.P2PChannelListener;
+import network.elrond.p2p.P2PRequestObjectHandler;
 import network.elrond.p2p.handlers.BroadcastStructuredHandler;
 import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.Logger;

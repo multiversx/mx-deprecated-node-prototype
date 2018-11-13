@@ -1,4 +1,4 @@
-package network.elrond.p2p;
+package network.elrond.p2p.service;
 
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
@@ -10,6 +10,8 @@ import net.tomp2p.peers.Number640;
 import net.tomp2p.storage.Data;
 import network.elrond.application.AppContext;
 import network.elrond.p2p.handlers.BroadcastStructuredHandler;
+import network.elrond.p2p.model.P2PConnection;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

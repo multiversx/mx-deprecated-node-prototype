@@ -14,9 +14,9 @@ import net.tomp2p.utils.ConcurrentCacheMap;
 import net.tomp2p.utils.Utils;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.data.BlockHeightMessage;
-import network.elrond.p2p.P2PConnection;
-import network.elrond.p2p.P2PIntroductionMessage;
-import network.elrond.p2p.P2PReplyIntroductionMessage;
+import network.elrond.p2p.model.P2PConnection;
+import network.elrond.p2p.model.P2PIntroductionMessage;
+import network.elrond.p2p.model.P2PReplyIntroductionMessage;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.Logger;
 

@@ -1,7 +1,9 @@
-package network.elrond.p2p;
+package network.elrond.p2p.model;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import network.elrond.p2p.P2PChannelListener;
 
 public class P2PBroadcastChannel {
 

@@ -2,6 +2,10 @@ package network.elrond.p2p;
 
 import junit.framework.TestCase;
 import net.tomp2p.dht.PeerDHT;
+import network.elrond.p2p.model.P2PBroadcastChannel;
+import network.elrond.p2p.model.P2PBroadcastChannelName;
+import network.elrond.p2p.model.P2PConnection;
+import network.elrond.p2p.service.P2PBroadcastService;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 import org.junit.Test;

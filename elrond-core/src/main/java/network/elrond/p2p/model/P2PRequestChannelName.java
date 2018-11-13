@@ -1,6 +1,7 @@
-package network.elrond.p2p;
+package network.elrond.p2p.model;
 
 import network.elrond.blockchain.BlockchainUnitType;
+import network.elrond.p2p.RequestHandler;
 import network.elrond.p2p.handlers.*;
 
 public enum P2PRequestChannelName {

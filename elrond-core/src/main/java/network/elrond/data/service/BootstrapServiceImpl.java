@@ -15,7 +15,7 @@ import network.elrond.data.model.ExecutionReport;
 import network.elrond.data.model.LocationType;
 import network.elrond.data.model.SyncState;
 import network.elrond.data.model.Transaction;
-import network.elrond.p2p.P2PRequestChannelName;
+import network.elrond.p2p.model.P2PRequestChannelName;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.util.console.AsciiPrinter;
 

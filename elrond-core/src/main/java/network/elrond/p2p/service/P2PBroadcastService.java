@@ -1,7 +1,10 @@
-package network.elrond.p2p;
+package network.elrond.p2p.service;
 
 
 import net.tomp2p.peers.PeerAddress;
+import network.elrond.p2p.model.P2PBroadcastChannel;
+import network.elrond.p2p.model.P2PBroadcastChannelName;
+import network.elrond.p2p.model.P2PConnection;
 
 import java.io.Serializable;
 import java.util.HashSet;

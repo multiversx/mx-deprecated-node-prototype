@@ -10,6 +10,7 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.p2p.*;
+import network.elrond.p2p.model.*;
 import network.elrond.sharding.Shard;
 import network.elrond.util.time.ElrondSystemTimerImpl;
 

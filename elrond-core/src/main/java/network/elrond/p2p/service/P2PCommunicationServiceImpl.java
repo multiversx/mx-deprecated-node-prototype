@@ -1,7 +1,9 @@
-package network.elrond.p2p;
+package network.elrond.p2p.service;
 
 
 import network.elrond.core.Util;
+import network.elrond.p2p.model.PingResponse;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

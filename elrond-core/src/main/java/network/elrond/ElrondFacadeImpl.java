@@ -17,6 +17,7 @@ import network.elrond.data.model.Block;
 import network.elrond.data.model.Receipt;
 import network.elrond.data.model.Transaction;
 import network.elrond.p2p.*;
+import network.elrond.p2p.model.*;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.AppShardingManager;
 import network.elrond.sharding.Shard;

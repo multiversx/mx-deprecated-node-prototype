@@ -4,7 +4,7 @@ import network.elrond.account.AbstractPersistenceUnit;
 import network.elrond.account.PersistenceUnit;
 import network.elrond.core.Util;
 import network.elrond.data.model.Block;
-import network.elrond.p2p.P2PConnection;
+import network.elrond.p2p.model.P2PConnection;
 import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

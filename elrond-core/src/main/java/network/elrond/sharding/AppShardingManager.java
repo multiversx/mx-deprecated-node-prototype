@@ -2,8 +2,8 @@ package network.elrond.sharding;
 
 import net.tomp2p.peers.PeerAddress;
 import network.elrond.application.AppState;
-import network.elrond.p2p.P2PBroadcastChannel;
-import network.elrond.p2p.P2PBroadcastChannelName;
+import network.elrond.p2p.model.P2PBroadcastChannel;
+import network.elrond.p2p.model.P2PBroadcastChannelName;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

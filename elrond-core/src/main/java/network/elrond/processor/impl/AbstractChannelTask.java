@@ -4,7 +4,7 @@ import network.elrond.Application;
 import network.elrond.application.AppState;
 import network.elrond.core.ThreadUtil;
 import network.elrond.p2p.AppP2PManager;
-import network.elrond.p2p.P2PBroadcastChannelName;
+import network.elrond.p2p.model.P2PBroadcastChannelName;
 import network.elrond.processor.AppTask;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

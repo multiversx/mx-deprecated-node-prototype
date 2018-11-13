@@ -1,7 +1,9 @@
-package network.elrond.p2p;
+package network.elrond.p2p.service;
 
 
 import network.elrond.application.AppContext;
+import network.elrond.p2p.model.P2PConnection;
+
 import java.io.IOException;
 import java.io.Serializable;
 

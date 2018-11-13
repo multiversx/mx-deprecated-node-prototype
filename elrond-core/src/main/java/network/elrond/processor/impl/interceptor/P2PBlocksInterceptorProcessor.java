@@ -8,7 +8,7 @@ import network.elrond.blockchain.BlockchainService;
 import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.Util;
 import network.elrond.data.model.Block;
-import network.elrond.p2p.P2PBroadcastChannelName;
+import network.elrond.p2p.model.P2PBroadcastChannelName;
 import network.elrond.processor.impl.AbstractChannelTask;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;

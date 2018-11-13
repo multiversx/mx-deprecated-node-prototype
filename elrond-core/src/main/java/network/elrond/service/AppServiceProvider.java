@@ -20,6 +20,14 @@ import network.elrond.data.service.SerializationServiceImpl;
 import network.elrond.data.service.TransactionService;
 import network.elrond.data.service.TransactionServiceImpl;
 import network.elrond.p2p.*;
+import network.elrond.p2p.service.P2PBroadcastService;
+import network.elrond.p2p.service.P2PBroadcastServiceImpl;
+import network.elrond.p2p.service.P2PCommunicationService;
+import network.elrond.p2p.service.P2PCommunicationServiceImpl;
+import network.elrond.p2p.service.P2PConnectionService;
+import network.elrond.p2p.service.P2PConnectionServiceImpl;
+import network.elrond.p2p.service.P2PRequestService;
+import network.elrond.p2p.service.P2PRequestServiceImpl;
 import network.elrond.sharding.ShardingService;
 import network.elrond.sharding.ShardingServiceImpl;
 

@@ -9,6 +9,7 @@ import network.elrond.application.AppContext;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.data.model.BootstrapType;
+import network.elrond.p2p.model.P2PConnection;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 

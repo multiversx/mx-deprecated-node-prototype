@@ -5,7 +5,7 @@ import net.tomp2p.peers.PeerAddress;
 import network.elrond.Application;
 import network.elrond.application.AppState;
 import network.elrond.core.ThreadUtil;
-import network.elrond.p2p.P2PConnection;
+import network.elrond.p2p.model.P2PConnection;
 import network.elrond.processor.AppTask;
 import network.elrond.util.console.AsciiTable;
 

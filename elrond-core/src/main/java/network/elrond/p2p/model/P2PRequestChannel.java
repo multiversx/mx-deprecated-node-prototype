@@ -1,5 +1,6 @@
-package network.elrond.p2p;
+package network.elrond.p2p.model;
 
+import network.elrond.p2p.P2PRequestObjectHandler;
 import network.elrond.sharding.Shard;
 
 

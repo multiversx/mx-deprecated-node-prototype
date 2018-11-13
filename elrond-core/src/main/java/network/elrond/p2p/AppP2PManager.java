@@ -2,6 +2,9 @@ package network.elrond.p2p;
 
 import network.elrond.Application;
 import network.elrond.application.AppState;
+import network.elrond.p2p.model.P2PBroadcastChannel;
+import network.elrond.p2p.model.P2PBroadcastChannelName;
+import network.elrond.p2p.model.P2PConnection;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,7 +49,8 @@ public class AppP2PManager {
                 logger.trace("request == null");
                 return;
             }
-            T object = (T) request.getPayload();
+            @SuppressWarnings("unchecked")
+			T object = (T) request.getPayload();
             queue.put(object);
 
         });

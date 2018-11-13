@@ -1,4 +1,4 @@
-package network.elrond.p2p;
+package network.elrond.p2p.model;
 
 public class PingResponse {
     private long responseTimeMs;

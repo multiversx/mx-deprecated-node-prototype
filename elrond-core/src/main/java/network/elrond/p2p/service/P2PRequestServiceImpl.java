@@ -1,4 +1,4 @@
-package network.elrond.p2p;
+package network.elrond.p2p.service;
 
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.futures.FutureDirect;
@@ -6,6 +6,11 @@ import net.tomp2p.p2p.Peer;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 import network.elrond.core.ThreadUtil;
+import network.elrond.p2p.DirectBaseFutureListener;
+import network.elrond.p2p.model.P2PConnection;
+import network.elrond.p2p.model.P2PRequestChannel;
+import network.elrond.p2p.model.P2PRequestChannelName;
+import network.elrond.p2p.model.P2PRequestMessage;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;

@@ -1,6 +1,6 @@
 package network.elrond.blockchain;
 
-import network.elrond.p2p.P2PConnection;
+import network.elrond.p2p.model.P2PConnection;
 
 public class AppPersistenceServiceImpl extends BlockchainServiceImpl implements AppPersistenceService {
 

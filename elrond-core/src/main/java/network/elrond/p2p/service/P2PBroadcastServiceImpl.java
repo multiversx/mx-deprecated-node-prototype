@@ -1,8 +1,13 @@
-package network.elrond.p2p;
+package network.elrond.p2p.service;
 
 import net.tomp2p.dht.PeerDHT;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.peers.PeerAddress;
+import network.elrond.p2p.model.P2PBroadcastChannel;
+import network.elrond.p2p.model.P2PBroadcastChannelName;
+import network.elrond.p2p.model.P2PBroadcastMessage;
+import network.elrond.p2p.model.P2PChannelType;
+import network.elrond.p2p.model.P2PConnection;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
