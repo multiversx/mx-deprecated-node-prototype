@@ -24,7 +24,7 @@ public abstract class AbstractPersistenceUnit<K, V> implements PersistenceUnit<K
     protected final String databasePath;
     protected DB database;
 
-    private final Map<K, V> cache = Collections.synchronizedMap(new LRUMap<>(0, MAX_ENTRIES));
+    private final Map<K, V> cache = Collections.synchronizedMap(new LRUMap<>(MAX_ENTRIES));
 
     private static final Logger logger = LogManager.getLogger(AbstractPersistenceUnit.class);
 

@@ -11,7 +11,7 @@ import network.elrond.db.ByteArrayWrapper;
 public class HashUtil {
 
     private static final int MAX_ENTRIES = 100; // Should contain most commonly hashed values
-    private static final Map<ByteArrayWrapper, byte[]> SHA3_CACHE = Collections.synchronizedMap(new LRUMap<>(0, MAX_ENTRIES));
+    private static final Map<ByteArrayWrapper, byte[]> SHA3_CACHE = Collections.synchronizedMap(new LRUMap<>(MAX_ENTRIES));
 
     public static byte[] sha3(byte[] input) {
         ByteArrayWrapper inputByteArray = new ByteArrayWrapper(input);
