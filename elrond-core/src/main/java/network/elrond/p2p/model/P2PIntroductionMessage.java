@@ -5,8 +5,8 @@ import net.tomp2p.peers.PeerAddress;
 import java.io.Serializable;
 
 public class P2PIntroductionMessage implements Serializable {
-    private Integer shardId;
-    PeerAddress peerAddress;
+    private final Integer shardId;
+    private final PeerAddress peerAddress;
 
     public P2PIntroductionMessage(PeerAddress peerAddress, Integer shardId) {
         this.shardId = shardId;

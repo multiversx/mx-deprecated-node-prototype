@@ -6,8 +6,8 @@ import network.elrond.sharding.Shard;
 
 public class P2PRequestChannel {
 
-    private P2PRequestChannelName name;
-    private P2PConnection connection;
+    private final P2PRequestChannelName name;
+    private final P2PConnection connection;
     private P2PRequestObjectHandler<?> handler;
 
 
@@ -20,16 +20,8 @@ public class P2PRequestChannel {
         return name;
     }
 
-    public void setName(P2PRequestChannelName name) {
-        this.name = name;
-    }
-
     public P2PConnection getConnection() {
         return connection;
-    }
-
-    public void setConnection(P2PConnection connection) {
-        this.connection = connection;
     }
 
     public P2PRequestObjectHandler<?> getHandler() {

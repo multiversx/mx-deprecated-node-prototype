@@ -86,7 +86,7 @@ public class P2PConnection {
                 continue;
             }
 
-            P2PRequestObjectHandler handler = chanel.getHandler();
+            P2PRequestObjectHandler<?> handler = chanel.getHandler();
             return handler.get(request);
 
         }

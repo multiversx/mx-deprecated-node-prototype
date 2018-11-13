@@ -7,9 +7,9 @@ import network.elrond.p2p.P2PChannelListener;
 
 public class P2PBroadcastChannel {
 
-    private P2PBroadcastChannelName name;
-    private P2PConnection connection;
-    private List<P2PChannelListener> listeners = new ArrayList<>();
+    private final P2PBroadcastChannelName name;
+    private final P2PConnection connection;
+    private final List<P2PChannelListener> listeners = new ArrayList<>();
 
     public P2PBroadcastChannel(P2PBroadcastChannelName chanelName, P2PConnection connection) {
         this.name = chanelName;
@@ -20,24 +20,12 @@ public class P2PBroadcastChannel {
         return name;
     }
 
-    public void setName(P2PBroadcastChannelName name) {
-        this.name = name;
-    }
-
     public P2PConnection getConnection() {
         return connection;
     }
 
-    public void setConnection(P2PConnection connection) {
-        this.connection = connection;
-    }
-
     public List<P2PChannelListener> getListeners() {
         return listeners;
-    }
-
-    public void setListeners(List<P2PChannelListener> listeners) {
-        this.listeners = listeners;
     }
 
     public String getChannelIdentifier(Integer destinationShard) {

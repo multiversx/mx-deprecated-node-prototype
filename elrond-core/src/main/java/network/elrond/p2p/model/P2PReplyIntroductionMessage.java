@@ -9,9 +9,10 @@ import java.util.List;
 import java.util.Map;
 
 public class P2PReplyIntroductionMessage implements Serializable {
-    private List<P2PIntroductionMessage> bucketList = new ArrayList<>();
+    private final List<P2PIntroductionMessage> bucketList;
 
     public P2PReplyIntroductionMessage(Map<Integer, HashSet<PeerAddress>> bucketPeers) {
+    	bucketList = new ArrayList<>();
         for (Integer shardId : bucketPeers.keySet()) {
             for (PeerAddress peerAddress : bucketPeers.get(shardId)) {
                 bucketList.add(new P2PIntroductionMessage(peerAddress, shardId));
