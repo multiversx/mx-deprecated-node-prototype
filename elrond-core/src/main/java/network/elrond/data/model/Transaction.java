@@ -42,6 +42,11 @@ public class Transaction implements Serializable {
 
     private Shard receiverShard;
 
+    //Implicit constructor for serializing-deserializing
+    public Transaction(){
+
+    }
+
     /**
      * Explicit constructor
      *

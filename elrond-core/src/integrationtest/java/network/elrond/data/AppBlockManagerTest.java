@@ -1,6 +1,7 @@
 package network.elrond.data;
 
 import junit.framework.TestCase;
+import network.elrond.Application;
 import network.elrond.UtilTest;
 import network.elrond.account.*;
 import network.elrond.application.AppContext;
@@ -20,7 +21,9 @@ import network.elrond.data.model.BlockReceipts;
 import network.elrond.data.model.BootstrapType;
 import network.elrond.data.model.ExecutionReport;
 import network.elrond.data.model.Transaction;
-import network.elrond.p2p.model.P2PConnection;
+import network.elrond.p2p.AppP2PManager;
+import network.elrond.p2p.RequestHandler;
+import network.elrond.p2p.model.*;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 import network.elrond.sharding.ShardingServiceImpl;
@@ -36,6 +39,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 
 public class AppBlockManagerTest {
     static AppBlockManager appBlockManager;
@@ -74,9 +78,11 @@ public class AppBlockManagerTest {
         context.setStorageBasePath("producer");
         context.setBootstrapType(BootstrapType.START_FROM_SCRATCH);
         context.setPrivateKey(new PrivateKey("PRODUCER"));
+        Application application = new Application(context);
 
         //Block blk0 = new Block();
         state = new AppState();
+        application.setState(state);
 
         if (connection == null) {
             connection = AppServiceProvider.getP2PConnectionService().createConnection(context);
@@ -115,6 +121,23 @@ public class AppBlockManagerTest {
         accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(accountsContext.getDatabasePath()));
 
         appBlockManager = new AppBlockManager();
+
+        //broadcast channels
+        ArrayBlockingQueue<Object> queue = AppP2PManager.instance().subscribeToChannel(application, P2PBroadcastChannelName.BLOCK);
+
+        //request channels
+        for (P2PRequestChannelName requestChannel : P2PRequestChannelName.values()) {
+            P2PRequestChannel channel = AppServiceProvider.getP2PRequestService().createChannel(connection, new Shard(0), requestChannel);
+            RequestHandler<?, P2PRequestMessage> requestHandler = requestChannel.getHandler();
+
+            channel.setHandler(request -> requestHandler.onRequest(state, request));
+            state.addChannel(channel);
+            logger.info("added request handler for {}", requestChannel);
+        }
+
+
+        //add current peer on shard bucket
+        state.getConnection().addPeerOnShard(state.getConnection().getPeer().peerAddress(), state.getShard().getIndex());
     }
 
     @After

@@ -3,12 +3,14 @@ package network.elrond.p2p;
 import net.tomp2p.peers.PeerAddress;
 import network.elrond.Application;
 import network.elrond.application.AppContext;
+import network.elrond.application.AppState;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.p2p.model.P2PBroadcastChannel;
 import network.elrond.p2p.model.P2PBroadcastChannelName;
 import network.elrond.p2p.model.P2PBroadcastMessage;
 import network.elrond.processor.AppTasks;
 import network.elrond.service.AppServiceProvider;
+import network.elrond.sharding.Shard;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -28,6 +30,8 @@ public class P2PAppBroadcastTest {
         AppContext context = createServer(6000);
         context.setPrivateKey(new PrivateKey("seed"));
         Application app = new Application(context);
+        app.setState(new AppState());
+        app.getState().setShard(new Shard(0));
         AppTasks.INITIALIZE_PUBLIC_PRIVATE_KEYS.process(app);
         AppTasks.INIT_P2P_CONNECTION.process(app);
         AppTasks.INIT_SHARDING.process(app);
@@ -58,6 +62,8 @@ public class P2PAppBroadcastTest {
         AppContext context = createServer(6000);
         context.setPrivateKey(new PrivateKey("seed"));
         Application app = new Application(context);
+        app.setState(new AppState());
+        app.getState().setShard(new Shard(0));
         AppTasks.INITIALIZE_PUBLIC_PRIVATE_KEYS.process(app);
         AppTasks.INIT_P2P_CONNECTION.process(app);
         AppTasks.INIT_SHARDING.process(app);

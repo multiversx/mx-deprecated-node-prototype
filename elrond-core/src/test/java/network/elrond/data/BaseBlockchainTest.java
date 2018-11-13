@@ -2,6 +2,12 @@ package network.elrond.data;
 
 import network.elrond.blockchain.BlockchainContext;
 import network.elrond.blockchain.BlockchainUnitType;
+import network.elrond.p2p.RequestHandler;
+import network.elrond.p2p.model.P2PConnection;
+import network.elrond.p2p.model.P2PRequestChannel;
+import network.elrond.p2p.model.P2PRequestChannelName;
+import network.elrond.p2p.model.P2PRequestMessage;
+import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 
 import java.io.IOException;
@@ -21,6 +27,7 @@ public abstract class BaseBlockchainTest {
         BlockchainContext context = new BlockchainContext();
 
         context.setShard(new Shard(0));
+        context.setConnection(new P2PConnection("", null, null));
 
         context.setDatabasePath(BlockchainUnitType.BLOCK, BLOCKCHAIN_BLOCK_DATA_TEST_PATH + currentDir);
         context.setDatabasePath(BlockchainUnitType.TRANSACTION, BLOCKCHAIN_TRANSACTION_DATA_TEST_PATH + currentDir);

@@ -94,7 +94,7 @@ public class TransactionsPoolTest {
 
         List<String> list = new ArrayList<>();
 
-        int max = 100000;
+        int max = 10000;
         int percent = 0;
         int oldPercent = 0;
 

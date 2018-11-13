@@ -18,6 +18,7 @@ import network.elrond.data.service.SerializationService;
 import network.elrond.data.service.TransactionService;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
+import network.elrond.sharding.ShardingServiceImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -206,6 +207,7 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         PublicKey publicKeyReceiver = new PublicKey(privateKeyReceiver);
 
         Block block = new Block();
+        block.setShard(new Shard(0));
         String blockHashStr = serializationService.getHashString(block);
         byte[] blockHash = serializationService.getHash(block);
 
@@ -361,9 +363,9 @@ public class ExecutionServiceTest extends BaseBlockchainTest {
         }
     }
 
-    @Test
     public void testProcessBlockOK() {
         UtilTest.createDummyGenesisBlock(blockchain);
+        ShardingServiceImpl.MAX_ACTIVE_SHARDS_CONT = 1;
 
         Block block = generateSignedBlockWithTransactions(100000, 100, 100);
         //execute

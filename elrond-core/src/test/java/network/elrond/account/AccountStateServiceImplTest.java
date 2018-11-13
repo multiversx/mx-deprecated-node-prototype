@@ -5,6 +5,7 @@ import network.elrond.application.AppState;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
+import network.elrond.p2p.model.P2PConnection;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 import org.junit.Assert;
@@ -134,12 +135,16 @@ public class AccountStateServiceImplTest {
         AccountsContext accountsContext = new AccountsContext();
         AppState appState = new AppState();
         AppContext appContext = new AppContext();
+        appContext.setPort(4000);
+        appContext.setMasterPeerPort(4000);
+        appContext.setNodeName("node");
         PrivateKey privateKey = new PrivateKey();
         PublicKey publicKey = new PublicKey(new PrivateKey());
         appContext.setPrivateKey(privateKey);
         Shard shard = AppServiceProvider.getShardingService().getShard(publicKey.getValue());
         accountsContext.setShard(shard);
         appState.setShard(shard);
+        appState.setConnection( AppServiceProvider.getP2PConnectionService().createConnection(appContext));
 
         accounts = new Accounts(accountsContext, new AccountsPersistenceUnit<>(""));
         String initialAddress = Util.byteArrayToHexString(publicKey.getValue());

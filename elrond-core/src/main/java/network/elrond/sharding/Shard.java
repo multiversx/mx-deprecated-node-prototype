@@ -6,6 +6,9 @@ import java.util.Objects;
 public class Shard implements Serializable {
     private Integer index = -1;
 
+    public Shard(){
+    }
+
     public Shard(Integer index) {
         this.index = index;
     }

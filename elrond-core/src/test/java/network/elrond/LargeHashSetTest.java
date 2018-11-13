@@ -26,7 +26,7 @@ public class LargeHashSetTest {
 
         Object dummyObject = new Object();
 
-        int max = 100000;
+        int max = 10000;
         int percent = 0;
         int oldPercent = 0;
 

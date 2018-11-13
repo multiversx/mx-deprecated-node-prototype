@@ -22,7 +22,7 @@ public class NTPClientTest {
 
         NTPClient ntp = new NTPClient(Arrays.asList(""), 100);
 
-        Thread.sleep(1000);
+        Thread.sleep(500);
 
         ntp.currentTimeMillis();
 
@@ -35,7 +35,7 @@ public class NTPClientTest {
 
         NTPClient ntp = new NTPClient(Arrays.asList("", "time.google.com"), 100);
 
-        Thread.sleep(1000);
+        Thread.sleep(500);
 
         long time = ntp.currentTimeMillis();
 

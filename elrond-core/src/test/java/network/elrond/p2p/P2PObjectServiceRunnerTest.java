@@ -37,7 +37,7 @@ public class P2PObjectServiceRunnerTest {
         do {
             do {
                 Thread.sleep(1);
-                strKey = String.valueOf(System.currentTimeMillis() / 1000);
+                strKey = String.valueOf(System.currentTimeMillis() / 100);
                 if (!strKey.equals(strOldKey))
                 {
                     strOldKey = strKey;
@@ -49,7 +49,7 @@ public class P2PObjectServiceRunnerTest {
         } while (strKeys.size() < MAX_GENERATED_KEYS);
 
         strKey = "";
-        Thread.sleep(5000);
+        Thread.sleep(1000);
     }
 
     public void StartRunner() throws Exception {
