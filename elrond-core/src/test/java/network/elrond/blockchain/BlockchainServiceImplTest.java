@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -99,152 +100,10 @@ public class BlockchainServiceImplTest {
         Blockchain blockchain = new Blockchain(new BlockchainContext());
         blockchainService.put(testHash,  testObject1, blockchain, BlockchainUnitType.BLOCK);
         blockchainService.put(testHash2,  testObject2, blockchain, BlockchainUnitType.BLOCK);
-        List objList = blockchainService.getAll(Arrays.asList(testHash, testHash2), blockchain, BlockchainUnitType.BLOCK);
+        List<Serializable> objList = blockchainService.getAll(Arrays.asList(testHash, testHash2), blockchain, BlockchainUnitType.BLOCK);
         Assert.assertEquals(2, objList.size());
         Assert.assertEquals(testObject1, objList.get(0));
         Assert.assertEquals(testObject2, objList.get(1));
     }
 
-
 }
-
-
-//    public synchronized <H extends Object, B extends Serializable> boolean contains(H hash, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
-//        logger.traceEntry("params: {} {} {}", hash, blockchain, type);
-//        BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
-//        P2PConnection connection = blockchain.getConnection();
-//        LRUMap<H, B> cache = unit.getCache();
-//
-//        if (cache.contains(hash)) {
-//            logger.trace("cache contains hash");
-//            return logger.traceExit(true);
-//        }
-//        B block = get(hash, blockchain, type);
-//        return logger.traceExit(block != null);
-//    }
-//
-//
-//    /**
-//     * Put object on object chain (memory->database->network)
-//     *
-//     * @param hash   object hash
-//     * @param object
-//     * @throws IOException
-//     */
-//    @Override
-//    public synchronized <H extends Object, B extends Serializable> void put(H hash, B object, Blockchain blockchain, BlockchainUnitType type) throws IOException {
-//        logger.traceEntry("params: {} {} {} {}", hash, object, blockchain, type);
-//
-//        if (object == null || hash == null) {
-//            logger.trace("object or hash is null");
-//            logger.traceExit();
-//            return;
-//        }
-//
-//        BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
-//        P2PConnection connection = blockchain.getConnection();
-//
-//        unit.getCache().put(hash, object);
-//        String strJSONData = AppServiceProvider.getSerializationService().encodeJSON(object);
-//        unit.put(bytes(hash.toString()), bytes(strJSONData));
-//
-//        logger.trace("Locally stored!");
-//
-//        if (!isOffline(connection)) {
-//            AppServiceProvider.getP2PObjectService().put(connection, hash.toString(), object);
-//            logger.trace("DHT stored!");
-//        }
-//
-//        logger.traceExit();
-//    }
-//
-//    @Override
-//    public <H extends Object, B extends Serializable> List<B> getAll(List<H> hashes, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
-//        logger.traceEntry("params: {} {} {}", hashes, blockchain, type);
-//        List<B> list = new ArrayList<>();
-//
-//        for (H hash : hashes) {
-//            list.add(get(hash, blockchain, type));
-//        }
-//
-//        return logger.traceExit(list);
-//    }
-//
-//    /**
-//     * Get block form blockchain (memory->database->network)
-//     *
-//     * @param hash block hash
-//     * @return
-//     * @throws IOException
-//     * @throws ClassNotFoundException
-//     */
-//    @Override
-//    public synchronized <H extends Object, B extends Serializable> B get(H hash, Blockchain blockchain, BlockchainUnitType type) throws IOException, ClassNotFoundException {
-//        logger.traceEntry("params: {} {} {}", hash, blockchain, type);
-//
-//        BlockchainPersistenceUnit<H, B> unit = blockchain.getUnit(type);
-//        P2PConnection connection = blockchain.getConnection();
-//
-//        LRUMap<H, B> cache = unit.getCache();
-//
-//        boolean exists = cache.get(hash) != null;
-//        if (!exists) {
-//            B object = getDataFromDatabase(hash, unit);
-//            if (object == null) {
-//                logger.trace("Getting from DHT...");
-//                object = getDataFromNetwork(hash, unit, connection);
-//            }
-//
-//            if (object != null) {
-//                cache.put(hash, object);
-//                String strJSONData = AppServiceProvider.getSerializationService().encodeJSON(object);
-//                unit.put(bytes(hash.toString()), bytes(strJSONData));
-//                logger.trace("Got from local storace, placed on DHT!");
-//            }
-//        }
-//
-//        B result = cache.get(hash);
-//        return logger.traceExit(result);
-//
-//    }
-//
-//    private <H extends Object, B extends Serializable> B getDataFromNetwork(H hash, BlockchainPersistenceUnit<H, B> unit, P2PConnection connection)
-//            throws ClassNotFoundException, IOException {
-//        logger.traceEntry("params: {} {} {}", hash, unit, connection);
-//
-//        if (isOffline(connection)) {
-//            logger.trace("offline!");
-//            logger.traceExit();
-//            return null;
-//        }
-//        return AppServiceProvider.getP2PObjectService().get(connection, hash.toString(), unit.clazz);
-//    }
-//
-//    private <B extends Serializable, H extends Object> B getDataFromDatabase(H hash, BlockchainPersistenceUnit<H, B> unit) {
-//        logger.traceEntry("params: {} {}", hash, unit);
-//        byte[] data = unit.get(bytes(hash.toString()));
-//        if (data == null) {
-//            logger.trace("data do not exists!");
-//            logger.traceExit();
-//            return null;
-//        }
-//
-//        String strJSONData = asString(data);
-//        return logger.traceExit(decodeObject(unit.clazz, strJSONData));
-//    }
-//
-//    private <B extends Serializable> B decodeObject(Class<B> clazz, String strJSONData) {
-//        logger.traceEntry("params: {} {}", clazz, strJSONData);
-//        if (strJSONData == null) {
-//            logger.trace("strJSONData is null");
-//            logger.traceExit();
-//            return null;
-//        }
-//        return logger.traceExit(AppServiceProvider.getSerializationService().decodeJSON(strJSONData, clazz));
-//    }
-//
-//    protected boolean isOffline(P2PConnection connection) {
-//        return connection == null;
-//    }
-//
-//}

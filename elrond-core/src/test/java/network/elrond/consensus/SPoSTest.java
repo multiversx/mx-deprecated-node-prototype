@@ -39,13 +39,13 @@ public class SPoSTest {
         System.out.println("==========================================================");
         UtilTest.displayListValidators(vList);
 
-        System.out.printf("Cleaned up listToTable [%d]:", cleanedUpList.list.size());
+        System.out.printf("Cleaned up listToTable [%d]:", cleanedUpList.getNrValidators());
         System.out.println();
         System.out.println("==========================================================");
-        UtilTest.displayListValidators(cleanedUpList.list);
+        UtilTest.displayListValidators(cleanedUpList.getValidators());
 
         //plain copy test
-        TestCase.assertEquals(7, cleanedUpList.list.size());
+        TestCase.assertEquals(7, cleanedUpList.getNrValidators());
 
     }
 

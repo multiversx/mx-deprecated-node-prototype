@@ -2,8 +2,8 @@ package network.elrond.crypto;
 
 public class ECKeyPair implements KeyPair {
 
-    private PrivateKey privateKey;
-    private PublicKey publicKey;
+    private final PrivateKey privateKey;
+    private final PublicKey publicKey;
 
     /**
      * Default constructor
@@ -26,24 +26,12 @@ public class ECKeyPair implements KeyPair {
     }
 
     /**
-     * Creates a pair of (private, public) keys
-     *
-     * @param privateKey the private key
-     * @param publicKey  the public key
-     */
-    public ECKeyPair(PrivateKey privateKey, PublicKey publicKey) {
-        if (privateKey.isValid() && publicKey.equals(new PublicKey(privateKey))) {
-            this.publicKey = publicKey;
-            this.privateKey = privateKey;
-        }
-    }
-
-    /**
      * Getter for the private key
      *
      * @return the private key
      */
-    public PrivateKey getPrivateKey() {
+    @Override
+	public PrivateKey getPrivateKey() {
         return privateKey;
     }
 
@@ -52,11 +40,13 @@ public class ECKeyPair implements KeyPair {
      *
      * @return the public key
      */
-    public PublicKey getPublicKey() {
+    @Override
+	public PublicKey getPublicKey() {
         return publicKey;
     }
 
-    public KeyPair clone() throws CloneNotSupportedException {
+    @Override
+	public KeyPair clone() throws CloneNotSupportedException {
         return (KeyPair) super.clone();
     }
 }

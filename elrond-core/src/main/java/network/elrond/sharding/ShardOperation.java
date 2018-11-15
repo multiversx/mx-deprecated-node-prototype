@@ -6,9 +6,8 @@ public enum ShardOperation {
     INTER_SHARD_IN(false, true),
     INTRA_SHARD(true, true),;
 
-
-    boolean checkSource;
-    boolean checkTarget;
+    private final boolean checkSource;
+    private final boolean checkTarget;
 
     ShardOperation(boolean checkSource, boolean checkTarget) {
         this.checkSource = checkSource;

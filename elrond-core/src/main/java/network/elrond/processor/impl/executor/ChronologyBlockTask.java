@@ -28,7 +28,6 @@ public class ChronologyBlockTask implements AppTask {
         Util.check(state.getBlockchain() != null, "blockchain != null");
 
         Blockchain blockchain = state.getBlockchain();
-        String nodeName = application.getContext().getNodeName();
 
         Thread thread = new Thread(() -> {
             logger.traceEntry();
@@ -37,8 +36,6 @@ public class ChronologyBlockTask implements AppTask {
             ChronologyService chronologyService = AppServiceProvider.getChronologyService();
 
             long genesisTimeStampCached = Long.MIN_VALUE;
-//            BigInteger maxRemoteBlockIndex = Util.BIG_INT_MIN_ONE;
-//            long nRetries = 0;
 
             while (state.isStillRunning()) {
                 ThreadUtil.sleep(1);
@@ -69,32 +66,6 @@ public class ChronologyBlockTask implements AppTask {
                 }
 
                 try {
-/*
-                    SyncState syncState = AppServiceProvider.getBootstrapService().getSyncState(blockchain);
-
-                    if (syncState.getRemoteBlockIndex().compareTo(maxRemoteBlockIndex) > 0) {
-                        maxRemoteBlockIndex = syncState.getRemoteBlockIndex();
-                        nRetries = 0;
-                        logger.debug("Max remote block index: {} and local block index: {}", maxRemoteBlockIndex, syncState.getLocalBlockIndex());
-                    }
-
-//                    if (syncState.isSyncRequired()){
-//                        continue;
-//                    }
-
-                    if (maxRemoteBlockIndex.compareTo(syncState.getRemoteBlockIndex()) > 0) {
-                        ThreadUtil.sleep(100);
-                        nRetries++;
-                        if (nRetries < Util.MAX_RETRIES) {
-                            logger.debug("Tries: {}", nRetries);
-                            continue;
-                        }
-
-                        logger.debug("############### Max tries have reached: {} #############", nRetries);
-                    }
-
-                    nRetries = 0;
-*/
                     synchronized (state.lockerSyncPropose) {
                         long globalTimeStamp = chronologyService.getSynchronizedTime(state.getNtpClient());
 
@@ -157,16 +128,13 @@ public class ChronologyBlockTask implements AppTask {
 
 
     private void notifyEventObjects(Application application, Round round, RoundState roundState, long globalTimeStamp){
-        SubRound subRound = new SubRound();
-        subRound.setRound(round);
-        subRound.setRoundState(roundState);
-        subRound.setTimeStamp(globalTimeStamp);
+        SubRound subRound = new SubRound(round, roundState, globalTimeStamp);
 
         AppState state = application.getState();
 
         logger.debug("notifyEventObjects event about to call {}, {}, {}", round.toString(), roundState.toString(), globalTimeStamp);
 
-        EventHandler eventHandler = roundState.getEventHandler();
+        EventHandler<SubRound> eventHandler = roundState.getEventHandler();
         if (eventHandler != null){
             logger.trace("calling default event handler object (from enum)...");
             try {

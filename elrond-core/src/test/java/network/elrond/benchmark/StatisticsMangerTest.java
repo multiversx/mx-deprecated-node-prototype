@@ -4,6 +4,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import network.elrond.util.time.ElrondSystemTimer;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -30,10 +32,11 @@ public class StatisticsMangerTest {
         when(statistic.getNrTransactionsInBlock()).thenReturn((long)100);
 
         statisticService.addStatistic(statistic);
+        statisticService.processStatistics();
 
-        Assert.assertEquals((Double)100.0, statisticService.getAverageTps());
-        Assert.assertEquals((Double)100.0, statisticService.getMaxTps());
-        Assert.assertEquals((Double)100.0, statisticService.getMinTps());
+        Assert.assertEquals((Double)50.0, statisticService.getAverageTps());
+        Assert.assertEquals((Double)20.0, statisticService.getMaxTps());
+        Assert.assertEquals((Double)20.0, statisticService.getMinTps());
 
         Statistic statistic2= mock(Statistic.class);
         when(statistic2.getCurrentTimeMillis()).thenReturn((long)3000);
@@ -41,9 +44,9 @@ public class StatisticsMangerTest {
 
         statisticService.addStatistic(statistic2);
 
-        Assert.assertEquals((Double)150.0, statisticService.getAverageTps());
-        Assert.assertEquals((Double)200.0, statisticService.getMaxTps());
-        Assert.assertEquals((Double)100.0, statisticService.getMinTps());
+        Assert.assertEquals((Double)50.0, statisticService.getAverageTps());
+        Assert.assertEquals((Double)20.0, statisticService.getMaxTps());
+        Assert.assertEquals((Double)20.0, statisticService.getMinTps());
 
         Statistic statistic3= mock(Statistic.class);
         when(statistic3.getCurrentTimeMillis()).thenReturn((long)4000);
@@ -51,8 +54,8 @@ public class StatisticsMangerTest {
 
         statisticService.addStatistic(statistic3);
 
-        Assert.assertEquals((Double)200.0, statisticService.getAverageTps());
-        Assert.assertEquals((Double)300.0, statisticService.getMaxTps());
-        Assert.assertEquals((Double)100.0, statisticService.getMinTps());
+        Assert.assertEquals((Double)50.0, statisticService.getAverageTps());
+        Assert.assertEquals((Double)20.0, statisticService.getMaxTps());
+        Assert.assertEquals((Double)20.0, statisticService.getMinTps());
     }
 }

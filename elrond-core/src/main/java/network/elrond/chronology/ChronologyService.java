@@ -1,8 +1,5 @@
 package network.elrond.chronology;
 
-import java.math.BigInteger;
-import java.util.List;
-
 public interface ChronologyService {
     long getRoundTimeDuration();
 

@@ -1,7 +1,7 @@
 package network.elrond.blockchain;
 
 import network.elrond.core.Util;
-import network.elrond.p2p.P2PConnection;
+import network.elrond.p2p.model.P2PConnection;
 import network.elrond.sharding.Shard;
 
 import java.io.Serializable;

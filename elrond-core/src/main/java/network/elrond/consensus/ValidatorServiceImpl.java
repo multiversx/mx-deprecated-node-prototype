@@ -9,7 +9,8 @@ public class ValidatorServiceImpl implements  ValidatorService{
      * @param val Validator to compute the score
      * @return the overall Validator score as int
      */
-    public int computeValidatorScore(Validator val) {
+    @Override
+	public int computeValidatorScore(Validator val) {
         int score = Math.round(val.getScoreRating() * Util.WEIGHT_RATING_SPOS + val.getScoreStake() * Util.WEIGHT_STAKE_SPOS);
 
         if (score < 0) {

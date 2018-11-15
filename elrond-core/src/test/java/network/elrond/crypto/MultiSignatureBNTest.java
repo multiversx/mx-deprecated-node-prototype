@@ -5,7 +5,6 @@ import network.elrond.core.Util;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 
-import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;

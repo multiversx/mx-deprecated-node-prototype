@@ -3,7 +3,7 @@ package network.elrond.p2p;
 import net.tomp2p.futures.BaseFutureListener;
 import net.tomp2p.futures.FutureDirect;
 
-public class DirectBaseFutureListener<F> implements BaseFutureListener<net.tomp2p.futures.FutureDirect> {
+public class DirectBaseFutureListener implements BaseFutureListener<net.tomp2p.futures.FutureDirect> {
     private Object object = null;
 
     @Override

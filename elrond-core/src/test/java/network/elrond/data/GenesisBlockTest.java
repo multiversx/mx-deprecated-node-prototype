@@ -1,12 +1,21 @@
 package network.elrond.data;
 
 import junit.framework.TestCase;
+import net.tomp2p.p2p.Peer;
+import net.tomp2p.peers.Number160;
 import network.elrond.account.*;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
+import network.elrond.data.model.Block;
+import network.elrond.data.model.Transaction;
+import network.elrond.data.service.ExecutionService;
+import network.elrond.p2p.AppP2PManager;
+import network.elrond.p2p.model.P2PConnection;
+import network.elrond.p2p.service.P2PConnectionService;
+import network.elrond.p2p.service.P2PConnectionServiceImpl;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 import org.junit.Test;
@@ -41,6 +50,13 @@ public class GenesisBlockTest {
         appState.setShard(AppServiceProvider.getShardingService().getShard(publicKeyMinting.getValue()));
         AppContext appContext = new AppContext();
         appContext.setPrivateKey(pvk1);
+        appContext.setNodeName("node");
+        appContext.setMasterPeerPort(4000);
+        appContext.setPort(4000);
+
+        P2PConnectionService p2pConnServ = new P2PConnectionServiceImpl();
+
+        appState.setConnection(p2pConnServ.createConnection(appContext));
 
         Fun.Tuple2<Block, Transaction> genesisData = accountStateService.generateGenesisBlock(Util.byteArrayToHexString(pbk1.getValue()), value, appState, appContext);
 
@@ -60,10 +76,5 @@ public class GenesisBlockTest {
 
         TestCase.assertEquals("Expecting " + value.toString(10), value, acsRecv.getBalance());
         TestCase.assertEquals("Expecting " + Util.VALUE_MINTING.subtract(value), Util.VALUE_MINTING.subtract(value), acsMint.getBalance());
-
-
-        //GenesisBlock gb = new GenesisBlock();
-        //System.out.println(AppServiceProvider.getSerializationService().encodeJSON(gb));
-
     }
 }

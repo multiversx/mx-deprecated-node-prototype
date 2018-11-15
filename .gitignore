@@ -22,4 +22,9 @@ logs
 /classes
 /classes/*
 
+*.classpath
+.settings
+/elrond-api/.settings/
+/elrond-core/.settings/
+
 elrond-node-2.1

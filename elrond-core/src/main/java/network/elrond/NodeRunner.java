@@ -4,7 +4,7 @@ import network.elrond.account.AccountAddress;
 import network.elrond.application.AppContext;
 import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
-import network.elrond.data.BootstrapType;
+import network.elrond.data.model.BootstrapType;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

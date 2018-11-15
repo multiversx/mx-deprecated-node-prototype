@@ -13,7 +13,7 @@ import network.elrond.blockchain.BlockchainUnitType;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
-import network.elrond.p2p.P2PConnection;
+import network.elrond.p2p.model.P2PConnection;
 import network.elrond.service.AppServiceProvider;
 import org.junit.After;
 import org.junit.Before;

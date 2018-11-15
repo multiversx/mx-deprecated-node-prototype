@@ -34,7 +34,7 @@ public class NTPClient implements AutoCloseable{
     Thread pollThread = null;
     long pollMs;
     List<InetAddress> listHostsAddr = new ArrayList<>();
-    List<String> listHosts = new ArrayList();
+    List<String> listHosts = new ArrayList<>();
     int currentHost = 0;
     boolean offline = true;
 

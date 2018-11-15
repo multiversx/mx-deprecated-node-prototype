@@ -13,13 +13,16 @@ import network.elrond.crypto.KeysManager;
 import network.elrond.crypto.PKSKPair;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
-import network.elrond.data.Block;
-import network.elrond.data.Receipt;
-import network.elrond.data.Transaction;
+import network.elrond.data.model.Block;
+import network.elrond.data.model.Receipt;
+import network.elrond.data.model.Transaction;
 import network.elrond.p2p.*;
+import network.elrond.p2p.model.*;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.AppShardingManager;
 import network.elrond.sharding.Shard;
+import network.elrond.util.time.ElrondSystemTimerImpl;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -236,7 +239,8 @@ public class ElrondFacadeImpl implements ElrondFacade {
         currentPeers.parallelStream().forEach( peer -> {
 
             Runnable myrunnable = new Runnable() {
-                public void run() {
+                @Override
+				public void run() {
                     String[] splitPeer = peer.split(";");
                     URL url = null;
                     try {
@@ -324,17 +328,17 @@ public class ElrondFacadeImpl implements ElrondFacade {
     }
 
     private ResponseObject generateTransaction(AccountAddress receiver, BigInteger value, AppState state) throws IOException, ClassNotFoundException {
-        Accounts accounts = state.getAccounts();
+        if (state == null) {
+            logger.warn("Invalid application state, state is null");
+            return logger.traceExit(new ResponseObject(false, "Invalid application state, state is null", null));
+        }
+
+    	Accounts accounts = state.getAccounts();
 
         PublicKey senderPublicKey = state.getPublicKey();
         PrivateKey senderPrivateKey = state.getPrivateKey();
         AccountAddress senderAddress = AccountAddress.fromBytes(senderPublicKey.getValue());
         AccountState senderAccount = AppServiceProvider.getAccountStateService().getAccountState(senderAddress, accounts);
-
-        if (state == null) {
-            logger.warn("Invalid application state, state is null");
-            return logger.traceExit(new ResponseObject(false, "Invalid application state, state is null", null));
-        }
 
         if (senderAccount == null) {
             // sender account is new, can't send

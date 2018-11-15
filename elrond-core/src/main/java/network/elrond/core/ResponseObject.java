@@ -1,9 +1,9 @@
 package network.elrond.core;
 
 public class ResponseObject {
-    private boolean success;
-    private String message;
-    private Object payload;
+    private final boolean success;
+    private final String message;
+    private final Object payload;
 
     public ResponseObject(){
         success = false;
@@ -21,24 +21,12 @@ public class ResponseObject {
         return(success);
     }
 
-    public void setSuccess(boolean success){
-        this.success = success;
-    }
-
     public String getMessage(){
         return(message);
     }
 
-    public void setMessage(String message){
-        this.message = message;
-    }
-
     public Object getPayload(){
         return(payload);
-    }
-
-    public void setPayload(Object payload){
-        this.payload = payload;
     }
 
     @Override

@@ -11,7 +11,8 @@ import network.elrond.blockchain.Blockchain;
 import network.elrond.core.ResponseObject;
 import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
-import network.elrond.data.BootstrapType;
+import network.elrond.data.model.BootstrapType;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -214,7 +215,8 @@ class ElrondApiNode {
 
     private void SendBalanceToNewNode(String nextPrivateKey) {
         Runnable myrunnable = new Runnable() {
-            public void run() {
+            @Override
+			public void run() {
                 try {
                     Thread.sleep(60000);
                 } catch (InterruptedException e) {

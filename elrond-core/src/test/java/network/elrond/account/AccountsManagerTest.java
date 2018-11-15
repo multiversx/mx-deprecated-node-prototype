@@ -1,7 +1,6 @@
 package network.elrond.account;
 
 import network.elrond.ExpectedExceptionTest;
-import network.elrond.core.Util;
 import network.elrond.crypto.PublicKey;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;

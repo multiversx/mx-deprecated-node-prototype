@@ -3,6 +3,10 @@ package network.elrond.data;
 import junit.framework.TestCase;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
+import network.elrond.data.model.Block;
+import network.elrond.data.model.Transaction;
+import network.elrond.data.service.SerializationService;
+import network.elrond.data.service.TransactionService;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 import org.spongycastle.util.encoders.Base64;
@@ -87,9 +91,6 @@ public class SerializationServiceTest {
 
         String encodedBlock = serializationService.encodeJSON(blk);
 
-        //System.out.println(strEncoded);
-        //System.out.println(strEncoded2);
-
         Block decodedBlock = serializationService.decodeJSON(encodedBlock, Block.class);
 
         TestCase.assertEquals(encodedBlock, serializationService.encodeJSON(decodedBlock));
@@ -111,9 +112,6 @@ public class SerializationServiceTest {
         blk.setSignature(null);
         blk.setCommitment(null);
         String encodedBlock = serializationService.encodeJSON(blk);
-
-        //System.out.println(strEncoded);
-        //System.out.println(strEncoded2);
 
         Block decodedBlock = serializationService.decodeJSON(encodedBlock, Block.class);
 

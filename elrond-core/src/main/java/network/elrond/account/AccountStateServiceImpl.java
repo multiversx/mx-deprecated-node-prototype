@@ -1,6 +1,5 @@
 package network.elrond.account;
 
-import net.tomp2p.peers.PeerAddress;
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
 import network.elrond.chronology.NTPClient;
@@ -10,8 +9,10 @@ import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
 import network.elrond.data.*;
-import network.elrond.p2p.P2PBroadcastChannel;
-import network.elrond.p2p.P2PBroadcastChannelName;
+import network.elrond.data.model.Block;
+import network.elrond.data.model.ExecutionReport;
+import network.elrond.data.model.Transaction;
+import network.elrond.data.service.ExecutionService;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,10 +21,7 @@ import org.mapdb.Fun;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class AccountStateServiceImpl implements AccountStateService {
     private static final Logger logger = LogManager.getLogger(AccountStateServiceImpl.class);
@@ -55,7 +53,7 @@ public class AccountStateServiceImpl implements AccountStateService {
             return logger.traceExit((AccountState) null);
         }
 
-        AccountsPersistenceUnit<AccountAddress, AccountState> unit = accounts.getAccountsPersistenceUnit();
+        PersistenceUnit<AccountAddress, AccountState> unit = accounts.getAccountsPersistenceUnit();
         byte[] bytes = address.getBytes();
         byte[] data = unit.get(bytes);
 
@@ -137,7 +135,8 @@ public class AccountStateServiceImpl implements AccountStateService {
         return logger.traceExit(accountState);
     }
 
-    public void initialMintingToKnownAddress(Accounts accounts) {
+    @Override
+	public void initialMintingToKnownAddress(Accounts accounts) {
         logger.traceEntry("params: {}", accounts);
         AccountState accountState = null;
 
@@ -156,7 +155,8 @@ public class AccountStateServiceImpl implements AccountStateService {
         logger.traceExit();
     }
 
-    public Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue, AppState state, AppContext context) {
+    @Override
+	public Fun.Tuple2<Block, Transaction> generateGenesisBlock(String initialAddress, BigInteger initialValue, AppState state, AppContext context) {
         logger.traceEntry("params: {} {} {} {}", initialAddress, initialValue, state, context);
 
         PrivateKey privateKey = context.getPrivateKey();

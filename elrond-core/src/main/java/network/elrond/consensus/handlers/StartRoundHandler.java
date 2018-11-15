@@ -5,7 +5,7 @@ import network.elrond.chronology.SubRound;
 import network.elrond.consensus.ConsensusData;
 import network.elrond.core.EventHandler;
 import network.elrond.core.Util;
-import network.elrond.data.SyncState;
+import network.elrond.data.model.SyncState;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.AppShardingManager;
 import org.apache.logging.log4j.LogManager;
@@ -16,7 +16,8 @@ import java.util.List;
 public class StartRoundHandler implements EventHandler<SubRound> {
     private static final Logger logger = LogManager.getLogger(StartRoundHandler.class);
 
-    public void onEvent(AppState state, SubRound data) {
+    @Override
+	public void onEvent(AppState state, SubRound data) {
         logger.traceEntry("params: {} {}", state, data);
 
         Util.check(state != null, "application state is null");

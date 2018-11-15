@@ -3,11 +3,12 @@ package network.elrond.processor.impl.executor;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.peers.PeerAddress;
 import network.elrond.Application;
-import network.elrond.AsciiTable;
 import network.elrond.application.AppState;
 import network.elrond.core.ThreadUtil;
-import network.elrond.p2p.P2PConnection;
+import network.elrond.p2p.model.P2PConnection;
 import network.elrond.processor.AppTask;
+import network.elrond.util.console.AsciiTable;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,7 +17,8 @@ import java.util.*;
 public class StatusPrinterBlockTask implements AppTask {
     private static final Logger logger = LogManager.getLogger(StatusPrinterBlockTask.class);
 
-    public void process(Application application) {
+    @Override
+	public void process(Application application) {
         AppState state = application.getState();
 
         Thread thread = new Thread(() -> {

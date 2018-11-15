@@ -2,8 +2,8 @@ package network.elrond.crypto;
 
 public class PKSKPair {
 
-    private String publicKey;
-    private String privateKey;
+    private final String publicKey;
+    private final String privateKey;
 
     public PKSKPair(String publicKey, String privateKey)
     {
@@ -15,16 +15,8 @@ public class PKSKPair {
         return publicKey;
     }
 
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
-
     public String getPrivateKey() {
         return privateKey;
-    }
-
-    public void setPrivateKey(String privateKey) {
-        this.privateKey = privateKey;
     }
 
     @Override

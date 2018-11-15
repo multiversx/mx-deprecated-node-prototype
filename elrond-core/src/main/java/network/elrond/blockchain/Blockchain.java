@@ -1,9 +1,10 @@
 package network.elrond.blockchain;
 
 import network.elrond.account.AbstractPersistenceUnit;
+import network.elrond.account.PersistenceUnit;
 import network.elrond.core.Util;
-import network.elrond.data.Block;
-import network.elrond.p2p.P2PConnection;
+import network.elrond.data.model.Block;
+import network.elrond.p2p.model.P2PConnection;
 import network.elrond.sharding.Shard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,14 +43,14 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
     public void generatePersistenceUnitMap(BlockchainContext context) throws IOException {
         for (BlockchainUnitType type : BlockchainUnitType.values()) {
             String path = context.getDatabasePath(type);
-            Class<?> ketType = type.getKeyType();
             Class<?> valueType = type.getValueType();
-            BlockchainPersistenceUnit<?, ?> unit = new BlockchainPersistenceUnit<>(path, valueType);
+            BlockchainPersistenceUnit<String, ?> unit = new BlockchainPersistenceUnit<>(path, valueType);
             blockchain.put(type, unit);
         }
     }
 
-    public <H extends Object, B> BlockchainPersistenceUnit<H, B> getUnit(BlockchainUnitType type) {
+    @SuppressWarnings("unchecked")
+	public <H extends Object, B> BlockchainPersistenceUnit<H, B> getUnit(BlockchainUnitType type) {
         return (BlockchainPersistenceUnit<H, B>) blockchain.get(type);
     }
 
@@ -112,7 +113,7 @@ public class Blockchain implements Serializable, PersistenceUnitContainer {
     @Override
     public void stopPersistenceUnit() {
         logger.traceEntry();
-        for (AbstractPersistenceUnit<?, ?> unit : blockchain.values()) {
+        for (PersistenceUnit<?, ?> unit : blockchain.values()) {
             try {
                 unit.close();
             } catch (IOException e) {

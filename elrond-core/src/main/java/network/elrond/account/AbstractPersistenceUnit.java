@@ -1,6 +1,8 @@
 package network.elrond.account;
 
-import network.elrond.core.LRUMap;
+import network.elrond.db.ByteArrayWrapper;
+
+import org.apache.commons.collections4.map.LRUMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.iq80.leveldb.DB;
@@ -9,18 +11,20 @@ import org.iq80.leveldb.impl.Iq80DBFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Abstract implementation of key => value persistence unit
  */
-public abstract class AbstractPersistenceUnit<K, V> {
+public abstract class AbstractPersistenceUnit<K, V> implements PersistenceUnit<K, V> {
 
     protected static final int MAX_ENTRIES = 10000;
 
     protected final String databasePath;
     protected DB database;
 
-    final private LRUMap<K, V> cache = new LRUMap<>(0, MAX_ENTRIES);
+    private final Map<K, V> cache = Collections.synchronizedMap(new LRUMap<>(MAX_ENTRIES));
 
     private static final Logger logger = LogManager.getLogger(AbstractPersistenceUnit.class);
 
@@ -45,7 +49,7 @@ public abstract class AbstractPersistenceUnit<K, V> {
         return logger.traceExit(factory.open(new File(databasePath), options));
     }
 
-    public LRUMap<K, V> getCache() {
+    public Map<K, V> getCache() {
         return cache;
     }
 
@@ -55,7 +59,8 @@ public abstract class AbstractPersistenceUnit<K, V> {
      * @param key
      * @param val
      */
-    protected abstract void put(byte[] key, byte[] val);
+    @Override
+	public abstract void put(byte[] key, byte[] val);
 
     /**
      * Get value from unit
@@ -63,7 +68,8 @@ public abstract class AbstractPersistenceUnit<K, V> {
      * @param key
      * @return
      */
-    protected abstract byte[] get(byte[] key);
+    @Override
+	public abstract byte[] get(byte[] key);
 
     /**
      * Delete everything and recreate unit
@@ -97,7 +103,8 @@ public abstract class AbstractPersistenceUnit<K, V> {
      *
      * @throws IOException
      */
-    public void close() throws IOException {
+    @Override
+	public void close() throws IOException {
         logger.traceEntry();
         this.database.close();
         logger.traceExit();

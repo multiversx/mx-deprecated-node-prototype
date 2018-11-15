@@ -1,8 +1,6 @@
 package network.elrond.application;
 
-import network.elrond.AsciiTable;
 import network.elrond.account.Accounts;
-import network.elrond.benchmark.ElrondSystemTimerImpl;
 import network.elrond.benchmark.StatisticsManager;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.TransactionsPool;
@@ -11,9 +9,11 @@ import network.elrond.consensus.ConsensusData;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
-import network.elrond.data.AsciiPrintable;
 import network.elrond.p2p.*;
+import network.elrond.p2p.model.*;
 import network.elrond.sharding.Shard;
+import network.elrond.util.time.ElrondSystemTimerImpl;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,7 +21,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AppState implements Serializable, AsciiPrintable {
+public class AppState implements Serializable {
 
     private static final Logger logger = LogManager.getLogger(AppState.class);
 
@@ -167,26 +167,5 @@ public class AppState implements Serializable, AsciiPrintable {
         return blockchain.getPool();
     }
 
-    @Override
-    public AsciiTable print() {
 
-        AsciiTable table = new AsciiTable();
-        table.setMaxColumnWidth(90);
-
-        table.getColumns().add(new AsciiTable.Column("AppState "));
-        table.getColumns().add(new AsciiTable.Column(Util.byteArrayToHexString(getPublicKey().getValue())));
-
-        AsciiTable.Row row0 = new AsciiTable.Row();
-        row0.getValues().add("Shard");
-        row0.getValues().add(getShard().getIndex().toString());
-        table.getData().add(row0);
-
-        AsciiTable.Row row1 = new AsciiTable.Row();
-        row1.getValues().add("Pool");
-        row1.getValues().add(String.valueOf(getPool().getTransactions().size()));
-        table.getData().add(row1);
-
-        table.calculateColumnWidth();
-        return table;
-    }
 }

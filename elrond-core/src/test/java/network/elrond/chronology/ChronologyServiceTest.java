@@ -41,8 +41,7 @@ public class ChronologyServiceTest {
     public void testIsDateTimeInRound(){
         ChronologyService chronologyService = new ChronologyServiceImpl(4000);
 
-        Round r = new Round();
-        r.setStartTimeStamp(10000);
+        Round r = new Round(0, 10000);
 
         TestCase.assertFalse(chronologyService.isDateTimeInRound(r, 1));
         TestCase.assertFalse(chronologyService.isDateTimeInRound(r, 9999));

@@ -8,7 +8,13 @@ import network.elrond.consensus.ValidatorServiceImpl;
 import network.elrond.crypto.MultiSignatureServiceBNImpl;
 import network.elrond.crypto.SignatureServiceSchnorrImpl;
 import network.elrond.data.*;
-import network.elrond.p2p.P2PBroadcastServiceImpl;
+import network.elrond.data.service.BootstrapServiceImpl;
+import network.elrond.data.service.ExecutionServiceImpl;
+import network.elrond.data.service.SerializationServiceImpl;
+import network.elrond.data.service.TransactionService;
+import network.elrond.data.service.TransactionServiceImpl;
+import network.elrond.p2p.service.P2PBroadcastServiceImpl;
+
 import org.junit.Assert;
 import org.junit.Test;
 

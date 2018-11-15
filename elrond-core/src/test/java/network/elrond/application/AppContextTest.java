@@ -2,7 +2,8 @@ package network.elrond.application;
 
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
-import network.elrond.data.BootstrapType;
+import network.elrond.data.model.BootstrapType;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

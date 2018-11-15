@@ -3,7 +3,8 @@ package network.elrond.api;
 import network.elrond.core.ResponseObject;
 import network.elrond.core.ThreadUtil;
 import network.elrond.core.Util;
-import network.elrond.data.BootstrapType;
+import network.elrond.data.model.BootstrapType;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.SpringApplication;
@@ -70,7 +71,8 @@ public class ElrondApiApplication {
         if (isEnoughArguments) {
             StringBuilder stringBuilderParameters = new StringBuilder();
 
-            Map<String, Object> data = (Map<String, Object>)responseObject.getPayload();
+            @SuppressWarnings("unchecked")
+			Map<String, Object> data = (Map<String, Object>) responseObject.getPayload();
 
             boolean isFirst = true;
             for (String key : data.keySet()){

@@ -22,7 +22,6 @@ package network.elrond.core;
  * This is borrowed and slightly modified from Guava's {@linkUnsignedBytes}
  * class to be able to compare arrays that start at non-zero offsets.
  */
-@SuppressWarnings("restriction")
 public abstract class FastByteComparisons {
 
     /**

@@ -3,6 +3,10 @@ package network.elrond.processor.impl.initialization;
 import network.elrond.Application;
 import network.elrond.application.AppState;
 import network.elrond.p2p.*;
+import network.elrond.p2p.model.P2PConnection;
+import network.elrond.p2p.model.P2PRequestChannel;
+import network.elrond.p2p.model.P2PRequestChannelName;
+import network.elrond.p2p.model.P2PRequestMessage;
 import network.elrond.processor.AppTask;
 import network.elrond.processor.impl.AbstractChannelTask;
 import network.elrond.service.AppServiceProvider;
@@ -24,7 +28,7 @@ public class P2PRequestObjectStarterProcessor implements AppTask {
 
         for (P2PRequestChannelName requestChannel : P2PRequestChannelName.values()) {
             P2PRequestChannel channel = AppServiceProvider.getP2PRequestService().createChannel(connection, shard, requestChannel);
-            RequestHandler requestHandler = requestChannel.getHandler();
+            RequestHandler<?, P2PRequestMessage> requestHandler = requestChannel.getHandler();
 
             channel.setHandler(request -> requestHandler.onRequest(state, request));
             state.addChannel(channel);

@@ -3,10 +3,6 @@ package network.elrond.benchmark;
 public interface StatisticService {
     void addStatistic(Statistic statistic);
 
-    //void ComputeTps(long currentTps);
-
-    //void computeNrTransactionsInBlock(long currentNrTransactionsInBlock);
-
     Double getAverageTps();
 
     Double getMaxTps();
@@ -22,8 +18,6 @@ public interface StatisticService {
     long getMinNrTransactionsInBlock();
 
     long getLiveNrTransactionsInBlock();
-
-    //Statistic getCurrentStatistic();
 
     long getAverageRoundTime();
 

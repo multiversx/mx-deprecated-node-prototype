@@ -5,9 +5,10 @@ import net.tomp2p.p2p.Peer;
 import network.elrond.account.Accounts;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.crypto.PrivateKey;
-import network.elrond.p2p.P2PBroadcastChannel;
-import network.elrond.p2p.P2PBroadcastChannelName;
-import network.elrond.p2p.P2PConnection;
+import network.elrond.p2p.model.P2PBroadcastChannel;
+import network.elrond.p2p.model.P2PBroadcastChannelName;
+import network.elrond.p2p.model.P2PConnection;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

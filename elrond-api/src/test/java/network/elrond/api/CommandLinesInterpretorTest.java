@@ -72,7 +72,8 @@ public class CommandLinesInterpretorTest {
         TestCase.assertTrue(result.isSuccess());
         TestCase.assertNotNull(result.getPayload());
 
-        Map<String, Object> data = (Map<String, Object>)result.getPayload();
+        @SuppressWarnings("unchecked")
+		Map<String, Object> data = (Map<String, Object>)result.getPayload();
 
         for (String key : data.keySet()){
             System.out.println(key + ": " + data.get(key).toString());
@@ -101,7 +102,8 @@ public class CommandLinesInterpretorTest {
         TestCase.assertTrue(result.isSuccess());
         TestCase.assertNotNull(result.getPayload());
 
-        Map<String, Object> data = (Map<String, Object>)result.getPayload();
+        @SuppressWarnings("unchecked")
+		Map<String, Object> data = (Map<String, Object>)result.getPayload();
 
         for (String key : data.keySet()){
             System.out.println(key + ": " + data.get(key).toString());

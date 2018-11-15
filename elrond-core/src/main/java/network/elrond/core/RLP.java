@@ -52,40 +52,22 @@ import java.util.List;
  * @since   2018-05-14
  */
 public class RLP {
-/*
-    public static final int ONE_ITEM_THRESHOLD = 0x80;
 
-
-    public static byte[] encode(Object objData) {
-        if (objData instanceof Integer)
-        {
-            int data = (Integer)objData;
-
-            if (data < 0) {
-
-            }
-
-            if (data < ONE_ITEM_THRESHOLD){
-
-            }
-        }
-
-        return(null);
-    }
-*/
     /** Allow for content up to size of 2^64 bytes **/
     private static double MAX_ITEM_LENGTH = Math.pow(256, 8);
 
     /**
      * Reason for threshold according to Vitalik Buterin:
-     * 	- 56 bytes maximizes the benefit of both options
-     * 	- if we went with 60 then we would have only had 4 slots for long strings
-     * so RLP would not have been able to store objects above 4gb
-     * 	- if we went with 48 then RLP would be fine for 2^128 space, but that's way too much
-     * 	- so 56 and 2^64 space seems like the right place to setAccountState the cutoff
-     * 	- also, that's where Bitcoin's varint does the cutof
+     * <ul>
+     * <li> 56 bytes maximizes the benefit of both options </li>
+     * <li> if we went with 60 then we would have only had 4 slots for long strings </li>
+     * so RLP would not have been able to store objects above 4gb </li>
+     * <li> if we went with 48 then RLP would be fine for 2^128 space, but that's way too much </li>
+     * <li> so 56 and 2^64 space seems like the right place to setAccountState the cutoff </li>
+     * <li> also, that's where Bitcoin's varint does the cutoff </li>
+     * </ul>
      **/
-    private static int SIZE_THRESHOLD = 56;
+    private static final int SIZE_THRESHOLD = 56;
 
     /**
      * [0x80]
@@ -93,7 +75,7 @@ public class RLP {
      * byte with value 0x80 plus the length of the string followed by the
      * string. The range of the first byte is thus [0x80, 0xb7].
      */
-    private static int OFFSET_SHORT_ITEM = 0x80;
+    private static final int OFFSET_SHORT_ITEM = 0x80;
 
     /**
      * [0xb7]
@@ -104,7 +86,7 @@ public class RLP {
      * \xb9\x04\x00 followed by the string. The range of the first byte is thus
      * [0xb8, 0xbf].
      */
-    private static int OFFSET_LONG_ITEM = 0xb7;
+    private static final int OFFSET_LONG_ITEM = 0xb7;
 
     /**
      * [0xc0]
@@ -114,7 +96,7 @@ public class RLP {
      * of the RLP encodings of the items. The range of the first byte is thus
      * [0xc0, 0xf7].
      */
-    private static int OFFSET_SHORT_LIST = 0xc0;
+    private static final int OFFSET_SHORT_LIST = 0xc0;
 
     /**
      * [0xf7]
@@ -124,7 +106,7 @@ public class RLP {
      * followed by the concatenation of the RLP encodings of the items. The
      * range of the first byte is thus [0xf8, 0xff].
      */
-    private static int OFFSET_LONG_LIST = 0xf7;
+    private static final int OFFSET_LONG_LIST = 0xf7;
 
     /* ******************************************************
      * 						DECODING						*
@@ -360,9 +342,9 @@ public class RLP {
      * Parse wire byte[] message into RLP elements
      *
      * @param msgData
-     *            - raw RLP data
+     *            raw RLP data
      * @return rlpList
-     *            - outcome of recursive RLP structure
+     *            of recursive RLP structure
      */
     public static RLPList decode2(byte[] msgData) {
         RLPList rlpList = new RLPList();

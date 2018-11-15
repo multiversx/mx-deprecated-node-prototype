@@ -1,7 +1,7 @@
 package network.elrond;
 
 import junit.framework.TestCase;
-import network.elrond.data.Transaction;
+import network.elrond.data.model.Transaction;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.Shard;
 import org.apache.commons.collections4.map.LRUMap;
@@ -26,7 +26,7 @@ public class LargeHashSetTest {
 
         Object dummyObject = new Object();
 
-        int max = 100000;
+        int max = 10000;
         int percent = 0;
         int oldPercent = 0;
 

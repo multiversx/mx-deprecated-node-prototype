@@ -13,9 +13,9 @@ import java.math.BigInteger;
  */
 public class Validator {
     //public key as String
-    private String pubKey;
+    private final String pubKey;
     //node's IP address
-    private String ip;
+    private final String ip;
     //the answer used in consensus
     private ConsensusAnswerType answer;
     //locked stake as sERDs
@@ -120,27 +120,11 @@ public class Validator {
     }
 
     /**
-     * Sets the public key
-     * @param pubKey to be set
-     */
-    public void setPubKey(String pubKey) {
-        this.pubKey = pubKey;
-    }
-
-    /**
      * Gets the IP address
      * @return the IP address as String
      */
     public String getIP() {
         return (this.ip);
-    }
-
-    /**
-     * Sets the IP address
-     * @param ip to be set
-     */
-    public void setIP(String ip) {
-        this.ip = ip;
     }
 
     /**
@@ -165,14 +149,6 @@ public class Validator {
      */
     public BigInteger getStake() {
         return (stake);
-    }
-
-    /**
-     * Sets the locked stake
-     * @param stake to set
-     */
-    public void setStake(BigInteger stake) {
-        this.stake = stake;
     }
 
     /**

@@ -2,8 +2,9 @@ package network.elrond.account;
 
 import network.elrond.application.AppContext;
 import network.elrond.application.AppState;
-import network.elrond.data.Block;
-import network.elrond.data.Transaction;
+import network.elrond.data.model.Block;
+import network.elrond.data.model.Transaction;
+
 import org.mapdb.Fun;
 
 import java.io.IOException;

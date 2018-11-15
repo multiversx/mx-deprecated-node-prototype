@@ -7,7 +7,6 @@ import org.iq80.leveldb.impl.Iq80DBFactory;
 import org.junit.Test;
 
 import java.io.File;
-import java.sql.DatabaseMetaData;
 
 public class TriePersistenceTest {
     @Test

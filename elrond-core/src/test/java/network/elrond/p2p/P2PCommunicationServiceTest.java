@@ -1,6 +1,8 @@
 package network.elrond.p2p;
 
 import junit.framework.TestCase;
+import network.elrond.p2p.model.PingResponse;
+import network.elrond.p2p.service.P2PCommunicationService;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 

@@ -16,7 +16,7 @@ public class PublicKeyTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithPrivateKeyNullThrowsException(){
-        PublicKey publicKey = new PublicKey((PrivateKey) null);
+        new PublicKey((PrivateKey) null);
     }
 
     @Test
@@ -29,7 +29,7 @@ public class PublicKeyTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithPublicKeyEncodingNullShouldThrowException(){
-        PublicKey publicKey = new PublicKey((byte[]) null);
+        new PublicKey((byte[]) null);
     }
 
     @Test
@@ -43,7 +43,7 @@ public class PublicKeyTest {
 
     @Test (expected = IllegalArgumentException.class)
     public void testConstructorWithPublicKeyNullShouldThrowException(){
-        PublicKey generatedPbKey = new PublicKey((PublicKey)null);
+        new PublicKey((PublicKey)null);
     }
 
 
@@ -71,9 +71,6 @@ public class PublicKeyTest {
         PublicKey pubk2 = new PublicKey(pubk);
 
         try {
-            // sets public key ECPoint from encoded byte array
-            //pubk2.setPublicKey(pubk.getQ().getEncoded(true));
-
             // test encoded form form both public keys is the same
             TestCase.assertEquals(
                     "021a50a33eb266ace1597f4399086b15b989d5c303dfc4ada06454dd7325062286",

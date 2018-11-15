@@ -22,7 +22,8 @@ public class DecodeResult implements Serializable {
         return decoded;
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return asString(this.decoded);
     }
 

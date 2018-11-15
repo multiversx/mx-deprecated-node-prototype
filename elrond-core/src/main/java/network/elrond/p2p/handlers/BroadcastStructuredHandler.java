@@ -14,9 +14,9 @@ import net.tomp2p.utils.ConcurrentCacheMap;
 import net.tomp2p.utils.Utils;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.data.BlockHeightMessage;
-import network.elrond.p2p.P2PConnection;
-import network.elrond.p2p.P2PIntroductionMessage;
-import network.elrond.p2p.P2PReplyIntroductionMessage;
+import network.elrond.p2p.model.P2PConnection;
+import network.elrond.p2p.model.P2PIntroductionMessage;
+import network.elrond.p2p.model.P2PReplyIntroductionMessage;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.Logger;
 
@@ -55,7 +55,6 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
         final Number160 messageKey = message.key(0);
         //filter out same message processed
         if (twiceSeen(messageKey)) {
-            //logger.debug("{} already received the message: {}", peer.peerAddress().tcpPort(), messageKey);
             return this;
         }
 
@@ -97,9 +96,7 @@ public class BroadcastStructuredHandler extends StructuredBroadcastHandler {
         final int hopCount = message.intAt(0);
         //get all verified peers
         List<PeerAddress> listToSend = peer.peerBean().peerMap().all();
-        //to be checked if we send to the verified peers or all known peers (even overflowed peers)
-        //listToSend.addAll(peer.peerBean().peerMap().allOverflow());
-
+        
         for (PeerAddress peerAddress : listToSend) {
             if (peerAddress == sender) {
                 //not returning to sender

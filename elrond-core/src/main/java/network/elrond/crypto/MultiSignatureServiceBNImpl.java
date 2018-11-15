@@ -198,7 +198,8 @@ public class MultiSignatureServiceBNImpl implements MultiSignatureService {
      *                             or 0 otherwise
      * @return the challenge as a byte array
      */
-    public byte[] computeChallenge(ArrayList<byte[]> signers,
+    @Override
+	public byte[] computeChallenge(ArrayList<byte[]> signers,
                                    byte[] publicKey,
                                    byte[] aggregatedCommitment,
                                    byte[] message,

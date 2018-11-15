@@ -2,8 +2,8 @@ package network.elrond.sharding;
 
 import net.tomp2p.peers.PeerAddress;
 import network.elrond.application.AppState;
-import network.elrond.p2p.P2PBroadcastChannel;
-import network.elrond.p2p.P2PBroadcastChannelName;
+import network.elrond.p2p.model.P2PBroadcastChannel;
+import network.elrond.p2p.model.P2PBroadcastChannelName;
 import network.elrond.service.AppServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,8 +15,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class AppShardingManager {
-
-    private static final Logger logger = LogManager.getLogger(AppShardingManager.class);
 
     private Boolean isSeedNode;
 
@@ -73,7 +71,6 @@ public class AppShardingManager {
             nodeList.addAll(state.getBlockchain().getCurrentBlock().getPeers());
         }
 
-        // P2PBroadcastChannel channel = state.getChannel(P2PBroadcastChannelName.BLOCK);
         HashSet<PeerAddress> totalPeers = state.getConnection().getPeersOnShard(state.getShard().getIndex());
 
         for (PeerAddress peer : totalPeers) {

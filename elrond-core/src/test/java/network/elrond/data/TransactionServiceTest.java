@@ -5,6 +5,9 @@ import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainContext;
 import network.elrond.crypto.PrivateKey;
 import network.elrond.crypto.PublicKey;
+import network.elrond.data.model.Block;
+import network.elrond.data.model.Transaction;
+import network.elrond.data.service.TransactionService;
 import network.elrond.service.AppServiceProvider;
 import org.junit.After;
 import org.junit.Assert;
@@ -18,9 +21,6 @@ import java.util.List;
 public class TransactionServiceTest extends ExpectedExceptionTest {
 
     TransactionService transactionService = AppServiceProvider.getTransactionService();
-    private String sendAddress ;
-    private String recvAddress ;
-    private String pubKey ;
     private BigInteger nonce;
     private BigInteger value;
     private PublicKey publicKeySender;
@@ -31,9 +31,6 @@ public class TransactionServiceTest extends ExpectedExceptionTest {
 
     @Before
     public void SetupTest(){
-        sendAddress = "0xa87b8fa28a8476553363a9356aa02635e4a1b033";
-        recvAddress = "0x0000000000000000000000000000000000000000";
-        pubKey = "025f37d20e5b18909361e0ead7ed17c69b417bee70746c9e9c2bcb1394d921d4ae";
         nonce = BigInteger.ZERO;
         value = BigInteger.TEN.pow(8);
 
@@ -87,7 +84,7 @@ public class TransactionServiceTest extends ExpectedExceptionTest {
     public void testgetTransactionsWithNullBlockShouldThrowException() throws IOException, ClassNotFoundException {
         expected(IllegalArgumentException.class, "block is null");
 
-        List<Transaction> transactions = AppServiceProvider.getTransactionService().getTransactions(new Blockchain(new BlockchainContext()), (Block) null);
+        AppServiceProvider.getTransactionService().getTransactions(new Blockchain(new BlockchainContext()), (Block) null);
         Assert.fail();
     }
 

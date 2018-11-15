@@ -3,6 +3,8 @@ package network.elrond.benchmark;
 import network.elrond.application.AppState;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.AppShardingManager;
+import network.elrond.util.time.ElrondSystemTimer;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

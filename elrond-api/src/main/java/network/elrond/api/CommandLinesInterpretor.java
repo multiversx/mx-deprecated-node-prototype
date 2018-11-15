@@ -1,11 +1,10 @@
 package network.elrond.api;
 
-import javafx.util.Pair;
 import network.elrond.core.ResponseObject;
 import network.elrond.core.Util;
 import network.elrond.crypto.PKSKPair;
 import network.elrond.crypto.PrivateKey;
-import network.elrond.data.BootstrapType;
+import network.elrond.data.model.BootstrapType;
 import network.elrond.service.AppServiceProvider;
 import network.elrond.sharding.ShardingService;
 import org.apache.logging.log4j.LogManager;
@@ -278,8 +277,6 @@ public class CommandLinesInterpretor {
 
     static Map<String, Object> parseFileProperties(String configFileName){
         Map<String, Object> data = new HashMap<>();
-
-        List<Pair<String, Object>> values = new ArrayList<>();
 
         Properties properties = null;
         FileReader fileReader = null;

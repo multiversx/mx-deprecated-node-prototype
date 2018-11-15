@@ -73,7 +73,7 @@ public class ExampleDiscover {
         System.out.println("Client started and Listening to: " + DiscoverNetworks.discoverInterfaces(b));
         System.out.println("address visible to outside is " + client.peerAddress());
 
-        InetAddress address = Inet4Address.getByName(ipAddress);
+        InetAddress address = InetAddress.getByName(ipAddress);
         int masterPort = 4000;
         PeerAddress pa = new PeerAddress(Number160.ZERO, address, masterPort, masterPort, masterPort +1 );
 

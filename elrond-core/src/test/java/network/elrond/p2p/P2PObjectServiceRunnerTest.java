@@ -8,7 +8,8 @@ import network.elrond.ContextCreator;
 import network.elrond.application.AppContext;
 import network.elrond.core.Util;
 import network.elrond.crypto.PrivateKey;
-import network.elrond.data.BootstrapType;
+import network.elrond.data.model.BootstrapType;
+import network.elrond.p2p.model.P2PConnection;
 import network.elrond.service.AppServiceProvider;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -36,7 +37,7 @@ public class P2PObjectServiceRunnerTest {
         do {
             do {
                 Thread.sleep(1);
-                strKey = String.valueOf(System.currentTimeMillis() / 1000);
+                strKey = String.valueOf(System.currentTimeMillis() / 100);
                 if (!strKey.equals(strOldKey))
                 {
                     strOldKey = strKey;
@@ -48,7 +49,7 @@ public class P2PObjectServiceRunnerTest {
         } while (strKeys.size() < MAX_GENERATED_KEYS);
 
         strKey = "";
-        Thread.sleep(5000);
+        Thread.sleep(1000);
     }
 
     public void StartRunner() throws Exception {

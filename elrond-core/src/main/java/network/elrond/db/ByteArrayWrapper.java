@@ -28,7 +28,8 @@ public class ByteArrayWrapper implements Comparable<ByteArrayWrapper> {
         logger.traceExit();
     }
 
-    public boolean equals(Object other) {
+    @Override
+	public boolean equals(Object other) {
         logger.traceEntry("params: {}", other);
 
         if (!(other instanceof ByteArrayWrapper)) {

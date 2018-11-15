@@ -6,7 +6,7 @@ import network.elrond.application.AppState;
 import network.elrond.blockchain.Blockchain;
 import network.elrond.blockchain.BlockchainContext;
 import network.elrond.blockchain.BlockchainUnitType;
-import network.elrond.p2p.P2PConnection;
+import network.elrond.p2p.model.P2PConnection;
 import network.elrond.processor.AppTask;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
