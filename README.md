@@ -1,4 +1,4 @@
-# Elrond Prototype
+# Elrond Node Prototype
 State Sharding PoC for Elrond network
 
 # Introduction
