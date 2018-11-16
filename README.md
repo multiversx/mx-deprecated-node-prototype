@@ -24,10 +24,9 @@ Elrond Prototype overview - [Progress update #2 - Medium](https://medium.com/elr
 -   [How to run a node](#how-to-run-a-node)
 
 ## Design goal
-The purpose of this project is to further research and development twords a state sharded architecture and validate some of our underlying hypothesis and experiments twords a decentralized, scalable and secure blockchain architecture.
+The purpose of this project is to offer a rapid development iteration twords a state sharded architecture and validate some of the initial hypothesis presented in our paper, while taking the first material steps to transforming our vision of a decentralized, scalable and secure blockchain architecture into working code.
 
-The project has been dismissed and focus has been moved onto another repository [elrond-go](https://github.com/ElrondNetwork/elrond-go)
-building the next step of elrond arhitecture &gt; Elrond Testnet v0.1 .
+With the validation of our core hypothesis: demonstrating a working model of state sharding and cross-shard transactions, this project has become obsolete and all focus has been moved onto another repository named [elrond-go](https://github.com/ElrondNetwork/elrond-go), where the next version of elrond arhitecture is built > Elrond Testnet v0.1 .
 
 ### What to expect
 This repository was originally created and used to validate several
@@ -77,7 +76,7 @@ sampling of proposer and validators is already implemented in a separate branch,
 changes to the PBFT consensus still have to be operated. The switch to PBFT consensus and selection
 of validators will be done as soon as the branch is ready - **put on hold as
 decided to switch to *Go* for the testnet. PBFT Consensus will be first implemented
-in testnet repository**
+in testnet repository**.
 ### Data layer: 
 main data models implemented: Block, Receipt, Transaction, Account,
 Trie etc. For serialization we are currently using either json or Ethereum's RLP.
