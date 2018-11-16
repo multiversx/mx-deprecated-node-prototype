@@ -26,7 +26,7 @@ Elrond Prototype overview - [Progress update #2 - Medium](https://medium.com/elr
 ## Design goal
 The purpose of this project is to offer a rapid development iteration twords a state sharded architecture and validate some of the initial hypothesis presented in our paper, while taking the first material steps to transforming our vision of a decentralized, scalable and secure blockchain architecture into working code.
 
-With the validation of our core hypothesis: demonstrating a working model of state sharding and cross-shard transactions, this project has become obsolete and all focus has been moved onto another repository named [elrond-go](https://github.com/ElrondNetwork/elrond-go), where the next version of elrond arhitecture is built > Elrond Testnet v0.1 .
+With the validation of our core hypothesis: demonstrating a working model of state sharding and cross-shard transactions, this project has become obsolete and all focus has been moved onto another repository named [elrond-go](https://github.com/ElrondNetwork/elrond-go), where the next version of elrond arhitecture is built -> Elrond Testnet v0.1 .
 
 ### What to expect
 This repository was originally created and used to validate several
