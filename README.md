@@ -102,7 +102,7 @@ Interceptors: blocks, receipts, transactions, cross shard transactions.
 
 ## How to run a node
 You can run an Elrond Prototype node either through Swagger, or by using the
-[elrond-ui](https://github.com/ElrondNetwork/elrond-ui)
+[elrond-wallet](https://github.com/ElrondNetwork/elrond-wallet-prototype)
 For this you need first to run the elrond-api jar.
 
 ![elrond-core-PoC1](https://i.imgur.com/SrFoOqu.png)
@@ -124,7 +124,7 @@ Wait until you you get a message like
 Started ElrondApiApplication in 15.48 seconds (JVM running for 17.733)
 '''
 
-Now you should be ready to either launch the elrond-ui or start using the swagger.
+Now you should be ready to either launch the elrond-wallet or start using the swagger.
 To use swagger open a browser page and go to : http://localhost:8080/swagger-ui.html
 
 In elrond-node-controller you can find all currently available REST APIs.
